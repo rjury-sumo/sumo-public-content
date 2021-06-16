@@ -1,0 +1,192 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Sumo Audit Metadata Behaviours",
+    "description": "",
+    "title": "Sumo Audit Metadata Behaviours",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-6h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-1D7306DEB0079A4C",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":17}"
+            },
+            {
+                "key": "panelAA78EFEC9E7B4949",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":4}"
+            },
+            {
+                "key": "panelD1F667969010194E",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":30}"
+            },
+            {
+                "key": "panelPANE-7BCCFD2BAF869B42",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": "59AA509012A6A97D",
+            "key": "panelPANE-1D7306DEB0079A4C",
+            "title": "More Details Per User",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by user_name, query_type,meta,value,analytics_tier | sort meta asc, user_name asc\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": "157459136C5E6D55",
+            "key": "panelAA78EFEC9E7B4949",
+            "title": "Meta Use High Level View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": "71EFE81032932C08",
+            "key": "panelD1F667969010194E",
+            "title": "Query Details (limit 1000)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n\n| limit 1000\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by user_name, query_type,meta,value,analytics_tier,query | sort meta asc, value asc, query asc\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": "CA9E20418483453E",
+            "key": "panelPANE-7BCCFD2BAF869B42",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard uses the Search Audit index. metadata strings are parsed out using parse regex multi to give a filterable view of what users are querying.\n\n\nYou can filter by various filters. note:\n- the regex query filter is very powerful but also slower\n- other filters are vs a column before the first | so must match the whole colum for example ```*value*``` but are case insensitive\n"
+        }
+    ],
+    "variables": [
+        {
+            "id": "CA827146BADB6BCC",
+            "name": "user_name",
+            "displayName": "user_name",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "jane.doe*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "C385415B1C02DA04",
+            "name": "query_regex",
+            "displayName": "query_regex",
+            "defaultValue": "^.",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".*,^.,a|b|c"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "A75D4AE06DACB085",
+            "name": "query_pattern",
+            "displayName": "query_pattern",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*mycategory*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "5B88EB2EBB591FB5",
+            "name": "query_type",
+            "displayName": "query_type",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "scheduled*,*dashboard*,interactive search,monitor,view*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "BA094C56A44A68C3",
+            "name": "tier",
+            "displayName": "tier",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "continuous,frequent,infrequent"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
