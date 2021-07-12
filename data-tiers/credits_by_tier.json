@@ -1,0 +1,386 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Credits By Tier",
+    "description": "A simple view of credits ingested by tier using pattern matching on the data volume _view (index) dimension.",
+    "title": "Credits By Tier",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-2F6D26D09EBDFA44",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":17}"
+            },
+            {
+                "key": "panelBCE5CC709022B84C",
+                "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":36}"
+            },
+            {
+                "key": "panelA46D36779F877B4E",
+                "structure": "{\"height\":8,\"width\":6,\"x\":6,\"y\":36}"
+            },
+            {
+                "key": "panel968E0544AE1EF947",
+                "structure": "{\"height\":8,\"width\":6,\"x\":12,\"y\":36}"
+            },
+            {
+                "key": "panelE64C346DA44AA847",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":17}"
+            },
+            {
+                "key": "panelPANE-D51893298F18B845",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panelPANE-12972226BA631B46",
+                "structure": "{\"height\":5,\"width\":18,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel5BC87A89911A8B42",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":35}"
+            },
+            {
+                "key": "panel2E9ED2749604AA4E",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelB0AACB67902B884D",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panelFD4EFA759646AB4C",
+                "structure": "{\"height\":5,\"width\":6,\"x\":18,\"y\":0}"
+            },
+            {
+                "key": "panelF2060CD3BDA43842",
+                "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":36}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-2F6D26D09EBDFA44",
+            "title": "Ingest By Tier (GB)",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"unit\":{\"value\":\"GB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{\"A_continuous\":{\"visible\":true},\"A_cse\":{\"visible\":true},\"A_frequent\":{\"visible\":true},\"A_infrequent\":{\"visible\":true}},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n//| concat(deployment,\"_\",org_id) as key\n//| lookup org_id,org_name,daily_gb_limit from /shared/lookups/master_orgs on key=key  \n| sum(gbytes) as gbytes by view,_timeslice\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",gbytes * ((100 - {{cse_pct}})  /100),0) as continuous\n| if (tier = \"continuous\",gbytes * ({{cse_pct}}  /100),0) as cse\n| if (tier = \"frequent\",gbytes,0) as frequent\n| if (tier = \"infrequent\",gbytes,0) as infrequent\n\n\n//| concat(\"continuous:\",continuous,\"cse:\",cse,\"frequent:\",frequent,\"infrequent:\",infrequent) as transport\n//| parse regex field = transport \"(?<type>[a-z_]+):(?<gbytes>[0-9]+)\" multi\n\n|  sum(continuous) as continuous,sum(frequent) as frequent,sum(infrequent) as infrequent, sum(cse) as cse by  _timeslice //| transpose row _timeslice column type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBCE5CC709022B84C",
+            "title": "Continuous Partitions (GB)",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"unit\":{\"value\":\"GB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes \n| sum(gbytes) as gbytes by view,_timeslice\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| where tier = \"continuous\"\n| view as index\n| if (index matches \"*sumologic*\",\"sumologic_internal\",index) as index\n|  sum(gbytes) as gbytes by index,_timeslice\n| transpose row _timeslice column index\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA46D36779F877B4E",
+            "title": "Frequent Partitions (GB)",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"unit\":{\"value\":\"GB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,_timeslice\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| where tier = \"frequent\"\n| view as index\n| if (index matches \"*sumologic*\",\"sumologic_internal\",index) as index\n|  sum(gbytes) as gbytes by index,_timeslice\n| transpose row _timeslice column index\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel968E0544AE1EF947",
+            "title": "InFrequent Partitions (GB)",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"inf_windowsevents\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"unit\":{\"value\":\"GB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,_timeslice\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| where tier = \"infrequent\"\n| view as index\n| if (index matches \"*sumologic*\",\"sumologic_internal\",index) as index\n|  sum(gbytes) as gbytes by index,_timeslice\n| transpose row _timeslice column index\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE64C346DA44AA847",
+            "title": "Ingestion Credit Estimate (Credits)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"series\":{\"A_cr_continuous\":{\"visible\":true},\"A_cr_cse\":{\"visible\":true},\"A_cr_frequent\":{\"visible\":true},\"A_cr_infrequent\":{\"visible\":true}}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n//| concat(deployment,\"_\",org_id) as key\n//| lookup org_id,org_name,daily_gb_limit from /shared/lookups/master_orgs on key=key  \n| sum(gbytes) as gbytes by view,_timeslice\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",cr_cont * gbytes * ((100 - {{cse_pct}})  /100),0) as continuous\n| if (tier = \"continuous\",cr_cse * gbytes * ({{cse_pct}}  /100),0) as cse\n| if (tier = \"frequent\",cr_freq * gbytes,0) as frequent\n| if (tier = \"infrequent\",cr_infreq * gbytes,0) as infrequent\n\n\n//| concat(\"continuous:\",continuous,\"cse:\",cse,\"frequent:\",frequent,\"infrequent:\",infrequent) as transport\n//| parse regex field = transport \"(?<type>[a-z_]+):(?<gbytes>[0-9]+)\" multi\n\n|  sum(continuous) as continuous,sum(frequent) as frequent,sum(infrequent) as infrequent, sum(cse) as cse by  _timeslice //| transpose row _timeslice column type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-D51893298F18B845",
+            "title": "Partition Mappings",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| view as rename_for_report\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as rename_for_report\n| if (view matches \"*sumologic*\",\"sumologic_internal\",rename_for_report) as rename_for_report\n| 20 as cr_cont\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",cr_cont * gbytes,0) as ingest_credits_consumed\n| if (tier = \"frequent\",cr_freq * gbytes,ingest_credits_consumed) as ingest_credits_consumed\n| if (tier = \"infrequent\",cr_infreq * gbytes,ingest_credits_consumed) as ingest_credits_consumed\n| gbytes as gbytes\n| sort ingest_credits_consumed\n| fields -cr_cont,cr_freq,cr_infreq\n| ingest_credits_consumed / gbytes as CPGI ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-12972226BA631B46",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"series\":{},\"text\":{\"format\":\"markdown\",\"fontSize\":12}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard estimates INGEST  credits.\n\n**Log Ingest Credits** estimates require that regular expressions **must match your partition names** to the correct tier.\n\n- Use params:```infreq_regex```  ```freq_regex``` ```cse_regex``` \n- cse_regex maps normalised cse_data partitions to exclude from ingest credits.\n**cse_pct** we can only estimate cse vs continous credits. Estimate a correct percent value for cse logs: ```_siemforward=true```\n\n**log mappings** Use the log mapping panel to verify partition to tier mapping."
+        },
+        {
+            "id": null,
+            "key": "panel5BC87A89911A8B42",
+            "title": "GB Ingest By Partition",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"series\":{},\"text\":{\"format\":\"text\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel uses"
+        },
+        {
+            "id": null,
+            "key": "panel2E9ED2749604AA4E",
+            "title": "Estimate For Log Ingestion Credits",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panelB0AACB67902B884D",
+            "title": "Credits and GB Per Day",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| min(_messagetime) as s, max(_messagetime) as e , sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,s,e\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| where !(tier = \"cse_data\")\n\n| if (tier = \"continuous\",gbytes * ((100 - {{cse_pct}})  /100),0) as continuous\n| if (tier = \"continuous\",gbytes * ({{cse_pct}}  /100),0) as cse\n| if (tier = \"frequent\", gbytes,0) as frequent\n| if (tier = \"infrequent\",gbytes,0) as infrequent\n\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n\n| if (tier = \"continuous\",cr_cont * gbytes * ((100 - {{cse_pct}})  /100),0) as cr_continuous\n| if (tier = \"continuous\",cr_cse * gbytes * ({{cse_pct}}  /100),0) as cr_cse\n| if (tier = \"frequent\",cr_freq * gbytes,0) as cr_frequent\n| if (tier = \"infrequent\",cr_infreq * gbytes,0) as cr_infrequent\n\n| min(s) as s, max(e) as e,sum(cr_continuous) as cr_cont, sum(cr_cse) as cr_cse, sum(cr_frequent) as cr_frequent,sum(cr_infrequent) as cr_infrequent,\nsum(continuous) as continuous, sum(cse) as cse,sum(frequent) as frequent, sum(infrequent) as infrequent\n\n| (e - s) / (1000 * 60 * 60 * 24) as days\n| continuous / days as continuous\n| cse / days as cse\n| frequent/ days as frequent\n| infrequent / days as infrequent\n\n| cr_cont / days as  cr_cont\n| cr_cse / days as cr_cse\n| cr_frequent/ days as cr_frequent\n| cr_infrequent / days as cr_infrequent\n| cr_cont + cr_cse + cr_frequent + cr_infrequent as cr_per_day\n| continuous + cse + frequent + infrequent as gb_per_day\n| cr_per_day / gb_per_day as CGPI\n| fields -s,e\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelFD4EFA759646AB4C",
+            "title": "Credits Per GB Ingested",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"CPGI\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":18,\"color\":\"#DFBE2E\"},{\"from\":18,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"min\":0,\"max\":25}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| min(_messagetime) as s, max(_messagetime) as e , sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,s,e\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| sum(gbytes) as gbytes by tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| cr_cont * gbytes * ((100 - {{cse_pct}} ) /100) as cr_cont\n| cr_cse * gbytes * ({{cse_pct}} /100)  as cr_cse\n| if (tier = \"continuous\", cr_cont+cr_cse ,0) as credits\n| if (tier = \"frequent\",cr_freq * gbytes,credits) as credits\n| if (tier = \"infrequent\",cr_infreq * gbytes,credits) as credits\n\n\n| if(tier  = \"frequent\",gbytes,0) as frequent\n| if (tier = \"continuous\",gbytes,0) as continuous\n| if(tier = \"infrequent\",gbytes,0) as infrequent\n| sum(continuous) as continuous,sum(frequent) as frequent, sum(infrequent) as infrequent\n\n| 20 as cr_cont\n| 25 as cr_cse\n| cr_cont * continuous * ((100 - {{cse_pct}} ) /100) as cr_cont\n| cr_cse * continuous * ({{cse_pct}} /100)  as cr_cse\n\n| ( cr_cont + cr_cse  + (frequent * 9) +  (infrequent * .4)  ) / (continuous + frequent + infrequent) as CPGI | avg(CPGI) as CPGI\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF2060CD3BDA43842",
+            "title": "CSE Records/Signals",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,_timeslice\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| where tier = \"cse_data\"\n| view as index\n| if (index matches \"*sumologic*\",\"sumologic_internal\",index) as index\n|  sum(gbytes) as gbytes by index,_timeslice\n| transpose row _timeslice column index\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": "49BEB250DC9A84A7",
+            "name": "freq_regex",
+            "displayName": "freq_regex",
+            "defaultValue": "^freq_",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "^freq_"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "FC9F53D5C40343A0",
+            "name": "infreq_regex",
+            "displayName": "infreq_regex",
+            "defaultValue": "^inf",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "^inf"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "3D1CE6B1D7B779E1",
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "15m",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "1h,1d,15m"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "3F46ECB029DDB918",
+            "name": "cse_regex",
+            "displayName": "cse_regex",
+            "defaultValue": "cse_|asoc",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "cse_|asoc"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "5AC2B7B33BA7BA1A",
+            "name": "cse_pct",
+            "displayName": "cse_pct",
+            "defaultValue": "0",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
