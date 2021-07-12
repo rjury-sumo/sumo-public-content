@@ -1,0 +1,227 @@
+
+
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "OSSEC Rules",
+    "description": "",
+    "title": "OSSEC Rules",
+    "rootPanel": null,
+    "theme": "Dark",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel36C7023199C53847",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panelAEE093B38D1CC844",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":6}"
+            },
+            {
+                "key": "panelD43B742A8C48BB42",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":6}"
+            },
+            {
+                "key": "panel6F3701989BFD1A45",
+                "structure": "{\"height\":17,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel2833A54CB4A0B84B",
+                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel36C7023199C53847",
+            "title": "Rules by severity",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"maxNumOfSlices\":30},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\"\n| where group matches /{{group_matches}}/\n| where sourcefile matches /{{file_matches}}/\n| where description matches /{{description_matches}}/\n| where level >= {{min_level}}\n| lookup Title as text from path://\"/Library/Users/YOURPATHHERE/ossec_level\" on level = level\n\n| count by level ,text | sort level asc  ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelAEE093B38D1CC844",
+            "title": "Rules by Source XML File",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"maxNumOfSlices\":50},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\"\n| where group matches /{{group_matches}}/\n| where sourcefile matches /{{file_matches}}/\n| where description matches /{{description_matches}}/\n| where level >= {{min_level}}\n//| lookup Title as level_text from path://\"/Library/Users/YOURPATHHERE/ossec_level\" on level = level\n | count by sourcefile | sort _count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD43B742A8C48BB42",
+            "title": "Rules by Group",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"maxNumOfSlices\":50},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\"\n| where group matches /{{group_matches}}/\n| where sourcefile matches /{{file_matches}}/\n| where description matches /{{description_matches}}/\n| where level >= {{min_level}}\n//| lookup Title as level_text from path://\"/Library/Users/YOURPATHHERE/ossec_level\" on level = level\n | count by group | sort _count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6F3701989BFD1A45",
+            "title": "Rule Details",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\"\n| where group matches /{{group_matches}}/\n| where sourcefile matches /{{file_matches}}/\n| where description matches /{{description_matches}}/\n| where level >= {{min_level}}\n//| lookup Title as level_text from path://\"/Library/Users/YOURPATHHERE/ossec_level\" on level = level\n | count by id,group,level,sourcefile,description | sort id asc | fields -_count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel2833A54CB4A0B84B",
+            "title": "Severity Guide",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat  path://\"/Library/Users/YOURPATHHERE/ossec_level\" \n| where level >= {{min_level}}\n//| lookup Title as level_text from  on level = level\n | count by Level,Title,Description | sort level asc | fields -_count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": "CD40B30889A89989",
+            "name": "min_level",
+            "displayName": null,
+            "defaultValue": "7",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "A08CF0A99A8AA9BA",
+            "name": "group_matches",
+            "displayName": null,
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\" | count by group",
+                "field": "group"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "BDF24BACA9A9988B",
+            "name": "file_matches",
+            "displayName": null,
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\" | count by sourcefile",
+                "field": "sourcefile"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "09AA0E06B9B98A89",
+            "name": "description_matches",
+            "displayName": null,
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
+

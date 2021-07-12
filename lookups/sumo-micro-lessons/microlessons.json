@@ -1,0 +1,114 @@
+
+
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Micro Lessons",
+    "description": "",
+    "title": "Micro Lessons",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelC61F2E77A84A9943",
+                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelPANE-FED1535B90F5594B",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelC61F2E77A84A9943",
+            "title": "micro lessons",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"decimals\":1},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"{{lookup_path}}\"\n| tourl(trim(link),concat(\"Open: \",trim(link))) as link\n| where tolowercase(title) matches tolowercase(\"{{search_title}}\")\n| where title matches /(?i){{regex_title}}/\n| toint(index) as id\n| count by id, title, link | sort title asc | fields -_count\n | sort id asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-FED1535B90F5594B",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel shows a lookup table of Sumo Logic micro lessons videos (from the youtube playlist), has search parameters for matches and regex matches, and provides clickable links.\n\nThe lookup_path parameter should match the lookup table location: {{lookup_path}}\n\nsearch params:\n- search_title: ```where tolowercase(title) matches tolowercase(\"{{search_title}}\")```\n- regex_title: ```where title matches/(?i){{regex_title}}/```"
+        }
+    ],
+    "variables": [
+        {
+            "id": "8DE4B429AAB9ABA8",
+            "name": "search_title",
+            "displayName": "search_title",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat path://\"/Library/Users/YOURPATHHERE/micro_lessons\" | count by title",
+                "field": "title"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "EB2B76E78A9B8BBA",
+            "name": "regex_title",
+            "displayName": "regex_title",
+            "defaultValue": ".+",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".+"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": "4AFADCC198B9BA9B",
+            "name": "lookup_path",
+            "displayName": "lookup_path",
+            "defaultValue": "/Library/Users/YOURPATHHERE/micro_lessons",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "/Library/Users/YOURPATHHERE/micro_lessons"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
+
