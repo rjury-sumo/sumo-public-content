@@ -1,0 +1,194 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Recent Log Ingest By Category",
+    "description": "",
+    "title": "Recent Log Ingest By Category",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelC16326DFB4712A4D",
+                "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel749D79248EADAB44",
+                "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":5}"
+            },
+            {
+                "key": "panelF817FB1DB6955945",
+                "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":16}"
+            },
+            {
+                "key": "panel13BFA6FD91ED3A41",
+                "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":16}"
+            },
+            {
+                "key": "panelPANE-41832144AC02A84E",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelC16326DFB4712A4D",
+            "title": "Ingest by {{dimension}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| timeslice {{timeslice}}\n| sum(gbytes) as gbytes by _timeslice, dimension\n| transpose row _timeslice column dimension",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel749D79248EADAB44",
+            "title": "Ingest Vs Previous Weeks",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| timeslice {{timeslice}}\n| sum(gbytes) as gbytes by _timeslice\n| compare with timeshift 7d 2",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF817FB1DB6955945",
+            "title": "Ingest by {{dimension}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by dimension\n| sort gbytes\n| total gbytes as tgb \n| (gbytes / tgb ) * 100 as ingest_percent | fields -tgb",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel13BFA6FD91ED3A41",
+            "title": "Ingest by {{dimension}} - Changes > 25%",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by dimension\n| sort gbytes\n| compare with timeshift 14d\n| gbytes - gbytes_14d as change\n| ( change / gbytes) * 100 as change_pct\n| where abs(change_pct) > 25 | sort change",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-41832144AC02A84E",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard shows recent ingest and compares vs 2 weeks ago using ingested statistics from the [data volume index](https://help.sumologic.com/Manage/Ingestion-and-Volume/Data_Volume_Index/Log_Data_Volume_Index).\n- **filter**: use a filter expression to filter categories returned. Evaluated as '| where dimension matches \"filter\"'. Current setting:\n```| where dimension matches \"{{filter}}\"```\n- **dimension**: chose from the data volume dimensions such as: sourcecategory,sourcehost,collector,view,sourcename\n- **timeslice**: for time series graphs choose the granularity."
+        }
+    ],
+    "variables": [
+        {
+            "id": "679B6DC9BA8998AA",
+            "name": "filter",
+            "displayName": "filter",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "a,b,c*,*d*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "14588404ABAA99B8",
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "15m",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "15m,1h,1d"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": "C9890BB198B889BA",
+            "name": "dimension",
+            "displayName": "dimension",
+            "defaultValue": "sourcecategory",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "sourcecategory,sourcehost,collector,view,sourcename"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
