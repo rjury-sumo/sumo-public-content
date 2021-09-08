@@ -1,0 +1,558 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Monitors Investigation Console 0.2",
+    "description": "",
+    "title": "Monitors Investigation Console 0.2",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-7BC0749686331849",
+                "structure": "{\"height\":17,\"width\":24,\"x\":0,\"y\":67}"
+            },
+            {
+                "key": "panelB1881670AD935A44",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":56}"
+            },
+            {
+                "key": "panel3DE390B1A16D0B4C",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":37}"
+            },
+            {
+                "key": "panel080A05B9B2A87B4B",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":37}"
+            },
+            {
+                "key": "panel22AF7959B87A3B4C",
+                "structure": "{\"height\":10,\"width\":7,\"x\":0,\"y\":46}"
+            },
+            {
+                "key": "panel1BA3E8C8BA78C942",
+                "structure": "{\"height\":10,\"width\":11,\"x\":13,\"y\":46}"
+            },
+            {
+                "key": "panel39B202009ABEAB48",
+                "structure": "{\"height\":10,\"width\":6,\"x\":7,\"y\":46}"
+            },
+            {
+                "key": "panelE2039D0A8E034942",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":84}"
+            },
+            {
+                "key": "panel167317B68B4C2A4C",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":17}"
+            },
+            {
+                "key": "panelC40DDF73965F2B48",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panelPANE-3E4B08FF83A7B94E",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel2D8254B6B1D40B48",
+                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":28}"
+            },
+            {
+                "key": "panelA58E8AD1BB5E8A4B",
+                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":28}"
+            },
+            {
+                "key": "panel60376DDCB2808846",
+                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":1}"
+            },
+            {
+                "key": "panel0732AAB2A46CAA47",
+                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":1}"
+            },
+            {
+                "key": "panel27291E04BAE66A4E",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":8}"
+            },
+            {
+                "key": "panelA90B6135950D5846",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":35}"
+            },
+            {
+                "key": "panelPANE-8859B7D8AB0B894C",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":97}"
+            },
+            {
+                "key": "panel0E39546D99858A4A",
+                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":98}"
+            },
+            {
+                "key": "panel7A873BB18CC94846",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":104}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-7BC0749686331849",
+            "title": "Resolved During Time Range",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \t{{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| parse regex \",(?<value>[0-9\\.]+),[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:\" nodrop\n|count as events, values(state) as statuses, values(severity) as severity,min(_messagetime) as first_event,max(_messagetime) as last_event ,first(dimensions) as dimensions, first(timeseries) as timeseries ,first(value) as value by id,monitor,name\n|trim(severity) as severity\n|trim(statuses) as statuses\n| (last_event -first_event) / (1000 * 60) as duration_minutes\n|tolong(last_event) as latest\n| formatdate(tolong(first_event),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as first_event\n| formatdate(tolong(last_event),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as last_event\n| count by id,latest,first_event,last_event,name,statuses,severity,dimensions,timeseries,value,duration_minutes | where duration_minutes > 0 or statuses=\"Resolved\"\n| round(duration_minutes,1) as duration_minutes\n|sort latest |fields -latest,_count,statuses\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB1881670AD935A44",
+            "title": "Alert Console",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \t {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| parse regex \",(?<value>[0-9\\.]+),[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:\" nodrop\n| max(_messagetime) as last_event ,first(dimensions) as dimensions, first(timeseries) as timeseries ,first(value) as value by id,monitor,name,state,severity\n\n|tolong(last_event) as latest\n| formatdate(tolong(last_event),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as last_event\n| count by latest,last_event,name,id,state,severity,dimensions,timeseries,value \n|sort latest | fields -_count,latest\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3DE390B1A16D0B4C",
+            "title": "Created Alerts Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \tCreated {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| parse regex \",(?<value>[0-9\\.]+),[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:\" nodrop\n|concat (name,\" \",dimensions) as alert\n| timeslice 15m | count by alert,_timeslice | transpose row _timeslice column alert\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel080A05B9B2A87B4B",
+            "title": "Created Resolved Overtime",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \tResolved {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| parse regex \",(?<value>[0-9\\.]+),[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:\" nodrop\n|concat (name,\" \",dimensions) as alert\n| timeslice 15m| count by alert,_timeslice | transpose row _timeslice column alert\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel22AF7959B87A3B4C",
+            "title": "Top Critical Alerts Triggered",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \tCreated Critical {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| where state = \"Created\"\n| count_distinct(dimensions) as entities,count as alerts by name,severity\n| where severity = \"Critical\" | sort alerts\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1BA3E8C8BA78C942",
+            "title": "Top Alerts With Dimensions Triggered",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \tCreated (Critical or Warning) {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| where state = \"Created\"\n|count as alerts by name ,dimensions,severity| sort alerts\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel39B202009ABEAB48",
+            "title": "Top Warning Alerts Triggered",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert \tCreated Warning {{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop \n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| where state = \"Created\"\n| count_distinct(dimensions) as entities,count as alerts by name,severity\n| where severity = \"Warning\" | sort alerts\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE2039D0A8E034942",
+            "title": "Created But Not Resolved During Time Range",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit _sourceCategory=alert (created or resolved)\t{{{filter}}}\n| parse regex \",(?<monitor>[^,]+),(?<severity>[^,]+),TimeSeriesTrigger\\(\"  nodrop\n| parse \"values=Map(*)), metaTags=\" as dimensions1 nodrop\n| replace (dimensions1,\" -> \",\"=\") as dimensions\n| parse \"Created alert Alert(None,Some(*)\" as id nodrop\n| parse \"Resolved alert * for timeseries *:*:* for monitor * with name\" as id,timeseries,junk,dimensions2,monitor nodrop\n| replace (dimensions2,\"%``%\",\":\") as dimensions2\n| parse \"with name *\" as name \n| parse \"* alert \" as state\n| sort _messagetime asc\n|if(isempty(dimensions2),dimensions,dimensions2) as dimensions\n| parse regex field=dimensions \"metric=(?<timeseries>[^,]+)\" nodrop\n| replace(dimensions,/ metric=[^,]+,/,\"\") as dimensions\n| parse regex \",(?<value>[0-9\\.]+),[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:\" nodrop\n|count as events, values(state) as statuses, values(severity) as severity,min(_messagetime) as first_event,max(_messagetime) as last_event ,first(dimensions) as dimensions, first(timeseries) as timeseries ,first(value) as value by id,monitor,name\n|trim(severity) as severity\n|trim(statuses) as statuses\n| (last_event -first_event) / (1000 * 60) as duration_minutes\n|tolong(last_event) as latest\n| formatdate(tolong(first_event),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as first_event\n| formatdate(tolong(last_event),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as last_event\n| count by id,latest,first_event,last_event,name,statuses,severity,dimensions,timeseries,value | where statuses=\"Created\"\n\n|sort latest |fields -latest,_count,statuses\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel167317B68B4C2A4C",
+            "title": "Monitor State Change Console",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n| timeslice by 1m\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| count by _timeslice,monitorid,name,status,previousstatus | fields -_count | sort _timeslice\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC40DDF73965F2B48",
+            "title": "Monitor Critical States Triggered",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n| timeslice 1h\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| where status =\"Critical\"\n| count by _timeslice,name | transpose row _timeslice column name\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-3E4B08FF83A7B94E",
+            "title": "Monitor High Level Status",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel2D8254B6B1D40B48",
+            "title": "Top Monitors Triggerd Critical State",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| where status=\"Critical\"\n| count by monitorid,name,status | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA58E8AD1BB5E8A4B",
+            "title": "Top Monitors Triggered Warning State",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| where status matches \"Warn*\"\n| count by monitorid,name,status | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel60376DDCB2808846",
+            "title": "Triggered Monitors Still Critical In Time Range",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| sort _messagetime asc\n| last(_messagetime) as updated,last(status) as status by monitorid,name\n| where status !=\"Normal\"\n| sort updated | formatdate(updated,\"yyyy-MM-dd hh:mm:ss ZZZZ\") as updated\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0732AAB2A46CAA47",
+            "title": "Triggered Monitors Resolved In Time Range",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| sort _messagetime asc\n| last(_messagetime) as updated,last(status) as status by monitorid,name\n| where status =\"Normal\"\n| sort updated | formatdate(updated,\"yyyy-MM-dd hh:mm:ss ZZZZ\") as updated\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel27291E04BAE66A4E",
+            "title": "Monitor Warning States Triggered",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_index=sumologic_system_events MonitorStatusChanged {{{filter}}}\n\n| json field=_raw \"details.monitorId\" as monitorid\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n| json field=_raw \"details.currentStatus\" as status\n| json field=_raw \"details.previousStatus\" as previousStatus\n| timeslice 1h\n| if(previousStatus=\"[]\",\"none\",previousstatus) as previousstatus\n| replace(status,/[\\[\\\"\\]]/,\"\") as status\n| replace(previousstatus,/[\\[\\\"\\]]/,\"\") as previousstatus\n| where status =\"Warning\"\n| count by _timeslice,name | transpose row _timeslice column name\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA90B6135950D5846",
+            "title": "Metric Monitor Detailed Status",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Metric alerts can have multiple series with 'per entity' status changes. These panels show state changes including per entity changes of state."
+        },
+        {
+            "id": null,
+            "key": "panelPANE-8859B7D8AB0B894C",
+            "title": "Monitor Changes",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel0E39546D99858A4A",
+            "title": "Disabled or Enabled",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit_events disable*  MonitorsLibraryItemUpdated {{{filter}}}\n| json field=_raw \"to.isDisabled\" as isDisabled\n| json field=_raw \"to.name\" as name\n| json field=_raw \"from.isDisabled\" as wasDisabled\n| json field=_raw \"operator.email\" as user\n| json field=_raw \"operator.sourceIp\" as src_ip\n| json field=_raw \"from.monitorType\" as monitortype\n| where isdisabled !=wasdisabled\n| _messagetime as time\n| count by time,isDisabled,wasDisabled,name,user,src_ip,monitortype | fields -_count\n| sort time\n| formatdate(tolong(time),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as time",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7A873BB18CC94846",
+            "title": "Monitor Configuration Updated",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sumologic_audit_events disable*  MonitorsLibraryItemUpdated {{{filter}}}\n| json field=_raw \"to.isDisabled\" as isDisabled nodrop\n| json field=_raw \"to.name\" as name nodrop\n| json field=_raw \"from.isDisabled\" as wasDisabled nodrop\n| json field=_raw \"operator.email\" as user\n| json field=_raw \"operator.sourceIp\" as src_ip\n| json field=_raw \"from.monitorType\" as monitortype\n| where isdisabled =wasdisabled\n| json field=_raw \"to\" as new_config\n| _messagetime as time\n| count by time,name,user,src_ip,monitortype,new_config | fields -_count\n| sort time\n| formatdate(tolong(time),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as time\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "filter",
+            "displayName": "filter",
+            "defaultValue": "// to disable or enter search",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "//anything"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
+}
