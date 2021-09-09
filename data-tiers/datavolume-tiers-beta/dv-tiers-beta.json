@@ -1,535 +1,277 @@
 {
-    "type": "FolderSyncDefinition",
-    "name": "data volume tiers",
+    "type": "DashboardV2SyncDefinition",
+    "name": "Data Volume Tiers - Single Dimension",
     "description": "",
-    "children": [
+    "title": "Data Volume Tiers - Single Dimension",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel6DA0287589046847",
+                "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":17}"
+            },
+            {
+                "key": "panel8289605AB6C28944",
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":17}"
+            },
+            {
+                "key": "panel98BD121FB45F6943",
+                "structure": "{\"height\":7,\"width\":5,\"x\":14,\"y\":0}"
+            },
+            {
+                "key": "panelCA22DFFB867A984C",
+                "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panel2C01C45CA2B6294C",
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":7}"
+            },
+            {
+                "key": "panelPANE-A6A877CF967A7B44",
+                "structure": "{\"height\":7,\"width\":14,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelE81B48D8A9AA6844",
+                "structure": "{\"height\":7,\"width\":5,\"x\":19,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
         {
-            "type": "DashboardV2SyncDefinition",
-            "name": "Data Volume Tiers - Partition Ingestion and Credits",
+            "id": null,
+            "key": "panel6DA0287589046847",
+            "title": "Tabular View - Top Sources Other < {{other_pct}}%",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > 50,concat(substring(value,0,50),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
             "description": "",
-            "title": "Data Volume Tiers - Partition Ingestion and Credits",
-            "rootPanel": null,
-            "theme": "Light",
-            "topologyLabelMap": {
-                "data": {}
-            },
-            "refreshInterval": 0,
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1w"
-                },
-                "to": null
-            },
-            "layout": {
-                "layoutType": "Grid",
-                "layoutStructures": [
-                    {
-                        "key": "panel6DA0287589046847",
-                        "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":27}"
-                    },
-                    {
-                        "key": "panel98BD121FB45F6943",
-                        "structure": "{\"height\":7,\"width\":10,\"x\":14,\"y\":0}"
-                    },
-                    {
-                        "key": "panelCA22DFFB867A984C",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":7}"
-                    },
-                    {
-                        "key": "panel2C01C45CA2B6294C",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":7}"
-                    },
-                    {
-                        "key": "panelPANE-A6A877CF967A7B44",
-                        "structure": "{\"height\":7,\"width\":14,\"x\":0,\"y\":0}"
-                    },
-                    {
-                        "key": "panelFFB2459E822EA84F",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":17}"
-                    },
-                    {
-                        "key": "panel34CF238AA3522B4B",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":17}"
-                    }
-                ]
-            },
-            "panels": [
-                {
-                    "id": null,
-                    "key": "panel6DA0287589046847",
-                    "title": "Tabular View - Partitions Ingest and Credits",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| value as partition\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, partition\n\n| bytes /1024/1024/1024 as gb | sort gb\n\n// remove long categories\n| sum(events) as events,sum(gb) as gbytes by partition,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by partition\n| tgbs / tgb as fraction\n\n\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,partition\n| sort percent",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel98BD121FB45F6943",
-                    "title": "Ingest Volume By Tier",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\" )\n| where datatier matches \"{{tier_filter}}\"\n| sum(sizeinbytes) as bytes by datatier, value\n| bytes / 1024/1024/1024 as gb\n| sum(gb) as gb by datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panelCA22DFFB867A984C",
-                    "title": "Ingest GB By Tier Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n\n| sum(gb) as gb by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel2C01C45CA2B6294C",
-                    "title": "Credits For Ingest By Tier Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"infrequent\",gb * .4,credits) as credits\n| sum(credits) as credits by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panelPANE-A6A877CF967A7B44",
-                    "title": "About",
-                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "TextPanel",
-                    "text": "This dashboard uses the new data volume with tier index for example: ```_index=sumologic_volume _sourcecategory=view_and_tier_volume```.\n\nIt shows ingestion gb, events and estimated ingest credits by partition, tier.\n\nAvailable filters are:\n- timeslice: timeslice value for some graphs such as 1m 15m 1h\n- value_filter: apply a where matches filter to value names\n- tier_filter: use * or choose a single tier\n"
-                },
-                {
-                    "id": null,
-                    "key": "panelFFB2459E822EA84F",
-                    "title": "Credits For Paritions Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"infrequent\",gb * .4,credits) as credits\n| if(value matches \"*sumologic*\",\"sumo_internal\",value) as value\n| sum(credits) as credits by value,_timeslice | transpose row _timeslice column value\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel34CF238AA3522B4B",
-                    "title": "Gb For Paritions Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory=view_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n//| if (datatier=\"frequent\",gb * 9,gb * 20) as credits\n//| if (datatier=\"infrequent\",gb * .4,credits) as credits\n| if(value matches \"*sumologic*\",\"sumo_internal\",value) as value\n| sum(gb) as gb by value,_timeslice | transpose row _timeslice column value\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                }
-            ],
-            "variables": [
-                {
-                    "id": null,
-                    "name": "view",
-                    "displayName": "view",
-                    "defaultValue": "view",
-                    "sourceDefinition": {
-                        "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_index=sumologic_volume _sourcecategory=*_and_tier_volume | parse field=_sourcecategory \"*_and_tier_volume\" as view\n| count by view",
-                        "field": "view"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": false,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "timeslice",
-                    "displayName": "timeslice",
-                    "defaultValue": "1d",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "5m,15m,1h,6h,24h"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": false,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "value_filter",
-                    "displayName": "value_filter",
-                    "defaultValue": "*",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "filter_value"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": true,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "tier_filter",
-                    "displayName": "tier_filter",
-                    "defaultValue": "*",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "Continuous,Frequent,Infrequent"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": true,
-                    "hideFromUI": false
-                }
-            ],
-            "coloringRules": []
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         },
         {
-            "type": "DashboardV2SyncDefinition",
-            "name": "Data Volume Tiers - Single Dimension",
+            "id": null,
+            "key": "panel8289605AB6C28944",
+            "title": "Ingest Over Time - Top Sources Other < {{other_pct}} %",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > 50,concat(substring(value,0,50),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by view,value,_timeslice\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n| sum(gbytes) as gb by _timeslice,value \n| transpose row _timeslice column value\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
             "description": "",
-            "title": "Data Volume Tiers - Single Dimension",
-            "rootPanel": null,
-            "theme": "Light",
-            "topologyLabelMap": {
-                "data": {}
-            },
-            "refreshInterval": 0,
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "layout": {
-                "layoutType": "Grid",
-                "layoutStructures": [
-                    {
-                        "key": "panel6DA0287589046847",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":17}"
-                    },
-                    {
-                        "key": "panel8289605AB6C28944",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":17}"
-                    },
-                    {
-                        "key": "panel98BD121FB45F6943",
-                        "structure": "{\"height\":7,\"width\":6,\"x\":18,\"y\":0}"
-                    },
-                    {
-                        "key": "panelCA22DFFB867A984C",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":7}"
-                    },
-                    {
-                        "key": "panel2C01C45CA2B6294C",
-                        "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":7}"
-                    },
-                    {
-                        "key": "panelPANE-A6A877CF967A7B44",
-                        "structure": "{\"height\":7,\"width\":18,\"x\":0,\"y\":0}"
-                    }
-                ]
-            },
-            "panels": [
-                {
-                    "id": null,
-                    "key": "panel6DA0287589046847",
-                    "title": "Tabular View - Top Sources Other < {{other_pct}}%",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > 50,concat(substring(value,0,50),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| sort percent",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel8289605AB6C28944",
-                    "title": "Ingest Over Time - Top Sources Other < {{other_pct}} %",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > 50,concat(substring(value,0,50),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by view,value,_timeslice\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n| sum(gbytes) as gb by _timeslice,value \n| transpose row _timeslice column value\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel98BD121FB45F6943",
-                    "title": "Ingest Volume By Tier",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\" )\n| where datatier matches \"{{tier_filter}}\"\n| sum(sizeinbytes) as bytes by datatier, value\n| bytes / 1024/1024/1024 as gb\n| sum(gb) as gb by datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panelCA22DFFB867A984C",
-                    "title": "Ingest GB By Tier Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n\n| sum(gb) as gb by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panel2C01C45CA2B6294C",
-                    "title": "Credits For Ingest By Tier Over Time",
-                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "SumoSearchPanel",
-                    "queries": [
-                        {
-                            "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"infrequent\",gb * .4,credits) as credits\n| sum(credits) as credits by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
-                            "queryType": "Logs",
-                            "queryKey": "A",
-                            "metricsQueryMode": null,
-                            "metricsQueryData": null,
-                            "tracesQueryData": null,
-                            "parseMode": "Auto",
-                            "timeSource": "Message"
-                        }
-                    ],
-                    "description": "",
-                    "timeRange": null,
-                    "coloringRules": null,
-                    "linkedDashboards": []
-                },
-                {
-                    "id": null,
-                    "key": "panelPANE-A6A877CF967A7B44",
-                    "title": "About",
-                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
-                    "keepVisualSettingsConsistentWithParent": true,
-                    "panelType": "TextPanel",
-                    "text": "This dashboard uses the new data volume with tier index for example: ```_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume```.\n\nIt shows ingestion gb, events and estimated ingest credits by category, tier and so on.\n\nAvailable filters are:\n- view: such as sourcecategory,view,collector,sourcehost. There is a volume for each sumo metadata.\n- timeslice: timeslice value for some graphs such as 1m 15m 1h\n- other_pct: Some panels group any category under this % threshold as 'other'. For example to see categories less than 1% of total GB as 'other' use 1. To see all categories use 0.\n- value_filter: apply a where matches filter to value names\n- tier_filter: use * or choose a single tier\n"
-                }
-            ],
-            "variables": [
-                {
-                    "id": null,
-                    "name": "view",
-                    "displayName": "view",
-                    "defaultValue": "view",
-                    "sourceDefinition": {
-                        "variableSourceType": "LogQueryVariableSourceDefinition",
-                        "query": "_index=sumologic_volume _sourcecategory=*_and_tier_volume | parse field=_sourcecategory \"*_and_tier_volume\" as view\n| count by view",
-                        "field": "view"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": false,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "timeslice",
-                    "displayName": "timeslice",
-                    "defaultValue": "15m",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "5m,15m,1h,6h,24h"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": false,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "other_pct",
-                    "displayName": "other_pct",
-                    "defaultValue": ".5",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": ".0,1,.5,1,2,3,5,10"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": false,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "value_filter",
-                    "displayName": "value_filter",
-                    "defaultValue": "*",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "filter_value"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": true,
-                    "hideFromUI": false
-                },
-                {
-                    "id": null,
-                    "name": "tier_filter",
-                    "displayName": "tier_filter",
-                    "defaultValue": "*",
-                    "sourceDefinition": {
-                        "variableSourceType": "CsvVariableSourceDefinition",
-                        "values": "Continuous,Frequent,Infrequent"
-                    },
-                    "allowMultiSelect": false,
-                    "includeAllOption": true,
-                    "hideFromUI": false
-                }
-            ],
-            "coloringRules": []
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         },
         {
-            "type": "SavedSearchWithScheduleSyncDefinition",
-            "name": "sourcecategory_and_tier_volume",
-            "search": {
-                "queryText": "(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<field>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| sum(sizeinbytes) as bytes, sum(count) as events by field,datatier,_sourcecategory\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension | fields -_sourcecategory,_some_matched",
-                "defaultTimeRange": "07/22/2021 10:11:31 AM to 07/22/2021 10:26:31 AM",
-                "byReceiptTime": false,
-                "viewName": "",
-                "viewStartTime": "1970-01-01T00:00:00Z",
-                "queryParameters": [],
-                "parsingMode": "Manual"
-            },
-            "searchSchedule": null,
-            "description": ""
+            "id": null,
+            "key": "panel98BD121FB45F6943",
+            "title": "Ingest Volume By Tier",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\" )\n| where datatier matches \"{{tier_filter}}\"\n| sum(sizeinbytes) as bytes by datatier, value\n| bytes / 1024/1024/1024 as gb\n| sum(gb) as gb by datatier\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelCA22DFFB867A984C",
+            "title": "Ingest GB By Tier Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n\n| sum(gb) as gb by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel2C01C45CA2B6294C",
+            "title": "Credits For Ingest By Tier Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Colorsafe\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum(credits) as credits by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-A6A877CF967A7B44",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard uses the new data volume with tier index for example: ```_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume```.\n\nIt shows ingestion gb, events and estimated ingest credits by category, tier and so on.\n\nAvailable filters are:\n- view: such as sourcecategory,view,collector,sourcehost. There is a volume for each sumo metadata.\n- timeslice: timeslice value for some graphs such as 1m 15m 1h\n- other_pct: Some panels group any category under this % threshold as 'other'. For example to see categories less than 1% of total GB as 'other' use 1. To see all categories use 0.\n- value_filter: apply a where matches filter to value names\n- tier_filter: use * or choose a single tier\n"
+        },
+        {
+            "id": null,
+            "key": "panelE81B48D8A9AA6844",
+            "title": "Total Credits",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum(credits) as credits by datatier\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
-    ]
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "view",
+            "displayName": "view",
+            "defaultValue": "view",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_index=sumologic_volume _sourcecategory=*_and_tier_volume | parse field=_sourcecategory \"*_and_tier_volume\" as view\n| count by view",
+                "field": "view"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": null,
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "15m",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5m,15m,1h,6h,24h"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": null,
+            "name": "other_pct",
+            "displayName": "other_pct",
+            "defaultValue": ".5",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".0,1,.5,1,2,3,5,10"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false
+        },
+        {
+            "id": null,
+            "name": "value_filter",
+            "displayName": "value_filter",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "filter_value"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        },
+        {
+            "id": null,
+            "name": "tier_filter",
+            "displayName": "tier_filter",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Continuous,Frequent,Infrequent"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false
+        }
+    ],
+    "coloringRules": []
 }
