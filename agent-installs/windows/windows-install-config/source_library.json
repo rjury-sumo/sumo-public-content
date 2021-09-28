@@ -1,0 +1,57 @@
+{
+    "api.version": "v1",
+    "sources": [
+        {
+            "name": "os_windows",
+            "description": "windows event logs target",
+            "category": "{{SUMO_ENVIRONMENT}}/os/windows/events",
+            "automaticDateParsing": true,
+            "multilineProcessingEnabled": false,
+            "useAutolineMatching": false,
+            "forceTimeZone": false,
+            "filters": [],
+            "cutoffRelativeTime": "-1h",
+            "encoding": "UTF-8",
+            "logNames": [
+                "Application",
+                "System"
+            ],
+            "sourceType": "LocalWindowsEventLog",
+            "alive": true
+        },
+        {
+            "name": "test",
+            "description": "test file source",
+            "category": "{{SUMO_ENVIRONMENT}}/test",
+            "automaticDateParsing": true,
+            "multilineProcessingEnabled": true,
+            "useAutolineMatching": false,
+            "forceTimeZone": false,
+            "filters": [],
+            "cutoffRelativeTime": "-1h",
+            "encoding": "UTF-8",
+            "pathExpression": "C:\\a\\path\\afile.log",
+            "blacklist": [],
+            "sourceType": "LocalFile"
+        },
+        {
+            "name":"HostMetrics",
+            "description":"HostMetrics",
+            "category":"{{SUMO_ENVIRONMENT}}/hostmetrics",
+            "automaticDateParsing":false,
+            "multilineProcessingEnabled":false,
+            "useAutolineMatching":false,
+            "contentType":"HostMetrics",
+            "forceTimeZone":false,
+            "filters":[],
+            "cutoffTimestamp":0,
+            "encoding":"UTF-8",
+            "fields":{
+              
+            },
+            "interval":60000,
+            "metrics":["CPU_User","CPU_Sys","CPU_Nice","CPU_Idle","CPU_IOWait","CPU_Irq","CPU_SoftIrq","CPU_Stolen","CPU_LoadAvg_1min","CPU_LoadAvg_5min","CPU_LoadAvg_15min","CPU_Total","Mem_Total","Mem_Used","Mem_Free","Mem_ActualFree","Mem_ActualUsed","Mem_UsedPercent","Mem_FreePercent","Mem_PhysicalRam","Disk_Used","Disk_UsedPercent","Disk_Available"],
+            "sourceType":"SystemStats"
+          }
+    ]
+}
