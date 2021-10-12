@@ -1,0 +1,141 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Custom Log Ingest Credits View",
+    "description": "",
+    "title": "Custom Log Ingest Credits View",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-94CBC18885F08945",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelB7BFCEF69E159840",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panel8CAEFA2581ECCA46",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":22}"
+            },
+            {
+                "key": "panelAF66DAAA86D40949",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":31}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-94CBC18885F08945",
+            "title": "Custom Sourcehost Credits View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory=sourcehost_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n\n//| timeslice by 15m\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n\n\n| parse regex field=value \"^(?<value2>[^\\/]+\\/[^\\/]+\\/)\" nodrop\n| if(value matches /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/,\"<ip>\",value) as value\n| if (isempty(value2),value,value2) as value\n| replace(value,/[0-9]{4,}[0-9\\.]*/,\"<n>\") as value\n// *** THIS LINE rolls up small sources into 'other' ***\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| total credits as tc \n| credits / tc as fraction\n| fraction * 100 as percent\n\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB7BFCEF69E159840",
+            "title": "Custom Sourcecategory Credits View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n\n//| timeslice by 15m\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n\n\n| parse regex field=value \"^(?<value2>[^\\/]+\\/[^\\/]+\\/)\" nodrop\n| if(value matches /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/,\"<ip>\",value) as value\n| if (isempty(value2),value,value2) as value\n| replace(value,/[0-9]{4,}[0-9\\.]*/,\"<n>\") as value\n// *** THIS LINE rolls up small sources into 'other' ***\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| total credits as tc \n| credits / tc as fraction\n| fraction * 100 as percent\n\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8CAEFA2581ECCA46",
+            "title": "Custom Collector Credits View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory=collector_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n\n//| timeslice by 15m\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n\n\n| parse regex field=value \"^(?<value2>[^\\/]+\\/[^\\/]+\\/)\" nodrop\n| if(value matches /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/,\"<ip>\",value) as value\n| if (isempty(value2),value,value2) as value\n| replace(value,/[0-9]{4,}[0-9\\.]*/,\"<n>\") as value\n// *** THIS LINE rolls up small sources into 'other' ***\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| total credits as tc \n| credits / tc as fraction\n| fraction * 100 as percent\n\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelAF66DAAA86D40949",
+            "title": "Custom Source Credits View ",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "(_index=sumologic_volume) _sourcecategory=source_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n\n//| timeslice by 15m\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n\n\n| parse regex field=value \"^(?<value2>[^\\/]+\\/[^\\/]+\\/)\" nodrop\n| if(value matches /^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+/,\"<ip>\",value) as value\n| if (isempty(value2),value,value2) as value\n| replace(value,/[0-9]{4,}[0-9\\.]*/,\"<n>\") as value\n// *** THIS LINE rolls up small sources into 'other' ***\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| total credits as tc \n| credits / tc as fraction\n| fraction * 100 as percent\n\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [],
+    "coloringRules": []
+}
