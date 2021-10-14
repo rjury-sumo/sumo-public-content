@@ -1,0 +1,464 @@
+
+
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "1. AWS EC2 Cloudwatch Overview",
+    "description": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+    "title": "1. AWS EC2 Cloudwatch Overview",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {
+            "namespace": [
+                "aws/ec2"
+            ]
+        }
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelpane-b03ffbbdb0b59b4d",
+                "structure": "{\"height\":10,\"width\":10,\"x\":9,\"y\":4}"
+            },
+            {
+                "key": "panelEC47B75AB2FE3943",
+                "structure": "{\"height\":5,\"width\":5,\"x\":19,\"y\":4}"
+            },
+            {
+                "key": "panelF71134BFB0713B42",
+                "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":30}"
+            },
+            {
+                "key": "panelE24B8E95BC6EEB49",
+                "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":22}"
+            },
+            {
+                "key": "panel3A96142ABC76FA46",
+                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":22}"
+            },
+            {
+                "key": "panelPANE-66793687B86EEB42",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel7E5AA258915E494A",
+                "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":30}"
+            },
+            {
+                "key": "panel4203208CB2AD9A42",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":28}"
+            },
+            {
+                "key": "panelC5DC5B5DB88CA94E",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":21}"
+            },
+            {
+                "key": "panel4B5FF5139EFE8B40",
+                "structure": "{\"height\":10,\"width\":9,\"x\":0,\"y\":4}"
+            },
+            {
+                "key": "panelC379A3708BD5AA4E",
+                "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":30}"
+            },
+            {
+                "key": "panelA16A473F808C7A4D",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel2398E603934BF947",
+                "structure": "{\"height\":5,\"width\":5,\"x\":19,\"y\":9}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelpane-b03ffbbdb0b59b4d",
+            "title": "CPU Utlization",
+            "visualSettings": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"CPU By Instance\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
+                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        },
+        {
+            "id": null,
+            "key": "panelEC47B75AB2FE3943",
+            "title": "Status Check Failed: Instance",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#98ECA9\"},{\"from\":1,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} |filter max > 0",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "yRU1gBnPnnhDr7ZXpwSroU9VuXAnetoj7BriVyesCmPvOo5dCm4wcHIopIh6",
+                    "relativePath": "",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        },
+        {
+            "id": null,
+            "key": "panelF71134BFB0713B42",
+            "title": "CPU Credit Balance (if applicable)",
+            "visualSettings": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Credits\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=cpucreditbalance region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE24B8E95BC6EEB49",
+            "title": "Status Check Failed: Instance",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Failed Instances\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3A96142ABC76FA46",
+            "title": "Status Check Failed: Instance System",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Failed Instances\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-66793687B86EEB42",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false},\"text\":{\"fontSize\":12,\"horizontalAlignment\":\"left\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This is an overview to link to the 'EC2' node in AWS Observability Explorer. This dashboard shows native AWS EC2 metrics only. For more detailed per host metrics (memory, disk volumes etc)  it's recommended to install a Sumo Logic Installed Collector.\n\nIn order to see metrics here you must do one of the following:\n- in the AWSO Cloudatch template add  AWS/EC2 namespace in parameter 4 \"Sumo Logic AWS Cloudwatch Metrics Sources\"\n- by manually adding collection and adding an 'account' field to each source matching the AWSO name parameter.\n\nYou can filter this dashboard by instanceid or using customer 'field' and 'value' filters to apply a custom filter to this dashboard.\nYou can click on the honeycomb to drill down to view a specific instance in a new dashboard.\n\nNote since these are AWS Cloudwatch metrics they will not have a _sourcehost or _collector as you would see with host metrics integrated into AWS Observability. For instructions on setting up host metrics for AWSO see [this link](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/03_Other_Configurations_and_Tools/Add_Fields_to_Existing_Host_Metrics_Sources)"
+        },
+        {
+            "id": null,
+            "key": "panel7E5AA258915E494A",
+            "title": "EBSByteBalance% (if applicable)",
+            "visualSettings": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Credits\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=EBSByteBalance%  region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4203208CB2AD9A42",
+            "title": "Credit Balances",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false},\"text\":{\"fontSize\":12}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "For applicable instance types only"
+        },
+        {
+            "id": null,
+            "key": "panelC5DC5B5DB88CA94E",
+            "title": "Status Checks",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false},\"text\":{\"fontSize\":12}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel4B5FF5139EFE8B40",
+            "title": "CPU Utlization Instances",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#98ECA9\"},{\"from\":85,\"to\":95,\"color\":\"#F2DA73\"},{\"from\":95,\"to\":100,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
+                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        },
+        {
+            "id": null,
+            "key": "panelC379A3708BD5AA4E",
+            "title": "EBSIOBalance% (if applicable) ",
+            "visualSettings": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Credits\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=EBSIOBalance%   region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA16A473F808C7A4D",
+            "title": "Instance List",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"cpu %\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}} ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
+                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        },
+        {
+            "id": null,
+            "key": "panel2398E603934BF947",
+            "title": "Status Check Failed: System",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#98ECA9\"},{\"from\":1,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} | filter max > 0",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "yRU1gBnPnnhDr7ZXpwSroU9VuXAnetoj7BriVyesCmPvOo5dCm4wcHIopIh6",
+                    "relativePath": "",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "region",
+            "displayName": null,
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "account={{account}}",
+                "key": "region"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "namespace",
+            "displayName": null,
+            "defaultValue": "aws/ec2",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "account={{account}} region={{region}}",
+                "key": "namespace"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "instanceid",
+            "displayName": null,
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "account={{account}} region={{region}} namespace={{namespace}}",
+                "key": "instanceid"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "field",
+            "displayName": "field",
+            "defaultValue": "account",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "_sourcecategory,_sourcehost,_collector,_source,account"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "value",
+            "displayName": "value",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "a,b*,*c*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
+

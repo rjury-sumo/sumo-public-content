@@ -1,5 +1,9 @@
 # Cloudwatch EC2 dashbaords to use in sumo if you setup a cloudwatch EC2 source. 
 Stack linked to 'instanceid' so will render in AWSO Explore.
+- apps/AWS-EC2/aws-ec2-cloudwatch-overview.json - 'overview' with clickable honeycomb to drill down that will link to the 'EC2' namespace level i explore
+- apps/AWS-EC2/aws-ec2-cloudwatch.json - a 'node level' ec2 dashboard with detailed graphs for each Cloudwatch EC2 metric. Stack linked to the 'instanceid' level of explore.
+
+Both dashboards have a 'field' and 'value' filter than you can use with custom metric dimensions. This demonstrates how it's easy to build your own custom dashboards that use your own tagging dimensions on your cloudwatch metrics.
 
 If you follow the AWS Observability instructions the metrics hierarchy for EC2 is generated from Sumo Logic host metrics - NOT Cloudwatch EC2 metrics.
 
