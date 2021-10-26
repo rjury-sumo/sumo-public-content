@@ -13,6 +13,16 @@
         i - install
         u - upgrade
 
+        in addition to the params below setting the following env variables will also trigger arguments added to installer cmd:
+        $ENV:SUMO_RECEIVER_URL -url
+        $ENV:SUMO_PROXY_USER -VproxyUser 
+        $ENV:SUMO_PROXY_PASSWORD -VproxyPassword
+        $ENV:SUMO_PROXY_NTLM_DOMAIN -VproxyNtlmDomain 
+        $ENV:SUMO_CLOBBER -Vclobber 
+        $ENV:SUMO_JAVA_MEMORY_INIT -Vwrapper.java.initmemory
+        $ENV:SUMO_JAVA_MEMORY_MAX -Vwrapper.java.maxmemory
+        $ENV:SUMO_FIELDS  Vfields
+
     .PARAMETER SUMO_COLLECTOR_NAME		
         Optional: SUMO_COLLECTOR_NAME optional name string to override the collector name. 
 		Note restrictions on valid characters only alphanumeric and very limited punctuation are allowed.
