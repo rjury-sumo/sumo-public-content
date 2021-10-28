@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Data Volume Tiers Investigation Console",
+    "name": "Raw Data - Data Volume Tiers Investigation Console",
     "description": "",
-    "title": "Data Volume Tiers Investigation Console",
+    "title": "Raw Data - Data Volume Tiers Investigation Console",
     "rootPanel": null,
     "theme": "Light",
     "topologyLabelMap": {
@@ -13,7 +13,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
             "type": "RelativeTimeRangeBoundary",
-            "relativeTime": "-1d"
+            "relativeTime": "-6h"
         },
         "to": null
     },
@@ -108,7 +108,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum({{graphs_by}}) as series by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, _timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum({{graphs_by}}) as series by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -199,7 +199,7 @@
             "sourceDefinition": {
                 "variableSourceType": "LogQueryVariableSourceDefinition",
                 "query": "_index=sumologic_volume _sourcecategory=*_and_tier_volume | parse field=_sourcecategory \"*_and_tier_volume\" as d\n| count by d",
-                "field": "view"
+                "field": "d"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -210,7 +210,7 @@
             "id": null,
             "name": "timeslice",
             "displayName": "timeslice",
-            "defaultValue": "15m",
+            "defaultValue": "5m",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "5m,15m,1h,6h,24h"
