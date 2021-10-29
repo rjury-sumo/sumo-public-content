@@ -1,0 +1,23 @@
+(_view=data_volume_custom_tiers_sourcehost or  _view=data_volume_custom_tiers_other)
+dimension =sourcecategory
+//| where tolowercase(value) matches tolowercase("*")
+//| where datatier matches "*"
+// remove long categories
+| bytes /1024/1024/1024 as gbytes 
+| sum(events) as  events,sum(gbytes) as gbytes by datatier, value,dimension
+| if (length(value) > 35,concat(substring(value,0,35),"..."),value) as value 
+
+| count as rows,sum(events) as events,sum(gbytes) as gbytes by datatier, value,dimension
+| total gbytes as tgb 
+| total gbytes as tgbs by value
+| tgbs / tgb as fraction
+
+| fraction * 100 as percent
+//| bytes / 1024/1024/1024 as gb
+| if (datatier="Frequent",gbytes * 9,gbytes * 20) as credits
+| if (datatier="Infrequent",gbytes * .4,credits) as credits
+| if (datatier="CSE",gbytes * 25,credits) as credits
+
+|sum(credits) as credits, sum(rows) as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value
+| credits/gbytes as %"cr/gb"
+| sort credits

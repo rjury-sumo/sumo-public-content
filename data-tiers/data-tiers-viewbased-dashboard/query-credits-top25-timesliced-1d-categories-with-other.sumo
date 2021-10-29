@@ -1,0 +1,19 @@
+(_view=data_volume_custom_tiers_sourcehost or  _view=data_volume_custom_tiers_other)
+dimension =sourcecategory
+//| where tolowercase(value) matches tolowercase("*")
+//| where datatier matches "*"
+| bytes / 1024/1024/1024 as gbytes
+| timeslice by 1d
+| sum(gbytes) as gbytes by datatier, value,_timeslice
+
+| if (datatier="Frequent",gbytes * 9,gbytes * 20) as credits
+| if (datatier="Infrequent",gbytes * .4,credits) as credits
+| if (datatier="CSE",gbytes * 25,credits) as credits
+
+| sum(credits) as credits by _timeslice,value 
+| 1 as rank
+| sort _timeslice,credits
+| accum rank as order by _timeslice
+| if (order > 25,"other",value) as value
+| sum(credits) as credits by _timeslice,value 
+| transpose row _timeslice column value
