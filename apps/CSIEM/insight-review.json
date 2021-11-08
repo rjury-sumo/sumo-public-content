@@ -1,0 +1,337 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "CSE Insights Review",
+    "description": "",
+    "title": "CSE Insights Review",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-1C2C9B9589C02948",
+                "structure": "{\"height\":5,\"width\":19,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-CFE9D761B3623A4C",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":44}"
+            },
+            {
+                "key": "panel3396E12CA5CE7B4B",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":58}"
+            },
+            {
+                "key": "panelB6D4F123BBDD4947",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":31}"
+            },
+            {
+                "key": "panelBE17E5288B519B42",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":22}"
+            },
+            {
+                "key": "panelF716D6E0B2E6DA44",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":13}"
+            },
+            {
+                "key": "panel4BFDA5F3A4E5384C",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":13}"
+            },
+            {
+                "key": "panelD96D56B0AA22E848",
+                "structure": "{\"height\":8,\"width\":13,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelD7769C0DAB575840",
+                "structure": "{\"height\":8,\"width\":11,\"x\":13,\"y\":5}"
+            },
+            {
+                "key": "panelEEC249C0A20A4849",
+                "structure": "{\"height\":5,\"width\":5,\"x\":19,\"y\":0}"
+            },
+            {
+                "key": "panel74556AC5A7345A4B",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":22}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-1C2C9B9589C02948",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Use this dashboard to review insights sent back the CIP system from CSE.\n\nYou can filter by any keyword(s) using the freeform keyword search filter. Use comment syntax // to disable.\n\nFor example you can search by any keyword in the insight payload including tags or signals, or search by say insight id: INSIGHT-616"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-CFE9D761B3623A4C",
+            "title": "Insight Current Status",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*  /// \"\\\"name\\\": \\\"new\\\",\" \n{{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by _messagetime,time,name,readableid,description,source,status,severity,confidence,assignee,entityType,entityName,created, tags,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort _messagetime \n| max(_messagetime) as latest,first(time) as time, first(name) as name, first(description) as description,first(source) as source, first(status) as status, first(severity) as severity, values(assignee) as assignee, first(entitytype) as entitytype, first(entityname) as entityname,last(created) as created,first(tags) as tags, first(signalnames) as signalnames,first(signalstages) as signalstages,first(signalruleids) as signalruleids by readableid\n| sort latest| fields -latest //| fields -_count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3396E12CA5CE7B4B",
+            "title": "Closed Insights",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   \"\\\"name\\\": \\\"closed\\\",\"  {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by _messagetime,time,name,readableid,description,source,status,severity,confidence,assignee,entityType,entityName,created,closed //, tags,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort _messagetime | fields -_messagetime | fields -_count\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB6D4F123BBDD4947",
+            "title": "Insight Summary",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| values(readableid) as ids,values(status) as statuses,values(entityName) as entities,count by name,description,source,severity ,confidence //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort name asc\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBE17E5288B519B42",
+            "title": "Tags",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by name,description,source,severity ,confidence ,tags ,readableid,status, entitytype,entityName //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n| parse regex field=tags \"\\\"(?<tag>[^\\\"]+)\\\"\" multi\n| count_distinct(readableid) as count, values(readableid) as insights by tag | sort tag asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF716D6E0B2E6DA44",
+            "title": "Signal Names",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by name,description,source,severity ,confidence ,tags ,readableid,status, entitytype,entityName ,signalNames ,signalstages, signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n| parse regex field=signalNames \"\\\"(?<signalName>[^\\\",]+)\\\"\" multi\n| count_distinct(readableid) as count, values(readableid) as insights by signalName | sort signalName asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4BFDA5F3A4E5384C",
+            "title": "Signal Stages",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by name,description,source,severity ,confidence ,tags ,readableid,status, entitytype,entityName ,signalNames ,signalstages, signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n| parse regex field=signalstages \"\\\"(?<signalstage>[^\\\",]+)\\\"\" multi\n| count_distinct(readableid) as count, values(readableid) as insights by signalstage | sort signalstage asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD96D56B0AA22E848",
+            "title": "Insights By Name",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count_distinct(readableid) as insights,count as events , values(status) as statuses by name,description //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort name asc\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD7769C0DAB575840",
+            "title": "Timeline By Severity",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*  \" \\\"new\\\"\" {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| timeslice \n//| json field=_raw \"name\"\n//| json field=_raw \"readableId\"\n//| json field=_raw \"description\"\n//| json field=_raw \"source\"\n//| json field=_raw \"created\"\n//| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n//| json field=_raw \"confidence\"\n//| json field=_raw \"status.name\" as status nodrop\n////| json field=_raw \"entity\"\n//| json field=_raw \"entity.entityType\" as entityType nodrop\n//| json field=_raw \"entity.name\" as entityName nodrop\n//| json field=_raw \"timeToDetection\" nodrop\n//| json field=_raw \"timeToResponse\" nodrop\n//| json field=_raw \"timeToRemediation\" nodrop\n//| json field=_raw \"assignee.username\" as assignee nodrop\n//| json field=_raw \"tags\" nodrop\n//| json field=_raw \"signals[*].name\" as signalNames\n//| json field=_raw \"signals[*].stage\" as signalstages\n//| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n//| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n//| count_distinct(readableid) as insights,count as events , values(status) as statuses by name,description //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n////| where status = \"new\"\n////| count as insights by name, description,source,severity,entitytype\n//\n//| sort name asc\n| count by _timeslice, severity | transpose row _timeslice column severity\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEEC249C0A20A4849",
+            "title": "Count By Severity",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*  \" \\\"new\\\"\" {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| timeslice \n//| json field=_raw \"name\"\n//| json field=_raw \"readableId\"\n//| json field=_raw \"description\"\n//| json field=_raw \"source\"\n//| json field=_raw \"created\"\n//| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n//| json field=_raw \"confidence\"\n//| json field=_raw \"status.name\" as status nodrop\n////| json field=_raw \"entity\"\n//| json field=_raw \"entity.entityType\" as entityType nodrop\n//| json field=_raw \"entity.name\" as entityName nodrop\n//| json field=_raw \"timeToDetection\" nodrop\n//| json field=_raw \"timeToResponse\" nodrop\n//| json field=_raw \"timeToRemediation\" nodrop\n//| json field=_raw \"assignee.username\" as assignee nodrop\n//| json field=_raw \"tags\" nodrop\n//| json field=_raw \"signals[*].name\" as signalNames\n//| json field=_raw \"signals[*].stage\" as signalstages\n//| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n//| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n//| count_distinct(readableid) as insights,count as events , values(status) as statuses by name,description //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n////| where status = \"new\"\n////| count as insights by name, description,source,severity,entitytype\n//\n//| sort name asc\n| count by severity \n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel74556AC5A7345A4B",
+            "title": "Affected Entities",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by name,description,source,severity ,confidence ,tags ,readableid,status, entitytype,entityName ,signalNames ,signalstages, signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n//| parse regex field=signalstages \"\\\"(?<signalstage>[^\\\",]+)\\\"\" multi\n| count_distinct(readableid) as count, values(readableid) as insights, values(entitytype) as types by entityName | sort entityName asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "// INSIGHT-123",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "//none"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
