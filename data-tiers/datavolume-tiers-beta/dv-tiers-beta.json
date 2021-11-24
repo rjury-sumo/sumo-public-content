@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Raw Data - Data Volume Tiers Investigation Console",
+    "name": "Data Volume With Tiers Console",
     "description": "",
-    "title": "Raw Data - Data Volume Tiers Investigation Console",
+    "title": "Data Volume With Tiers Console",
     "rootPanel": null,
     "theme": "Light",
     "topologyLabelMap": {
@@ -26,7 +26,7 @@
             },
             {
                 "key": "panel98BD121FB45F6943",
-                "structure": "{\"height\":7,\"width\":5,\"x\":18,\"y\":0}"
+                "structure": "{\"height\":7,\"width\":5,\"x\":17,\"y\":0}"
             },
             {
                 "key": "panel2C01C45CA2B6294C",
@@ -34,11 +34,11 @@
             },
             {
                 "key": "panelPANE-A6A877CF967A7B44",
-                "structure": "{\"height\":7,\"width\":10,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panelE81B48D8A9AA6844",
-                "structure": "{\"height\":8,\"width\":6,\"x\":12,\"y\":0}"
+                "structure": "{\"height\":8,\"width\":6,\"x\":11,\"y\":0}"
             },
             {
                 "key": "panel96475C979583F84D",
@@ -60,7 +60,7 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits",
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\},\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits\n| total credits as tc | 100 * (credits/tc) as pct_cr | fields -tc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
