@@ -1,0 +1,351 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "CSE Failed To Map",
+    "description": "",
+    "title": "CSE Failed To Map",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel123163CF998B794A",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel477ACF848F558840",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":24}"
+            },
+            {
+                "key": "panel500734A3A4544B40",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":16}"
+            },
+            {
+                "key": "panelA67AA8ED87ECFB45",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":16}"
+            },
+            {
+                "key": "panel008F6C668615094D",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":16}"
+            },
+            {
+                "key": "panel9729929189C28847",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":24}"
+            },
+            {
+                "key": "panelF33C2015BA492949",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panel20C3CEBCA93A2A49",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":40}"
+            },
+            {
+                "key": "panel749A6631B86F8A4E",
+                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":32}"
+            },
+            {
+                "key": "panelPANE-2AD803DDB19C884A",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel7B79B920AFD63A4D",
+                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":32}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel123163CF998B794A",
+            "title": "Map Fail By Original Sourcecategory",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice, metadata_sourcecategory\n| transpose row _timeslice column metadata_sourcecategory\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel477ACF848F558840",
+            "title": "Map Fail By Metadata Vendor-Product",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| concat(metadata_vendor,\"-\",metadata_product) as MP\n| count by _timeslice, MP\n| transpose row _timeslice column MP\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel500734A3A4544B40",
+            "title": "Map Fail By Original Sourcecategory",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":true,\"fontSize\":9}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \nmetadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n\n| count by metadata_sourcecategory | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA67AA8ED87ECFB45",
+            "title": "Map Fail By Metadata Vendor-Product",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"legend\":{\"enabled\":true,\"fontSize\":9}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| concat(metadata_vendor,\"-\",metadata_product) as MP\n| count by  MP | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel008F6C668615094D",
+            "title": "Map Fail By metadata_deviceeventid",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"legend\":{\"enabled\":true,\"fontSize\":9}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \nmetadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n\n| count by  metadata_deviceeventid | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel9729929189C28847",
+            "title": "Map Fail By metadata_deviceeventid",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice,metadata_deviceeventid\n| transpose row _timeslice column metadata_deviceeventid\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF33C2015BA492949",
+            "title": "Table View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| metadata_sourcecategory as sourcecategory\n| metadata_vendor as vendor\n| metadata_product as product\n| metadata_deviceeventid as eventid\n| metadata_parser as parser\n| count by sourcecategory,vendor,product,eventid,parser,reason | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel20C3CEBCA93A2A49",
+            "title": "Example Unmapped Events (limit 100)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":11,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "\n_sourcecategory={{sourcecategory}}\n// subquery will give us a sample set of 100 messageids for this same sourcecategory\n[subquery:\n_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| limit 100\n| count by _sourcecategory ,metadata_sourceCategory,metadata_sourceMessageId \n| metadata_sourceMessageId as _messageid\n| metadata_sourceCategory as _sourcecategory | count by _sourcecategory,_messageid | compose _sourcecategory,_messageid]\n| limit 100\n| concat(\"_sourcecategory=\",_sourcecategory,\"\\n _messageid=\",_messageid) as log_search\n| count by log_search,_raw ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel749A6631B86F8A4E",
+            "title": "Map Fail By metadata_parser",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":true}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice,metadata_parser\n| transpose row _timeslice column metadata_parser\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-2AD803DDB19C884A",
+            "title": "Help",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "CSE Log Mapping is part of the [record processing pipeline](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/00_Record_Processing_Pipeline). Events are forwarded from CIP to CSE when they have a _siemforward=\"true\" field. To become a record these events must:\n- A. Match a [SumoLogic Integration config in administration / Integrations / Sumologic in CSE UI](https://help.sumologic.com/Cloud_SIEM_Enterprise/Integrations/Send_Data_from_Sumo_Logic_to_CSE)\n- B. Match a [structured log mapping](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Create_a_Structured_Log_Mapping) rule in Content / Log Mappings in CSE UI.\n\nEvery CIP event forwarded to CSE is reflected back to CIP as a normalised event stored in the sec_record_* index/view. If an event fails either of the steps above it will be routed to the sec_record_failure index with a 'failed to map' error.\n\nGenerally if an event is in sec_record_failue and has no metadata_vendor or product it's likely to have failed in Step A above. If it has a metadata_vendor, product and deviceeventid it likely failed to match one of the log mapping content rules (ie. step B).\n\nfailed to map events do not store the origional event text, however metatada_sourcecategory has the origional sourcecategory and metadata_sourceMessageId is the origional _messageid which is a searchable field in CIP. The bottom panel demonstrates how to use a subquery to return messageids for origional events given a certain set of filters on sec_record_failure.\n\nIf the record has a metadata_parser it's likely a failure with step B above and may have a useful reason field\n"
+        },
+        {
+            "id": null,
+            "key": "panel7B79B920AFD63A4D",
+            "title": "Map Fail By reason",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":true}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice,reason\n| transpose row _timeslice column reason\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Receipt"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "sourcecategory",
+            "displayName": "sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "any source category"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "search_term",
+            "displayName": "search_term",
+            "defaultValue": "// no search term",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "// any.search.term.vs.sec_record_failure"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
