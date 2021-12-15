@@ -1,0 +1,238 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Keyword Drilldown Explorer",
+    "description": "",
+    "title": "Keyword Drilldown Explorer",
+    "rootPanel": null,
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-6h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-19E67F10A6E68843",
+                "structure": "{\"height\":5,\"width\":10,\"x\":14,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-95074586A6012943",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panel5E94FD119AED794A",
+                "structure": "{\"height\":5,\"width\":14,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel59120187A56BAA48",
+                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel8D6BA9A79A18D94E",
+                "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":5}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-19E67F10A6E68843",
+            "title": "Selected Settings",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "```\n_sourceCategory={{sourcecategory}} _collector={{collector}} \n{{keywords}}\n```\n- maximum events returned: {{max_events}}\n- +/- seconds: {{plus_minus_seconds}}\n\nRows in Matching Events Window are limited to {{limit}} events"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-95074586A6012943",
+            "title": "Matching Events",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory={{sourcecategory}} _collector={{collector}} \n{{keywords}}\n| limit {{limit}}\n| tostring(_messageid) as messageid\n| {{plus_minus_seconds}} as buffer_seconds\n| _messagetime + (buffer_seconds * 1000) as end\n| _messagetime - (buffer_seconds * 1000) as start\n| \"https://live.us2.sumologic.com/ui/#/search/@\" as endpoint\n\n// prepare the category strings\n| concat(\"_sourcecategory=\",_sourcecategory) as sc\n| concat(\"_sourcename=\",_sourcename) as sn\n| concat(\"_collector=\",_collector) as c\n\n// suppress scientific notation must be epoch\n| format( \"%.0f\",end) as end\n| format( \"%.0f\",start) as start\n\n// fix if they put a space in their stuff\n| replace(sc,\" \",\"?\") as sc\n| replace(sn,\" \",\"?\") as sn\n| replace(c,\" \",\"?\") as c\n\n// create one meta to avoid the 10 param limit on concat.\n| concat (sc,\" \",sn,\" \",c) as meta\n\n// add an invaid not condition and the keywords so we get highlighting in the UI\n//  ((not XXIGNOREDXX) or 7c08249862244770a65050bbb14c1e70)\n| concat (\"%0A\",urlencode(\"((not XXIGNOREDXX) or {{keywords}})\")) as searched\n\n// build a custom query that will show n messages each side of the event within the time range using it's message id\n//  | \"1013436549599799094\" as mid |  abs(_messageid - mid) as offset | sort offset asc | limit 25 | tostring(_messageid) as id | fields -mid,offset | sort _messagetime\n| concat( \" | \\\"\",messageid,\"\\\" as mid | abs(_messageid - mid) as offset | sort offset asc | limit \",round({{max_events}}),\" | tostring(_messageid) as id | fields -mid,offset,id | sort _messagetime\")  as suffix\n\n| replace(_sourcename,\" \",\"?\") as show_source_string\n| tourl(concat(endpoint,start,\",\",end,\"@\",urlencode(meta),searched,\"%0A\",urlencode(suffix)),show_source_string) as  %\"Show Source\" \n| fields -sc ,sn,c,endpoint,buffer_seconds\n| _messagetime as time\n| count by time,_sourcecategory,_collector,%\"Show Source\",_raw | fields -_count\n| formatdate(time,\"yyy-MM-dd HH:mm:ss.SSS ZZZZ\") as time\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5E94FD119AED794A",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard will enable you to locate logs matching a category, collector and one or more keywords, then open a drilldown to the origional source file showing just surrounding messages based on the time range for the event.\n\nUse the filters for this dashboard to specify a _sourcecategory, _collector and one or more keywords. The matching events table will show matching events with a clickable \"Show Source\" link to open a new search window. \n**Right click on the show source link and choose 'open in new sumo tab'**\n\nThe new search will show only the previous +/- seconds and max number of events specified in the dashboard filter.s\n\nYou can also click on the columns in the events by collector or sourcecategory and choose \"Log Drilldown\" from the linked dashboards panel to open this dashboard with a new category or collector filter."
+        },
+        {
+            "id": null,
+            "key": "panel59120187A56BAA48",
+            "title": "Events Matching By Collector",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory={{sourcecategory}} _collector={{collector}} \n{{keywords}}\n| _collector as collector\n| timeslice | count by _timeslice, collector | transpose row _timeslice column collector",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "RAgvBcvKMAXQIwm6oxOPnpUuAqu6gwd54hZRpewlhvdPlLuH4tTo2IDcXnhj",
+                    "relativePath": "",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        },
+        {
+            "id": null,
+            "key": "panel8D6BA9A79A18D94E",
+            "title": "Events Matching By Sourcecategory",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory={{sourcecategory}} _collector={{collector}} \n{{keywords}}\n| _sourcecategory as sourcecategory\n| timeslice | count by _timeslice, sourcecategory | transpose row _timeslice column sourcecategory",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "RAgvBcvKMAXQIwm6oxOPnpUuAqu6gwd54hZRpewlhvdPlLuH4tTo2IDcXnhj",
+                    "relativePath": "",
+                    "includeTimeRange": true,
+                    "includeVariables": true
+                }
+            ]
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "sourcecategory",
+            "displayName": "sourcecategory",
+            "defaultValue": "*sedemo*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "prod/*,beta/*,qa/*,dev/*,kubernetes/*,*demo*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "collector",
+            "displayName": "collector",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "collectorname"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "JDBCConnectionException",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "JDBCConnectionException,error,exception"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "plus_minus_seconds",
+            "displayName": "plus_minus_seconds",
+            "defaultValue": "15",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5,10,15,20,30,60,120,300"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "max_events",
+            "displayName": "max_events",
+            "defaultValue": "25",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5,10,15,20,25,50,100"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "limit",
+            "displayName": "limit",
+            "defaultValue": "1000",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "1000"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
