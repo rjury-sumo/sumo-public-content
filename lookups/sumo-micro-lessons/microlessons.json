@@ -22,7 +22,7 @@
         "layoutStructures": [
             {
                 "key": "panelC61F2E77A84A9943",
-                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":9}"
+                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":12}"
             },
             {
                 "key": "panelPANE-FED1535B90F5594B",
@@ -30,7 +30,11 @@
             },
             {
                 "key": "panelBF8F73D5AF8F1846",
-                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":5}"
+                "structure": "{\"height\":7,\"width\":18,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelF2846F60AB6E1B44",
+                "structure": "{\"height\":7,\"width\":6,\"x\":18,\"y\":5}"
             }
         ]
     },
@@ -66,7 +70,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This panel shows a lookup table of Sumo Logic micro lessons videos (from the youtube playlist), has search parameters for matches and regex matches, and provides clickable links.\n\nThe lookup_path parameter should match the lookup table location: {{lookup_path}}\n\nsearch params:\n- search_title: ```where tolowercase(title) matches tolowercase(\"{{search_title}}\")```\n- regex_title: ```where title matches/(?i){{regex_title}}/```"
+            "text": "This panel shows a lookup table of Sumo Logic micro lessons videos (from the youtube playlist), has search parameters for matches and regex matches, and provides clickable links.\n\nThe lookup_path parameter should match the lookup table location: {{lookup_path}}\n\nsearch params:\n- search_title: ```where tolowercase(title) matches tolowercase(\"{{search_title}}\")```\n- regex_title: ```where title matches/(?i){{regex_title}}/```\n\nClick on a slice of the pie chart for keywords and use linked dashboard to reoped this dashboard filtered to that keyword."
         },
         {
             "id": null,
@@ -91,6 +95,37 @@
             "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF2846F60AB6E1B44",
+            "title": "Keywords Used",
+            "visualSettings": "{\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":60,\"mode\":\"distribution\",\"fontSize\":8},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"color\":{},\"title\":{\"fontSize\":14}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "cat path://\"{{lookup_path}}\"\n| tourl(trim(link),concat(\"Open: \",trim(link))) as link\n| where tolowercase(title) matches tolowercase(\"{{search_title}}\")\n| where title matches /(?i){{regex_title}}/\n| parse regex field=title \"(?<word>\\w+)\" multi\n| count by word\n| where length(word) > 3\n//| where !(word in (\"Micro\",\"lesson\",\"Lesson\")) \n| 1 as i\n//| now() as _messagetime\n//| transactionize i (merge i takefirst, word join with \" \") \n| word as regex_title\n| sum(_count) by regex_title | sort _sum\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": [
+                {
+                    "id": "ixRTwPnjFKUVZBJs4eKVCPZpkGlSd08TjmdrMEmYWKWPJNZ0miz0kjuHSHyu",
+                    "relativePath": "",
+                    "includeTimeRange": false,
+                    "includeVariables": true
+                }
+            ]
         }
     ],
     "variables": [
@@ -106,7 +141,8 @@
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
-            "hideFromUI": false
+            "hideFromUI": false,
+            "valueType": "Any"
         },
         {
             "id": null,
@@ -119,22 +155,23 @@
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
-            "hideFromUI": false
+            "hideFromUI": false,
+            "valueType": "Any"
         },
         {
             "id": null,
             "name": "lookup_path",
             "displayName": "lookup_path",
-            "defaultValue": "/Library/Users/YOURPATHHERE/micro_lessons",
+            "defaultValue": "/Library/Users/rjury@sumologic.com/micro_lessons",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "/Library/Users/YOURPATHHERE/micro_lessons"
+                "values": "/Library/Users/rjury@sumologic.com/micro_lessons"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
-            "hideFromUI": false
+            "hideFromUI": false,
+            "valueType": "Any"
         }
     ],
     "coloringRules": []
 }
-
