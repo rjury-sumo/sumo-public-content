@@ -2,20 +2,6 @@
 
 #set -x 
 
-# SUMO AGENT user.properties configure script
-
-# This is step two of three stages of install / config
-# We assume we installed sumo agent with VskipRegistration and it's not been allowed to start and register yet.
-# if you let the agent register this method of config won't work.
-
-# SUMO_SYNC_SOURCES
-# We are assuming you want to use SUMO_SYNC_SOURCES, so agent will scan local json config and dynamically update.
-# It's also possible to setup agents without local syncsource on and configure them via UI  or API.
-# for more info see: https://help.sumologic.com/03Send-Data/Sources/03Use-JSON-to-Configure-Sources/Local-Configuration-File-Management/Local-Configuration-File-Management-for-Existing-Collectors-and-Sources
-
-# collector naming
-# our collector name is: aws_account+instance_id+SUMO_NAME
-
 FILE=${SUMO_USER_PROPERTIES:=/opt/SumoCollector/config/user.properties}
 CONFIG_PATH=`dirname "$FILE"`
 
@@ -34,8 +20,6 @@ fi
 SUMO_DISABLE_SCRIPTS=${SUMO_DISABLE_SCRIPTS:=true}
 SUMO_EPHEMERAL=${SUMO_EPHEMERAL:=true}
 SUMO_GENERATE_USER_PROPERTIES=${SUMO_GENERATE_USER_PROPERTIES:=true}
-#SUMO_ACCESS_ID=${SUMO_ACCESS_ID:=$1}
-#SUMO_ACCESS_KEY=${SUMO_ACCESS_KEY:=$2}
 SUMO_RECEIVER_URL=${SUMO_RECEIVER_URL:='https://collectors.us2.sumologic.com'}
 SUMO_SOURCES_JSON=${SUMO_SOURCES_JSON:=/etc/sumo-sources.json}
 SUMO_SYNC_SOURCES=${SUMO_SYNC_SOURCES:=true}
@@ -51,17 +35,9 @@ else
         InstanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
         AWS_ACCOUNT_ID=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document|grep accountId|awk -F\" '{print $4}'`
         
-        # iyou could use code like this to set the cat values from tags
-        cat1=`aws ec2 describe-instances --instance-ids $InstanceId --region $Region | grep -B 1 '"Key": "product"' | head -n 1 |awk -F\" '{print $4}'`
-        cat2=`aws ec2 describe-instances --instance-ids $InstanceId --region $Region | grep -B 1 '"Key": "Name"' | head -n 1 |awk -F\" '{print $4}'`
-        cat3=`aws ec2 describe-instances --instance-ids $InstanceId --region $Region | grep -B 1 '"Key": "subproduct"' | head -n 1 |awk -F\" '{print $4}'`
+        SUMO_COLLECTOR_NAME="$InstanceId+$AWS_ACCOUNT_ID+"
 
-        SUMO_COLLECTOR_NAME="$AWS_ACCOUNT_ID+$InstanceId+$SUMO_NAME"
-
-        # fix invalid possible chrs in collector name
-        SUMO_COLLECTOR_NAME=`echo $SUMO_COLLECTOR_NAME | sed 's/[^a-zA-Z0-9.+_-]/_/g'`
-
-        if [[ "${SUMO_COLLECTOR_NAME}" == "++" ]] ;then
+        if [[ "${SUMO_COLLECTOR_NAME}" == "+" ]] ;then
             echo "AWS name set failed default to hostname"
             SUMO_COLLECTOR_NAME=`hostname`
         fi
@@ -69,7 +45,7 @@ else
     else
 
         echo 'no sumo host name found going for default'
-        SUMO_COLLECTOR_NAME="`hostname`+$SUMO_NAME"
+        SUMO_COLLECTOR_NAME="`hostname`"
     fi
 fi
 
