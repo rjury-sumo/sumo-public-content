@@ -1,0 +1,371 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "CSE Signals",
+    "description": "",
+    "title": "CSE Signals",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-4B8B50EE83C95B42",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":65}"
+            },
+            {
+                "key": "panel0AFB51868C47D84F",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":1}"
+            },
+            {
+                "key": "panelPANE-6E829924B6C34A4F",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel7A59912A95E3BA45",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":23}"
+            },
+            {
+                "key": "panel20583478BE0BD94F",
+                "structure": "{\"height\":13,\"width\":14,\"x\":0,\"y\":10}"
+            },
+            {
+                "key": "panel4286864B91157845",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":54}"
+            },
+            {
+                "key": "panel0A9E954A96FCAB46",
+                "structure": "{\"height\":13,\"width\":10,\"x\":14,\"y\":10}"
+            },
+            {
+                "key": "panel23E43A2F9C0AAA49",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":33}"
+            },
+            {
+                "key": "panel22F765FE9A609A4A",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel1C1F29C4B8C6DB47",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":44}"
+            },
+            {
+                "key": "panelD33237CAB543384A",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":78}"
+            },
+            {
+                "key": "panelBE490A54BCB87943",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":77}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-4B8B50EE83C95B42",
+            "title": "Signals - Detailed View",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n| json field=_raw \"description\"\n| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n| json field=_raw \"full_records[0].fields\" as fields \n| max(_messagetime) as latest,count by rule_id,rule_name,severity,entity_id,attack_stage,metadata_parser,product,vendor, user_username,deviceEventId,mapperName ,suppressed\n| sort latest | formatdate(tolong(latest),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as latest\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0AFB51868C47D84F",
+            "title": "Signals - Over Time by {{graph_by}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n//| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n//| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| timeslice | count by {{graph_by}},_timeslice | transpose row _timeslice column {{graph_by}}\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-6E829924B6C34A4F",
+            "title": "A - Configurable Graphs - Change the dimension using the graph_by parameter",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel7A59912A95E3BA45",
+            "title": "B - Signals - Review Tabular Views",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel20583478BE0BD94F",
+            "title": "Signals  by {{graph_by}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n\n| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n//| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n//| timeslice |\n| count by {{graph_by}} //,_timeslice | transpose row _timeslice column {{graph_by}}\n| sort _count\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4286864B91157845",
+            "title": "Signals - Counts",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| count_distinct(entity_id) as entities,count_distinct(user_username) as usernames,count as signals by rule_id,rule_name,severity,attack_stage,product,vendor,deviceEventId,mapperName \n| sort rule_name asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0A9E954A96FCAB46",
+            "title": "Signals  by {{graph_by}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n\n| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n//| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n//| timeslice |\n| count by {{graph_by}} //,_timeslice | transpose row _timeslice column {{graph_by}}\n| sort _count\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel23E43A2F9C0AAA49",
+            "title": "entity_id and user_username with rules",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n//| json field=_raw \"attack_stage\"\n//| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n//| json field=_raw \"id\"\n////| json field=_raw \"objectClassification\"\n//| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n//| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n//| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n//| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n//| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n|  values(user_username) as users,values(rule_id) as ids,count by entity_id | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel22F765FE9A609A4A",
+            "title": "product and vendor, with rule_id and rule_names",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n| json field=_raw \"description\"\n| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n| json field=_raw \"full_records[0].fields\" as fields \n| count,values(rule_id) as ids ,values(rule_name) as names by product,vendor| sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1C1F29C4B8C6DB47",
+            "title": "attack_stage and tags",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n////| json field=_raw \"severity\"\n////| json field=_raw \"description\"\n////| json field=_raw \"id\"\n////| json field=_raw \"objectClassification\"\n//| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n//| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n//| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n//| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n//| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n//| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| count by attack_stage,tags | sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD33237CAB543384A",
+            "title": "metadata_parser,mapperName,deviceEventId",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "queryString": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n//| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n//| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n| json field=_raw \"content_type\"\n//| json field=_raw \"rule_id\"\n//| json field=_raw \"attack_stage\"\n//| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n//| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n//| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| count by metadata_parser,mapperName,deviceEventId| sort _count\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBE490A54BCB87943",
+            "title": "C - Signals - Mapping / Parsing Views",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "keyword,wildcarded*,// any sumo syntax"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "graph_by",
+            "displayName": "graph_by",
+            "defaultValue": "rule_name",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "rule_name,severity,user_username,entity_id,metadta_parser,product,vendor,mappername,attack_stage"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "suppressed",
+            "displayName": "suppressed",
+            "defaultValue": "NO",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "YES,NO,*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
