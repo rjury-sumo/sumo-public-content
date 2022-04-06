@@ -3,7 +3,6 @@
     "name": "Data Volume With Tiers Console",
     "description": "",
     "title": "Data Volume With Tiers Console",
-    "rootPanel": null,
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -26,7 +25,7 @@
             },
             {
                 "key": "panel98BD121FB45F6943",
-                "structure": "{\"height\":7,\"width\":5,\"x\":17,\"y\":0}"
+                "structure": "{\"height\":8,\"width\":6,\"x\":14,\"y\":0}"
             },
             {
                 "key": "panel2C01C45CA2B6294C",
@@ -34,11 +33,11 @@
             },
             {
                 "key": "panelPANE-A6A877CF967A7B44",
-                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panelE81B48D8A9AA6844",
-                "structure": "{\"height\":8,\"width\":6,\"x\":11,\"y\":0}"
+                "structure": "{\"height\":8,\"width\":6,\"x\":8,\"y\":0}"
             },
             {
                 "key": "panel96475C979583F84D",
@@ -47,6 +46,10 @@
             {
                 "key": "panel9C3CF35A941AA94D",
                 "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":20}"
+            },
+            {
+                "key": "panel88514E5D8BA67B42",
+                "structure": "{\"height\":8,\"width\":4,\"x\":20,\"y\":0}"
             }
         ]
     },
@@ -60,12 +63,14 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits\n| total credits as tc | 100 * (credits/tc) as pct_cr | fields -tc",
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories, sum(credits) as credits, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits\n| total credits as tc | 100 * (credits/tc) as pct_cr | fields -tc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message"
                 }
@@ -79,17 +84,19 @@
             "id": null,
             "key": "panel98BD121FB45F6943",
             "title": "Total {{graphs_by}} By {{view}}",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9,\"title\":\"value\"},\"axisY\":{\"title\":\"total\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value\n| bytes /1024/1024/1024 as gb | sort gb\n\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n|sum(credits) as credits,count as rows, sum(gbytes) as gbytes by datatier,value\n\n| sum({{graphs_by}}) as total by value | sort total\n\n",
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value\n| bytes /1024/1024/1024 as gb | sort gb\n\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n\n|sum(credits) as credits,count as rows, sum(gbytes) as gbytes by datatier,value\n\n| sum({{graphs_by}}) as total by value | sort total\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message"
                 }
@@ -103,17 +110,19 @@
             "id": null,
             "key": "panel2C01C45CA2B6294C",
             "title": "{{graphs_by}} For Ingest By Tier Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Colorsafe\"},\"overrides\":[]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Colorsafe\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, _timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum({{graphs_by}}) as series by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, _timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n\n| sum({{graphs_by}}) as series by datatier,_timeslice | transpose row _timeslice column datatier\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message"
                 }
@@ -141,12 +150,14 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| sum(credits) as credits by datatier\n",
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n\n| sum(credits) as credits by datatier\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message"
                 }
@@ -160,17 +171,19 @@
             "id": null,
             "key": "panel96475C979583F84D",
             "title": "{{graphs_by}} over time by {{view}}",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,_timeslice,datatier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| sum({{graphs_by}}) as series by _timeslice,value \n| transpose row _timeslice column value\n",
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,_timeslice,datatier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n\n| sum({{graphs_by}}) as series by _timeslice,value \n| transpose row _timeslice column value\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message"
                 }
@@ -188,6 +201,32 @@
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
             "text": "these graphs show either ingest credits or gbytes based on the value of the 'graphs_by' parameter which is set to: {{graphs_by}}"
+        },
+        {
+            "id": null,
+            "key": "panel88514E5D8BA67B42",
+            "title": "Ingested Credits",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credits Per GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":17,\"color\":\"#DFBE2E\"},{\"from\":17,\"to\":50,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":30}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n//| timeslice by {{timeslice}}\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories, sum(credits) as credits, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB \n| credits/gbytes as %\"cr/gb\" \n| avg(%\"cr/gb\") as %\"cr/gb\"",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message"
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
     "variables": [
@@ -255,7 +294,7 @@
             "defaultValue": "*",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Continuous,Frequent,Infrequent"
+                "values": "Continuous,Frequent,Infrequent,CSE"
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
@@ -266,7 +305,7 @@
             "id": null,
             "name": "max_chrs",
             "displayName": "max_chrs",
-            "defaultValue": "35",
+            "defaultValue": "40",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "30,35,45,50,55"
