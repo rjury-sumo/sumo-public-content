@@ -1,0 +1,1393 @@
+
+
+{
+    "type": "FolderSyncDefinition",
+    "name": "Credits Usage Summary",
+    "description": "An app that uses views and a lookup to summarize data volume credits stats.",
+    "children": [
+        {
+            "type": "FolderSyncDefinition",
+            "name": "Alerts",
+            "description": "",
+            "children": [
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Alert - Abnormal rate of credits consumption",
+                    "search": {
+                        "queryText": "/* \nSchedule this alert so you are notified when credits usage is outside of normal averages\nSince it uses time compare you can apply to any time range. Using longer times such as -24h every 24h will produce less sensitive alerts.\n*/\n_view=credits_usage_hourly_v1 \n| sum(credits) as credits by uom\n| compare with timeshift 1d 7 avg\n| if(isnull(credits),0,credits) as credits\n| (( credits - credits_7d_avg) / credits_7d_avg) * 100 as change_percent\n| ( credits - credits_7d_avg)  as change\n\n/* \nThresholds\n*/\n\n| 0 as credits_minimum\n//| -50 as under\n| 50 as over\n//| if (abs(change) >= credits_minimum and (change_percent < under or change_percent > over),\"ALERT Abnormal Credits Consumption Rate\",\"OK\") as status\n| if (abs(change) >= credits_minimum and (change_percent > over),\"ALERT Abnormal Credits Consumption Rate\",\"OK\") as status\n\n| where status !=\"OK\"\n| fields -over,credits_minimum\n\n\n",
+                        "defaultTimeRange": "Last 3 Hours",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "AutoParse"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Alert - Daily credits trend exceeds plan size.",
+                    "search": {
+                        "queryText": "/*\n Schedule this search daily to alert if your average usage over say -7d is over plan\nSet schedule to daily for -7d for example.\nFor trigger set to where event count > 0\n*/\n\ncat /shared/lookups/credits_report\n| where _timeslice > ( now() - (8 * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by _timeslice\n| avg(credits) as %\"cr/day\"\n/* \nPLAN and THRESHOLDS \n*/\n| 21900 / 365 as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| 95 as warning\n| 100 as critical\n\n// anniversary could be this year or next year\n| now() as today\n| formatdate(today,\"MM\") as current_month\n| formatdate(today,\"dd\") as current_day\n| formatdate(today,\"yyyy\") as current_year\n\n| \"2023/03/11\" as end_date\n| 365 as term_days\n| parsedate (end_date,\"yyyy/MM/dd\") as contract_end\n\n| formatdate(contract_end,\"MM\") as contract_month\n| formatdate(contract_end,\"dd\") as contract_day\n| formatdate(contract_end,\"yyyy\") as contract_year\n| concat (round(contract_year + 1),\"/\",contract_month,\"/\",contract_day) as end_date_b\n| parsedate (end_date_b,\"yyyy/MM/dd\") as contract_end_b\n\n| if(contract_end - today  < 0,contract_end_b,contract_end) as adjusted_end_date\n| floor((adjusted_end_date - today ) / (1000 * 60 * 60 * 24)) as days_left\n| ceil(term_days - days_left) as days_used\n| round( %\"cr/day\" * days_left) as cr_needed\n| concat(\"Using: \",round(%\"cr/day\",2) ,\" cr/day. At this rate estimated: \",round(cr_needed),\" credits will be used at current burn rate in: \", toint(days_left),\" days until: \", formatdate(adjusted_end_date,\"yyyy/MM/dd\")) as string\n| if(pct_plan > warning,\"WARNING Daily credits rate is close to plan.\",\"NORMAL. Credits daily rate is within acceptable limits.\") as alert\n| if(pct_plan > critical,\"CRITICAL. Daily credits rate exceeds plan.\",alert) as alert\n\n| concat(\"Daily rate is: \",round(pct_plan,1),\"% of of your plan. \",string) as string\n| first (string) as estimate_credits_to_term, first(alert) as alert | concat(estimate_credits_to_term,\" You can compare this number of credits with the used/remaining number on your account page to determine how you are tracking to plan at current burn rate.\") as estimate_credits_to_term\n\n// use this where clause to only alert when usage is critical\n| where !(Alert matches \"*NORMAL*\") ",
+                        "defaultTimeRange": "05/05/2022 2:57:29 PM to 05/05/2022 3:12:29 PM",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Alert: Abnormal Infrequent Scan Credits",
+                    "search": {
+                        "queryText": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| (query_end_time - query_start_time ) / (1000 * 60 * 60 * 24) as scan_days\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| scan_gb * 0.016 as credits | sort credits\n| sum(scan_gb) as scan_gb, sum(scan_days) as scan_days,count as searches, count_distinct(query) as unique_searches,sum(credits) as credits,max(credits) as max_credits,first(query) as most_expensive_query by user_name\n| total credits as total_scan_credits_all_users\n\n/*\nSet thresholds here\n*/\n\n| 50 as max_credits_per_query\n| 100 as max_credits_per_user\n| 500 as max_credits_all_users\n\n| if(total_scan_credits_all_users > max_credits_all_users,\"Alert: all users infrequent scan limit exceeded\",\"\") as Alert\n| if(max_credits > max_credits_per_query,\"Alert: large single scan infrequent query\",Alert) as alert\n| if(credits > max_credits_per_user,\"Alert: user exceeded infrequent scan limit\",alert) as alert\n| where length(alert) > 0\n| concat(alert,\" Credits Limits: Per search: \",max_credits_per_query,\" Per User: \", max_credits_per_user,\" All Users: \",max_credits_all_users) as alert\n| fields -max_credits_per_query,max_credits_per_user,max_credits_all_users\n\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Credits Usage Summary App Readme",
+            "description": "",
+            "title": "Credits Usage Summary App Readme",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-15m"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-9060AB2F910BD947",
+                        "structure": "{\"height\":19,\"width\":24,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-9060AB2F910BD947",
+                    "title": "About the credits usage app",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "# Credits Usage Summary App\nThis app enables a customer to produce summarized credits reporting in their own Sumo account for the following:\n- logs (continuous, frequent, infrequent, CSE) using data volume\n- metrics using data volume\n- tracing using data volume\n- infrequent scan using search audit\n- storage: create a fixed daily estimate taken from the account page.\n\nUse these dashboards to estimate your sumologic credits usage for logs, metrics and traces using the current consumption rate per day, and provide longer term views than can be easily generated by default. This is useful if the year to date estimate on the account page is inaccurate vs current rate of use. \n\nThe app also includes sample alerts for credits over plan rate, abnormal spike in a credit Unit of Measure or infrequent scans outside fixed thresholds.\n\nCustomizing the setup with account specific numbers is advisable however you can get going immediately just by importing the app via the library import feature. Required search schedules to save to view and lookup will be created in one simple step.\n\n## Dashboards\n- Daily Ingest Burn Rate (Data Volume Raw) - Realtime view using the raw data volume index data. This will work well for recent time but will load very slowly compared to the view or lookups based dashboards.\n- Credits View (credits_usage_hourly) - A summary using the hourly view. This dashboard uses a view _view=credits_usage_hourly_v* derived from two data sources: the datavolume with tier index per ingestion index/partition, and the search audit index. \n- Long Term Credits Report (credits_report lookup) - Shows long term estimates of credits usage in your account using a lookup table. The lookup table is built daily by the scheduled search 'Credits Report' using a view created by scheduled searches that aggregate data from the data volume indexes. Since it usese a timeless lookup you can dashboard > 31 day Sumo limit.\n\n## Setup\nWARNING! The view contains columns that count as fields in sumo.  If you previously created fields in your sumo account( fields or view fields) with the **same names** but different data types you will need to modify the searches and the app to use different column names to avoid data type errors in your account!\n- _timeslice (long)\n- rate(Double)\n- unit(String)\n- units(Double)\n- uom(String)\n\n### 1. Set account specific values\nWe can setup the defaults on the dashboards now, or manully fix the default in sumo after importing the app later.\nOpen the credits_usage_summary_app.json file in a text editor.\nlocate your annual credits amount, anniversary date and term days and replace the value following values using global text/replace:\n- 21900 -  your annual credits number.\n- 365 -  your term days (usually it will be same)\n- 2023/03/11 - your anniversary date (yyyy/mm/dd)\nsave the file\n\n### 2. Import the credits_usage_summary_app.json from step 1 into your account.\n\n### 3. (optional) Create a storage estimate in the view\nReview your account page and determine typical daily numbers for storage for logs (contiuous/frequent/CSE) and infrequent. In the Views folder open the credits_usage_storage_estimated and credits_usage_storage_estimated_backfill searches and modify these to match your typical daily estimate:\n```\n// take these numbers from your account page\n| 1 as daily_storage_gb\n| 1 as daily_storage_gb_infrequent\n| 0 as daily_storage_gb_security\n```\n\n### 4. (optional) Backfill view data\nIn the views folder open each backfill search and execute it for the number of days you want to have initial history for. In a larger sumo account you might need to backfill in stages say -30d -14d, -14d -7d, -7d etc.\n\nPossible history will be constrained by your Default partition history which restricts the retention of Data volume logs.\n\n### 5. Set lookup history value\nOpen the Lookup_Report folder and edit the credits_report search schedule. By default this is set to -90d but you may want to use a longer number for more history to build up over time. Bear in mind it's a v1 lookup at max allowed size is 8MB.\n\n### 6. (optional) Schedule alerts.\nIn the Alerts folder configure and schedule relevant alerts.\n1. Alert - Abnormal rate of credits consumption (uses hourly view and time compare to detect anomaly vs previous trends)\n2. Alert - Daily credits trend exceeds plan size. (uses daily lookup file)\n3. Alert: Abnormal Infrequent Scan Credits (uses raw search audit data.)\n\n\n## Solution\n## Hourly aggregated credits dataset in a view\nA set of hourly scheduled searches summarizes data volume for each credit type to the view credits_hourly_v1. You can find these searches in the view subfolder. A dashboard is provided that uses this view enabling fast reporting in the 7-31 day range by credit Unit of Measure (UOM) down to 1 hour granularity.\n\n## Long term aggregated dataset in a lookup\nA once per day search scans the view and creates a lookup table with one row per day and totals for each credit Unit of Measure (UOM). This facilitates long term executive level reporting in a sumo dashboard (avoiding the 31 day dashboard limit).\n\n###  view credits_usage_hourly_v1\nThe hourly view name is _view=credits_usage_hourly_v1\nIt has the following columns:\n- _timeslice (long)\n- rate(Double)\n- unit(String)\n- units(Double)\n- uom(String)\n\nExample data:\n```\n05/05/2022 11:00:00.000 AM +1200\t0.00786\t0.003\tdpm\t62.91667\tmetrics\n05/05/2022 11:00:00.000 AM +1200\t6.25000e-5\t0.0015\tgbytes/day\t0.04167\tstorage_infrequent\n05/05/2022 11:00:00.000 AM +1200\t0\t0.0015\tgbytes/day\t0\tstorage_security\n```\n\n### lookup /shared/lookups/credits_report\nThis lookup table is generated daily by the credits_report search. By producing a timeless summary we can dashboard for longer than 31d. \n"
+                }
+            ],
+            "variables": [],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Credits View (credits_usage_hourly)",
+            "description": "A dashboard of high level credits consumption using the hourly credits view.",
+            "title": "Credits View (credits_usage_hourly)",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-4w2d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel1D15ABABB654C84D",
+                        "structure": "{\"height\":7,\"width\":5,\"x\":14,\"y\":0}"
+                    },
+                    {
+                        "key": "panel605249409A547949",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":16}"
+                    },
+                    {
+                        "key": "panelPANE-A1FAE162AC6C7A4C",
+                        "structure": "{\"height\":7,\"width\":7,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel61D8539EA2231940",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":7}"
+                    },
+                    {
+                        "key": "panelE09BE9CA9E8ED844",
+                        "structure": "{\"height\":7,\"width\":5,\"x\":19,\"y\":0}"
+                    },
+                    {
+                        "key": "panelC8187B99AB7A0844",
+                        "structure": "{\"height\":7,\"width\":7,\"x\":7,\"y\":0}"
+                    },
+                    {
+                        "key": "panel48F13702828A3842",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":7}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel1D15ABABB654C84D",
+                    "title": "Daily Rate Vs Plan",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"%\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":3,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#16943E\"},{\"from\":85,\"to\":95,\"color\":\"#DFBE2E\"},{\"from\":95,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly*\n| sum(units) as units,sum(credits) as credits by uom,rate,unit\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\"\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n\n| avg(pct_plan) as prediction\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel605249409A547949",
+                    "title": "Total Credits and Daily Average Vs Plan (use avg_units for metric dpm)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly*\n| avg(units) as avg_units,sum(units) as units,sum(credits) as credits by uom,rate,unit\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\"\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days\n| sort uom asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A1FAE162AC6C7A4C",
+                    "title": "About This Dashboard",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Use ths dashboard to estimate your sumologic credits usage for logs, metrics and traces using the current consumption trend. This is useful if the year to date estimate on the account page is inaccurate. \n\nThis dashboard uses a view ```_view=credits_usage_hourly_v*``` derived from two data sources: the datavolume with tier index per ingestion index/partition, and the search audit index. \n\nUpdate the dashboard paramenters with the correct credit total and term for your contract."
+                },
+                {
+                    "id": null,
+                    "key": "panel61D8539EA2231940",
+                    "title": "Credits Vs Plan",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly_v*\n| tolong(_timeslice) as _messagetime\n| timeslice by 1d\n| sum(credits) as credits by _timeslice\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc | smooth credits as trend\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE09BE9CA9E8ED844",
+                    "title": "Credits Per Log GB",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credits/GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":13,\"color\":\"#16943E\"},{\"from\":13,\"to\":20,\"color\":\"#DFBE2E\"},{\"from\":20,\"to\":30,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":30}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly*\n| sum(units) as units,sum(credits) as credits by uom,rate,unit\n| where uom matches /CSE|Continuous|Infrequent|Frequent/\n| credits / units as CPGB | avg(CPGB) as CPGB",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelC8187B99AB7A0844",
+                    "title": "Total Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly_v*\n| sum(credits) as credits by uom | sort credits\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel48F13702828A3842",
+                    "title": "Credits By Type",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=credits_usage_hourly_v*\n| tolong(_timeslice) as _messagetime\n| timeslice by 1d\n| sum(credits) as credits by _timeslice,uom\n| transpose row _timeslice column uom\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "my_annual_credits",
+                    "displayName": "my_annual_credits",
+                    "defaultValue": "21900",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "10000,1000000,100000"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "credit_term_days",
+                    "displayName": "credit_term_days",
+                    "defaultValue": "365",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "365"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Daily Ingest Burn Rate (Data Volume Raw)",
+            "description": "",
+            "title": "Daily Ingest Burn Rate (Data Volume Raw)",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-2w"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel1D15ABABB654C84D",
+                        "structure": "{\"height\":8,\"width\":9,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel898D69ACA41A9A48",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":23}"
+                    },
+                    {
+                        "key": "panel4A3E96949485F84E",
+                        "structure": "{\"height\":8,\"width\":9,\"x\":9,\"y\":6}"
+                    },
+                    {
+                        "key": "panel605249409A547949",
+                        "structure": "{\"height\":4,\"width\":6,\"x\":18,\"y\":6}"
+                    },
+                    {
+                        "key": "panel5DAF3BC5AA450B44",
+                        "structure": "{\"height\":4,\"width\":6,\"x\":18,\"y\":10}"
+                    },
+                    {
+                        "key": "panel9183DB48B11FEB45",
+                        "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":23}"
+                    },
+                    {
+                        "key": "panelPANE-A1FAE162AC6C7A4C",
+                        "structure": "{\"height\":6,\"width\":10,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel4B18B505B2549A4F",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":22}"
+                    },
+                    {
+                        "key": "panel342C94F0B25E5B42",
+                        "structure": "{\"height\":6,\"width\":14,\"x\":10,\"y\":0}"
+                    },
+                    {
+                        "key": "panel3D09C2448B77F84C",
+                        "structure": "{\"height\":8,\"width\":9,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelD4994BD390B9C94E",
+                        "structure": "{\"height\":4,\"width\":6,\"x\":18,\"y\":18}"
+                    },
+                    {
+                        "key": "panelA8C3148EBAD4EB47",
+                        "structure": "{\"height\":4,\"width\":6,\"x\":18,\"y\":14}"
+                    },
+                    {
+                        "key": "panelAFC259FFBCFFEA42",
+                        "structure": "{\"height\":8,\"width\":9,\"x\":9,\"y\":14}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel1D15ABABB654C84D",
+                    "title": "Daily Ingest Credits With Storage Estimate",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume _sourcecategory=view_and_tier_volume\n| parse regex \"(?<row>\\{\\\"[^\\}]+\\})\" multi\n// too slow: parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n// slower | json field=row \"field\",\"dataTier\",\"sizeInBytes\"  as value,datatier,sizeinbytes \n| parse field=row \"{\\\"field\\\":\\\"*\\\",\\\"dataTier\\\":\\\"*\\\",\\\"sizeInBytes\\\":*,\\\"count\\\":*}\" as value,datatier,sizeinbytes,count\n| where sizeinbytes > 0\n| timeslice by 1d\n//| sum(sizeinbytes) as bytes by datatier, value\n\n| sum(sizeInBytes) as sizeInBytes by datatier, value,_timeslice\n| sizeInBytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n| if (datatier=\"Security\",gb * 0,credits) as credits\n| sum(credits) as credits by datatier,_timeslice\n\n// these will estimate storage credits over lifetime so we get a storage estimate\n\n| 0.0067 as cr_storage\n| 0.0015 as cr_infreq_storage\n| if (datatier=\"Infrequent\", (credits / .4) *  {{retention_days_infr}} * cr_infreq_storage ,0 ) as credits_storage\n| if (datatier=\"Continuous\", (credits / 20) *  {{retention_days}} * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"Frequent\", (credits / 20) *  {{retention_days}} * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"CSE\", (credits / 25) *  {{retention_days}} * cr_storage ,credits_storage ) as credits_storage\n\n// it's unlikely to ever fully use retention container over long term due to growth\n// if you ingest is very flat or shorter retention use a flatter ratio number\n| credits_storage * {{storage_estimate_factor}} as credits_storage\n\n// now we need to repack the columsn to support final graph output\n| if(datatier=\"Continuous\",credits,0) as cr_cont\n| if(datatier=\"Frequent\",credits,0) as cr_frequent\n| if(datatier=\"Infrequent\",credits,0) as cr_infrequent\n| if(datatier=\"CSE\",credits,0) as cr_CSE\n\n| sum(cr_cont) as continuous, sum(cr_frequent) as frequent, sum(cr_infrequent) as infrequent,sum(cr_CSE) as CSE, sum(credits_storage) as %\"storage (estimate)\"  by _timeslice\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc | continuous + frequent + infrequent + cse + %\"storage (estimate)\" as total_credits | smooth total_credits as trend | fields -total_credits\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel898D69ACA41A9A48",
+                    "title": "Ingestion Indexes, Tiers, GB and Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume _sourcecategory=view_and_tier_volume\n| parse regex \"(?<row>\\{\\\"[^\\}]+\\})\" multi\n// too slow: parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n// slower | json field=row \"field\",\"dataTier\",\"sizeInBytes\"  as value,datatier,sizeinbytes \n| parse field=row \"{\\\"field\\\":\\\"*\\\",\\\"dataTier\\\":\\\"*\\\",\\\"sizeInBytes\\\":*,\\\"count\\\":*}\" as value,datatier,sizeinbytes,count\n| where sizeinbytes > 0\n//| timeslice by 1d\n//| sum(sizeinbytes) as bytes by datatier, value\n| sizeInBytes / 1024/1024/1024 as gb\n| value as index\n| sum(gb) as gb by datatier, index\n\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n| if (datatier=\"Security\",gb * 0,credits) as credits\n| sum(gb) as gb,sum(credits) as credits by datatier,index\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| num(( %\"cr/day\"/plan ) * 100) as pct_plan | sort credits | fields -plan,query_days",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel4A3E96949485F84E",
+                    "title": "Infrequent Scan Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{\"A_credits\":{\"visible\":true},\"A_plan\":{\"visible\":true}},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice by 1d\n| (scan_inf/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by _timeslice\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel605249409A547949",
+                    "title": "Ingest and Storage Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume _sourcecategory=view_and_tier_volume\n| parse regex \"(?<row>\\{\\\"[^\\}]+\\})\" multi\n// too slow: parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n// slower | json field=row \"field\",\"dataTier\",\"sizeInBytes\"  as value,datatier,sizeinbytes \n| parse field=row \"{\\\"field\\\":\\\"*\\\",\\\"dataTier\\\":\\\"*\\\",\\\"sizeInBytes\\\":*,\\\"count\\\":*}\" as value,datatier,sizeinbytes,count\n| where sizeinbytes > 0\n\n//| sum(sizeinbytes) as bytes by datatier, value\n| sizeInBytes / 1024/1024/1024 as gb\n| sum(gb) as gb by datatier //,_timeslice\n\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n| if (datatier=\"Security\",gb * 0,credits) as credits\n| sum(credits) as credits by datatier\n\n// these will estimate storage credits over lifetime so we get a storage estimate\n//\n| 390 as retention_days\n| 390 as infr_retention_days\n| 0.0067 as cr_storage\n|  0.0015 as cr_infreq_storage\n| if (datatier=\"Infrequent\", (credits / .4) *  infr_retention_days * cr_infreq_storage ,0 ) as credits_storage\n| if (datatier=\"Continuous\", (credits / 20) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"Frequent\", (credits / 20) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"CSE\", (credits / 25) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n\n// it's unlikely to ever fully use retention container over long term due to growth\n// if you ingest is very flat or shorter retention use a flatter ratio number\n| credits_storage * .55 as credits_storage\n\n// now we need to repack the columsn to support final graph output\n| if(datatier=\"Continuous\",credits,0) as cr_cont\n| if(datatier=\"Frequent\",credits,0) as cr_frequent\n| if(datatier=\"Infrequent\",credits,0) as cr_infrequent\n| if(datatier=\"CSE\",credits,0) as cr_CSE\n\n| sum(credits) as credits, sum(credits_storage) as %\"storage (estimate)\"  // by _timeslice\n| credits + %\"storage (estimate)\" as daily_credits_estimate | sum(daily_credits_estimate) as credits\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5DAF3BC5AA450B44",
+                    "title": "Infrequent Scan Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| sum(credits) as credits \n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9183DB48B11FEB45",
+                    "title": "Infrequent Scan By User",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits | (scan_inf/1024/1024/1024 ) as gb | count as searches,sum(gb) as scan_gb,sum(credits) as credits by user_name\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| (%\"cr/day\"/plan ) * 100 as pct_plan | sort credits | fields -plan,query_days\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A1FAE162AC6C7A4C",
+                    "title": "About This Dashboard",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Use ths dashboard to estimate your sumologic credits usage for logs, metrics and traces using the current consumption trend. This is useful if the year to date estimate on the account page is inaccurate. This dashboard uses two data sources: the datavolume with tier index per ingestion index/partition, and the search audit index. Using these two sources we can:\n- get very close estimates of ingestion credits\n- estimate storage credits\n- calculate infrequent scan credits."
+                },
+                {
+                    "id": null,
+                    "key": "panel4B18B505B2549A4F",
+                    "title": "Breakdown of Ingest By Partition and Scans By User",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel342C94F0B25E5B42",
+                    "title": "Configuration",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Configuration fields:\n- retention_days: used for per day storage estimate for continuous, frequent and CSE\n- retention_days_infr: used for per day storage estmiate for infrequent\n- storage_estimate_factor: depending on your account growth rate set this value so the storage credits estimate closely matches your account page.\n- my_annual_credits: enter your annual credits from the account page here\n- credit_term_days: enter your term days from the contract page here (usually 365)"
+                },
+                {
+                    "id": null,
+                    "key": "panel3D09C2448B77F84C",
+                    "title": "Tracing Ingest Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\n_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum(billedBytes) as %\"billedBytes\" by _timeslice, field_type\n| %\"billedBytes\"  as %\"billedBytes Count\"\n\n| %\"billedBytes\" / 1024/1024/1024 as gb\n| gb * 14 as credits\n| sum(credits) as credits by field_type,_timeslice\n| transpose row _timeslice column field_type\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc \n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelD4994BD390B9C94E",
+                    "title": "Metrics Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume datapoints\n _sourceCategory = \"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| max(__timeslice_end) as tse, sum(datapoints) as datapoints by _timeslice,collector\n| (tse-_timeslice) /1000 / 60 as slice_minutes\n| datapoints / slice_minutes as Dpm\n// dpms are measured in 24 hour averages\n| ((dpm / (60 * 24))/1000) * 3 as credits\n| sum(credits) as credits\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA8C3148EBAD4EB47",
+                    "title": "Tracing Credits ",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum(billedBytes) as %\"billedBytes\" by _timeslice, field_type\n| %\"billedBytes\"  as %\"billedBytes Count\"\n\n| %\"billedBytes\" / 1024/1024/1024 as gb\n| gb * 14 as credits\n| sum(credits) as credits  //by field_type //,_timeslice\n\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelAFC259FFBCFFEA42",
+                    "title": "Metrics DPM Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_volume datapoints\n _sourceCategory = \"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| max(__timeslice_end) as tse, sum(datapoints) as datapoints by _timeslice,collector\n| (tse-_timeslice) /1000 / 60 as slice_minutes\n| datapoints / slice_minutes as Dpm\n// dpms are measured in 24 hour averages\n| ((dpm / (60 * 24))/1000) * 3 as credits\n| sum(credits) as credits by collector,_timeslice | transpose row _timeslice column collector\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc \n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "retention_days",
+                    "displayName": "retention_days",
+                    "defaultValue": "390",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "390,30,90,180"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "retention_days_infr",
+                    "displayName": "retention_days_infr",
+                    "defaultValue": "390",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "390,30,90,180"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "storage_estimate_factor",
+                    "displayName": "storage_estimate_factor",
+                    "defaultValue": ".55",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": ".55,.6,.7,.8,.9"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "my_annual_credits",
+                    "displayName": "my_annual_credits",
+                    "defaultValue": "21900",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "10000,1000000,100000"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "credit_term_days",
+                    "displayName": "credit_term_days",
+                    "defaultValue": "365",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "365"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Long Term Credits Report (credits_report lookup)",
+            "description": "Uses the credits_report lookup table to show long term credits consumption.",
+            "title": "Long Term Credits Report (credits_report lookup)",
+            "theme": "Light",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-15m"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel1D15ABABB654C84D",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":17}"
+                    },
+                    {
+                        "key": "panel605249409A547949",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":26}"
+                    },
+                    {
+                        "key": "panelPANE-A1FAE162AC6C7A4C",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel61D8539EA2231940",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":17}"
+                    },
+                    {
+                        "key": "panelC8187B99AB7A0844",
+                        "structure": "{\"height\":11,\"width\":8,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panel5D3A7C83984A194D",
+                        "structure": "{\"height\":11,\"width\":7,\"x\":17,\"y\":6}"
+                    },
+                    {
+                        "key": "panel47FFE8D4B60CEB46",
+                        "structure": "{\"height\":11,\"width\":9,\"x\":8,\"y\":6}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel1D15ABABB654C84D",
+                    "title": "Daily Credits By Type",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| tolong(_timeslice) as _messagetime\n| timeslice by 1d\n| sum(credits) as credits by uom,_timeslice\n| transpose row _timeslice column uom\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel605249409A547949",
+                    "title": "Total Credits and Daily Average Vs Plan (Use avg_units for metric DPM)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| avg(avg_units) as avg_units,sum(units) as units,sum(credits) as credits by uom,rate,unit,_timeslice\n| avg(avg_units) as avg_units,sum(units) as units,sum(credits) as credits,avg(credits) as %\"cr/day\" by uom,rate,unit\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan\n| sort uom asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-A1FAE162AC6C7A4C",
+                    "title": "About This Dashboard",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Shows long term estimates of credits usage in your account using a lookup table. The lookup table is built daily by the scheduled search 'Credits Report' using a view created by scheduled searches that aggregate data from the data volume indexes.\n\nConfiguration fields:\n- my_annual_credits: enter your annual credits from the account page here\n- credit_term_days: enter your term days from the contract page here (usually 365)\n- lookup: the lookup file generated by the daily search. This summarizes the hourly views into a daily summary.\n- days: since this dashboard uses a lookup use the days parameter if you want to change the days of history shown\n- anniversary: the rollover date for your contract as per your account page"
+                },
+                {
+                    "id": null,
+                    "key": "panel61D8539EA2231940",
+                    "title": "Credits Vs Plan",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| tolong(_timeslice) as _messagetime\n| timeslice by 1d\n| sum(credits) as credits by _timeslice\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc | smooth credits as trend\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelC8187B99AB7A0844",
+                    "title": "Total Credits",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by uom | sort credits\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5D3A7C83984A194D",
+                    "title": "Daily Rate Vs Plan",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"%\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#16943E\"},{\"from\":85,\"to\":95,\"color\":\"#DFBE2E\"},{\"from\":95,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by _timeslice\n| avg(credits) as %\"cr/day\"\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n\n| avg(pct_plan) as prediction\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel47FFE8D4B60CEB46",
+                    "title": "Credits Needed To Term At Current Rate",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":18,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by _timeslice\n| avg(credits) as %\"cr/day\"\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n\n// anniversary could be this year or next year\n| now() as today\n| formatdate(today,\"MM\") as current_month\n| formatdate(today,\"dd\") as current_day\n| formatdate(today,\"yyyy\") as current_year\n\n| \"{{anniversary}}\" as end_date\n| {{credit_term_days}} as term_days\n| parsedate (end_date,\"yyyy/MM/dd\") as contract_end\n\n| formatdate(contract_end,\"MM\") as contract_month\n| formatdate(contract_end,\"dd\") as contract_day\n| formatdate(contract_end,\"yyyy\") as contract_year\n| concat (round(contract_year + 1),\"/\",contract_month,\"/\",contract_day) as end_date_b\n| parsedate (end_date_b,\"yyyy/MM/dd\") as contract_end_b\n\n| if(contract_end - today  < 0,contract_end_b,contract_end) as adjusted_end_date\n| floor((adjusted_end_date - today ) / (1000 * 60 * 60 * 24)) as days_left\n| ceil(term_days - days_left) as days_used\n| round( %\"cr/day\" * days_left) as cr_needed\n| concat(\"Using:\",round(%\"cr/day\",2) ,\" cr/day. Estimate: \",round(cr_needed),\" will be used at current burn rate in: \", toint(days_left),\" days until: \", formatdate(adjusted_end_date,\"yyyy/MM/dd\")) as string\n| first (string) as estimate_credits_to_term | concat(estimate_credits_to_term,\" You can compare this number of credits with the used/remaining number on your account page to determine how you are tracking to plan at current burn rate.\") as estimate_credits_to_term",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message"
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "my_annual_credits",
+                    "displayName": "my_annual_credits",
+                    "defaultValue": "21900",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "10000,1000000,100000"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "credit_term_days",
+                    "displayName": "credit_term_days",
+                    "defaultValue": "365",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "365"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "lookup",
+                    "displayName": "lookup",
+                    "defaultValue": "/shared/lookups/credits_report",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "/shared/lookups/credits_report"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "days",
+                    "displayName": "days",
+                    "defaultValue": "90",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "90"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "anniversary",
+                    "displayName": "anniversary",
+                    "defaultValue": "2023/03/11",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "yyyy/MM/dd,2023/03/11"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "FolderSyncDefinition",
+            "name": "Lookup_Report",
+            "description": "Saves a lookup table daily for longer term usage so we can dashboard past 30d.",
+            "children": [
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Credits_Report",
+                    "search": {
+                        "queryText": "// we will run this query daily at 00:15 Pacific time\n// saves a lookup table of the last n days of results\n// this allows dashboarding past 30 days by using cat /shared/lookups/credits_report as the base for each panel.\n\n_view=credits_usage_hourly_v1 \n| timeslice by 1d\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n| sum(credits) as credits,sum(units) as units,avg(units) as avg_units by uom,unit,rate,_timeslice\n| save /shared/lookups/credits_report\n\n",
+                        "defaultTimeRange": "Last 24 Hours",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "AutoParse"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 15 0 * * ?",
+                        "displayableTimeRange": "-90d",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-12w6d"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "America/Los_Angeles",
+                        "threshold": {
+                            "thresholdType": "group",
+                            "operator": "lt",
+                            "count": 0
+                        },
+                        "notification": {
+                            "taskType": "EmailSearchNotificationSyncDefinition",
+                            "toList": [
+                                "invaliduser@sumologic.com"
+                            ],
+                            "subjectTemplate": "Search Alert: {{TriggerCondition}} found for {{SearchName}}",
+                            "includeQuery": false,
+                            "includeResultSet": true,
+                            "includeHistogram": false,
+                            "includeCsvAttachment": false
+                        },
+                        "scheduleType": "Custom",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                }
+            ]
+        },
+        {
+            "type": "FolderSyncDefinition",
+            "name": "Views",
+            "description": "",
+            "children": [
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_infrequent_scan",
+                    "search": {
+                        "queryText": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as bytes  \n\n| queryendtime() as _timeslice\n| bytes/1Gi as units\n| .016 as rate\n| \"gbytes\" as unit\n| \"infrequent_scan\" as uom\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n",
+                        "defaultTimeRange": "Last 60 Minutes",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 0 * * * ? *",
+                        "displayableTimeRange": "-60m",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-1h"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "Etc/UTC",
+                        "threshold": null,
+                        "notification": {
+                            "taskType": "SaveToViewNotificationSyncDefinition",
+                            "viewName": "credits_usage_hourly_v1"
+                        },
+                        "scheduleType": "1Hour",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_infrequent_scan - backfill",
+                    "search": {
+                        "queryText": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nnot user_name=*sumosupport*\n| json field =scanned_bytes_breakdown \"Infrequent\" as bytes  \n\n| timeslice by 1h\n| bytes/1Gi as units\n| .016 as rate\n| \"gbytes\" as unit\n| \"infrequent_scan\" as uom\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n| save view credits_usage_hourly_v1\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_logs",
+                    "search": {
+                        "queryText": "_index=sumologic_volume _sourcecategory=view_and_tier_volume \n| parse regex \"(?<element>\\{[^\\}]+})\" multi \n| json field=element \"field\", \"dataTier\", \"sizeInBytes\", \"count\" as name, uom, bytes, events \n| queryendtime() as _timeslice\n| bytes/1Gi as units\n| if(uom = \"CSE\",25,20) as rate\n| if(uom = \"Infrequent\",.4,rate) as rate\n| if(uom = \"Frequent\",9,rate) as rate\n| \"gbytes\" as unit\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n",
+                        "defaultTimeRange": "Last 60 Minutes",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 0 * * * ? *",
+                        "displayableTimeRange": "Last 60 Minutes",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-1h"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "Etc/UTC",
+                        "threshold": null,
+                        "notification": {
+                            "taskType": "SaveToViewNotificationSyncDefinition",
+                            "viewName": "credits_usage_hourly_v1"
+                        },
+                        "scheduleType": "1Hour",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_logs - backfill",
+                    "search": {
+                        "queryText": "_index=sumologic_volume _sourcecategory=view_and_tier_volume \n| parse regex \"(?<element>\\{[^\\}]+})\" multi \n| json field=element \"field\", \"dataTier\", \"sizeInBytes\", \"count\" as name, uom, bytes, events \n| timeslice by 1h\n| bytes/1Gi as units\n| if(uom = \"CSE\",25,20) as rate\n| if(uom = \"Infrequent\",.4,rate) as rate\n| if(uom = \"Frequent\",9,rate) as rate\n| \"gbytes\" as unit\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n| save view credits_usage_hourly_v1\n\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_metrics",
+                    "search": {
+                        "queryText": "// metric dpm are problematic for these views as they are the only UOM measured as an average daily rate.\n// you could either send a dpm number (but then have to average it instead of sum for every other measure)\n// or send datapoints instead in which case you must change the math depending on the time range (as its datapoints / time)\n_index=sumologic_volume datapoints\n _sourceCategory = \"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| queryendtime() as _timeslice\n| sum(datapoints) as datapoints by _timeslice,collector\n| 60 as slice_minutes // this only works correctly for 1 hour slices!\n| datapoints / slice_minutes as units\n| \"metrics\" as uom\n| \"dpm\" as unit\n// dpms are measured in 24 hour averages\n// it's actually a daily average of dpm not hourly\n// this is where we have issues here too as the 'rate' for 1 hour is not the same as the 'rate' for 1 day or any other time range\n// 24 hours is typically 3 * (dpm / 1000)\n| ((1 / ( 24))/1000) * 3 as rate \n| units * rate as credits\n\n// now lets put the 24 hour rate in the rate column as it would be applied to a daily average\n// this means the credits column is the credits per hour but the exact dpm could also be\n// calculated upstream by avg(units) * rate per 24 hours time range which suits our upstream daily views\n/*\nfor example\nrate = 0.003\ncredits sumo 1 hour = 0.00804\ndpm (avg) =   64.3\n\n.00804 * 24 = 19.2  - sum 24 1 hour credits \n64.3 * .003 = 19.2  - if you averaged 24 1 hour units column values and times the daily rate            \n\n*/\n| 3 / 1000 as rate\n\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units",
+                        "defaultTimeRange": "-60m",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 0 * * * ? *",
+                        "displayableTimeRange": "-60m",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-1h"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "Etc/UTC",
+                        "threshold": null,
+                        "notification": {
+                            "taskType": "SaveToViewNotificationSyncDefinition",
+                            "viewName": "credits_usage_hourly_v1"
+                        },
+                        "scheduleType": "1Hour",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_metrics - backfill",
+                    "search": {
+                        "queryText": "// metric dpm are problematic for these views as they are the only UOM measured as an average daily rate.\n// you could either send a dpm number (but then have to average it instead of sum for every other measure)\n// or send datapoints instead in which case you must change the math depending on the time range (as its datapoints / time)\n_index=sumologic_volume datapoints\n _sourceCategory = \"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice by 1h\n| sum(datapoints) as datapoints by _timeslice,collector\n| 60 as slice_minutes // this only works correctly for 1 hour slices!\n| datapoints / slice_minutes as units\n| \"metrics\" as uom\n| \"dpm\" as unit\n// dpms are measured in 24 hour averages\n// it's actually a daily average of dpm not hourly\n// this is where we have issues here too as the 'rate' for 1 hour is not the same as the 'rate' for 1 day or any other time range\n// 24 hours is typically 3 * (dpm / 1000)\n| ((1 / ( 24))/1000) * 3 as rate \n| units * rate as credits\n\n// now lets put the 24 hour rate in the rate column as it would be applied to a daily average\n// this means the credits column is the credits per hour but the exact dpm could also be\n// calculated upstream by avg(units) * rate per 24 hours time range which suits our upstream daily views\n/*\nfor example\nrate = 0.003\ncredits sumo 1 hour = 0.00804\ndpm (avg) =   64.3\n\n.00804 * 24 = 19.2  - sum 24 1 hour credits \n64.3 * .003 = 19.2  - if you averaged 24 1 hour units column values and times the daily rate            \n\n*/\n| 3 / 1000 as rate\n\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n| save view credits_usage_hourly_v1\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_storage_estimated",
+                    "search": {
+                        "queryText": "/*\nThis is an ESTIMATE of storage only.\nIn order to make the estimate accurate we have to consider:\n- retention may vary between customers and partitions\n- storage rate are per total GB per day\n- billing is on total for current day for all previously ingested GB so over it may take say 30,90 or even 365+ days before storage will peak\n- long term growth rate of the account also impacts storage.\n\nwe could do a lot of math but it's better just to use fixed numbers based off your account page because storage changes slowly based on long term ingest averages\n*/\n\n_index=sumologic_volume _sourcecategory=view_and_tier_volume \n//| parse regex \"(?<element>\\{[^\\}]+})\" multi \n//| json field=element \"field\", \"dataTier\", \"sizeInBytes\", \"count\" as name, uom, bytes, events \n| limit 1\n\n// take these numbers from your account page\n| 1 as daily_storage_gb\n| 1 as daily_storage_gb_infrequent\n| 0 as daily_storage_gb_security\n\n| concat(\"storage:\", daily_storage_gb,\", storage_infrequent:\",daily_storage_gb_infrequent,\", storage_security:\",daily_storage_gb_security) as storage_string\n| parse regex field=storage_string \"(?<uom>[a-z_]+):(?<units>[0-9]+)\" multi\n| queryendtime() as _timeslice\n| \"gbytes/day\" as unit\n| if( uom = \"storage\",.0067,.0015) as rate\n| units / 24 as units\n| units * rate as credits // we follow the principle you should be able to sum the 24 hours to = 1 day\n//\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n\n//// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n// use these to ensure your fixed numbers match account page totals\n//| units * 24 as units_day\n//| units_day * rate  as cr_day_a\n//| credits *24 as cr_day_b",
+                        "defaultTimeRange": "Last 60 Minutes",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 0 * * * ? *",
+                        "displayableTimeRange": "Last 60 Minutes",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-1h"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "Etc/UTC",
+                        "threshold": null,
+                        "notification": {
+                            "taskType": "SaveToViewNotificationSyncDefinition",
+                            "viewName": "credits_usage_hourly_v1"
+                        },
+                        "scheduleType": "1Hour",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_storage_estimated - backfill",
+                    "search": {
+                        "queryText": "/*\nThis is an ESTIMATE of storage only.\nIn order to make the estimate accurate we have to consider:\n- retention may vary between customers and partitions\n- storage rate are per total GB per day\n- billing is on total for current day for all previously ingested GB so over it may take say 30,90 or even 365+ days before storage will peak\n- long term growth rate of the account also impacts storage.\n\nwe could do a lot of math but it's better just to use fixed numbers based off your account page because storage changes slowly based on long term ingest averages\n*/\n\n_index=sumologic_volume _sourcecategory=view_and_tier_volume \n//| parse regex \"(?<element>\\{[^\\}]+})\" multi \n//| json field=element \"field\", \"dataTier\", \"sizeInBytes\", \"count\" as name, uom, bytes, events \n//| limit 1\n\n// take these numbers from your account page\n| 1 as daily_storage_gb\n| 1 as daily_storage_gb_infrequent\n| 0 as daily_storage_gb_security\n\n| concat(\"storage:\", daily_storage_gb,\", storage_infrequent:\",daily_storage_gb_infrequent,\", storage_security:\",daily_storage_gb_security) as storage_string\n| parse regex field=storage_string \"(?<uom>[a-z_]+):(?<units>[0-9]+)\" multi\n| timeslice by 1h\n| \"gbytes/day\" as unit\n| if( uom = \"storage\",.0067,.0015) as rate\n| units / 24 as units\n| units * rate as credits // we follow the principle you should be able to sum the 24 hours to = 1 day\n//\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n\n//// fix the double to long bug\n| max(credits) as credits,max(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n// use these to ensure your fixed numbers match account page totals\n//| units * 24 as units_day\n//| units_day * rate  as cr_day_a\n//| credits *24 as cr_day_b\n\n| save view credits_usage_hourly_v1\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_tracing",
+                    "search": {
+                        "queryText": "_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<bytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| queryendtime() as _timeslice\n| bytes/1Gi as units\n| 14 as rate\n| \"tracing\" as uom\n| \"gbytes\" as unit\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units",
+                        "defaultTimeRange": "Last 60 Minutes",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": {
+                        "cronExpression": "0 0 * * * ? *",
+                        "displayableTimeRange": "Last 60 Minutes",
+                        "parseableTimeRange": {
+                            "type": "BeginBoundedTimeRange",
+                            "from": {
+                                "type": "RelativeTimeRangeBoundary",
+                                "relativeTime": "-1h"
+                            },
+                            "to": null
+                        },
+                        "timeZone": "Etc/UTC",
+                        "threshold": null,
+                        "notification": {
+                            "taskType": "SaveToViewNotificationSyncDefinition",
+                            "viewName": "credits_usage_hourly_v1"
+                        },
+                        "scheduleType": "1Hour",
+                        "muteErrorEmails": false,
+                        "parameters": []
+                    },
+                    "description": ""
+                },
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "credits_usage_tracing - backfill",
+                    "search": {
+                        "queryText": "_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<bytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice by 1h\n| bytes/1Gi as units\n| 14 as rate\n| \"tracing\" as uom\n| \"gbytes\" as unit\n| units * rate as credits\n// measure timeslice at end of time unit not start\n| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice\n// fix the double to long bug\n| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate\n| todouble(rate) as rate\n| todouble(credits) as credits\n| tolong(_timeslice ) as _timeslice\n| todouble(units) as units\n\n| save view credits_usage_hourly_v1\n",
+                        "defaultTimeRange": "Last 7 Days",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual"
+                    },
+                    "searchSchedule": null,
+                    "description": ""
+                }
+            ]
+        }
+    ]
+}
+
