@@ -1,0 +1,12 @@
+// Run this query one time to create the lookup table once you have data in the view
+// otherwise importing the app will fail.
+
+_view=credits_usage_hourly_v1 
+| timeslice by 1d
+| todouble(rate) as rate
+| todouble(credits) as credits
+| tolong(_timeslice ) as _timeslice
+| todouble(units) as units
+| sum(credits) as credits,sum(units) as units,avg(units) as avg_units by uom,unit,rate,_timeslice
+| save /shared/lookups/credits_report
+

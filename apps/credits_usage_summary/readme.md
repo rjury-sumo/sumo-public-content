@@ -35,6 +35,8 @@ locate your annual credits amount, anniversary date and term days and replace th
 save the file
 
 ### 2. Import the credits_usage_summary_app.json from step 1 into your account.
+- run the query in create_view.sumo to create 1 row in the view. If the view does not exist import of the app will fail.
+- run the query create_lookup.sumo to create the lookup table. If this does not exist the import will fail.
 
 ### 3. (optional) Create a storage estimate in the view
 Review your account page and determine typical daily numbers for storage for logs (contiuous/frequent/CSE) and infrequent. In the Views folder open the credits_usage_storage_estimated and credits_usage_storage_estimated_backfill searches and modify these to match your typical daily estimate:
@@ -49,6 +51,8 @@ Review your account page and determine typical daily numbers for storage for log
 In the views folder open each backfill search and execute it for the number of days you want to have initial history for. In a larger sumo account you might need to backfill in stages say -30d -14d, -14d -7d, -7d etc.
 
 Possible history will be constrained by your Default partition history which restricts the retention of Data volume logs.
+
+Wait a few minutes then run the Lookup_Report/Create_Report search to create an initial data set. 
 
 ### 5. Set lookup history value
 Open the Lookup_Report folder and edit the credits_report search schedule. By default this is set to -90d but you may want to use a longer number for more history to build up over time. Bear in mind it's a v1 lookup at max allowed size is 8MB.
