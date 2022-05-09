@@ -1,0 +1,44 @@
+// metric dpm are problematic for these views as they are the only UOM measured as an average daily rate.
+// you could either send a dpm number (but then have to average it instead of sum for every other measure)
+// or send datapoints instead in which case you must change the math depending on the time range (as its datapoints / time)
+_index=sumologic_volume datapoints
+ _sourceCategory = "sourcecategory_metrics_volume"
+| parse regex "\"(?<collector>[^\"]+)\"\:\{\"dataPoints\"\:(?<datapoints>\d+)\}" multi
+| timeslice by 1h
+| sum(datapoints) as datapoints by _timeslice,collector
+| 60 as slice_minutes // this only works correctly for 1 hour slices!
+| datapoints / slice_minutes as units
+| "metrics" as uom
+| "dpm" as unit
+// dpms are measured in 24 hour averages
+// it's actually a daily average of dpm not hourly
+// this is where we have issues here too as the 'rate' for 1 hour is not the same as the 'rate' for 1 day or any other time range
+// 24 hours is typically 3 * (dpm / 1000)
+| ((1 / ( 24))/1000) * 3 as rate 
+| units * rate as credits
+
+// now lets put the 24 hour rate in the rate column as it would be applied to a daily average
+// this means the credits column is the credits per hour but the exact dpm could also be
+// calculated upstream by avg(units) * rate per 24 hours time range which suits our upstream daily views
+/*
+for example
+rate = 0.003
+credits sumo 1 hour = 0.00804
+dpm (avg) =   64.3
+
+.00804 * 24 = 19.2  - sum 24 1 hour credits 
+64.3 * .003 = 19.2  - if you averaged 24 1 hour units column values and times the daily rate            
+
+*/
+| 3 / 1000 as rate
+
+// measure timeslice at end of time unit not start
+| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice
+// fix the double to long bug
+| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate
+| todouble(rate) as rate
+| todouble(credits) as credits
+| tolong(_timeslice ) as _timeslice
+| todouble(units) as units
+
+//| save view credits_usage_hourly_v1

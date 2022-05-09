@@ -1,0 +1,21 @@
+_view=sumologic_search_usage_per_query  
+analytics_tier=*infrequent*
+not user_name=*sumosupport*
+| json field =scanned_bytes_breakdown "Infrequent" as bytes  
+
+| timeslice by 1h
+| bytes/1Gi as units
+| .016 as rate
+| "gbytes" as unit
+| "infrequent_scan" as uom
+| units * rate as credits
+// measure timeslice at end of time unit not start
+| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice
+// fix the double to long bug
+| sum(credits) as credits,sum(units) as units by _timeslice,uom,unit,rate
+| todouble(rate) as rate
+| todouble(credits) as credits
+| tolong(_timeslice ) as _timeslice
+| todouble(units) as units
+
+//| save view credits_usage_hourly_v1

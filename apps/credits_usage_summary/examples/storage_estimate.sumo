@@ -1,0 +1,45 @@
+/*
+This is an ESTIMATE of storage only.
+In order to make the estimate accurate we have to consider:
+- retention may vary between customers and partitions
+- storage rate are per total GB per day
+- billing is on total for current day for all previously ingested GB so over it may take say 30,90 or even 365+ days before storage will peak
+- long term growth rate of the account also impacts storage.
+
+we could do a lot of math but it's better just to use fixed numbers based off your account page because storage changes slowly based on long term ingest averages
+*/
+
+_index=sumologic_volume _sourcecategory=view_and_tier_volume 
+//| parse regex "(?<element>\{[^\}]+})" multi 
+//| json field=element "field", "dataTier", "sizeInBytes", "count" as name, uom, bytes, events 
+//| limit 1
+
+// take these numbers from your account page
+| 1 as daily_storage_gb
+| 1 as daily_storage_gb_infrequent
+| 0 as daily_storage_gb_security
+
+| concat("storage:", daily_storage_gb,", storage_infrequent:",daily_storage_gb_infrequent,", storage_security:",daily_storage_gb_security) as storage_string
+| parse regex field=storage_string "(?<uom>[a-z_]+):(?<units>[0-9]+)" multi
+| timeslice by 1h
+| "gbytes/day" as unit
+| if( uom = "storage",.0067,.0015) as rate
+| units / 24 as units
+| units * rate as credits // we follow the principle you should be able to sum the 24 hours to = 1 day
+//
+// measure timeslice at end of time unit not start
+| tolong(_timeslice + ( 1000 * 60 * 60)) as _timeslice
+
+//// fix the double to long bug
+| max(credits) as credits,max(units) as units by _timeslice,uom,unit,rate
+| todouble(rate) as rate
+| todouble(credits) as credits
+| tolong(_timeslice ) as _timeslice
+| todouble(units) as units
+
+// use these to ensure your fixed numbers match account page totals
+//| units * 24 as units_day
+//| units_day * rate  as cr_day_a
+//| credits *24 as cr_day_b
+
+//| save view credits_usage_hourly_v1
