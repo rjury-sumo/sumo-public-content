@@ -15,8 +15,12 @@ Customizing the setup with account specific numbers is advisable however you can
 ## Dashboards
 - Daily Ingest Burn Rate (Data Volume Raw) - Realtime view using the raw data volume index data. This will work well for recent time but will load very slowly compared to the view or lookups based dashboards.
 - Credits View (credits_usage_hourly) - A summary using the hourly view. This dashboard uses a view _view=credits_usage_hourly_v* derived from two data sources: the datavolume with tier index per ingestion index/partition, and the search audit index. 
+
+![credits view](./credits.view.dashboard.png?raw=true "credits view")
+
 - Long Term Credits Report (credits_report lookup) - Shows long term estimates of credits usage in your account using a lookup table. The lookup table is built daily by the scheduled search 'Credits Report' using a view created by scheduled searches that aggregate data from the data volume indexes. Since it usese a timeless lookup you can dashboard > 31 day Sumo limit.
 
+![long term lookup dash](./long.term.credits.dashboard.png?raw=true "long term lookup dash")
 ## Setup
 WARNING! The view contains columns that count as fields in sumo.  If you previously created fields in your sumo account( fields or view fields) with the **same names** but different data types you will need to modify the searches and the app to use different column names to avoid data type errors in your account!
 - _timeslice (long)
