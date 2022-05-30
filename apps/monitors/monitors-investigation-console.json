@@ -21,7 +21,7 @@
         "layoutStructures": [
             {
                 "key": "panel1BA3E8C8BA78C942",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":23}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":24}"
             },
             {
                 "key": "panelPANE-3E4B08FF83A7B94E",
@@ -29,67 +29,71 @@
             },
             {
                 "key": "panel60376DDCB2808846",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":41}"
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":42}"
             },
             {
                 "key": "panel0732AAB2A46CAA47",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":49}"
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":50}"
             },
             {
                 "key": "panelPANE-8859B7D8AB0B894C",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":58}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":59}"
             },
             {
                 "key": "panel0E39546D99858A4A",
-                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":59}"
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":60}"
             },
             {
                 "key": "panel7A873BB18CC94846",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":66}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":67}"
             },
             {
                 "key": "panel94C774E796B0884E",
-                "structure": "{\"height\":4,\"width\":5,\"x\":0,\"y\":1}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":0,\"y\":2}"
             },
             {
                 "key": "panel95409DDBB4D8FB4B",
-                "structure": "{\"height\":4,\"width\":5,\"x\":5,\"y\":1}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":5,\"y\":2}"
             },
             {
                 "key": "panelA53833DCBD81CB4E",
-                "structure": "{\"height\":4,\"width\":5,\"x\":15,\"y\":1}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":15,\"y\":2}"
             },
             {
                 "key": "panel2664C95891AEE846",
-                "structure": "{\"height\":4,\"width\":5,\"x\":10,\"y\":1}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":10,\"y\":2}"
             },
             {
                 "key": "panel89E8D08F8EA29A4D",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":22}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":23}"
             },
             {
                 "key": "panel75D845FB94E75944",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":33}"
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":34}"
             },
             {
                 "key": "panel103AD92FAB8EFB41",
-                "structure": "{\"height\":4,\"width\":4,\"x\":20,\"y\":1}"
+                "structure": "{\"height\":4,\"width\":4,\"x\":20,\"y\":2}"
             },
             {
                 "key": "panelBAE8D267B7164B41",
-                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":13}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":6}"
             },
             {
                 "key": "panelC68AAAC9B5C4A843",
-                "structure": "{\"height\":17,\"width\":7,\"x\":10,\"y\":5}"
+                "structure": "{\"height\":17,\"width\":7,\"x\":10,\"y\":6}"
             },
             {
                 "key": "panel74936AA4AFDEB841",
-                "structure": "{\"height\":17,\"width\":7,\"x\":17,\"y\":5}"
+                "structure": "{\"height\":17,\"width\":7,\"x\":17,\"y\":6}"
             },
             {
                 "key": "panel7CD89D4F80E06A4B",
-                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":13,\"minHeight\":3,\"minWidth\":3}"
+                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel08D3370CBD32FB44",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":1}"
             }
         ]
     },
@@ -104,7 +108,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n//| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as oldstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| first(status) as last_state,count as events, count_distinct(timeseries) as series, values(status) as statuses,avg(duration) as avg_duration, max (duration) as max_duration by monitorid,path,granularity \n| sort events\n\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n//| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as oldstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| first(status) as last_state,count as events, count_distinct(timeseries) as series, values(status) as statuses,avg(duration) as avg_duration, max (duration) as max_duration by monitorid,path,granularity \n| sort events\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -257,7 +261,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Critical\"\n| count\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Critical\"\n| count\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -284,7 +288,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Warning\"\n| count\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Warning\"\n| count\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -311,7 +315,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Normal\"\n| count\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Normal\"\n| count\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -338,7 +342,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status matches \"*Data\"\n| count\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status matches \"*Data\"\n| count\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -401,7 +405,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity,duration\n| where status =\"Normal\"\n| duration/ 60 as %\"Duration (Min)\" | avg(%\"Duration (Min)\" ) as %\"Avg Duration (Min)\" \n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,duration\n| where status =\"Normal\"\n| duration/ 60 as %\"Duration (Min)\" | avg(%\"Duration (Min)\" ) as %\"Avg Duration (Min)\" \n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -525,6 +529,15 @@
             "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel08D3370CBD32FB44",
+            "title": "Monitor High Level Status (Copy)",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
         }
     ],
     "variables": [
