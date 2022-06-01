@@ -22,7 +22,7 @@ Customizing the setup with account specific numbers is advisable however you can
 
 ![long term lookup dash](./long.term.credits.dashboard.png?raw=true "long term lookup dash")
 ## Setup
-WARNING! The view contains columns that count as fields in sumo.  If you previously created fields in your sumo account( fields or view fields) with the **same names** but different data types you will need to modify the searches and the app to use different column names to avoid data type errors in your account!
+WARNING! The view contains columns that count as fields in sumo.  If you previously created fields in your sumo account( fields or view fields) with the **same names** but different data types you will need to modify the searches and the app to use different column names to avoid data type errors in your account. Get your sumo account team to check if you are unsure.
 - _timeslice (long)
 - rate(Double)
 - unit(String)
@@ -30,42 +30,70 @@ WARNING! The view contains columns that count as fields in sumo.  If you previou
 - uom(String)
 
 ### 1. Set account specific values
-We can setup the defaults on the dashboards now, or manully fix the default in sumo after importing the app later.
-Open the credits_usage_summary_app.json file in a text editor.
-locate your annual credits amount, anniversary date and term days and replace the value following values using global text/replace:
+We can setup the defaults on the dashboards now, or manully fix the default in sumo after importing the app later by editing the dashboard temaplate defaults. 
+
+To fix before import: 
+- Open the ```credits_usage_summary_app.json``` file in a text editor.
+- from your contract or administration/account page locate your annual credits amount, anniversary date and term days 
+ replace the value following values using global text/replace:
 - 21900 -  your annual credits number.
 - 365 -  your term days (usually it will be same)
 - 2023/03/11 - your anniversary date (yyyy/mm/dd)
-save the file
+save the ```credits_usage_summary_app.json``` file 
 
 ### 2. Import the credits_usage_summary_app.json from step 1 into your account.
-- run the query in create_view.sumo to create 1 row in the view. If the view does not exist import of the app will fail.
-- run the query create_lookup.sumo to create the lookup table. If this does not exist the import will fail.
+There are two items referenced in the app that must exist before we import it or import will fail with errors.
+
+- run the query in ```create_view.sumo``` to create 1 row in the view. 
+- wait a couple of minutes for the _view to exist then run the query ```create_lookup.sumo``` to create the lookup table. 
+
+Now we can import that app. Chose a good shared location (Admin Recommended / Sumo Admin is a good place) where it has permissions to be managed by Sumo admins.
+
+Open the LIbrary at the correct parent folder
+Choose import option
+For name use "Credits Usage Summary App"
+paste the contents of ```credits_usage_summary_app.json``` into the data box and click Import button.
+
+After importing you now should see the folder and contents in the library.
 
 ### 3. (optional) Create a storage estimate in the view
-Review your account page and determine typical daily numbers for storage for logs (contiuous/frequent/CSE) and infrequent. In the Views folder open the credits_usage_storage_estimated and credits_usage_storage_estimated_backfill searches and modify these to match your typical daily estimate:
+Storage is hard to estimate in a Sumo account so it's best just to use fixed values from the account page.
+
+Review your Administration / Account page and determine typical daily GB number for storage for storage and storage infrequent.
+
+In the Views folder open the ```credits_usage_storage_estimated``` and ```credits_usage_storage_estimated_backfill``` searches and modify these to match your typical daily in this section replacing 1 with your daily GB number:
 ```
 // take these numbers from your account page
 | 1 as daily_storage_gb
 | 1 as daily_storage_gb_infrequent
-| 0 as daily_storage_gb_security
 ```
 
 ### 4. (optional) Backfill view data
-In the views folder open each backfill search and execute it for the number of days you want to have initial history for. In a larger sumo account you might need to backfill in stages say -30d -14d, -14d -7d, -7d etc.
+Thi step creates a history for the dashboards immediately vs waiting for history to build up over time from the  schedules. We can do this by running the backfill searches in the views folder in the library.
 
-Possible history will be constrained by your Default partition history which restricts the retention of Data volume logs.
+In the views folder open each backfill search and execute it for the number of days you want to have initial history for. 
 
-Wait a few minutes then run the Lookup_Report/Create_Report search to create an initial data set. 
+WARNING! It's very important to be careful not to backfill the same time period more than once. Doing so will duplicate volume in the view for those times.
 
-### 5. Set lookup history value
+For example if you want 14d initial history choose -14d. 
+
+As you open each search :
+- **click Cancel** on the save dialog
+- set the retention time
+- run the query and choose to Save in the save dialog.
+
+
+### 5. Set lookup history 
+Wait a few minutes then run the ```Lookup_Report/Create_Report``` search to create an initial data set.  Each day from now on this will happen via a schedule.
+
 Open the Lookup_Report folder and edit the credits_report search schedule. By default this is set to -90d but you may want to use a longer number for more history to build up over time. Bear in mind it's a v1 lookup at max allowed size is 8MB.
 
 ### 6. (optional) Schedule alerts.
+Some optional alerts are provided but not scheduled in this app.
 In the Alerts folder configure and schedule relevant alerts.
-1. Alert - Abnormal rate of credits consumption (uses hourly view and time compare to detect anomaly vs previous trends)
-2. Alert - Daily credits trend exceeds plan size. (uses daily lookup file)
-3. Alert: Abnormal Infrequent Scan Credits (uses raw search audit data.)
+1. **Alert - Abnormal rate of credits consumption** (uses hourly view and time compare to detect anomaly vs previous trends)
+2. **Alert - Daily credits trend exceeds plan size.** (uses daily lookup file)
+3. **Alert: Abnormal Infrequent Scan Credits** (uses raw search audit data.)
 
 
 ## Solution
@@ -76,7 +104,7 @@ A set of hourly scheduled searches summarizes data volume for each credit type t
 A once per day search scans the view and creates a lookup table with one row per day and totals for each credit Unit of Measure (UOM). This facilitates long term executive level reporting in a sumo dashboard (avoiding the 31 day dashboard limit).
 
 ###  view credits_usage_hourly_v1
-The hourly view name is _view=credits_usage_hourly_v1
+The hourly view name is ```_view=credits_usage_hourly_v1```
 It has the following columns:
 - _timeslice (long)
 - rate(Double)
@@ -92,4 +120,4 @@ Example data:
 ```
 
 ### lookup /shared/lookups/credits_report
-This lookup table is generated daily by the credits_report search. By producing a timeless summary we can dashboard for longer than 31d. 
+```/shared/lookups/credits_report``` lookup table is generated daily by the credits_report search. By producing a timeless summary we can dashboard for longer than 31d. 
