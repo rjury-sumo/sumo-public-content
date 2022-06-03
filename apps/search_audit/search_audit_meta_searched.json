@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Search Audit Metadata Searched (20220420)",
+    "name": "Search Audit Metadata Searched (20220603)",
     "description": "",
-    "title": "Search Audit Metadata Searched (20220420)",
+    "title": "Search Audit Metadata Searched (20220603)",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -21,39 +21,55 @@
         "layoutStructures": [
             {
                 "key": "panelPANE-1D7306DEB0079A4C",
-                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":46}"
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":66}"
             },
             {
                 "key": "panelAA78EFEC9E7B4949",
-                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":32}"
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":38}"
             },
             {
                 "key": "panelD1F667969010194E",
-                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":60}"
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":80}"
             },
             {
                 "key": "panelPANE-7BCCFD2BAF869B42",
-                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":5,\"width\":12,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panel34046E0EB3A7B94B",
-                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":6}"
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":12}"
             },
             {
                 "key": "panel6E26DD539D1EDA49",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":11}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":17}"
             },
             {
                 "key": "panel50DC42F58CF2684D",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":21}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":27}"
             },
             {
                 "key": "panelPANE-E270F509BEDFAA4B",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":45}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":51}"
             },
             {
                 "key": "panelA15D5BBF88E47B40",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":59}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":79}"
+            },
+            {
+                "key": "panel5AA9489D957F784F",
+                "structure": "{\"height\":7,\"width\":11,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel569A3FB5BDF7DB4D",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":53}"
+            },
+            {
+                "key": "panel27EF02E38D55B941",
+                "structure": "{\"height\":7,\"width\":12,\"x\":11,\"y\":5}"
+            },
+            {
+                "key": "panel1D74476FBEEBBA46",
+                "structure": "{\"height\":5,\"width\":12,\"x\":12,\"y\":0}"
             }
         ]
     },
@@ -61,14 +77,14 @@
         {
             "id": null,
             "key": "panelPANE-1D7306DEB0079A4C",
-            "title": "Meta Per User",
+            "title": "F. Meta Per User",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>(?:_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?:=|matches|in)[ \\\"]*[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(meta,\"\\\"\",\"\") as meta\n\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, values(analytics_tier) as tiers,values(query_type) as types, values(meta) as metas by user_name\n\n//| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions, values(analytics_tier) as tiers,values(query_type) as types, values(meta) as metas by user_name | sort user_name asc\n//| sort avg_exec_ms",
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n//| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>(?:_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?:=|matches|in)[ \\\"]*[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(meta,\"\\\"\",\"\") as meta\n\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes,sum(inf_scan_gbytes) as inf_scan_gbytes, values(analytics_tier) as tiers,values(query_type) as types, values(meta) as metas by user_name\n| sort user_name asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -76,7 +92,8 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -94,7 +111,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = *dashboard or query_type=sumo* or query_type=monitors or query_type=view*)\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = *dashboard or query_type=sumo* or query_type=monitors or query_type=view*)\n\nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -102,7 +119,8 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -120,7 +138,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n\n| limit 1000\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n| round(avg_exec_ms / 1000) as avg_exec_s\n//| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/-]+)\\\"*\"\n//| replace(value,\"\\\"\",\"\") as value\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by user_name, query_type,analytics_tier,query | sort  query asc\n//| sort avg_exec_ms",
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n\n| limit 1000\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n| round(avg_exec_ms / 1000) as avg_exec_s\n//| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/-]+)\\\"*\"\n//| replace(value,\"\\\"\",\"\") as value\n| sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by user_name, query_type,analytics_tier,query | sort  query asc\n//| sort avg_exec_ms",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -128,7 +146,8 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -143,7 +162,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard uses the Search Audit index. metadata strings are parsed out using parse regex multi to give a filterable view of what users are querying.\n\nIt's intented use to to review search activity around one or more keywords or regular expessions in a query to identfy what metdata users have used to search, and what types of search they have used.\n\nYou can filter by various filters. note:\n- using a query match pattern will speed up the search.\n- the regex query filter is very powerful but also slower\n- other filters are vs a column before the first | so must match the whole colum for example ```*value*``` but are case insensitive\n"
+            "text": "This dashboard uses the Search Audit index. \n\nPrimary use metadata strings are parsed out using parse regex multi to give a filterable view of what users are querying.\n\nUse this dashboard to investigate query behaviour and feature usage in your account for say:\n- specific users\n- specific query types\n- specific metadata terms in search.\n\nCommon use cases:\n-  is to establish which users (if any) are using particular metadata sets in your account\n- to investigate if a metadata set is a good candidate for the infrequent tier based on scan volume and query_type.\n\nYou can filter by various filters. note:\n- using a query match pattern will speed up the search. This is a case sensitive match filter vs the query column\n- the regex query filter is very powerful but also slower\n- other filters are vs a column before the first | so must match the whole colum for example ```*value*``` but are case insensitive\n"
         },
         {
             "id": null,
@@ -164,7 +183,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = \"interactive search\" or query_type=\"search api\") \nnot query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = \"interactive search\" or query_type=\"search api\") \n \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -172,7 +191,8 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -190,7 +210,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = \"scheduled search\") \nnot query_type=sumo*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type = \"scheduled search\") \n\nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events,avg(time_range_m) as avg_time_range_m by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?<op>=|matches|in)[ \\\"]*(?<value>[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(value,\"\\\"\",\"\") as value\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(scan_gbytes) as scan_gbytes, sum(inf_scan_gbytes) as inf_scan_gbytes, sum(retrieved_events) as retrieved_events, max(scanned_partition_count) as scanned_partitions by query_type,meta,value,analytics_tier | sort meta asc, value asc\n| sort users,searches,scan_gbytes",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -198,7 +218,8 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -213,7 +234,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": ""
+            "text": "note: users can use more than one meta per query so a single query may be included in multiple rows in these tables."
         },
         {
             "id": null,
@@ -223,6 +244,96 @@
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
             "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel5AA9489D957F784F",
+            "title": "Total Stats",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n//| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Frequent\" as f_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Continuous\" as c_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(f_scan_bytes),0,f_scan_bytes) as f_scan_bytes\n| if (isnull(c_scan_bytes),0,c_scan_bytes) as c_scan_bytes\n\n| count as searches,  sum(inf_scan_bytes) as inf_scan_bytes,sum(c_scan_bytes) as c_scan_bytes, sum(f_scan_bytes) as f_scan_bytes by user_name,query_type\n| round((inf_scan_bytes /1024/1024/1024) * 10 )/10 as inf_scan_gb\n| round((f_scan_bytes /1024/1024/1024) * 10 )/10 as f_scan_gb\n| round((c_scan_bytes /1024/1024/1024) * 10 )/10 as c_scan_gb\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(c_scan_gb) as c_scan_gb, sum(inf_scan_gb) as inf_scan_gb, sum(f_scan_gb) as f_scan_gb\n| inf_scan_gb * .016 as inf_scan_credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel569A3FB5BDF7DB4D",
+            "title": "E. Meta to Types and Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n//| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| avg(execution_duration_ms) as avg_exec_ms,count as searches, sum(data_scanned_bytes) as data_scanned_bytes, sum(inf_scan_bytes) as inf_scan_bytes,sum(data_retrieved_bytes) as data_retrieved_bytes , sum(retrieved_message_count) as retrieved_events by user_name,query_type,query,scanned_partition_count,is_aggregate,analytics_tier,status_message //,session_id\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n//| round((data_retrieved_bytes/1024/1024/1024) * 10 )/10 as retrieved_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n//| round(avg_exec_ms / 1000) as avg_exec_s\n| parse regex field = query \"(?i)(?<meta>(?:_sourcename|_sourcecategory|_source|_sourcehost|_collector|_index|_datatier) *(?:=|matches|in)[ \\\"]*[\\w+\\*\\\",/:\\\\\\.\\_-]+)\\\"*\"\n| replace(meta,\"\\\"\",\"\") as meta\n| if (query_type = \"Interactive Dashboard\",searches,0) as dashboard\n| if ( query_type = \"Interactive Search\",searches,0) as search\n| if (query_type = \"Scheduled Search\",searches,0) as schedule_sch\n| if (query_type = \"Subquery\",searches,0) as subquery\n| if (query_type = \"Monitors\",searches,0) as monitors\n| if (query_type = \"View Maintenance\",searches,0) as views\n| if (query_type = \"Search API\",searches,0) as api\n\n| if (query_type matches /(?i)compare|internal|subquery/,searches,0) as other\n\n| sum(dashboard) as dashboards,sum(search) as search,sum(schedule_sch) as ss, sum(monitors) as monitor,sum(api) as api, sum(other) as other,sum(views) as views, sum(scan_gbytes) as scan_gbytes,sum(inf_scan_gbytes) as inf_scan_gbytes, count_distinct(user_name) as users,avg(scanned_partition_count) as partitions by meta\n| sort meta asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel27EF02E38D55B941",
+            "title": "Total Stats Types",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n//| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Frequent\" as f_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Continuous\" as c_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(f_scan_bytes),0,f_scan_bytes) as f_scan_bytes\n| if (isnull(c_scan_bytes),0,c_scan_bytes) as c_scan_bytes\n\n| count as searches,  sum(inf_scan_bytes) as inf_scan_bytes,sum(c_scan_bytes) as c_scan_bytes, sum(f_scan_bytes) as f_scan_bytes by user_name,query_type\n| round((inf_scan_bytes /1024/1024/1024) * 10 )/10 as inf_scan_gb\n| round((f_scan_bytes /1024/1024/1024) * 10 )/10 as f_scan_gb\n| round((c_scan_bytes /1024/1024/1024) * 10 )/10 as c_scan_gb\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(c_scan_gb) as c_scan_gb, sum(inf_scan_gb) as inf_scan_gb, sum(f_scan_gb) as f_scan_gb by query_type\n| inf_scan_gb * .016 as inf_scan_credits | sort query_type asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1D74476FBEEBBA46",
+            "title": "Effective Query Fiters Selected",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "```\n(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n```"
         }
     ],
     "variables": [
