@@ -1,11 +1,8 @@
-
-
 {
     "type": "DashboardV2SyncDefinition",
     "name": "Collection Issues",
     "description": "",
     "title": "Collection Issues",
-    "rootPanel": null,
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -15,17 +12,13 @@
         "type": "BeginBoundedTimeRange",
         "from": {
             "type": "RelativeTimeRangeBoundary",
-            "relativeTime": "-15m"
+            "relativeTime": "-1w"
         },
         "to": null
     },
     "layout": {
         "layoutType": "Grid",
         "layoutStructures": [
-            {
-                "key": "panelAA32CF2AAE3FF94C",
-                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":36}"
-            },
             {
                 "key": "panelPANE-0AF05FE9A19B5944",
                 "structure": "{\"height\":8,\"width\":16,\"x\":0,\"y\":10}"
@@ -35,60 +28,20 @@
                 "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":10}"
             },
             {
-                "key": "panelPANE-C689344398ED3A43",
-                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":44}"
-            },
-            {
-                "key": "panelD721B480AD8C9B41",
-                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":44}"
-            },
-            {
-                "key": "panelE7D65797BFBD084F",
-                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":29}"
-            },
-            {
-                "key": "panelDCCE5D6B8300BB4B",
-                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":59}"
-            },
-            {
-                "key": "panel839A8DA6ACC98A4B",
-                "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":59}"
-            },
-            {
                 "key": "panel756CB3D0AF116A45",
-                "structure": "{\"height\":7,\"width\":9,\"x\":0,\"y\":20}"
+                "structure": "{\"height\":10,\"width\":11,\"x\":0,\"y\":31}"
             },
             {
                 "key": "panel279B57A1AE00AB40",
-                "structure": "{\"height\":7,\"width\":7,\"x\":17,\"y\":20}"
+                "structure": "{\"height\":10,\"width\":13,\"x\":11,\"y\":31}"
             },
             {
                 "key": "panelPANE-33DD41A89BC11B42",
                 "structure": "{\"height\":5,\"width\":4,\"x\":0,\"y\":5}"
             },
             {
-                "key": "panelB05488B2969B594D",
-                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":29}"
-            },
-            {
                 "key": "panelPANE-98510C96B10B9A49",
                 "structure": "{\"height\":5,\"width\":12,\"x\":0,\"y\":0}"
-            },
-            {
-                "key": "panel4AA70633B1CC7B49",
-                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":36}"
-            },
-            {
-                "key": "panelC6FC497DB12B5A4F",
-                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":51}"
-            },
-            {
-                "key": "panel1F14EE5A90E2C946",
-                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":51}"
-            },
-            {
-                "key": "panel64D5C20E92621A43",
-                "structure": "{\"height\":7,\"width\":8,\"x\":9,\"y\":20}"
             },
             {
                 "key": "panel2876F03E8A88A947",
@@ -100,78 +53,43 @@
             },
             {
                 "key": "panel644E91C297172A47",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":18}"
-            },
-            {
-                "key": "panel1E2C0029AA98C84E",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":27}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":29}"
             },
             {
                 "key": "panelA1C2E1A585000B44",
                 "structure": "{\"height\":5,\"width\":4,\"x\":4,\"y\":5}"
+            },
+            {
+                "key": "panelCC5582D0A3CB8842",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":18}"
             }
         ]
     },
     "panels": [
         {
             "id": null,
-            "key": "panelAA32CF2AAE3FF94C",
-            "title": "Collectors With No Recent Data",
-            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourceCategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>(?:[^\\\"]+)|(?:\\\"\\\"))\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n//| sort _messagetime \n| max(_messagetime) as MostRecent, sum(bytes) as TotalVolumeBytes by collector \n| formatDate(tolong(MostRecent),\"yyyy/MM/dd HH:mm:ss\") as MostRecentTime \n| toMillis(now()) as currentTime \n| formatDate(fromMillis(currentTime),\"yyyy/MM/dd HH:mm:ss\") as SearchTime \n| (currentTime-MostRecent) / 1000 / 60 as mins_since_last_logs \n| fields -mostrecent, currenttime,SearchTime\n|floor(mins_since_last_logs) as mins_since_last_logs\n//| format (\"%s Has not collected data in the past %s minutes\", collector,mins_since_last_logs) as message\n| sort mins_since_last_logs\n// we set a threshold on this line\n| where mins_since_last_logs >= 15\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
             "key": "panelPANE-0AF05FE9A19B5944",
-            "title": "Recent Health Failure Events",
+            "title": "Health Event Types",
             "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_system_events \"Health-Change\" error\n| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| timeslice by 1m | count by _timeslice, eventtype, resourceid, trackerid,name,error | fields -_count",
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\" unhealthy {{{keywords}}}\n| json field=_raw \"status\" \n| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| count_distinct(resourceid) as resources, count by  trackerid,error ",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -184,180 +102,21 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_system_events \"Health-Change\" error\n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n//| json field=_raw \"details.trackerId\" as trackerid\n//| json field=_raw \"resourceIdentity.name\" as name\n//| concat(name,\" \",trackerid ) as key \n| 1 as failed\n| timeslice by 1h | count by _timeslice,error | transpose row _timeslice column error",
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\" unhealthy\n {{{keywords}}}\n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId\n \n| json field=_raw \"status\" \n| json field=_raw \"details.error\" as error\n//| json field=_raw \"details.trackerId\" as trackerid\n//| json field=_raw \"resourceIdentity.name\" as name\n//| concat(name,\" \",trackerid ) as key \n| 1 as failed\n| timeslice by 1h | count by _timeslice,error | transpose row _timeslice column error",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1w"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelPANE-C689344398ED3A43",
-            "title": "Large Increases in Collection (10% increase, .5% total ingest)",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":25,\"color\":\"#98ECA9\"},{\"from\":25,\"to\":50,\"color\":\"#F2DA73\"},{\"from\":50,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by collector \n| where !(collector matches \"*_volume\") \n| compare timeshift -14d \n| if(isNull(gbytes_14d), 0, gbytes_14d) as gbytes_14d \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes / 1024) as mb\n| round(gbytes_14d / 1024) as mb_baseline \n| where  pct_increase > 10 and ingest_weight > .5 and ( mb > 100 or mb_baseline > 100)\n//update pct_increase and/or weight value to adjust alert sensitivity\n| concat (round(pct_increase,1),\"% more ingest was: \",round(mb_baseline),\"MB now: \",round(mb),\"MB pct of total:\",round(ingest_weight,1)) as comment\n| last(pct_increase) by collector,comment",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1h"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelD721B480AD8C9B41",
-            "title": "Large Decreases in Collection (10% drop, .5% total ingest, >100mb) vs 14d ago",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":-25,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":-50,\"to\":-25,\"color\":\"#F2DA73\"},{\"from\":-1000000,\"to\":-50,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by collector \n| where !(collector matches \"*_volume\") \n| compare timeshift -14d \n| if(isNull(gbytes_14d), 0, gbytes_14d) as gbytes_14d \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes / 1024) as mb\n| round(gbytes_14d / 1024) as mb_baseline \n| where  pct_increase <= -10 and ingest_weight > .5 and ( mb > 100 or mb_baseline > 100)\n//update pct_increase and/or weight value to adjust alert sensitivity\n| concat (round(pct_increase,1),\"% less ingest was: \",round(mb_baseline),\"MB now: \",round(mb),\"MB pct of total:\",round(ingest_weight,1)) as comment\n| last(pct_increase) by collector,comment",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-3h"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelE7D65797BFBD084F",
-            "title": "Collectors Large Changes (weight > .1%, abs change > 5%)",
-            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| timeslice 1h \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by collector \n| where !(collector matches \"*_volume\") \n| compare timeshift -7d 2 avg \n| if(isNull(gbytes_14d_avg), 0, gbytes_14d_avg) as gbytes_14d_avg \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d_avg) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes * 1024) as mb\n| round(gbytes_14d_avg * 1024) as mb_baseline\n| fields -gbytes, gbytes_14d_avg,_total\n| where ingest_weight > .1 and (abs(pct_increase) > 5)\n| sort pct_increase\n\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1h"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelDCCE5D6B8300BB4B",
-            "title": "Collection Create, Delete or Upgrade",
-            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection and (CollectorCreated OR CollectorUpdated OR CollectorDeleted OR CollectorUpgradeCompleted)\n| timeslice by 1h\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"CollectorUpgradeCompleted\") \n| count as Count by EventName,_timeslice\n//| fillmissing values() in EventName \n| fillmissing timeslice(1h)\n| transpose row _timeslice column eventname\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-3d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel839A8DA6ACC98A4B",
-            "title": "Sources Created or Deleted",
-            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted OR CollectorSourcesSynchronized)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\", \"CollectorSourcesSynchronized\") \n| timeslice by 1h\n| count by EventName,_timeslice\n| fillmissing timeslice(1h)\n| transpose row _timeslice column eventname",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-3d"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -365,30 +124,26 @@
             "id": null,
             "key": "panel756CB3D0AF116A45",
             "title": "Budget Status",
-            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":80,\"color\":\"#98ECA9\"},{\"from\":80,\"to\":100,\"color\":\"#F2DA73\"},{\"from\":100,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management budget\n//| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action\n\n| parse \"Budget * with scope * consumed\" as name,scope\n| parse \"consumed *% of capacity and is reset at *.\" as percent,reset_time\n| parse \"Capacity: * bytes\" as capacity_bytes\n| parse \"Usage: * bytes\" as used_bytes\n| timeslice 15m | sort _timeslice asc\n| last(capacity_bytes) as capacity_bytes, last(percent) as percent by name | sort percent\n| if (percent >=100 ,\"exceeded\",\"ok\") as status",
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management budget  {{{keywords}}}\n//| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action\n\n| parse \"Budget * with scope * consumed\" as name,scope\n| parse \"consumed *% of capacity and is reset at *.\" as percent,reset_time\n| parse \"Capacity: * bytes\" as capacity_bytes\n| parse \"Usage: * bytes\" as used_bytes\n| sort _messagetime \n| first(capacity_bytes) as capacity_bytes, first(percent) as percent by name \n| capacity_bytes/1024/1024 as mb\n|  num(percent) as percent |sort percent\n| if (percent >=100 ,\"exceeded\",\"ok\") as status\n| fields -capacity_bytes",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -401,25 +156,21 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management \"Budget\" \"last reset\" //\"Approaching\"\n| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action\n| parse \"Budget * with field value * consumed *% of capacity since last reset.\" as budget,key,usage_pct\n| timeslice \n| max(usage_pct) by _timeslice, budget\n| transpose row _timeslice column budget",
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management \"Budget\" \"last reset\" \n {{{keywords}}}\n//\"Approaching\"\n| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action nodrop\n| parse \"Budget * with \" as budget nodrop\n| parse \"consumed *% of capacity since last reset.\" as usage_pct nodrop\n\n| timeslice \n| max(usage_pct) by _timeslice, budget\n| transpose row _timeslice column budget",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-3d"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -432,56 +183,21 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_audit _sourceCategory=account_management _sourceName=VOLUME_QUOTA \"rate limit\"\n\n| count | if (isnull(_count),0,_count) as _count",
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit _sourceCategory=account_management _sourceName=VOLUME_QUOTA \"rate limit\"  {{{keywords}}}\n\n| count | if (isnull(_count),0,_count) as _count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelB05488B2969B594D",
-            "title": "Categories Volume Changes (weight > 1%, abs pct increase > 10%)",
-            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"sourcecategory_volume\" \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| timeslice 1h \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by sourcecategory \n| where !(sourcecategory matches \"*_volume\") \n| compare timeshift -7d 2 avg \n| if(isNull(gbytes_14d_avg), 0, gbytes_14d_avg) as gbytes_14d_avg \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d_avg) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes * 1024) as mb\n| round(gbytes_14d_avg * 1024) as mb_baseline\n// exclude removed \n| where (pct_increase >= 10 or pct_increase < -10) and ingest_weight > 1\n | fields -gbytes, gbytes_14d_avg,_total\n| sort pct_increase\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1h"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -492,160 +208,32 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard brings together many aspect so Sumo collection management in a single pane of glass including:\n- health events\n- ingest budgets\n- collection spikes\n- sudden drop in collection volume\n- throttling events"
-        },
-        {
-            "id": null,
-            "key": "panel4AA70633B1CC7B49",
-            "title": "Collection Over Time by collector > 1% ingest",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024 as mb \n| timeslice 15m| sum(mb) as mb by collector ,_timeslice\n| if (collector matches \"*_volume\",\"views\",collector) as collector\n| total mb as tmb by _timeslice\n| if (mb/tmb <.01,\"others\",collector) as collector \n| sum(mb) as mbby collector,_timeslice | transpose row _timeslice column collector",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelC6FC497DB12B5A4F",
-            "title": "Collection Over Time by source > 1% ingest",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"source_volume\" \n| parse regex \"\\\"(?<source>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024 as mb \n| timeslice 15m| sum(mb) as mb by source ,_timeslice\n| if (source matches \"*_volume\",\"views\",source) as source\n| total mb as tmb by _timeslice\n| if (mb/tmb <.01,\"others\",source) as source \n| sum(mb) as mbby source,_timeslice | transpose row _timeslice column source",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel1F14EE5A90E2C946",
-            "title": "Collection Over Time by sourcecategory > 1% ingest",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "_index=sumologic_volume sizeInBytes _sourcecategory=\"sourcecategory_volume\" \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024 as mb \n| timeslice 15m| sum(mb) as mb by sourcecategory ,_timeslice\n| if (sourcecategory matches \"*_volume\",\"views\",sourcecategory) as sourcecategory\n| total mb as tmb by _timeslice\n| if (mb/tmb <.01,\"others\",sourcecategory) as sourcecategory \n| sum(mb) as mbby sourcecategory,_timeslice | transpose row _timeslice column sourcecategory",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel64D5C20E92621A43",
-            "title": "Budget Use Pct Over Time",
-            "visualSettings": "{\"series\":{},\"overrides\":[],\"axes\":{\"axisY\":{\"unit\":{\"value\":\"\",\"isCustom\":false},\"maximum\":100}},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "queryString": "(_index=sumologic_audit budget)\n| parse \"Budget * with * * consumed *% of capacity and is reset at *.\\nCapacity: * bytes\\nUsage: * bytes\\nNext reset: *\" as budget,type,scope,percent_used,reset_time,capacity,usage,next_reset\n| timeslice\n| max(percent_used) as percent_used by budget,_timeslice\n| transpose row _timeslice column budget",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "parseMode": "Manual",
-                    "timeSource": "Message"
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-3d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
+            "text": "Sumo collection management in a single pane of glass including:\n- health events\n- ingest budgets\n- throttling events"
         },
         {
             "id": null,
             "key": "panel2876F03E8A88A947",
-            "title": "Budget Exceeded",
+            "title": "Budgets Exceeded",
             "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":0.1,\"color\":\"#98ECA9\"},{\"from\":1,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_system_events \"IngestBudget\" \n| json \"eventType\",\"severityLevel\", \"resourceIdentity.type\" as eventType , severity, resourceType \n| where eventType = \"Health-Change\" AND resourceType = \"IngestBudget\" and severity=\"Error\" | count",
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"IngestBudget\"  {{{keywords}}}\n| json field=_raw \"status\"\n| json field=_raw \"resourceIdentity.name\" as budget\n| json \"eventType\",\"severityLevel\", \"resourceIdentity.type\" as eventType , severity, resourceType \n| where eventType = \"Health-Change\" AND resourceType = \"IngestBudget\" and severity=\"Error\" | count by budget | count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -669,47 +257,74 @@
         },
         {
             "id": null,
-            "key": "panel1E2C0029AA98C84E",
-            "title": "Changes In Collection and Sources",
-            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "TextPanel",
-            "text": "Help Topics: - [Data Volume Index](https://help.sumologic.com/Manage/Ingestion-and-Volume/Data_Volume_Index) - [Data Volume App](https://help.sumologic.com/07Sumo-Logic-Apps/26Apps_for_Sumo/Data_Volume_App) - [Ingestion Alerting](https://help.sumologic.com/Manage/Ingestion-and-Volume/Monitor_Ingestion_and_Receive_Alerts)\n"
-        },
-        {
-            "id": null,
             "key": "panelA1C2E1A585000B44",
             "title": "Error Health Events",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Health Events\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#16943E\"},{\"from\":0,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Resources\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#16943E\"},{\"from\":0,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
-                    "queryString": "_index=sumologic_system_events \"Health-Change\" error\n| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| count",
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\"  {{{keywords}}} unhealthy\n| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| count by name | count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Manual",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelCC5582D0A3CB8842",
+            "title": "Latest Health Failure Summary",
+            "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\"  {{{keywords}}}\n| json field=_raw \"status\" \n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"severityLevel\" as severity\n| sort _messagetime | count as events, first(_messagetime) as latest, first(status) as status by trackerid,name,error,severity\n| sort latest | formatdate(latest,\"yyyy/MM/dd HH:mm:ss ZZZ\") as latest\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         }
     ],
-    "variables": [],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*,// any search keywords,not installed* not filecollection*,budget"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
     "coloringRules": []
 }
-
-
