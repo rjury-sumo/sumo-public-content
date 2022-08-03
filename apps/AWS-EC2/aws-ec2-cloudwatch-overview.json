@@ -88,7 +88,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid",
+                    "queryString": " account={{account}} metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -115,7 +115,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} |filter max > 0",
+                    "queryString": "account={{account}} metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} |filter max > 0",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -149,7 +149,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=cpucreditbalance region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryString": "account={{account}} metric=cpucreditbalance region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -176,7 +176,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
+                    "queryString": "account={{account}} metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -203,7 +203,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
+                    "queryString": "account={{account}} metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -239,7 +239,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=EBSByteBalance%  region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryString": "account={{account}} metric=EBSByteBalance%  region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -284,7 +284,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}}",
+                    "queryString": "account={{account}} metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}}",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -311,7 +311,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=EBSIOBalance%   region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
+                    "queryString": "account={{account}} metric=EBSIOBalance%   region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -338,7 +338,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}} ",
+                    "queryString": "account={{account}} metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}} ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -365,7 +365,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} | filter max > 0",
+                    "queryString": "account={{account}}  metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} | filter max > 0",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -440,7 +440,7 @@
             "id": null,
             "name": "field",
             "displayName": "field",
-            "defaultValue": "account",
+            "defaultValue": "_collector",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name"
@@ -458,6 +458,21 @@
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "a,b*,*c*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "account",
+            "displayName": "account",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "account"
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
