@@ -1,11 +1,8 @@
-
-
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "1. AWS EC2 Cloudwatch Overview",
+    "name": "98. AWS EC2 Cloudwatch Metrics Overview",
     "description": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
-    "title": "1. AWS EC2 Cloudwatch Overview",
-    "rootPanel": null,
+    "title": "98. AWS EC2 Cloudwatch Metrics Overview",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {
@@ -90,27 +87,23 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
             "timeRange": null,
             "coloringRules": null,
-            "linkedDashboards": [
-                {
-                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
-                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
-                    "includeTimeRange": true,
-                    "includeVariables": true
-                }
-            ]
+            "linkedDashboards": []
         },
         {
             "id": null,
@@ -121,14 +114,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} |filter max > 0",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -136,7 +132,7 @@
             "coloringRules": null,
             "linkedDashboards": [
                 {
-                    "id": "yRU1gBnPnnhDr7ZXpwSroU9VuXAnetoj7BriVyesCmPvOo5dCm4wcHIopIh6",
+                    "id": "ZHyJCWL5LACZRNiyhONdG4pRQ2I22ukeYtxzVFcmTp8rYUmB7TNoZvAJORow",
                     "relativePath": "",
                     "includeTimeRange": true,
                     "includeVariables": true
@@ -152,14 +148,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=cpucreditbalance region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -176,14 +175,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=StatusCheckFailed_Instance  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -200,14 +202,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -222,7 +227,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false},\"text\":{\"fontSize\":12,\"horizontalAlignment\":\"left\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This is an overview to link to the 'EC2' node in AWS Observability Explorer. This dashboard shows native AWS EC2 metrics only. For more detailed per host metrics (memory, disk volumes etc)  it's recommended to install a Sumo Logic Installed Collector.\n\nIn order to see metrics here you must do one of the following:\n- in the AWSO Cloudatch template add  AWS/EC2 namespace in parameter 4 \"Sumo Logic AWS Cloudwatch Metrics Sources\"\n- by manually adding collection and adding an 'account' field to each source matching the AWSO name parameter.\n\nYou can filter this dashboard by instanceid or using customer 'field' and 'value' filters to apply a custom filter to this dashboard.\nYou can click on the honeycomb to drill down to view a specific instance in a new dashboard.\n\nNote since these are AWS Cloudwatch metrics they will not have a _sourcehost or _collector as you would see with host metrics integrated into AWS Observability. For instructions on setting up host metrics for AWSO see [this link](https://help.sumologic.com/Observability_Solution/AWS_Observability_Solution/03_Other_Configurations_and_Tools/Add_Fields_to_Existing_Host_Metrics_Sources)"
+            "text": "This is an overview to link to the 'EC2' node in AWS Observability Explorer. This dashboard shows native AWS EC2 metrics only. For more detailed per host metrics (memory, disk volumes etc)  it's recommended to install a Sumo Logic Installed Collector.\n\nTo include EC2 host metrics use AWSO v 2.5 onward or \n- in the AWSO Cloudatch template add  AWS/EC2 namespace in parameter 4 \"Sumo Logic AWS Cloudwatch Metrics Sources\"\n- by manually adding collection and adding an 'account' field to each source matching the AWSO name parameter.\n\nYou can filter this dashboard by instanceid or using customer 'field' and 'value' filters to apply a custom filter to this dashboard.\nYou can click on the honeycomb to drill down to view a specific instance in a new dashboard.\n\nNote since these are AWS Cloudwatch metrics they will not have a _sourcehost or _collector as you would see with host metrics integrated into AWS Observability. "
         },
         {
             "id": null,
@@ -233,14 +238,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=EBSByteBalance%  region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -275,27 +283,23 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}}",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
             "timeRange": null,
             "coloringRules": null,
-            "linkedDashboards": [
-                {
-                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
-                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
-                    "includeTimeRange": true,
-                    "includeVariables": true
-                }
-            ]
+            "linkedDashboards": []
         },
         {
             "id": null,
@@ -306,14 +310,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=EBSIOBalance%   region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -330,27 +337,23 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid,account,region,{{field}} ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
             "timeRange": null,
             "coloringRules": null,
-            "linkedDashboards": [
-                {
-                    "id": "llgklcbQK0m2wV8Kermx2NaDorB8YgMhm0E3xrFz8jUyoTAWyhV5Acipbizq",
-                    "relativePath": "../1. AWS EC2 Cloudwatch Metrics",
-                    "includeTimeRange": true,
-                    "includeVariables": true
-                }
-            ]
+            "linkedDashboards": []
         },
         {
             "id": null,
@@ -361,14 +364,17 @@
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
+                    "transient": false,
                     "queryString": "metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} | filter max > 0",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
                     "metricsQueryData": null,
                     "tracesQueryData": null,
+                    "spansQueryData": null,
                     "parseMode": "Auto",
-                    "timeSource": "Message"
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -376,7 +382,7 @@
             "coloringRules": null,
             "linkedDashboards": [
                 {
-                    "id": "yRU1gBnPnnhDr7ZXpwSroU9VuXAnetoj7BriVyesCmPvOo5dCm4wcHIopIh6",
+                    "id": "ZHyJCWL5LACZRNiyhONdG4pRQ2I22ukeYtxzVFcmTp8rYUmB7TNoZvAJORow",
                     "relativePath": "",
                     "includeTimeRange": true,
                     "includeVariables": true
@@ -437,7 +443,7 @@
             "defaultValue": "account",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "_sourcecategory,_sourcehost,_collector,_source,account"
+                "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name"
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
@@ -461,4 +467,3 @@
     ],
     "coloringRules": []
 }
-
