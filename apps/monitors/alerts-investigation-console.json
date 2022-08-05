@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Monitors Investigation Console 0.4",
+    "name": "Alerts Investigation Console",
     "description": "",
-    "title": "Monitors Investigation Console 0.4",
+    "title": "Alerts Investigation Console",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -21,7 +21,7 @@
         "layoutStructures": [
             {
                 "key": "panel1BA3E8C8BA78C942",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":24}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":25}"
             },
             {
                 "key": "panelPANE-3E4B08FF83A7B94E",
@@ -29,71 +29,67 @@
             },
             {
                 "key": "panel60376DDCB2808846",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":42}"
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":43}"
             },
             {
                 "key": "panel0732AAB2A46CAA47",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":50}"
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":51}"
             },
             {
                 "key": "panelPANE-8859B7D8AB0B894C",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":59}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":60}"
             },
             {
                 "key": "panel0E39546D99858A4A",
-                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":60}"
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":61}"
             },
             {
                 "key": "panel7A873BB18CC94846",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":67}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":68}"
             },
             {
                 "key": "panel94C774E796B0884E",
-                "structure": "{\"height\":4,\"width\":5,\"x\":0,\"y\":2}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":0,\"y\":1}"
             },
             {
                 "key": "panel95409DDBB4D8FB4B",
-                "structure": "{\"height\":4,\"width\":5,\"x\":5,\"y\":2}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":5,\"y\":1}"
             },
             {
                 "key": "panelA53833DCBD81CB4E",
-                "structure": "{\"height\":4,\"width\":5,\"x\":15,\"y\":2}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":15,\"y\":1}"
             },
             {
                 "key": "panel2664C95891AEE846",
-                "structure": "{\"height\":4,\"width\":5,\"x\":10,\"y\":2}"
+                "structure": "{\"height\":4,\"width\":5,\"x\":10,\"y\":1}"
             },
             {
                 "key": "panel89E8D08F8EA29A4D",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":23}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":24}"
             },
             {
                 "key": "panel75D845FB94E75944",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":34}"
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":35}"
             },
             {
                 "key": "panel103AD92FAB8EFB41",
-                "structure": "{\"height\":4,\"width\":4,\"x\":20,\"y\":2}"
+                "structure": "{\"height\":4,\"width\":4,\"x\":20,\"y\":1}"
             },
             {
                 "key": "panelBAE8D267B7164B41",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":6}"
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":5}"
             },
             {
                 "key": "panelC68AAAC9B5C4A843",
-                "structure": "{\"height\":17,\"width\":7,\"x\":10,\"y\":6}"
+                "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":14}"
             },
             {
                 "key": "panel74936AA4AFDEB841",
-                "structure": "{\"height\":17,\"width\":7,\"x\":17,\"y\":6}"
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":14}"
             },
             {
                 "key": "panel7CD89D4F80E06A4B",
-                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":14}"
-            },
-            {
-                "key": "panel08D3370CBD32FB44",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":1}"
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":5}"
             }
         ]
     },
@@ -108,7 +104,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n//| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as oldstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| first(status) as last_state,count as events, count_distinct(timeseries) as series, values(status) as statuses,avg(duration) as avg_duration, max (duration) as max_duration by monitorid,path,granularity \n| sort events\n\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / (1000 * 60)) as duration\n| json field=_raw \"subsystem\"\n//| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as oldstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| first(status) as last_state,count as events, count_distinct(timeseries) as series, values(status) as statuses,avg(duration) as avg_duration, max (duration) as max_duration by monitorid,path,granularity \n| sort events\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -426,13 +422,13 @@
             "id": null,
             "key": "panelBAE8D267B7164B41",
             "title": "Events Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#df3d3d\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#df3d3d\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| timeslice | where status !=\"Normal\"\n| count by status,_timeslice | transpose row _timeslice column status\n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n\n//| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n//| json field=_raw \"details.alertingGroup.triggerValue\" as value\n///| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| timeslice //| where status !=\"Normal\"\n| count by status,_timeslice | transpose row _timeslice column status\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -453,7 +449,7 @@
             "id": null,
             "key": "panelC68AAAC9B5C4A843",
             "title": "Alerts By Resource Name",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelMaxWidth\":\"300\"},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#bf2121\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelMaxWidth\":\"300\"},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#bf2121\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
@@ -480,7 +476,7 @@
             "id": null,
             "key": "panel74936AA4AFDEB841",
             "title": "Alerts By Monitor Folder",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelMaxWidth\":\"300\"},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#bf2121\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelMaxWidth\":\"300\"},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#bf2121\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
@@ -506,8 +502,8 @@
         {
             "id": null,
             "key": "panel7CD89D4F80E06A4B",
-            "title": "Events By Name Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#df3d3d\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}]}",
+            "title": "Warning, Error or Missing Data Events By Name Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[{\"series\":[\"Critical\"],\"queries\":[],\"properties\":{\"color\":\"#df3d3d\"}},{\"series\":[\"Warning\"],\"queries\":[],\"properties\":{\"color\":\"#f0731f\"}}],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
@@ -529,15 +525,6 @@
             "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel08D3370CBD32FB44",
-            "title": "Monitor High Level Status (Copy)",
-            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "TextPanel",
-            "text": ""
         }
     ],
     "variables": [
@@ -559,7 +546,7 @@
             "id": null,
             "name": "sumo_url",
             "displayName": "sumo_url",
-            "defaultValue": "live.us2",
+            "defaultValue": "service.us2",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "live.us2,service.us2,service,service.au,service.mum,service.fra"
