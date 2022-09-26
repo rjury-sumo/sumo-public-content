@@ -401,7 +401,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,duration\n| where status =\"Normal\"\n| duration/ 60 as %\"Duration (Min)\" | avg(%\"Duration (Min)\" ) as %\"Avg Duration (Min)\" \n",
+                    "queryString": "\n{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / (1000 * 60)) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries | sort _messagetime \n| values(status) as statuses,min(_messagetime) as start, max(_messagetime) as end,first(status) as status by monitorid,duration,timeseries\n| where status =\"Normal\"\n| if(start=end,duration,(end - start ) / ( 1000 * 60) ) as %\"Duration (Min)\"\n | avg(%\"Duration (Min)\" ) as %\"Avg Duration (Min)\" \n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -535,7 +535,7 @@
             "defaultValue": "// to disable or enter search",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "//anything"
+                "values": "//anything,(drop or \"new relic\" or availability)"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
