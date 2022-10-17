@@ -1,0 +1,13 @@
+_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH triggered
+| parse "[AlertType=*]" as type nodrop
+| parse "[Destination=*]" as dest nodrop
+| parse "[Recipients=*]" as dest nodrop
+| parse "[IndexName=*]" as dest nodrop
+
+| parse "[Name=*]" as name nodrop
+| parse "[StatusCode=*]" as statuscode nodrop
+| parse "[Reason=*]" as error nodrop
+
+//| where !isEmpty(type)
+| count as count by name, type, dest,statuscode,error
+| order by count
