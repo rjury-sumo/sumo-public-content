@@ -1,559 +1,235 @@
-{
-    "type": "DashboardV2SyncDefinition",
-    "name": "Host Metrics Telegraf Top N",
-    "description": "",
-    "title": "Host Metrics Telegraf Top N",
-    "theme": "Light",
-    "topologyLabelMap": {
-        "data": {}
-    },
-    "refreshInterval": 0,
-    "timeRange": {
-        "type": "BeginBoundedTimeRange",
-        "from": {
-            "type": "RelativeTimeRangeBoundary",
-            "relativeTime": "-1d"
-        },
-        "to": null
-    },
-    "layout": {
-        "layoutType": "Grid",
-        "layoutStructures": [
-            {
-                "key": "panel77F246BDBB666843",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":8}"
-            },
-            {
-                "key": "panelB423F5369FC13845",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":8}"
-            },
-            {
-                "key": "panel7D9425F9AFD07845",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":16}"
-            },
-            {
-                "key": "panelAB2F968CAC2B9A4D",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":16}"
-            },
-            {
-                "key": "panelPANE-16A90A8F9089284E",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":0}"
-            },
-            {
-                "key": "panel07499DAAA660D848",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":24}"
-            },
-            {
-                "key": "panel882E65948B2A1B48",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":24}"
-            },
-            {
-                "key": "panel0A31D3579E13B948",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":32}"
-            },
-            {
-                "key": "panelA3883E4AA621C84D",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":41}"
-            },
-            {
-                "key": "panel65EE007E88D09947",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":41}"
-            },
-            {
-                "key": "panel1E9C3F77A1E91945",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":49}"
-            },
-            {
-                "key": "panelF9EADD49AC9C4A4B",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":49}"
-            }
-        ]
-    },
-    "panels": [
-        {
-            "id": null,
-            "key": "panel77F246BDBB666843",
-            "title": "Top N CPU {{cpu_metric}}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest) \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelB423F5369FC13845",
-            "title": "Top {{cpu_metric}} Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},100 - latest) \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1d"
-                },
-                "to": null
-            },
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel7D9425F9AFD07845",
-            "title": "Top Memory {{mem_metric }}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{mem_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest) \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelAB2F968CAC2B9A4D",
-            "title": "Top {{mem_metric }} Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{mem_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest) \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelPANE-16A90A8F9089284E",
-            "title": "About",
-            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "TextPanel",
-            "text": "This dashboard shows the top N instances for key metrics for hosts/instances. This dashboard can be useful to switch between say host metrics (collector) vs host /process metrics (telegraf).\n\nFor example for \n- Installed Sumo Collector Host Metrics the cpu_metric is cpu_total and you can use _sourcehost for the host_metric. \n- for telegraf host and process metrics for cpu_metric use: procstat field=cpu_usage and for host_metric use: host.name\n\n**General**:\n-  Use filter_field and filter_value if you require custom filtering dimensions inserted in your query. The default for _filter_field is _sourcecategory. Current setting:\n```{{filter_field}}={{filter_value}}```\n- N is the N value to topk, currently set to: {{N}}\n\n**Host**\n- Set host_metric to the metric dimension that defines a host/instance. This will be used with host_value to filter the result set and will also be the grouping used in each panel. Current setting: ```{{host_metric}}={{host_value}} | .... by {{host_metric}}```\n\n**Tabular**\n- set the tabular_metric to see top K for a metric in a tabular format.\n\n** A and B options**\nYou can add two custom metrics to the chart using filters. A is Rate based and B is not.\n- use other_metric_a and b to customize the metrics displayed in the bottom panel.\n\n**Example Metric Sets**\n\nAdd these to your query string to try out for other metric sets for host metrics:\n- installed collector host metrics: ```?variables=host_metric:_sourcehost;host_value:*;cpu_metric:cpu_total;mem_metric:Mem_UsedPercent;filter_field:_sourcecategory;filter_value:*;disk_metric:Disk_UsedPercent;N:20;disk_name:devname;other_metric_a:Disk_Queue;other_metric_b:CPU_LoadAvg_1min&from=-24h&to=now```\n\n- host and process metrics (telegraf): ```?variables=N:20;host_metric:host.name;host_value:*;filter_field:_sourcecategory;filter_value:*;cpu_metric:procstat%20field%3Dcpu_usage;mem_metric:procstat%20field%3Dmemory_usage;disk_metric:host_disk%20field%3Dused_percent;disk_name:path;other_metric_a:host_diskio%20field%3Dweighted_io_time;other_metric_b:processes%20field%3Dtotal```\n\n**Host and Process Metrics List**\n- metric=host_cpu field=usage_guest\n- metric=host_cpu field=usage_guest_nice\n- metric=host_cpu field=usage_idle\n- metric=host_cpu field=usage_iowait\n- metric=host_cpu field=usage_irq\n- metric=host_cpu field=usage_nice\n- metric=host_cpu field=usage_softirq\n- metric=host_cpu field=usage_steal\n- metric=host_cpu field=usage_system\n- metric=host_cpu field=usage_user\n- metric=host_disk field=free\n- metric=host_disk field=inodes_free\n- metric=host_disk field=inodes_total\n- metric=host_disk field=inodes_used\n- metric=host_disk field=total\n- metric=host_disk field=used\n- metric=host_disk field=used_percent\n- metric=host_diskio field=io_time\n- metric=host_diskio field=iops_in_progress\n- metric=host_diskio field=merged_reads\n- metric=host_diskio field=merged_writes\n- metric=host_diskio field=read_bytes\n- metric=host_diskio field=read_time\n- metric=host_diskio field=reads\n- metric=host_diskio field=weighted_io_time\n- metric=host_diskio field=write_bytes\n- metric=host_diskio field=write_time\n- metric=host_diskio field=writes\n- metric=host_mem field=active\n- metric=host_mem field=available\n- metric=host_mem field=available_percent\n- metric=host_mem field=buffered\n- metric=host_mem field=cached\n- metric=host_mem field=commit_limit\n- metric=host_mem field=committed_as\n- metric=host_mem field=dirty\n- metric=host_mem field=free\n- metric=host_mem field=high_free\n- metric=host_mem field=high_total\n- metric=host_mem field=huge_page_size\n- metric=host_mem field=huge_pages_free\n- metric=host_mem field=huge_pages_total\n- metric=host_mem field=inactive\n- metric=host_mem field=low_free\n- metric=host_mem field=low_total\n- metric=host_mem field=mapped\n- metric=host_mem field=page_tables\n- metric=host_mem field=shared\n- metric=host_mem field=slab\n- metric=host_mem field=sreclaimable\n- metric=host_mem field=sunreclaim\n- metric=host_mem field=swap_cached\n- metric=host_mem field=swap_free\n- metric=host_mem field=swap_total\n- metric=host_mem field=total\n- metric=host_mem field=used\n- metric=host_mem field=used_percent\n- metric=host_mem field=vmalloc_chunk\n- metric=host_mem field=vmalloc_total\n- metric=host_mem field=vmalloc_used\n- metric=host_mem field=write_back\n- metric=host_mem field=write_back_tmp\n- metric=host_net field=bytes_recv\n- metric=host_net field=bytes_sent\n- metric=host_net field=drop_in\n- metric=host_net field=drop_out\n- metric=host_net field=err_in\n- metric=host_net field=err_out\n- metric=host_net field=icmp_inaddrmaskreps\n- metric=host_net field=icmp_inaddrmasks\n- metric=host_net field=icmp_incsumerrors\n- metric=host_net field=icmp_indestunreachs\n- metric=host_net field=icmp_inechoreps\n- metric=host_net field=icmp_inechos\n- metric=host_net field=icmp_inerrors\n- metric=host_net field=icmp_inmsgs\n- metric=host_net field=icmp_inparmprobs\n- metric=host_net field=icmp_inredirects\n- metric=host_net field=icmp_insrcquenchs\n- metric=host_net field=icmp_intimeexcds\n- metric=host_net field=icmp_intimestampreps\n- metric=host_net field=icmp_intimestamps\n- metric=host_net field=icmp_outaddrmaskreps\n- metric=host_net field=icmp_outaddrmasks\n- metric=host_net field=icmp_outdestunreachs\n- metric=host_net field=icmp_outechoreps\n- metric=host_net field=icmp_outechos\n- metric=host_net field=icmp_outerrors\n- metric=host_net field=icmp_outmsgs\n- metric=host_net field=icmp_outparmprobs\n- metric=host_net field=icmp_outredirects\n- metric=host_net field=icmp_outsrcquenchs\n- metric=host_net field=icmp_outtimeexcds\n- metric=host_net field=icmp_outtimestampreps\n- metric=host_net field=icmp_outtimestamps\n- metric=host_net field=icmpmsg_intype3\n- metric=host_net field=icmpmsg_outtype3\n- metric=host_net field=ip_defaultttl\n- metric=host_net field=ip_forwarding\n- metric=host_net field=ip_forwdatagrams\n- metric=host_net field=ip_fragcreates\n- metric=host_net field=ip_fragfails\n- metric=host_net field=ip_fragoks\n- metric=host_net field=ip_inaddrerrors\n- metric=host_net field=ip_indelivers\n- metric=host_net field=ip_indiscards\n- metric=host_net field=ip_inhdrerrors\n- metric=host_net field=ip_inreceives\n- metric=host_net field=ip_inunknownprotos\n- metric=host_net field=ip_outdiscards\n- metric=host_net field=ip_outnoroutes\n- metric=host_net field=ip_outrequests\n- metric=host_net field=ip_reasmfails\n- metric=host_net field=ip_reasmoks\n- metric=host_net field=ip_reasmreqds\n- metric=host_net field=ip_reasmtimeout\n- metric=host_net field=packets_recv\n- metric=host_net field=packets_sent\n- metric=host_net field=tcp_activeopens\n- metric=host_net field=tcp_attemptfails\n- metric=host_net field=tcp_currestab\n- metric=host_net field=tcp_estabresets\n- metric=host_net field=tcp_incsumerrors\n- metric=host_net field=tcp_inerrs\n- metric=host_net field=tcp_insegs\n- metric=host_net field=tcp_maxconn\n- metric=host_net field=tcp_outrsts\n- metric=host_net field=tcp_outsegs\n- metric=host_net field=tcp_passiveopens\n- metric=host_net field=tcp_retranssegs\n- metric=host_net field=tcp_rtoalgorithm\n- metric=host_net field=tcp_rtomax\n- metric=host_net field=tcp_rtomin\n- metric=host_net field=udp_ignoredmulti\n- metric=host_net field=udp_incsumerrors\n- metric=host_net field=udp_indatagrams\n- metric=host_net field=udp_inerrors\n- metric=host_net field=udp_noports\n- metric=host_net field=udp_outdatagrams\n- metric=host_net field=udp_rcvbuferrors\n- metric=host_net field=udp_sndbuferrors\n- metric=host_net field=udplite_ignoredmulti\n- metric=host_net field=udplite_incsumerrors\n- metric=host_net field=udplite_indatagrams\n- metric=host_net field=udplite_inerrors\n- metric=host_net field=udplite_noports\n- metric=host_net field=udplite_outdatagrams\n- metric=host_net field=udplite_rcvbuferrors\n- metric=host_net field=udplite_sndbuferrors\n- metric=host_netstat field=tcp_close\n- metric=host_netstat field=tcp_close_wait\n- metric=host_netstat field=tcp_closing\n- metric=host_netstat field=tcp_established\n- metric=host_netstat field=tcp_fin_wait1\n- metric=host_netstat field=tcp_fin_wait2\n- metric=host_netstat field=tcp_last_ack\n- metric=host_netstat field=tcp_listen\n- metric=host_netstat field=tcp_none\n- metric=host_netstat field=tcp_syn_recv\n- metric=host_netstat field=tcp_syn_sent\n- metric=host_netstat field=tcp_time_wait\n- metric=host_netstat field=udp_socket\n- metric=host_system field=load1\n- metric=host_system field=load15\n- metric=host_system field=load5\n- metric=host_system field=n_cpus\n- metric=host_system field=n_users\n- metric=host_system field=uptime\n- metric=processes field=dead\n- metric=processes field=idle\n- metric=processes field=paging\n- metric=processes field=sleeping\n- metric=processes field=stopped\n- metric=processes field=total\n- metric=processes field=total_threads\n- metric=processes field=unknown\n- metric=processes field=zombies\n- metric=procstat field=child_major_faults\n- metric=procstat field=child_minor_faults\n- metric=procstat field=cpu_time\n- metric=procstat field=cpu_time_guest\n- metric=procstat field=cpu_time_guest_nice\n- metric=procstat field=cpu_time_idle\n- metric=procstat field=cpu_time_iowait\n- metric=procstat field=cpu_time_irq\n- metric=procstat field=cpu_time_nice\n- metric=procstat field=cpu_time_soft_irq\n- metric=procstat field=cpu_time_steal\n- metric=procstat field=cpu_time_system\n- metric=procstat field=cpu_time_user\n- metric=procstat field=cpu_usage\n- metric=procstat field=created_at\n- metric=procstat field=involuntary_context_switches\n- metric=procstat field=lookup_pid_count\n- metric=procstat field=lookup_result_code\n- metric=procstat field=lookup_running\n- metric=procstat field=major_faults\n- metric=procstat field=memory_data\n- metric=procstat field=memory_locked\n- metric=procstat field=memory_rss\n- metric=procstat field=memory_stack\n- metric=procstat field=memory_swap\n- metric=procstat field=memory_usage\n- metric=procstat field=memory_vms\n- metric=procstat field=minor_faults\n- metric=procstat field=nice_priority\n- metric=procstat field=num_fds\n- metric=procstat field=num_threads\n- metric=procstat field=pid\n- metric=procstat field=ppid\n- metric=procstat field=read_bytes\n- metric=procstat field=read_count\n- metric=procstat field=rlimit_cpu_time_hard\n- metric=procstat field=rlimit_cpu_time_soft\n- metric=procstat field=rlimit_file_locks_hard\n- metric=procstat field=rlimit_file_locks_soft\n- metric=procstat field=rlimit_memory_data_hard\n- metric=procstat field=rlimit_memory_locked_hard\n- metric=procstat field=rlimit_memory_locked_soft\n- metric=procstat field=rlimit_memory_rss_hard\n- metric=procstat field=rlimit_memory_rss_soft\n- metric=procstat field=rlimit_memory_stack_hard\n- metric=procstat field=rlimit_memory_stack_soft\n- metric=procstat field=rlimit_memory_vms_hard\n- metric=procstat field=rlimit_memory_vms_soft\n- metric=procstat field=rlimit_nice_priority_hard\n- metric=procstat field=rlimit_num_fds_hard\n- metric=procstat field=rlimit_num_fds_soft\n- metric=procstat field=rlimit_realtime_priority_soft\n- metric=procstat field=rlimit_signals_pending_hard\n- metric=procstat field=rlimit_signals_pending_soft\n- metric=procstat field=signals_pending\n- metric=procstat field=voluntary_context_switches\n- metric=procstat field=write_bytes\n- metric=procstat field=write_count"
-        },
-        {
-            "id": null,
-            "key": "panel07499DAAA660D848",
-            "title": "Top Disk Used Per  {{host_metric}},{{disk_name}} {{disk_metric }}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| avg by {{host_metric}},{{disk_name}}\n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel882E65948B2A1B48",
-            "title": "Top {{disk_metric }} Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| avg by {{host_metric}},{{disk_name}}\n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel0A31D3579E13B948",
-            "title": "Tabular Metrics Display for metric: {{tabular_metric}} shows all dimensions ",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{tabular_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelA3883E4AA621C84D",
-            "title": "Top N Rate:  other_metric_a: {{other_metric_a}}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#28aa55\"},{\"from\":null,\"to\":null,\"color\":\"#f6c851\"},{\"from\":null,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{other_metric_a}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| rate\n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel65EE007E88D09947",
-            "title": "Top N Rate Based: other_metric_a: {{other_metric_a}}",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{other_metric_a}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| rate\n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel1E9C3F77A1E91945",
-            "title": "Top N other_metric_b: {{other_metric_b}}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#28aa55\"},{\"from\":null,\"to\":null,\"color\":\"#f6c851\"},{\"from\":null,\"to\":null,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{other_metric_b}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panelF9EADD49AC9C4A4B",
-            "title": "Top N other_metric_b: {{other_metric_b}}",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{other_metric_b}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        }
-    ],
-    "variables": [
-        {
-            "id": null,
-            "name": "N",
-            "displayName": "N",
-            "defaultValue": "20",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "10,20,25,30"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "host_metric",
-            "displayName": "host_metric",
-            "defaultValue": "host.name",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "_sourcehost,host.name,host,_collector"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "host_value",
-            "displayName": "host_value",
-            "defaultValue": "*",
-            "sourceDefinition": {
-                "variableSourceType": "MetadataVariableSourceDefinition",
-                "filter": "",
-                "key": "_sourcehost"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": true,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "filter_field",
-            "displayName": "filter_field",
-            "defaultValue": "_sourcecategory",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "_sourcehost,_sourcecategory,application,service,location,environment,account"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "filter_value",
-            "displayName": "filter_value",
-            "defaultValue": "*",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "a,*b*,c/d/e,etc"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": true,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "cpu_metric",
-            "displayName": "cpu_metric",
-            "defaultValue": "procstat field=cpu_usage",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "cpu_total,procstat field=cpu_usage"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "mem_metric",
-            "displayName": "mem_metric",
-            "defaultValue": "procstat field=memory_usage",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Mem_UsedPercent,procstat field=memory_usage"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "disk_metric",
-            "displayName": "disk_metric",
-            "defaultValue": "host_disk field=used_percent",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Disk_UsedPercent,host_disk field=used_percent"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "disk_name",
-            "displayName": "disk_name",
-            "defaultValue": "path",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "devname,path,what disk or volume tag name is"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "other_metric_a",
-            "displayName": "other_metric_a",
-            "defaultValue": "host_diskio field=weighted_io_time",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "any_other_metric_name,Disk_Queue,host_diskio field=weighted_io_time"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "other_metric_b",
-            "displayName": "other_metric_b",
-            "defaultValue": "processes field=total",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,processes field=total"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        },
-        {
-            "id": null,
-            "name": "tabular_metric",
-            "displayName": "tabular_metric",
-            "defaultValue": "host_disk field=used_percent",
-            "sourceDefinition": {
-                "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Disk_UsedPercent"
-            },
-            "allowMultiSelect": false,
-            "includeAllOption": false,
-            "hideFromUI": false,
-            "valueType": "Any"
-        }
-    ],
-    "coloringRules": []
-}
+metric=host_cpu field=usage_guest
+metric=host_cpu field=usage_guest_nice
+metric=host_cpu field=usage_idle
+metric=host_cpu field=usage_iowait
+metric=host_cpu field=usage_irq
+metric=host_cpu field=usage_nice
+metric=host_cpu field=usage_softirq
+metric=host_cpu field=usage_steal
+metric=host_cpu field=usage_system
+metric=host_cpu field=usage_user
+metric=host_disk field=free
+metric=host_disk field=inodes_free
+metric=host_disk field=inodes_total
+metric=host_disk field=inodes_used
+metric=host_disk field=total
+metric=host_disk field=used
+metric=host_disk field=used_percent
+metric=host_diskio field=io_time
+metric=host_diskio field=iops_in_progress
+metric=host_diskio field=merged_reads
+metric=host_diskio field=merged_writes
+metric=host_diskio field=read_bytes
+metric=host_diskio field=read_time
+metric=host_diskio field=reads
+metric=host_diskio field=weighted_io_time
+metric=host_diskio field=write_bytes
+metric=host_diskio field=write_time
+metric=host_diskio field=writes
+metric=host_mem field=active
+metric=host_mem field=available
+metric=host_mem field=available_percent
+metric=host_mem field=buffered
+metric=host_mem field=cached
+metric=host_mem field=commit_limit
+metric=host_mem field=committed_as
+metric=host_mem field=dirty
+metric=host_mem field=free
+metric=host_mem field=high_free
+metric=host_mem field=high_total
+metric=host_mem field=huge_page_size
+metric=host_mem field=huge_pages_free
+metric=host_mem field=huge_pages_total
+metric=host_mem field=inactive
+metric=host_mem field=low_free
+metric=host_mem field=low_total
+metric=host_mem field=mapped
+metric=host_mem field=page_tables
+metric=host_mem field=shared
+metric=host_mem field=slab
+metric=host_mem field=sreclaimable
+metric=host_mem field=sunreclaim
+metric=host_mem field=swap_cached
+metric=host_mem field=swap_free
+metric=host_mem field=swap_total
+metric=host_mem field=total
+metric=host_mem field=used
+metric=host_mem field=used_percent
+metric=host_mem field=vmalloc_chunk
+metric=host_mem field=vmalloc_total
+metric=host_mem field=vmalloc_used
+metric=host_mem field=write_back
+metric=host_mem field=write_back_tmp
+metric=host_net field=bytes_recv
+metric=host_net field=bytes_sent
+metric=host_net field=drop_in
+metric=host_net field=drop_out
+metric=host_net field=err_in
+metric=host_net field=err_out
+metric=host_net field=icmp_inaddrmaskreps
+metric=host_net field=icmp_inaddrmasks
+metric=host_net field=icmp_incsumerrors
+metric=host_net field=icmp_indestunreachs
+metric=host_net field=icmp_inechoreps
+metric=host_net field=icmp_inechos
+metric=host_net field=icmp_inerrors
+metric=host_net field=icmp_inmsgs
+metric=host_net field=icmp_inparmprobs
+metric=host_net field=icmp_inredirects
+metric=host_net field=icmp_insrcquenchs
+metric=host_net field=icmp_intimeexcds
+metric=host_net field=icmp_intimestampreps
+metric=host_net field=icmp_intimestamps
+metric=host_net field=icmp_outaddrmaskreps
+metric=host_net field=icmp_outaddrmasks
+metric=host_net field=icmp_outdestunreachs
+metric=host_net field=icmp_outechoreps
+metric=host_net field=icmp_outechos
+metric=host_net field=icmp_outerrors
+metric=host_net field=icmp_outmsgs
+metric=host_net field=icmp_outparmprobs
+metric=host_net field=icmp_outredirects
+metric=host_net field=icmp_outsrcquenchs
+metric=host_net field=icmp_outtimeexcds
+metric=host_net field=icmp_outtimestampreps
+metric=host_net field=icmp_outtimestamps
+metric=host_net field=icmpmsg_intype3
+metric=host_net field=icmpmsg_outtype3
+metric=host_net field=ip_defaultttl
+metric=host_net field=ip_forwarding
+metric=host_net field=ip_forwdatagrams
+metric=host_net field=ip_fragcreates
+metric=host_net field=ip_fragfails
+metric=host_net field=ip_fragoks
+metric=host_net field=ip_inaddrerrors
+metric=host_net field=ip_indelivers
+metric=host_net field=ip_indiscards
+metric=host_net field=ip_inhdrerrors
+metric=host_net field=ip_inreceives
+metric=host_net field=ip_inunknownprotos
+metric=host_net field=ip_outdiscards
+metric=host_net field=ip_outnoroutes
+metric=host_net field=ip_outrequests
+metric=host_net field=ip_reasmfails
+metric=host_net field=ip_reasmoks
+metric=host_net field=ip_reasmreqds
+metric=host_net field=ip_reasmtimeout
+metric=host_net field=packets_recv
+metric=host_net field=packets_sent
+metric=host_net field=tcp_activeopens
+metric=host_net field=tcp_attemptfails
+metric=host_net field=tcp_currestab
+metric=host_net field=tcp_estabresets
+metric=host_net field=tcp_incsumerrors
+metric=host_net field=tcp_inerrs
+metric=host_net field=tcp_insegs
+metric=host_net field=tcp_maxconn
+metric=host_net field=tcp_outrsts
+metric=host_net field=tcp_outsegs
+metric=host_net field=tcp_passiveopens
+metric=host_net field=tcp_retranssegs
+metric=host_net field=tcp_rtoalgorithm
+metric=host_net field=tcp_rtomax
+metric=host_net field=tcp_rtomin
+metric=host_net field=udp_ignoredmulti
+metric=host_net field=udp_incsumerrors
+metric=host_net field=udp_indatagrams
+metric=host_net field=udp_inerrors
+metric=host_net field=udp_noports
+metric=host_net field=udp_outdatagrams
+metric=host_net field=udp_rcvbuferrors
+metric=host_net field=udp_sndbuferrors
+metric=host_net field=udplite_ignoredmulti
+metric=host_net field=udplite_incsumerrors
+metric=host_net field=udplite_indatagrams
+metric=host_net field=udplite_inerrors
+metric=host_net field=udplite_noports
+metric=host_net field=udplite_outdatagrams
+metric=host_net field=udplite_rcvbuferrors
+metric=host_net field=udplite_sndbuferrors
+metric=host_netstat field=tcp_close
+metric=host_netstat field=tcp_close_wait
+metric=host_netstat field=tcp_closing
+metric=host_netstat field=tcp_established
+metric=host_netstat field=tcp_fin_wait1
+metric=host_netstat field=tcp_fin_wait2
+metric=host_netstat field=tcp_last_ack
+metric=host_netstat field=tcp_listen
+metric=host_netstat field=tcp_none
+metric=host_netstat field=tcp_syn_recv
+metric=host_netstat field=tcp_syn_sent
+metric=host_netstat field=tcp_time_wait
+metric=host_netstat field=udp_socket
+metric=host_system field=load1
+metric=host_system field=load15
+metric=host_system field=load5
+metric=host_system field=n_cpus
+metric=host_system field=n_users
+metric=host_system field=uptime
+metric=processes field=dead
+metric=processes field=idle
+metric=processes field=paging
+metric=processes field=sleeping
+metric=processes field=stopped
+metric=processes field=total
+metric=processes field=total_threads
+metric=processes field=unknown
+metric=processes field=zombies
+metric=procstat field=child_major_faults
+metric=procstat field=child_minor_faults
+metric=procstat field=cpu_time
+metric=procstat field=cpu_time_guest
+metric=procstat field=cpu_time_guest_nice
+metric=procstat field=cpu_time_idle
+metric=procstat field=cpu_time_iowait
+metric=procstat field=cpu_time_irq
+metric=procstat field=cpu_time_nice
+metric=procstat field=cpu_time_soft_irq
+metric=procstat field=cpu_time_steal
+metric=procstat field=cpu_time_system
+metric=procstat field=cpu_time_user
+metric=procstat field=cpu_usage
+metric=procstat field=created_at
+metric=procstat field=involuntary_context_switches
+metric=procstat field=lookup_pid_count
+metric=procstat field=lookup_result_code
+metric=procstat field=lookup_running
+metric=procstat field=major_faults
+metric=procstat field=memory_data
+metric=procstat field=memory_locked
+metric=procstat field=memory_rss
+metric=procstat field=memory_stack
+metric=procstat field=memory_swap
+metric=procstat field=memory_usage
+metric=procstat field=memory_vms
+metric=procstat field=minor_faults
+metric=procstat field=nice_priority
+metric=procstat field=num_fds
+metric=procstat field=num_threads
+metric=procstat field=pid
+metric=procstat field=ppid
+metric=procstat field=read_bytes
+metric=procstat field=read_count
+metric=procstat field=rlimit_cpu_time_hard
+metric=procstat field=rlimit_cpu_time_soft
+metric=procstat field=rlimit_file_locks_hard
+metric=procstat field=rlimit_file_locks_soft
+metric=procstat field=rlimit_memory_data_hard
+metric=procstat field=rlimit_memory_locked_hard
+metric=procstat field=rlimit_memory_locked_soft
+metric=procstat field=rlimit_memory_rss_hard
+metric=procstat field=rlimit_memory_rss_soft
+metric=procstat field=rlimit_memory_stack_hard
+metric=procstat field=rlimit_memory_stack_soft
+metric=procstat field=rlimit_memory_vms_hard
+metric=procstat field=rlimit_memory_vms_soft
+metric=procstat field=rlimit_nice_priority_hard
+metric=procstat field=rlimit_num_fds_hard
+metric=procstat field=rlimit_num_fds_soft
+metric=procstat field=rlimit_realtime_priority_soft
+metric=procstat field=rlimit_signals_pending_hard
+metric=procstat field=rlimit_signals_pending_soft
+metric=procstat field=signals_pending
+metric=procstat field=voluntary_context_switches
+metric=procstat field=write_bytes
+metric=procstat field=write_count
