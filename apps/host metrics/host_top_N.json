@@ -192,7 +192,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard shows the top N instances for key metrics. There are many possible ways to collect metrics in sumo so the dashboard leaves this open to you.\n\nFor example for Installed Sumo Collector Host Metrics the cpu_metric is cpu_total and you can use _sourcehost for the host_metric. However if you are using say telegraf cpu, memory plugins these values will be different.\n\n**General**:\n-  Use filter_field and filter_value if you require custom filtering dimensions inserted in your query. The default for _filter_field is _sourcecategory. Current setting:\n```{{filter_field}}={{filter_value}}```\n- N is the N value to topk, currently set to: {{N}}\n\n**Host**\n- Set host_metric to the metric dimension that defines a host/instance. This will be used with host_value to filter the result set and will also be the grouping used in each panel. Current setting: ```{{host_metric}}={{host_value}} | .... by {{host_metric}}```\n\n**Example Metric Sets**\n\nAdd these to your query string to try out for other metric sets for host metrics:\n- installed collector host metrics: ```?variables=host_metric:_sourcehost;host_value:*;cpu_metric:cpu_total;mem_metric:Mem_UsedPercent;filter_field:_sourcecategory;filter_value:*;disk_metric:Disk_UsedPercent;N:20;disk_name:devname;other_metric_a:Disk_Queue;other_metric_b:CPU_LoadAvg_1min&from=-24h&to=now```\n\n- host and process metrics (telegraf): ```?variables=N:20;host_metric:host.name;host_value:*;filter_field:_sourcecategory;filter_value:*;cpu_metric:procstat%20field%3Dcpu_usage;mem_metric:procstat%20field%3Dmemory_usage;disk_metric:host_disk%20field%3Dused_percent;disk_name:path;other_metric_a:host_diskio%20field%3Dweighted_io_time;other_metric_b:processes%20field%3Dtotal```"
+            "text": "This dashboard shows the top N instances for key metrics for hosts/instances. This dashboard can be useful to switch between say host metrics (collector) vs host /process metrics (telegraf).\n\nFor example for \n- Installed Sumo Collector Host Metrics the cpu_metric is cpu_total and you can use _sourcehost for the host_metric. \n- for telegraf host and process metrics for cpu_metric use: procstat field=cpu_usage and for host_metric use: host.name\n\n**General**:\n-  Use filter_field and filter_value if you require custom filtering dimensions inserted in your query. The default for _filter_field is _sourcecategory. Current setting:\n```{{filter_field}}={{filter_value}}```\n- N is the N value to topk, currently set to: {{N}}\n\n**Host**\n- Set host_metric to the metric dimension that defines a host/instance. This will be used with host_value to filter the result set and will also be the grouping used in each panel. Current setting: ```{{host_metric}}={{host_value}} | .... by {{host_metric}}```\n\n**Tabular**\n- set the tabular_metric to see top K for a metric in a tabular format.\n\n** A and B options**\n- use other_metric_a and b to customize the metrics displayed in the bottom panel.\n\n**Example Metric Sets**\n\nAdd these to your query string to try out for other metric sets for host metrics:\n- installed collector host metrics: ```?variables=host_metric:_sourcehost;host_value:*;cpu_metric:cpu_total;mem_metric:Mem_UsedPercent;filter_field:_sourcecategory;filter_value:*;disk_metric:Disk_UsedPercent;N:20;disk_name:devname;other_metric_a:Disk_Queue;other_metric_b:CPU_LoadAvg_1min&from=-24h&to=now```\n\n- host and process metrics (telegraf): ```?variables=N:20;host_metric:host.name;host_value:*;filter_field:_sourcecategory;filter_value:*;cpu_metric:procstat%20field%3Dcpu_usage;mem_metric:procstat%20field%3Dmemory_usage;disk_metric:host_disk%20field%3Dused_percent;disk_name:path;other_metric_a:host_diskio%20field%3Dweighted_io_time;other_metric_b:processes%20field%3Dtotal```"
         },
         {
             "id": null,
@@ -251,14 +251,14 @@
         {
             "id": null,
             "key": "panel0A31D3579E13B948",
-            "title": "Top N Disk {{disk_metric }}, Tabular format all dimensions ",
+            "title": "Tabular Metrics Display for metric: {{tabular_metric}} shows all dimensions ",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
+                    "queryString": "metric={{tabular_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -534,6 +534,20 @@
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,processes field=total"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "tabular_metric",
+            "displayName": "tabular_metric",
+            "defaultValue": "Disk_UsedPercent",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Disk_UsedPercent"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
