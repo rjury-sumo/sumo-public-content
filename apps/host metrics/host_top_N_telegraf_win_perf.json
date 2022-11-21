@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Host Metrics Top N",
+    "name": "Host Metrics Telegraf Win",
     "description": "",
-    "title": "Host Metrics Top N",
+    "title": "Host Metrics Telegraf Win",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -21,51 +21,59 @@
         "layoutStructures": [
             {
                 "key": "panel77F246BDBB666843",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":8}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":12}"
             },
             {
                 "key": "panelB423F5369FC13845",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":8}"
+                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":12}"
             },
             {
                 "key": "panel7D9425F9AFD07845",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":16}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":20}"
             },
             {
                 "key": "panelAB2F968CAC2B9A4D",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":16}"
+                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":20}"
             },
             {
                 "key": "panelPANE-16A90A8F9089284E",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panel07499DAAA660D848",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":24}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":28}"
             },
             {
                 "key": "panel882E65948B2A1B48",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":24}"
+                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":28}"
             },
             {
                 "key": "panel0A31D3579E13B948",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":32}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":36}"
             },
             {
                 "key": "panelA3883E4AA621C84D",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":41}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":47}"
             },
             {
                 "key": "panel65EE007E88D09947",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":41}"
+                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":47}"
             },
             {
                 "key": "panel1E9C3F77A1E91945",
-                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":49}"
+                "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":63}"
             },
             {
                 "key": "panelF9EADD49AC9C4A4B",
-                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":49}"
+                "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":63}"
+            },
+            {
+                "key": "panelDA82DDE9BE43BA48",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":55}"
+            },
+            {
+                "key": "panel71623A388DBAEB4A",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":71}"
             }
         ]
     },
@@ -73,14 +81,14 @@
         {
             "id": null,
             "key": "panel77F246BDBB666843",
-            "title": "Top N CPU {{cpu_metric}}",
+            "title": "Top CPU {{cpu_metric}} {{{cpu_fields}}}",
             "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest) \n",
+                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} {{{cpu_fields}}}\n| topk({{N}},latest) \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -100,14 +108,14 @@
         {
             "id": null,
             "key": "panelB423F5369FC13845",
-            "title": "Top {{cpu_metric}} Over Time",
+            "title": "Top {{cpu_metric}} {{{cpu_fields}}} Over Time",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},100 - latest) \n",
+                    "queryString": "metric={{cpu_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} {{{cpu_fields}}}\n| topk({{N}},latest) \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -134,7 +142,7 @@
         {
             "id": null,
             "key": "panel7D9425F9AFD07845",
-            "title": "Top Memory {{mem_metric }}",
+            "title": "Top {{mem_metric }}",
             "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
@@ -192,19 +200,19 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard shows the top N instances for key metrics. There are many possible ways to collect metrics in sumo so the dashboard leaves this open to you.\n\nFor example for Installed Sumo Collector Host Metrics the cpu_metric is cpu_total and you can use _sourcehost for the host_metric. However if you are using say telegraf cpu, memory plugins these values will be different.\n\n**General**:\n-  Use filter_field and filter_value if you require custom filtering dimensions inserted in your query. The default for _filter_field is _sourcecategory. Current setting:\n```{{filter_field}}={{filter_value}}```\n- N is the N value to topk, currently set to: {{N}}\n\n**Host**\n- Set host_metric to the metric dimension that defines a host/instance. This will be used with host_value to filter the result set and will also be the grouping used in each panel. Current setting: ```{{host_metric}}={{host_value}} | .... by {{host_metric}}```\n\n**Example Metric Sets**\n\nAdd these to your query string to try out for other metric sets for host metrics:\n- installed collector host metrics: ```?variables=host_metric:_sourcehost;host_value:*;cpu_metric:cpu_total;mem_metric:Mem_UsedPercent;filter_field:_sourcecategory;filter_value:*;disk_metric:Disk_UsedPercent;N:20;disk_name:devname;other_metric_a:Disk_Queue;other_metric_b:CPU_LoadAvg_1min&from=-24h&to=now```\n\n- host and process metrics (telegraf): ```?variables=N:20;host_metric:host.name;host_value:*;filter_field:_sourcecategory;filter_value:*;cpu_metric:procstat%20field%3Dcpu_usage;mem_metric:procstat%20field%3Dmemory_usage;disk_metric:host_disk%20field%3Dused_percent;disk_name:path;other_metric_a:host_diskio%20field%3Dweighted_io_time;other_metric_b:processes%20field%3Dtotal```"
+            "text": "This dashboard shows the top N instances for key metrics. This version of this dashboard is tweaked to work with telegraf: https://github.com/influxdata/telegraf/tree/master/plugins/inputs/win_perf_counters\n\n**General**:\n-  Use filter_field and filter_value if you require custom filtering dimensions inserted in your query. The default for _filter_field is _sourcecategory. Current setting:\n```{{filter_field}}={{filter_value}}```\n- N is the N value to topk, currently set to: {{N}}\n\n**Host**\n- Set host_metric to the metric dimension that defines a host/instance. This will be used with host_value to filter the result set and will also be the grouping used in each panel. Current setting: ```{{host_metric}}={{host_value}} | .... by {{host_metric}}```\n\n**Example Metric Sets**\n\nAdd these to your query string to try out for other metric sets for host metrics:\n- key win perf metrics: ```?variables=N:20;host_value:*;filter_field:_sourcecategory;filter_value:*;host_metric:host;cpu_metric:win_cpu;cpu_fields:field%3DPercent_Idle_time%20instance%3D_Total;mem_metric:win_swap;disk_metric:win_disk;disk_name:instance;other_metric_a:win_disk%20field%3D\"Current_Disk_Queue_Length\";other_metric_b:win_system%20field%3D\"Processor_Queue_Length\"```\n\nFor the \"other\" metrics A and B you can use any metric and field combo from below (just remove metric=)\n- win_aspnet field=Application_Restarts\n- win_aspnet field=Request_Wait_Time\n- win_aspnet field=Requests_Current\n- win_aspnet field=Requests_Queued\n- win_aspnet field=Requests_Rejected\n- win_aspnet_app field=Cache_Total_Entries\n- win_aspnet_app field=Cache_Total_Hit_Ratio\n- win_aspnet_app field=Cache_Total_Turnover_Rate\n- win_aspnet_app field=Compilations_Total\n- win_aspnet_app field=Errors_Total_persec\n- win_aspnet_app field=Output_Cache_Entries\n- win_aspnet_app field=Output_Cache_Hit_Ratio\n- win_aspnet_app field=Output_Cache_Hits\n- win_aspnet_app field=Output_Cache_Turnover_Rate\n- win_aspnet_app field=Pipeline_Instance_Count\n- win_aspnet_app field=Requests_Executing\n- win_aspnet_app field=Requests_in_Application_Queue\n- win_aspnet_app field=Requests_persec\n- win_cpu field=Percent_DPC_Time\n- win_cpu field=Percent_Idle_Time\n- win_cpu field=Percent_Interrupt_Time\n- win_cpu field=Percent_Privileged_Time\n- win_cpu field=Percent_Processor_Time\n- win_cpu field=Percent_User_Time\n- win_disk field=Current_Disk_Queue_Length\n- win_disk field=Free_Megabytes\n- win_disk field=Percent_Disk_Read_Time\n- win_disk field=Percent_Disk_Time\n- win_disk field=Percent_Disk_Write_Time\n- win_disk field=Percent_Free_Space\n- win_disk field=Percent_Idle_Time\n- win_diskio field=Current_Disk_Queue_Length\n- win_diskio field=Disk_Read_Bytes_persec\n- win_diskio field=Disk_Reads_persec\n- win_diskio field=Disk_Write_Bytes_persec\n- win_diskio field=Disk_Writes_persec\n- win_diskio field=Percent_Disk_Read_Time\n- win_diskio field=Percent_Disk_Time\n- win_diskio field=Percent_Disk_Write_Time\n- win_dotnet_exceptions field=#_of_Exceps_Thrown_/_sec\n- win_dotnet_jit field=IL_Bytes_Jitted_/_sec\n- win_dotnet_jit field=Percent_Time_in_Jit\n- win_dotnet_loading field=Percent_Time_Loading\n- win_dotnet_locks field=#_of_current_logical_Threads\n- win_dotnet_locks field=#_of_current_physical_Threads\n- win_dotnet_locks field=#_of_current_recognized_threads\n- win_dotnet_locks field=#_of_total_recognized_threads\n- win_dotnet_locks field=Current_Queue_Length\n- win_dotnet_locks field=Queue_Length_/_sec\n- win_dotnet_locks field=Total_#_of_Contentions\n- win_dotnet_mem field=#_Bytes_in_all_Heaps\n- win_dotnet_mem field=#_Gen_0_Collections\n- win_dotnet_mem field=#_Gen_1_Collections\n- win_dotnet_mem field=#_Gen_2_Collections\n- win_dotnet_mem field=#_Induced_GC\n- win_dotnet_mem field=#_of_Pinned_Objects\n- win_dotnet_mem field=Allocated_Bytes_persec\n- win_dotnet_mem field=Finalization_Survivors\n- win_dotnet_mem field=Gen_0_heap_size\n- win_dotnet_mem field=Gen_1_heap_size\n- win_dotnet_mem field=Gen_2_heap_size\n- win_dotnet_mem field=Large_Object_Heap_size\n- win_dotnet_mem field=Percent_Time_in_GC\n- win_dotnet_security field=Percent_Time_in_RT_checks\n- win_dotnet_security field=Stack_Walk_Depth\n- win_dotnet_security field=Total_Runtime_Checks\n- win_http_queues field=CurrentQueueSize\n- win_http_queues field=RejectedRequests\n- win_mem field=Available_Bytes\n- win_mem field=Cache_Faults_persec\n- win_mem field=Demand_Zero_Faults_persec\n- win_mem field=Page_Faults_persec\n- win_mem field=Pages_persec\n- win_mem field=Pool_Nonpaged_Bytes\n- win_mem field=Pool_Paged_Bytes\n- win_mem field=Standby_Cache_Core_Bytes\n- win_mem field=Standby_Cache_Normal_Priority_Bytes\n- win_mem field=Standby_Cache_Reserve_Bytes\n- win_mem field=Transition_Faults_persec\n- win_net field=Bytes_Received_persec\n- win_net field=Bytes_Sent_persec\n- win_net field=Packets_Outbound_Discarded\n- win_net field=Packets_Outbound_Errors\n- win_net field=Packets_Received_Discarded\n- win_net field=Packets_Received_Errors\n- win_net field=Packets_Received_persec\n- win_net field=Packets_Sent_persec\n- win_services field=startup_mode\n- win_services field=state\n- win_swap field=Percent_Usage\n- win_system field=Context_Switches_persec\n- win_system field=Processor_Queue_Length\n- win_system field=System_Calls_persec\n- win_system field=System_Up_Time\n- win_websvc field=Connection_Attempts_persec\n- win_websvc field=Current_Connections\n- win_websvc field=Get_Requests_persec\n- win_websvc field=ISAPI_Extension_Requests_persec\n- win_websvc field=Post_Requests_persec\n- win_websvc_cache field=File_Cache_Hits_Percent\n- win_websvc_cache field=Kernel:_URI_Cache_Hits_Percent\n- win_websvc_cache field=URI_Cache_Hits_Percent"
         },
         {
             "id": null,
             "key": "panel07499DAAA660D848",
-            "title": "Top Disk Used Per  {{host_metric}},{{disk_name}} {{disk_metric }}",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+            "title": "Bottom Percent_Free_Space  {{host_metric}},{{disk_name}} {{disk_metric }}",
+            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":15,\"to\":100,\"color\":\"#28aa55\"},{\"from\":5,\"to\":15,\"color\":\"#f6c851\"},{\"from\":-1,\"to\":5,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| avg by {{host_metric}},{{disk_name}}\n| topk({{N}},latest)  \n",
+                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \nfield=Percent_Free_Space\n| avg by {{host_metric}},{{disk_name}}\n| bottomk({{N}},latest)  \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -224,14 +232,14 @@
         {
             "id": null,
             "key": "panel882E65948B2A1B48",
-            "title": "Top {{disk_metric }} Over Time",
+            "title": "Bottom Percent_Free_Space {{disk_metric}}",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| avg by {{host_metric}},{{disk_name}}\n| topk({{N}},latest)  \n",
+                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \nfield=Percent_Free_Space\n| avg by {{host_metric}},{{disk_name}}\n| bottomk({{N}},latest)  \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -251,14 +259,14 @@
         {
             "id": null,
             "key": "panel0A31D3579E13B948",
-            "title": "Top N Disk {{disk_metric }}, Tabular format all dimensions ",
+            "title": "Top N Disk Tabular {{disk_metric }} ",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
+                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \nfield=Percent_Free_Space\n| topk({{N}},latest)  \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -382,6 +390,60 @@
             "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelDA82DDE9BE43BA48",
+            "title": "metric={{other_metric_a}}  Tabular",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{other_metric_a}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel71623A388DBAEB4A",
+            "title": "metric={{other_metric_b}}  Tabular",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{other_metric_b}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
     "variables": [
@@ -403,7 +465,7 @@
             "id": null,
             "name": "host_metric",
             "displayName": "host_metric",
-            "defaultValue": "_sourcehost",
+            "defaultValue": "host",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "_sourcehost,host.name,host,_collector"
@@ -460,10 +522,10 @@
             "id": null,
             "name": "cpu_metric",
             "displayName": "cpu_metric",
-            "defaultValue": "cpu_total",
+            "defaultValue": "win_cpu",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "cpu_total,procstat field=cpu_usage"
+                "values": "cpu_total,win_cpu"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -474,10 +536,10 @@
             "id": null,
             "name": "mem_metric",
             "displayName": "mem_metric",
-            "defaultValue": "Mem_UsedPercent ",
+            "defaultValue": "win_swap ",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Mem_UsedPercent,procstat field=memory_usage"
+                "values": "Mem_UsedPercent,win_swap"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -488,10 +550,10 @@
             "id": null,
             "name": "disk_metric",
             "displayName": "disk_metric",
-            "defaultValue": "Disk_UsedPercent",
+            "defaultValue": "win_disk",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "Disk_UsedPercent,host_disk field=used_percent"
+                "values": "Disk_UsedPercent,win_disk"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -502,10 +564,10 @@
             "id": null,
             "name": "disk_name",
             "displayName": "disk_name",
-            "defaultValue": "devname",
+            "defaultValue": "instance",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "devname,path,what disk or volume tag name is"
+                "values": "devname,what disk or volume tag name is,instance"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -516,10 +578,10 @@
             "id": null,
             "name": "other_metric_a",
             "displayName": "other_metric_a",
-            "defaultValue": "Disk_Queue",
+            "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "any_other_metric_name,Disk_Queue,host_diskio field=weighted_io_time"
+                "values": "any_other_metric_name,Disk_Queue,win_disk field=\"Current_Disk_Queue_Length\""
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
@@ -530,10 +592,24 @@
             "id": null,
             "name": "other_metric_b",
             "displayName": "other_metric_b",
-            "defaultValue": "CPU_LoadAvg_1min",
+            "defaultValue": "win_system field=\"Processor_Queue_Length\"",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,processes field=total"
+                "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,win_system field=\"Processor_Queue_Length\""
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "cpu_fields",
+            "displayName": "cpu_fields",
+            "defaultValue": "field=Percent_Idle_time instance=_Total",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "field=Percent_Idle_time instance=_Total"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
