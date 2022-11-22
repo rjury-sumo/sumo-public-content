@@ -48,10 +48,6 @@
                 "structure": "{\"height\":8,\"width\":14,\"x\":10,\"y\":28}"
             },
             {
-                "key": "panel0A31D3579E13B948",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":36}"
-            },
-            {
                 "key": "panelA3883E4AA621C84D",
                 "structure": "{\"height\":8,\"width\":10,\"x\":0,\"y\":47}"
             },
@@ -70,10 +66,6 @@
             {
                 "key": "panelDA82DDE9BE43BA48",
                 "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":55}"
-            },
-            {
-                "key": "panel71623A388DBAEB4A",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":71}"
             }
         ]
     },
@@ -258,33 +250,6 @@
         },
         {
             "id": null,
-            "key": "panel0A31D3579E13B948",
-            "title": "Top N Disk Tabular {{disk_metric }} ",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \nfield=Percent_Free_Space\n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
             "key": "panelA3883E4AA621C84D",
             "title": "Top N other_metric_a: {{other_metric_a}}",
             "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
@@ -394,41 +359,14 @@
         {
             "id": null,
             "key": "panelDA82DDE9BE43BA48",
-            "title": "metric={{other_metric_a}}  Tabular",
+            "title": "Tabular Metric: {{tabular_metric}}",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric={{other_metric_a}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel71623A388DBAEB4A",
-            "title": "metric={{other_metric_b}}  Tabular",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "metric={{other_metric_b}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
+                    "queryString": "metric={{tabular_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \n| topk({{N}},latest)  \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -606,13 +544,27 @@
             "id": null,
             "name": "cpu_fields",
             "displayName": "cpu_fields",
-            "defaultValue": "field=Percent_Idle_time instance=_Total",
+            "defaultValue": "field=Percent_Idle_time instance=_Total | eval 100 - _value",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "field=Percent_Idle_time instance=_Total"
+                "values": "field=Percent_Idle_time instance=_Total | eval 100 - _value"
             },
             "allowMultiSelect": false,
             "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "tabular_metric",
+            "displayName": "tabular_metric",
+            "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_disk field=\"Current_Disk_Queue_Length\""
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
             "hideFromUI": false,
             "valueType": "Any"
         }
