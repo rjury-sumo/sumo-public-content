@@ -1,0 +1,353 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Windows IIS/ASP.NET (Telegraf)",
+    "description": "",
+    "title": "Windows IIS/ASP.NET (Telegraf)",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-ED787D7F8E212942",
+                "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-FA9EDC2F836A7948",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panel3AA675F5A6555840",
+                "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":0}"
+            },
+            {
+                "key": "panel91FF0005B42B6A46",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":6}"
+            },
+            {
+                "key": "panel05D73814A070394C",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":6}"
+            },
+            {
+                "key": "panel5EAAAD37A1698B45",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":15}"
+            },
+            {
+                "key": "panel4942AE5AA6CEBB4C",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":15}"
+            },
+            {
+                "key": "panelE9636C2DB6A43840",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":15}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-ED787D7F8E212942",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard is a quick way to dashboard a set of win_aspnet or win_aspnet_app metrics if you are collecting ASP or .NET counters via https://github.com/influxdata/telegraf/tree/master/plugins/inputs/win_perf_counters\n\nUse the filter_field and filter_value params if you would like custom filtering."
+        },
+        {
+            "id": null,
+            "key": "panelPANE-FA9EDC2F836A7948",
+            "title": "1: {{metric1}}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric1}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3AA675F5A6555840",
+            "title": "Choose metrics",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Choose any of the following metrics for the metricX params. You can change the default setting for any param to change what will be the default metric shown.\n- win_aspnet field=Application_Restarts\n- win_aspnet field=Request_Wait_Time\n- win_aspnet field=Requests_Current\n- win_aspnet field=Requests_Queued\n- win_aspnet field=Requests_Rejected\n- win_aspnet_app field=Cache_Total_Entries\n- win_aspnet_app field=Cache_Total_Hit_Ratio\n- win_aspnet_app field=Cache_Total_Turnover_Rate\n- win_aspnet_app field=Compilations_Total\n- win_aspnet_app field=Errors_Total_persec\n- win_aspnet_app field=Output_Cache_Entries\n- win_aspnet_app field=Output_Cache_Hit_Ratio\n- win_aspnet_app field=Output_Cache_Hits\n- win_aspnet_app field=Output_Cache_Turnover_Rate\n- win_aspnet_app field=Pipeline_Instance_Count\n- win_aspnet_app field=Requests_Executing\n- win_aspnet_app field=Requests_in_Application_Queue\n- win_aspnet_app field=Requests_persec\n- win_websvc field=Connection_Attempts_persec\n- win_websvc field=Current_Connections\n- win_websvc field=Get_Requests_persec\n- win_websvc field=ISAPI_Extension_Requests_persec\n- win_websvc field=Post_Requests_persec\n- win_websvc_cache field=File_Cache_Hits_Percent\n- win_websvc_cache field=Kernel:_URI_Cache_Hits_Percent\n- win_websvc_cache field=URI_Cache_Hits_Percent"
+        },
+        {
+            "id": null,
+            "key": "panel91FF0005B42B6A46",
+            "title": "2: {{metric2}}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel05D73814A070394C",
+            "title": "3: {{metric3}}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric3}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5EAAAD37A1698B45",
+            "title": "4: {{metric4}} Scale 0-100",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric4}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4942AE5AA6CEBB4C",
+            "title": "5: {{metric5}}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric5}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE9636C2DB6A43840",
+            "title": "6: {{metric6}} Column Stacked",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "{{filter_field}}={{filter_value}}  \nmetric={{metric6}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "filter_field",
+            "displayName": "filter_field",
+            "defaultValue": "_sourcecategory",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "_sourcecategory"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "filter_value",
+            "displayName": "filter_value",
+            "defaultValue": "prod/metrics/windows",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "a,*b*,c/d/e"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric1",
+            "displayName": "metric1",
+            "defaultValue": " win_aspnet_app field=Requests_persec",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric2",
+            "displayName": "metric2",
+            "defaultValue": "win_aspnet field=Requests_Current",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric3",
+            "displayName": "metric3",
+            "defaultValue": "win_aspnet field=Requests_Queued",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric4",
+            "displayName": "metric4",
+            "defaultValue": "win_aspnet_app field=Cache_Total_Hit_Ratio",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric5",
+            "displayName": "metric5",
+            "defaultValue": "win_aspnet_app field=Errors_Total_persec",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metric6",
+            "displayName": "metric6",
+            "defaultValue": "win_aspnet field=Application_Restarts",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "win_aspnet field=Application_Restarts,win_aspnet field=Request_Wait_Time,win_aspnet field=Requests_Current,win_aspnet field=Requests_Queued,win_aspnet field=Requests_Rejected,win_aspnet_app field=Cache_Total_Entries,win_aspnet_app field=Cache_Total_Hit_Ratio,win_aspnet_app field=Cache_Total_Turnover_Rate,win_aspnet_app field=Compilations_Total,win_aspnet_app field=Errors_Total_persec,win_aspnet_app field=Output_Cache_Entries,win_aspnet_app field=Output_Cache_Hit_Ratio,win_aspnet_app field=Output_Cache_Hits,win_aspnet_app field=Output_Cache_Turnover_Rate,win_aspnet_app field=Pipeline_Instance_Count,win_aspnet_app field=Requests_Executing,win_aspnet_app field=Requests_in_Application_Queue,win_aspnet_app field=Requests_persec"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
