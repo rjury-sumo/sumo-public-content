@@ -1,0 +1,386 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "telegraf metrics tests",
+    "description": "",
+    "title": "telegraf metrics tests",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-3h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelC54D0B809B4E0948",
+                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelBF9978BCB2A6A946",
+                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":13}"
+            },
+            {
+                "key": "panelC4AA218391D3A842",
+                "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":21}"
+            },
+            {
+                "key": "panel68E5A034B19CC847",
+                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":5}"
+            },
+            {
+                "key": "panelPANE-58F190A8ACE0C945",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel112F839C8C1BBB45",
+                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":21}"
+            },
+            {
+                "key": "panel47EF6715B125E94A",
+                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":13}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelC54D0B809B4E0948",
+            "title": "procstat per process cpu / cpu count a/b/c",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[\"A\",\"B\"],\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"cpu average {{process.executable.name}} {{host.name}}\"}}],\"series\":{},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=procstat field=cpu_usage process.executable.name=* host.name=* | avg by host.name , process.executable.name",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_system field=n_cpus host.name=* | avg by host.name",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "#A / #B  along host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBF9978BCB2A6A946",
+            "title": "procstat cpu_usage per process - can be greater than 100 if more than one cpu core",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=procstat field=cpu_usage process.executable.name=* host.name=* | avg by host.name , process.executable.name",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC4AA218391D3A842",
+            "title": "host_system n_cpus - count of cpus on this box",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_system field=n_cpus host.name=* | avg by host.name",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel68E5A034B19CC847",
+            "title": "Metrics  -host_cpu  breakdown by field",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[],\"series\":{\"G_#G host.name=your_host_name_here metric=avg\":{\"visible\":true},\"C_#C host.name=your_host_name_here metric=avg\":{\"visible\":true},\"F_#F host.name=your_host_name_here metric=avg\":{\"visible\":true},\"E_#E host.name=your_host_name_here metric=avg\":{\"visible\":true}},\"general\":{\"type\":\"area\",\"displayType\":\"stacked\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#9bd3e6\",\"name\":\"iowait\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"color\":\"#cbbfff\",\"name\":\"user\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"color\":\"#9bd3e6\",\"name\":\"system\"}},{\"series\":[],\"queries\":[\"G\"],\"properties\":{\"color\":\"#bff26c\",\"name\":\"idle (free)\"}},{\"series\":[],\"queries\":[\"H\"],\"properties\":{\"color\":\"#f2da73\",\"name\":\"softirq\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_iowait   | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_user    | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "E",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_system  | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "F",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_idle   | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "G",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_softirq | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "H",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-58F190A8ACE0C945",
+            "title": "about",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "this dashboard is about telegraf metrics for procstat and host cpu \n\nprocstat metric per process can add up to > 100 as it's measured relative to number of cores. so with say 8 cores 800 is actually max cpu usage. In practice it's unlikely you could ever use 100% as the system, irq and iowait will always consume some of the available 100% of available cpu. Note : A single threaded process could never consume more than a single core (ie. 100) in this type of mesurement paradigm so if you are looking at monitoring you must also know whether the target process is able to utilize more than one cpu core.\n\nOn right we have the actual individual metrics idle, system, user and iowait. In most cases these should add up to 100 and to get the system level cpu usage % one should add system, user and iowait.\n\nTypical open source approach to \"total cpu used per host\" in telegraf is 100 - idle for cpu_total ( or to add up each type excluding idle instead)"
+        },
+        {
+            "id": null,
+            "key": "panel112F839C8C1BBB45",
+            "title": "host_cpu  iowait + user + system + softirq",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[\"H\",\"F\",\"C\",\"E\"],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"G\"],\"properties\":{\"name\":\"cpu pct {{host.name}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_iowait   | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_user    | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "E",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_system  | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "F",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "#C + #E + #F + #H along host.name",
+                    "queryType": "Metrics",
+                    "queryKey": "G",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_softirq  | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "H",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel47EF6715B125E94A",
+            "title": "host_cpu  100 - idle along host.name",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"hiddenQueryKeys\":[\"F\",\"C\",\"E\"],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"G\"],\"properties\":{\"name\":\"cpu pct {{host.name}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "host.name={{host.name}}  _sourceCategory=metrics/telegraf metric=host_cpu field=usage_idle    | avg by host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "100 - #C along host.name ",
+                    "queryType": "Metrics",
+                    "queryKey": "G",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "host.name",
+            "displayName": "host.name",
+            "defaultValue": "your_host_name_here",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "host.name"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
