@@ -4176,6 +4176,474 @@
                 }
             ],
             "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Single Entity View (Tuning Pack)",
+            "description": "A dashboard for reviewing reflected entity data from CSE.",
+            "title": "Single Entity View (Tuning Pack)",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panel0AFB51868C47D84F",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":87}"
+                    },
+                    {
+                        "key": "panelD33237CAB543384A",
+                        "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":98}"
+                    },
+                    {
+                        "key": "panelB8321E8CBBC82A4D",
+                        "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel6BF97B2490785A46",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":47}"
+                    },
+                    {
+                        "key": "panel7121A2178C14BB4B",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":73}"
+                    },
+                    {
+                        "key": "panel64B1DA37B00D8A45",
+                        "structure": "{\"height\":11,\"width\":10,\"x\":0,\"y\":5}"
+                    },
+                    {
+                        "key": "panel9DA725CEB2E2384E",
+                        "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":48}"
+                    },
+                    {
+                        "key": "panel4B2CC916875D6A41",
+                        "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":27}"
+                    },
+                    {
+                        "key": "panel12890CF0BC114B47",
+                        "structure": "{\"height\":11,\"width\":14,\"x\":10,\"y\":16}"
+                    },
+                    {
+                        "key": "panelB6E9031E908A1849",
+                        "structure": "{\"height\":11,\"width\":10,\"x\":0,\"y\":16}"
+                    },
+                    {
+                        "key": "panelAF1B7B409827894F",
+                        "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":74}"
+                    },
+                    {
+                        "key": "panel69E66D2FA6E3B94F",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":87}"
+                    },
+                    {
+                        "key": "panel883F2A7FA1D4FA44",
+                        "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":36}"
+                    },
+                    {
+                        "key": "panel5A0EAD8BBD395943",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":4}"
+                    },
+                    {
+                        "key": "panel6345E8399792194D",
+                        "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":61}"
+                    },
+                    {
+                        "key": "panelD6964474AE357948",
+                        "structure": "{\"height\":11,\"width\":14,\"x\":10,\"y\":5}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panel0AFB51868C47D84F",
+                    "title": "Signals Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sec_signal  {{{entity}}}\n| if (isempty(suppressedReasons),\"NO\",\"YES\") as suppressed\n//\n//\n| if(suppressed=\"YES\",1,0) as s\n| if(suppressed=\"NO\",1,0) as g\n| timeslice  | sum(s) as suppresed, sum(g) as generated  by _timeslice //| compare with timeshift 7d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelD33237CAB543384A",
+                    "title": "Signals Ingestion Mapping and Suppression",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sec_signal\n  {{{entity}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n|  sum(is_suppressed) as suppressed,sum(is_generated) as created by rule,product,vendor,sourceCategory,parser,mapperName,deviceEventId| sort created\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelB8321E8CBBC82A4D",
+                    "title": "About",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "This dashboard shows key insights and signals with a lens designed for reviewing a single entity.\n\nYou can enter any entity name in the entity paramenter, it will be applied in panel searches as a keyword. This means in theory you can use more complex scopes if you like such as ``` ( entitya or entityb)```\n\nThis dashboard is designed to be able to be linked as a CSE Action using the entity as the variable see: https://help.sumologic.com/docs/cse/administration/create-cse-context-actions/. This enables a detailed drilldown to here for a specific entity from the CSE UI.\n\nVersion: 20230222"
+                },
+                {
+                    "id": null,
+                    "key": "panel6BF97B2490785A46",
+                    "title": "Insights",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel7121A2178C14BB4B",
+                    "title": "Signals",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel64B1DA37B00D8A45",
+                    "title": "Insights Generated Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n| where entity matches \"{{entity}}\"\n\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.severity\" as severity\n\n\n| first(severity) as severity, min(_messagetime) as _messagetime,count as events by insightid,entity\n| tolong(_messagetime) as _messagetime\n| timeslice\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n\n| count as insights by _timeslice,severity | transpose row _timeslice column severity\n\n\n\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9DA725CEB2E2384E",
+                    "title": "Rules In Insights",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n\n| where entity matches \"{{entity}}\"\n| json field=_raw \"eventName\" nodrop\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| replace (rule,\"\\\",\\\"\",\" \") as rule\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n////\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| parse regex field=signal \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\",\"name\",\"severity\",\"summary\",\"description\",\"ruleId\",\"ruleName\",\"tags\",\"suppressedReasons\",\"created\" nodrop\n\n// squshdown\n| count by created,insightid,id,name,severity,summary,description,ruleid,rulename,tags | fields -_count \n|  values(insightid) as insights,max(severity) as severity, count_distinct(id) as signals,first(name) as example_name,first(description) as example_description,first(tags) as example_tags by ruleid,rulename  //,first(signals) as signals,\n| sort rulename asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel4B2CC916875D6A41",
+                    "title": "Insight Event History",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n| where entity matches \"{{entity}}\"\n\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n| json field=_raw \"to\" as updates nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm:ss\") as time\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n\n// ensure we only store the most recent result\n| count by time,insightid,name,eventname,entity,status,severity,confidence,assignee,resolution,_messagetime\n| sort _messagetime | fields -_count,_messagetime\n\n\n\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel12890CF0BC114B47",
+                    "title": "Signals High Level Summary",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\n_index=sec_signal\n {{entity}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| count_distinct(entityid) as entities,sum(is_suppressed) as suppressed,sum(is_generated) as generated by rule,severity,product,vendor,sourceCategory\n| severity * generated as total_severity\n| sort total_severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelB6E9031E908A1849",
+                    "title": "Signals Generated Over Time By Rule",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sec_signal\n  {{{entity}}}\n\n| where (isempty(suppressedreasons))\n\n//| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| timeslice  | count by rule,_timeslice | transpose row _timeslice column rule\n\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelAF1B7B409827894F",
+                    "title": "Rules Fired With Descriptions",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sec_signal\n  {{{entity}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| values(entityid) as entity_list,sum(is_generated) as generated,sum(is_suppressed) as suppresed by rule,severity,description,tags | sort rule asc\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel69E66D2FA6E3B94F",
+                    "title": "Signal Impact By Entity",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sec_signal\n  {{{entity}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| count_distinct(rule) as rules,sum(is_suppressed) as suppressed,sum(is_generated) as generated by entityid,severity\n| severity * generated as total_severity\n| sort total_severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel883F2A7FA1D4FA44",
+                    "title": "Signals History",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\n_index=sec_signal\n {{entity}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n| timeslice 1m\n| count,sum(is_suppressed) as suppressed,sum(is_generated) as generated by _timeslice, entityid, rule,severity,product,vendor,sourceCategory,deviceEventId\n| sort _timeslice ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel5A0EAD8BBD395943",
+                    "title": "Timeline And Summary",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panel6345E8399792194D",
+                    "title": "Tags In Signals That Generated An Insight",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n\n| where entity matches \"{{entity}}\"\n| json field=_raw \"eventName\" nodrop\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| replace (rule,\"\\\",\\\"\",\" \") as rule\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n////\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| parse regex field=signal \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\",\"name\",\"severity\",\"summary\",\"description\",\"ruleId\",\"ruleName\",\"tags\",\"suppressedReasons\",\"created\" nodrop\n\n// squshdown\n| count by created,insightid,id,name,severity,summary,description,ruleid,rulename,tags,entityvalue | fields -_count \n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n\n// tactics\n| parse field=tag \"_mitreAttackTactic:*\" as tactic nodrop\n| \"\" as stage\n| if(tactic = \"TA0043\",\"a.Reconnaissance\",stage) as stage\n| if(tactic = \"TA0042\",\"b.Resource Development\",stage) as stage\n| if(tactic = \"TA0001\",\"c.Initial Access\",stage) as stage\n| if(tactic = \"TA0002\",\"d.Execution\",stage) as stage\n| if(tactic = \"TA0003\",\"e.Persistence\",stage) as stage\n| if(tactic = \"TA0004\",\"f.Privilege Escalation\",stage) as stage\n| if(tactic = \"TA0005\",\"g.Defense Evasion\",stage) as stage\n| if(tactic = \"TA0006\",\"h.Credential Access\",stage) as stage\n| if(tactic = \"TA0007\",\"i.Discovery\",stage) as stage\n| if(tactic = \"TA0008\",\"j.Lateral Movement\",stage) as stage\n| if(tactic = \"TA0009\",\"k.Collection\",stage) as stage\n| if(tactic = \"TA0011\",\"l.Command and Control\",stage) as stage\n| if(tactic = \"TA0010\",\"m.Exfiltration\",stage) as stage\n| if(tactic = \"TA0040\",\"n.Impact\",stage) as stage\n\n\n// tech\n| replace(tag,\"_mitreAttackTechnique:\",\"\") as T\n| replace(T,\".\",\"/\") as T\n| concat(\"https://attack.mitre.org/techniques/\",T) as Tl\n| if( tag matches \"_mitreAttackTech*\",tourl(Tl,T),\"\") as Mitre\n| if(!(isempty(stage)),stage,Mitre) as Mitre\n\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| avg(severity) as avg_sev, count_distinct(insightid) as insights,count_distinct(entityvalue) as entities, count_distinct(id) as signals by tag,Mitre  //,first(signals) as signals,\n| sort tag asc\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelD6964474AE357948",
+                    "title": "Rules In Insights Signals",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n\n| where entity matches \"{{entity}}\"\n| json field=_raw \"eventName\" nodrop\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| replace (rule,\"\\\",\\\"\",\" \") as rule\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n////\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| parse regex field=signal \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\",\"name\",\"severity\",\"summary\",\"description\",\"ruleId\",\"ruleName\",\"tags\",\"suppressedReasons\",\"created\",\"entityId\" nodrop\n\n// squshdown\n| count by created,insightid,id,name,severity,summary,description,ruleid,rulename,tags,entityid | fields -_count \n// final aggregation to save to a lookup with only one row for most recent status of insight\n| concat(ruleid,\":\",rulename) as rule\n| avg(severity) as sev, count_distinct(insightid) as insights,values(entityid) as entities, count_distinct(id) as signals by rule  //,first(signals) as signals,\n| sort rule asc\n| sev * signals as total_sev",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "entity",
+                    "displayName": "entity",
+                    "defaultValue": "12345",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n| json field=_raw \"insight.entityValue\" as entity\n| count by entity | sort entity asc\n",
+                        "field": "entity"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
         }
     ]
 }
