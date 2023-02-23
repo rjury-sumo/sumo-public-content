@@ -1,0 +1,2171 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "nginx logs custom (FER)",
+    "description": "This folder contains Logs based dashboards for Nginx App",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx  - Threat Intel",
+            "description": "The Nginx - Threat Intel Dashboard provides an at-a-glance view of threats to Nginx servers on your network. Dashboard panels display threat count over a selected time period, geographic locations where threats occurred, source breakdown, actors responsible for threats, severity, and a correlation of IP addresses, cs_method, and status code of threats.",
+            "title": "Nginx  - Threat Intel",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-A30AF488B1E9A942",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":10,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-F5E1578887C81B4D",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":17,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-8B276580AB752B40",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":17,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-33C06EFA8CC8BA4D",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":10,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-F5674AACBC9A3A48",
+                        "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panelPANE-1D164CE69BCCFB4F",
+                        "structure": "{\"height\":6,\"width\":10,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-BA1609C1B6DF3949",
+                        "structure": "{\"height\":6,\"width\":14,\"x\":10,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-EAB11A358AAF3B47",
+                        "structure": "{\"height\":12,\"width\":10,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-A30AF488B1E9A942",
+                    "title": "Threat Count",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"svp\":{\"option\":\"Average\",\"label\":\"Threats\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#16943E\"},{\"from\":1,\"to\":10,\"color\":\"#DFBE2E\"},{\"from\":10,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n|sum (ip_count) as threat_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-F5E1578887C81B4D",
+                    "title": "Threat Breakdown by Sources",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Source Name\"},\"axisY\":{\"title\":\"Threat Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip  \n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n|sum (ip_count) as threat_count by _source ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-8B276580AB752B40",
+                    "title": "Threat by Actors",
+                    "visualSettings": "{\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":90,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n|sum (ip_count) as threat_count by Actor",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-33C06EFA8CC8BA4D",
+                    "title": "Threat by Malicious Confidence",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Malicious Confidence\"},\"axisY\":{\"title\":\"Threat Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count by xffi,i | where IsPublicIp (i) | i as c_ip \n\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n|sum (ip_count) as threat_count by malicious_confidence",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-F5674AACBC9A3A48",
+                    "title": "Threat Table",
+                    "visualSettings": "{\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n//| count by c_ip,x_forwarded_for,_source \n| concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop \n//| sum(_count) as ip_count  by i ,_source\n| where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| count by malicious_confidence, Actor,  c_ip, cs_method, sc_status, cs_uri_stem, sc_bytes, referrer, user_agent\n| sort by _count\n| limit 50",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-1D164CE69BCCFB4F",
+                    "title": "Top 5 Highly Malicious cs_uri_stems",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,cs_uri_stem | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,cs_uri_stem| where IsPublicIp (i) | i as c_ip | count as ip_count by  c_ip, cs_uri_stem\n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| where malicious_confidence matches \"high\"\n| sum(ip_count) by cs_uri_stem\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-BA1609C1B6DF3949",
+                    "title": "Highly Malicious Threat Table",
+                    "visualSettings": "{\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by x_forwarded_for, c_ip, sc_status, cs_uri_stem, Referrer, user_agent | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i, sc_status, cs_uri_stem, Referrer, user_agent | where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as Malicious_Confidence from sumo://threat/cs on threat= c_ip \n| where  type=\"ip_address\" and !isNull(Malicious_Confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| where Malicious_Confidence matches \"high\"\n| sum(ip_count) as ip_count by Malicious_Confidence, Actor,  c_ip, sc_status, cs_uri_stem, Referrer, user_agent\n| sort by ip_count\n| limit 20",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-EAB11A358AAF3B47",
+                    "title": "Threat Locations",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip | lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where type=\"ip_address\" and !isNull(malicious_confidence)\n| sum(_count) as _count by  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx  - Trends",
+            "description": "The Nginx - Logs Timeline Analysis Dashboard provides a high-level view of the activity and health of Nginx servers on your network. Dashboard panels display visual graphs and detailed information on traffic volume and distribution, responses over time, as well as time comparisons for visitor locations and server hits.",
+            "title": "Nginx  - Trends",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-FAB9828CAE6AAA44",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-B1D3BCAF89F64943",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-4E21B8789E756944",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-D26C4FD8886C1B44",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-00C50FB19DBD0849",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":12}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-FAB9828CAE6AAA44",
+                    "title": "Traffic Distribution by cs_host",
+                    "visualSettings": "{\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.5,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":10,\"title\":\"TIme\"},\"axisY\":{\"title\":\"Requests Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \n \n| if (isEmpty(cs_host),_sourceHost,cs_host) as Host\n| timeslice 1h\n| count by _timeslice, Host  \n| transpose row _timeslice column Host",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-B1D3BCAF89F64943",
+                    "title": "Responses Over Time",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Time\"},\"axisY\":{\"title\":\"Requests Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \n \n| if(sc_status matches \"2*\", 1, 0) as Successes \n| if(sc_status matches \"3*\", 1, 0) as Redirects \n| if(sc_status matches \"4*\", 1, 0) as Client_Errors \n| if(sc_status matches \"5*\", 1, 0) as cs_host_Errors \n| timeslice by 1h \n| sum(Successes) as Successes, sum(Client_Errors) as Client_Errors,  sum(Redirects) as Redirects, sum(cs_host_Errors) as cs_host_Errors by _timeslice\n| sort by _timeslice asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-4E21B8789E756944",
+                    "title": "Traffic Volume and Bytes Served",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Time\"},\"axisY\":{\"title\":\"Volume\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"Bytes Served\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"overrides\":[{\"series\":[\"gbytes\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#c55003\",\"axisYType\":\"secondary\",\"name\":\"GBytes\"}},{\"series\":[\"hits\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"column\",\"color\":\"#00a0d6\",\"name\":\"Hits\"}}],\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \n \n| where sc_bytes != \"-\"\n| timeslice 1h\n| (sc_bytes/(1048576*1000)) as gbytes \n| count as hits, sum(gbytes) as gbytes by _timeslice \n| sort _timeslice asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-D26C4FD8886C1B44",
+                    "title": "Visitor Locations (Top 5 Countries) - Today Vs. Yesterday",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Country Name\"},\"axisY\":{\"title\":\"Visitors Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"overrides\":[{\"series\":[\"Visitors_Locations\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"column\",\"color\":\"#00a0d6\",\"name\":\"Visitors Locations\"}},{\"series\":[\"Visitors_Locations_1d\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#c55003\",\"fillOpacity\":0.5,\"name\":\"Visitor Locations 1 Day before\"}}],\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \n | count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip \n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| where !isEmpty(country_name)\n| count as visitors by country_name\n| sort visitors \n| compare with timeshift 1d\n| order by visitors desc\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-00C50FB19DBD0849",
+                    "title": "Number of Hits by cs_host - One Day Time Comparison",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Source Host\"},\"axisY\":{\"title\":\"Hits\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"overrides\":[{\"series\":[\"Number_of_Hits\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"column\",\"color\":\"#00a0d6\",\"fillOpacity\":0.5,\"name\":\"Number of Hits\"}},{\"series\":[\"Number_of_Hits_1d\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#c55003\",\"name\":\"Number of Hits 1 Day before\"}}],\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \n \n| if (isEmpty(cs_host),_sourceHost,cs_host) as Host\n| count as Number_of_Hits by Host  | sort number_of_hits | limit 25\n| compare with timeshift 1d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "MetadataVariableSourceDefinition",
+                        "filter": "_sourceCategory=*nginx*  ",
+                        "key": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nginx*  _sourcecategory={{sourcecategory}} {{keywords}} _sourcecategory=* | if (isEmpty(cs_host),_sourceHost,cs_host) as host | count by host",
+                        "field": "host"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Error Logs",
+            "description": "The Nginx - Error Logs Analysis Dashboard provides a high-level view of log level breakdowns,  comparisons, and trends. The panels also show the geographic locations of clients and clients with critical messages, new connections and outliers, client requests, request trends, and request outliers.",
+            "title": "Nginx - Error Logs",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-5DA62434AF966942",
+                        "structure": "{\"height\":6,\"width\":16,\"x\":8,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-B454C31291F34B4C",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-1E61C2C19B05794B",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-E65D64E798E48B49",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-E172855199EB2A4E",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-0E8F7BB9BE522B43",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-8EB2369E92984946",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-24E3596D8E922847",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":18}"
+                    },
+                    {
+                        "key": "panelPANE-79568B91A41BBB41",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-5DA62434AF966942",
+                    "title": "Critical Messages",
+                    "visualSettings": "{\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| where log_level in (\"emerg\", \"alert\", \"crit\")\n| count by  log_level, cs_host, Message\n| sort by _count\n| limit 20",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-B454C31291F34B4C",
+                    "title": "Log Level - One Day Time Comparison",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Log Level\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[\"_count\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"column\",\"color\":\"#50caf2\",\"fillOpacity\":0.5,\"name\":\"Count\"}},{\"series\":[\"_count_1d\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#c55003\",\"name\":\"Count 1 Day before\"}}],\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| count by log_level\n| sort by _count | compare with timeshift 1d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-1E61C2C19B05794B",
+                    "title": "Messages by Log Level - Over Time",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| timeslice 1h\n| count by _timeslice, Log_Level\n| transpose row _timeslice column Log_Level",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E65D64E798E48B49",
+                    "title": "Top 5 Clients causing Errors",
+                    "visualSettings": "{\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| where !isEmpty( c_ip)\n| count by  c_ip\n| sort by _count\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E172855199EB2A4E",
+                    "title": "Number of Requests by Client - One Day Time Comparison",
+                    "visualSettings": "{\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[\"_count\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"column\",\"color\":\"#50caf2\",\"fillOpacity\":0.5,\"name\":\"Count\"}},{\"series\":[\"_count_1d\"],\"queries\":[],\"userProvidedChartType\":true,\"properties\":{\"type\":\"line\",\"color\":\"#c55003\",\"name\":\"Count 1 Day before\"}}],\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| where !isEmpty( c_ip)\n| count by  c_ip\n| sort by _count\n| compare with timeshift 1d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-0E8F7BB9BE522B43",
+                    "title": "Top 5 cs_hosts with Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| count by cs_host\n| sort by _count\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-8EB2369E92984946",
+                    "title": "Top 5 cs_uri_stems with Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| count by cs_uri_stem\n| sort by _count\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-24E3596D8E922847",
+                    "title": "All Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| formatDate(_messageTime, \"MM/dd/yyyy HH:mm:ss:SSS\") as messageDate\n| count by messageDate, log_level,  c_ip, cs_host, cs_method, cs_uri_stem, Message\n| fields - _count\n| sort by messageDate\n| limit 50",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-79568B91A41BBB41",
+                    "title": "Client Locations with Critical Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n | parse regex \"\\s\\[(?<Log_Level>\\S+)\\]\\s\\d+#\\d+:\\s(?:\\*\\d+\\s|)(?<Message>[A-Za-z][^,]+)(?:,|$)\"\n| parse  \"client: *, server: *, request: \\\"* * HTTP/1.1\\\", host: \\\"*\\\"\" as  c_ip, cs_host, cs_method, cs_uri_stem, Host nodrop\n| where log_level in (\"emerg\", \"alert\", \"crit\")\n| where !isEmpty( c_ip)\n| count by  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Outlier Analysis",
+            "description": "The Nginx -  Outlier Analysis Dashboard provides a high-level view of Nginx server outlier metrics for bytes served, number of visitors, and server errors. You can select the time interval over which outliers are aggregated, then hover the cursor over the graph to display detailed information for that point in time. Use the dashboard and panel filters to drill down and view more granular data.",
+            "title": "Nginx - Outlier Analysis",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-2CB4E004BD999940",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-61FFD0B8BAAA1B42",
+                        "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-4E141BC8B197F84B",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-6E019948B8970A4C",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-2CB4E004BD999940",
+                    "title": "Bytes Served",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#50caf2\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme3\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| timeslice   | (sc_bytes/(1048576*1000)) as gbytes \n| sum(gbytes) as gbytes by _timeslice \n| sort _timeslice asc\n| outlier gbytes window={{Window}},threshold={{Threshold}},consecutive={{Consecutive}},direction=+- ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-61FFD0B8BAAA1B42",
+                    "title": "Number of Visitors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#50caf2\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme3\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| timeslice  \n| count as count by _timeslice \n| sort _timeslice asc\n| outlier count window={{Window}},threshold={{Threshold}},consecutive={{Consecutive}},direction=+",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-4E141BC8B197F84B",
+                    "title": "cs_host Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#50caf2\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme3\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n sc_status =5*\n\n| timeslice  \n| count as server_errors by _timeslice\n| sort _timeslice asc\n| outlier server_errors window={{Window}},threshold={{Threshold}},consecutive={{Consecutive}},direction=+",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-6E019948B8970A4C",
+                    "title": "Client Errors",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#50caf2\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme3\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n sc_status = 4*\n| timeslice  \n| count as client_errors by _timeslice\n| sort _timeslice asc\n| outlier client_errors window={{Window}},threshold={{Threshold}},consecutive={{Consecutive}},direction=+",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "TimeSlice",
+                    "displayName": null,
+                    "defaultValue": "1h",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "1h,2h,3h,4h,5h"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "Window",
+                    "displayName": null,
+                    "defaultValue": "10",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "6,7,8,9,10"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "Threshold",
+                    "displayName": null,
+                    "defaultValue": "3",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "1,2,3,4,5"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "Consecutive",
+                    "displayName": null,
+                    "defaultValue": "3",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "1,2,3,4,5"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Visitor Access Types",
+            "description": "The Nginx - Visitor Access Types Dashboard provides insights into visitor platform types, browsers, and operating systems, as well as the most popular mobile devices, PC and Mac versions used.",
+            "title": "Nginx - Visitor Access Types",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-DCC0B87EB3D3CB43",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":6,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-82D4DBFE8791A84E",
+                        "structure": "{\"height\":9,\"width\":11,\"x\":13,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-C5A799B98A774A41",
+                        "structure": "{\"height\":9,\"width\":11,\"x\":13,\"y\":9}"
+                    },
+                    {
+                        "key": "panelPANE-E9FDFFC081B14849",
+                        "structure": "{\"height\":6,\"width\":13,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-63E623028A824A40",
+                        "structure": "{\"height\":6,\"width\":13,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-19B5273DBF614B4D",
+                        "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-DCC0B87EB3D3CB43",
+                    "title": "Visitor Platforms",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| if (user_agent matches \"*iPad*\" OR user_agent matches \"*iPhone*\" OR user_agent matches \"*Android*\" OR user_agent matches \"*BlackBerry*\" OR user_agent matches \"*Galaxy*\" OR user_agent matches \"LGE-*\" OR user_agent matches \"SCH-*\" OR user_agent matches \"*HUAWEI-*\" OR user_agent matches \"*SAMSUNG*\" OR user_agent matches \"*samsung*\" OR user_agent matches \"Dalvik/*\" OR user_agent matches \"Nokia*\" OR user_agent matches \"LG-*\" OR user_agent matches \"*CFNetwork*\"  OR user_agent matches \"*UP.Browser/*\" OR user_agent matches \"*QQ*rowser*\" OR user_agent matches \"*NetFront/*\" OR user_agent matches \"*Windows Phone*\" OR user_agent matches \"*Mobile Safari*\" OR user_agent matches \"*iemobile*\",\"Mobile\",\"\") as type\n| if (user_agent matches \"*Windows*\" OR user_agent matches \"*Win64*\" OR user_agent matches \"*Win32*\" OR user_agent matches \"*i686*\" OR user_agent matches \"*x86*\",\"PC\",type) as type\n| if (user_agent matches \"*Macintosh*\" OR user_agent matches \"*Mac OS*\",\"Mac\",type) as type\n| if (type = \"\",\"bots/unknown\",type) as type\n| count type\n| sort by _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-82D4DBFE8791A84E",
+                    "title": "Browsers and Operating Systems",
+                    "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| if (user_agent matches \"*Windows *\" OR user_agent matches \"*Win32*\" OR user_agent matches \"*Win64*\",\"Windows\",\"\") as OS \n| if (user_agent matches \"*Macintosh*\" OR user_agent matches \"*Darwin/*\" OR user_agent matches \"*Mac OS*\",\"MacOS\",OS) as OS \n| if (user_agent matches \"* CrOS *\",\"Chrome OS\",OS) as OS\n| if (user_agent matches \"*Linux*\",\"Linux\",OS) as OS \n| if (user_agent matches \"*iPad*\",\"iPad\",OS) as OS \n| if (user_agent matches \"*iPhone*\",\"iPhone\",OS) as OS \n| if (user_agent matches \"*Android*\",\"Android\",OS) as OS \n| if (user_agent matches \"*Windows Phone*\",\"Windows Phone\",OS) as OS \n| if (OS == \"\",\"Other\",OS) as OS \n| if (user_agent matches \"Mozilla/*; rv:*)*\",\"Mozilla\",\"\") as Browser\n| if (user_agent matches \"*MSIE*\",\"Internet Explorer\",Browser) as Browser \n| if (user_agent matches \"*Firefox*\",\"Firefox\",Browser) as Browser \n| if (user_agent matches \"*Safari*\",\"Safari\",Browser) as Browser \n| if (OS==\"Android\" AND user_agent matches \"*WebKit*\",\"WebKit\",Browser) as Browser\n| if ((OS==\"iPhone\" OR OS==\"iPad\") AND (user_agent matches \"*Mobile/*\" OR user_agent matches \"*AppleWebKit*(KHTML*Gecko)*\"),\"Mobile Safari\",Browser) as Browser\n| if (browser == \"\" AND OS==\"MacOS\" AND user_agent matches \"Mozilla/* (Macintosh;*(KHTML, like Gecko)*\",\"Safari\",Browser) as Browser \n| if (user_agent matches \"*MobileSafari/*\",\"Mobile Safari\",Browser) as Browser\n| if (user_agent matches \"*Chrome*\",\"Chrome\",Browser) as Browser \n| if (user_agent matches \"Opera*\",\"Opera\",Browser) as Browser \n| if (user_agent matches \"Dolphin*\",\"Dolphin\",Browser) as Browser \n| if (Browser == \"\",\"Other\",Browser) as Browser  \n| count by OS,browser\n| transpose row Browser column OS",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-C5A799B98A774A41",
+                    "title": "Popular Mobile Device Versions",
+                    "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}   (iphone or ipad or android or samsung) \n \n| parse regex \"\\((?<device>iPhone).+? CPU iPhone OS (?<version>.+?) like Mac\"  nodrop \n| parse regex \"\\((?<device>iPad).+? CPU OS (?<version>.+?) like Mac\"  nodrop \n| parse regex \" (?<device>Android) (?<version>[\\d\\.]+)\" nodrop \n| parse regex \"(?<device>SAMSUNG).+?(?<version>(?:GT-\\w+|SGH-\\w+|SPH-\\w+|SCH-\\w+))\" \n| where device != \"\"\n| count as count by device, version \n| transpose row version column device",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E9FDFFC081B14849",
+                    "title": "Desktop OS Version",
+                    "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}   (\"macintosh\" OR \"mac os\" OR \"windows\" OR \"i686\" or \"PC\" or (\"Linux\" AND !android))\n \n| parse regex field=user_agent \"(?<os>Mac OS) (?<version>[^;\\)]+?)(?:;|\\))\" nodrop \n| parse regex field=user_agent \"(?<os>Windows)(?: NT | )(?<version>[\\d.]+)\" nodrop \n| parse regex field=user_agent \"(?<os>Linux) (?<version>\\S+?)(?:\\)|;)\" nodrop \n| where os != \"\"\n| count as count by os, version\n| transpose row Version column Os",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-63E623028A824A40",
+                    "title": "Visitors Platforms Over Time",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| if (user_agent matches \"*iPad*\" OR user_agent matches \"*iPhone*\" OR user_agent matches \"*Android*\" OR user_agent matches \"*BlackBerry*\" OR user_agent matches \"*Galaxy*\" OR user_agent matches \"LGE-*\" OR user_agent matches \"SCH-*\" OR user_agent matches \"*HUAWEI-*\" OR user_agent matches \"*SAMSUNG*\" OR user_agent matches \"*samsung*\" OR user_agent matches \"Dalvik/*\" OR user_agent matches \"Nokia*\" OR user_agent matches \"LG-*\" OR user_agent matches \"*CFNetwork*\"  OR user_agent matches \"*UP.Browser/*\" OR user_agent matches \"*QQ*rowser*\" OR user_agent matches \"*NetFront/*\" OR user_agent matches \"*Windows Phone*\" OR user_agent matches \"*Mobile Safari*\" OR user_agent matches \"*iemobile*\",\"Mobile\",\"\") as type\n| if (user_agent matches \"*Windows*\" OR user_agent matches \"*Win64*\" OR user_agent matches \"*Win32*\" OR user_agent matches \"*i686*\" OR user_agent matches \"*x86*\",\"PC\",type) as type\n| if (user_agent matches \"*Macintosh*\" OR user_agent matches \"*Mac OS*\",\"Mac\",type) as type\n| if (type = \"\",\"bots/unknown\",type) as type\n| timeslice 5m\n| count by _timeslice, type\n| transpose row _timeslice column type",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-19B5273DBF614B4D",
+                    "title": "Unique Visitors",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"svp\":{\"option\":\"Average\",\"label\":\"Unique Visitors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| Count by  c_ip\n| Count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Visitor Locations",
+            "description": "The Nginx - Visitor Locations Dashboard provides a high-level view of Nginx visitor geographic locations both worldwide and in the United States. Dashboard panels also show graphic trends for visits by country over time and visits by  US region over time.",
+            "title": "Nginx - Visitor Locations",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-47DEA2ADA5AE7B4B",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":0,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-45AFA216B309F94C",
+                        "structure": "{\"height\":7,\"width\":12,\"x\":12,\"y\":11}"
+                    },
+                    {
+                        "key": "panelPANE-510336D7A677A84E",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-334498A1A664A843",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-47DEA2ADA5AE7B4B",
+                    "title": "Visits by Country Over Time",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| timeslice 5m\n| count by _timeslice,  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| where !isNull(country_name) AND country_name != \"\"\n| count by _timeslice, country_name\n| transpose row _timeslice column country_name as * ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-45AFA216B309F94C",
+                    "title": "Visits by US Regions Over Time",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| timeslice 5m\n| count by _timeslice,  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| where country_name=\"United States\" AND !isNull(region) AND region !=\"\"\n| count by _timeslice, region\n| transpose row _timeslice column region as * ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-510336D7A677A84E",
+                    "title": "WorldWide",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| count by  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-334498A1A664A843",
+                    "title": "United States",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| count by  c_ip\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| where country_name=\"United States\" AND !isNull(region) AND region !=\"\"\n| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Visitor Traffic Insight",
+            "description": "The Nginx - Visitor Traffic Insight Dashboard provides detailed information on the top documents accessed, top referrers, top search terms from popular search engines, and the media types served.",
+            "title": "Nginx - Visitor Traffic Insight",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-E91ECDE2B87F9A4B",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panelPANE-E76ED311A7B5A843",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":6}"
+                    },
+                    {
+                        "key": "panelPANE-49EC264EBABA8A4F",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":9}"
+                    },
+                    {
+                        "key": "panelPANE-5FC578689E6C594E",
+                        "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-E968E0A3A63E3947",
+                        "structure": "{\"height\":6,\"width\":5,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panelPANE-BFC27172AB4CC841",
+                        "structure": "{\"height\":6,\"width\":7,\"x\":5,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-E91ECDE2B87F9A4B",
+                    "title": "Top 5 cs_uri_stems",
+                    "visualSettings": "{\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"cs_uri_stem\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| count as count by url\n| sort by count\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E76ED311A7B5A843",
+                    "title": "Top 5 Referrers",
+                    "visualSettings": "{\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Referrer\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| where referrer != \"-\"\n| count as count by referrer\n| sort by count\n| limit 5 ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-49EC264EBABA8A4F",
+                    "title": "Media Types Served",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| parse regex field=cs_uri_stem \"^/[^\\?]+?\\.(?<type>[a-zA-Z]{2,4})$\" \n| parse regex field=cs_uri_stem \"/\\S+?(?<email_prefix>(?:%40|@)[^.]+?)\\.\\w+\" nodrop \n| where email_prefix=\"\" \n| count as count by type\n| sort by count, type asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-5FC578689E6C594E",
+                    "title": "Top 10 Search Terms from Popular Search Engines",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}   (google OR bing OR aol OR ask OR yahoo) (\"p=\" OR \"q=\" OR \"wd=\" OR \"searchfor=\")\n \n| parse regex field=referrer \"(?:\\?|&)(?:p|q|wd|searchfor)=(?<search_term>[^=]+?)(?:&|$)\" nodrop \n| where search_term != \"\"\n| urldecode(search_term)\n| if(referrer matches \"*google.*\", \"Google\", \"\") as engine\n| if(referrer matches \"*bing.*\", \"Bing\", engine) as engine\n| if(referrer matches \"*ask.com*\", \"Ask.com\", engine) as engine\n| if(referrer matches \"*aol.*\", \"AOL\", engine) as engine\n| if(referrer matches \"*yahoo.*\", \"Yahoo\", engine) as engine\n| where engine !=\"\" \n| count as count by search_term\n| sort count\n| limit 10",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-E968E0A3A63E3947",
+                    "title": "Bytes Served",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"svp\":{\"option\":\"Average\",\"label\":\"GBytes Served\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"labelFontSize\":8},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n|  sum(sc_bytes) as Bytes_Served\n| Bytes_Served/(1024*1024*1000) as Gbytes_Served\n| fields Gbytes_Served",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-BFC27172AB4CC841",
+                    "title": "HTTP cs_methods",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":180,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| count by cs_method",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Nginx - Web cs_host Operations",
+            "description": "The Nginx - Web cs_host Operations Dashboard provides a high-level view combined with detailed information on the top ten bots, geographic locations and data for clients with high error rates, server errors over time, and non 200 response code status codes. Dashboard panels also show information on server error logs, error log levels, error responses by server, and the top URIs responsible for 404 responses.",
+            "title": "Nginx - Web cs_host Operations",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-3965BEA281E32946",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":13}"
+                    },
+                    {
+                        "key": "panelPANE-3E6AD0FEA5200B4C",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":7}"
+                    },
+                    {
+                        "key": "panelPANE-97BC25D193D8C947",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":13}"
+                    },
+                    {
+                        "key": "panelPANE-B0A0A4AFABF16B4C",
+                        "structure": "{\"height\":12,\"width\":8,\"x\":16,\"y\":19}"
+                    },
+                    {
+                        "key": "panelPANE-7BA72609A62C394C",
+                        "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":7}"
+                    },
+                    {
+                        "key": "panelPANE-526A1A42A21EE946",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":13}"
+                    },
+                    {
+                        "key": "panelPANE-B2A8414389CEFA4B",
+                        "structure": "{\"height\":12,\"width\":8,\"x\":8,\"y\":19}"
+                    },
+                    {
+                        "key": "panelB6C29B97A3C1F940",
+                        "structure": "{\"height\":12,\"width\":8,\"x\":0,\"y\":19}"
+                    },
+                    {
+                        "key": "panel412BD14EABAA7B4B",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel1CC94D219C5E5A47",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":0}"
+                    },
+                    {
+                        "key": "panelE290BEF7BAB41945",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":16,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-3965BEA281E32946",
+                    "title": "Top 10 Bots Observed",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}   (\"Googlebot\" OR \"AskJeeves\" OR \"Digger\" OR \"Lycos\"\nOR \"msnbot\" OR \"Inktomi Slurp\" OR \"Yahoo\" OR \"Nutch\" OR \"bingbot\" OR\n\"BingPreview\" OR \"Mediapartners-Google\" OR \"proximic\" OR \"AhrefsBot\" OR\n\"AdsBot-Google\" OR \"Ezooms\" OR \"AddThis.com\" OR \"facebookexternalhit\" OR\n\"MetaURI\" OR \"Feedfetcher-Google\" OR \"PaperLiBot\" OR \"TweetmemeBot\" OR\n\"Sogou web spider\" OR \"GoogleProducer\" OR \"RockmeltEmbedder\" OR\n\"ShareThisFetcher\" OR \"YandexBot\" OR \"rogerbot-crawler\" OR \"ShowyouBot\" OR \"Baiduspider\" OR \"Sosospider\" OR \"Exabot\")\n \n| parse regex field=user_agent \"(?<bot_name>facebook)externalhit?\\W+\" nodrop\n| parse regex field=user_agent \"Feedfetcher-(?<bot_name>Google?)\\S+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>PaperLiBot?)/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>TweetmemeBot?)/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>msn?)bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Nutch?)-.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Google?)bot\\W\" nodrop\n| parse regex field=user_agent \"Feedfetcher-(?<bot_name>Google?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Yahoo?)!\\s+Slurp[;/].+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>bing?)bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Bing?)Preview\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Sogou?)\\s+web\\s\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Yandex?)Bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>rogerbot?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>AddThis\\.com?)\\s+robot\\s+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>ShareThis?)Fetcher/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Ahrefs?)Bot/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>MetaURI?)\\s+API/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Showyou?)Bot\\s+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Google?)Producer;\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Ezooms?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Rockmelt?)Embedder\\s+\" nodrop \n| parse regex field=user_agent \"(?<bot_name>Sosospider?)\\W\" nodrop \n| parse regex field=user_agent \"(?<bot_name>Baidu?)spider\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Exabot?)\\W\"\n| where bot_name != \"\"\n| if (bot_name=\"bing\",\"Bing\",bot_name) as bot_name\n| count as count by bot_name\n| sort by count\n| limit 10",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-3E6AD0FEA5200B4C",
+                    "title": "cs_host Errors Over Time",
+                    "visualSettings": "{\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| where sc_status matches \"5*\"\n| timeslice 5m\n| count as count by _timeslice, sc_status\n| transpose row _timeslice column sc_status ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-97BC25D193D8C947",
+                    "title": "Non 200 Response Status Codes",
+                    "visualSettings": "{\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Status Code\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n sc_status=* and not sc_status=2*\n| count as count by sc_status \n| sort by count, sc_status asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-B0A0A4AFABF16B4C",
+                    "title": "Top Error Pages",
+                    "visualSettings": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Client IP\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \nsc_status=5*\n| count by sc_status, cs_host, cs_uri_stem | sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-7BA72609A62C394C",
+                    "title": "Error Responses by cs_host",
+                    "visualSettings": "{\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| where sc_status matches \"4*\" or sc_status matches \"5*\"\n| if (isEmpty(cs_host),_sourceHost,cs_host) as Host\n| timeslice 5m\n| count as count by _timeslice, Host\n| transpose row _timeslice column Host",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-526A1A42A21EE946",
+                    "title": "Top 5 URIs causing 404 Responses",
+                    "visualSettings": "{\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| where sc_status = \"404\"\n| count as count by url\n| sort count, url asc\n| limit 5",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-B2A8414389CEFA4B",
+                    "title": "Visitor Locations",
+                    "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \nsc_status = *\n | count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip \n\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| sum(ip_count) as _count, avg( latitude) as latitude, avg(longitude) as longitude by  country_name\n//| sort _count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelB6C29B97A3C1F940",
+                    "title": "Visitor Locations (Copy)",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}} \nsc_status = *\n| timeslice 15m\n| concat (x_forwarded_for,\",\",c_ip) as xffi \n| parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop \n| count as ip_count  by i ,_timeslice | where IsPublicIp (i) | i as c_ip \n\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip =  c_ip\n| sum(ip_count) as hits  by  country_name,_timeslice | sort _timeslice,hits\n|if (hits<100,\"others\",country_name) as country_name | sum(hits) as hits by country_name, _timeslice | transpose row _timeslice column country_name",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel412BD14EABAA7B4B",
+                    "title": "Requests Vs Last Week",
+                    "visualSettings": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[{\"series\":[\"count_7d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| timeslice 5m\n| count as count by _timeslice\n| compare with timeshift 7d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1CC94D219C5E5A47",
+                    "title": "Response Time Median,95th vs last week",
+                    "visualSettings": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[{\"series\":[\"_time_taken_pct_50_7d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\"}},{\"series\":[\"_time_taken_pct_95_7d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| timeslice 5m\n| pct(time_taken,50,95) by _timeslice\n| compare with timeshift 7d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE290BEF7BAB41945",
+                    "title": "HTTP 500 Errors vs Last Week",
+                    "visualSettings": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"\"},\"axisY\":{\"title\":\"Count\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#dde4e9\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":12,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14},\"overrides\":[{\"series\":[\"count_7d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "_sourcecategory={{sourcecategory}} {{keywords}}  \nsc_status=5*\n| timeslice 5m\n| count by _timeslice\n| compare with timeshift 7d",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "sourcecategory",
+                    "displayName": "sourcecategory",
+                    "defaultValue": "*nginx*",
+                    "sourceDefinition": {
+                        "variableSourceType": "LogQueryVariableSourceDefinition",
+                        "query": "_sourceCategory=*nignx* | count by _sourcecategory",
+                        "field": "_sourcecategory"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "a,b*,*c*,( a or d)"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        }
+    ]
+}
