@@ -1,5 +1,7 @@
 This lab uses the Training Org that is used in Sumo Certjams.
 
+![](Dashboard.png)
+
 Log in as a training user as per usual method such as training+analyst###@sumologic.com where ### is a number from 0001-999
 
 # Create a dashboard
