@@ -8,13 +8,13 @@ Log in as a training user as per usual method such as training+analyst###@sumolo
 - First click the time range selector in the top right corner.
 - Tick 'set as dashboards's default time range' and change it to 'Last 60 Minutes'
 
-## 1 First let's setup a template variable 
+## First let's setup a template variable 
 You can see detailed info about filters here: https://help.sumologic.com/docs/dashboards-new/filter-template-variables/
-- click Create new variable + to add a new parameter on top left of the dashboard (if you can't see this click the filter button in top right.)
-- for Variable Name use  ```keywords```
-- for Variable Type use ```Custom List```
-- you can put a list of things such as a,b,c in the list but it's optional
-- users can actually type anything in a filter param later
+- Click Create new variable + to add a new parameter on top left of the dashboard (if you can't see this click the filter button in top right.)
+- For Variable Name use  ```keywords```
+- For Variable Type use ```Custom List```
+- You can put a list of things such as a,b,c in the list but it's optional
+- Users can actually type anything in a template variable the list is only suggesitons
 - Save it.
 
 ## Set a name
@@ -32,26 +32,28 @@ _sourcecategory = *cloudfront* {{keywords}}
 - Click the looking glass icon or press enter to run the search.
 - In the "Categorical" section try changing the chart type to try Table, Bar or Pie
 - You can click the panel title 'Untitled' to change it's name
--  then when you are happy with it Click Add to Dashboard to save.
+- When you are happy with it Click Add to Dashboard to save.
 
 ## Using the filter
 This dashboard  has a filter defined, we called ```keywords``` . Filters make it easy to re-use dashboards across environments or services, and to enable them to be powerful first step troubleshooting tools. This means are run time the value ```{{keywords}}``` in the panel will be replaced by whatever you type in the filter.
-Try changing entering a keyword such as 304 or Miss 
+- Try changing entering a keyword such as ```304``` or ```Miss```  
 - what effect does this have on results?
+- Put the value back to *
 
 ## Duplicate and edit to add a new panel
-- Use the ellipsis button on the panel to bring up the panel menu. 
+- Use the ellipsis button on the panel to bring up the panel menu on the top righ tof a panel. (You have to hover over the top right near the time range to see it).
 - Choose Duplicate. 
 - Then choose Edit on the new panel. 
-- Remove the count line and instead do:
+- Remove the count line at the end. You can delete it or add ```//``` to the line to comment it out
+- Add a new aggregation instead:
 ```
 | timeslice
 | count by _timeslice
 ```
 - Change the panel type to **Time Series** 
--  Run the query 
--  change the panel time range to -3h and run again
--  then try some different time series chart types such as line and area.
+- Run the query 
+- Change the panel time range to -3h and run again
+- Then try some different time series chart types such as line and area.
 
 ## Using time compare
 Time compare is a very powerful way to understand if current performance is anomalous with previous performance.https://help.sumologic.com/docs/search/time-compare/
@@ -69,7 +71,7 @@ _sourcecategory = *cloudfront* {{keywords}}
 ## Multi Series Time Charts
 It's very useful to represent dynamic series changes over time.
 - Duplicate the time series panel you just created.
-- change the last line so it looks like this 
+- Change the last line so it looks like this. Transpose reformats time series data with a series column into a format for graphing over time. 
 ```
 _sourcecategory = *cloudfront* {{keywords}} 
 | parse "*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*" as _filedate,time,edgeloc, scbytes, c_ip,method,cs_host,uri_stem,status,referer,user_agent,uri_query,cookie,edgeresult,edge_request,domain,protocol,bytes,time_taken,forwarded_for,ssl_protocol,ssl_cipher, x_edge_response_result_type,protocol_version 
@@ -79,7 +81,6 @@ _sourcecategory = *cloudfront* {{keywords}}
 - change the Chart Type to Column
 - Change the Display Type below that to Stacked
 - Update the chart and you will see each status code stacked in time series buckets over time.
-
 
 ## Honeycomb Panels
 Let's add a new panel type - the honeycomb type. This is good for showing dynamic changes ranges of things like nodes in auto scale groups for example vs a dimension such as CPU use.
@@ -91,8 +92,8 @@ _sourcecategory = *cloudfront* {{keywords}}
 | parse "*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*" as _filedate,time,edgeloc, scbytes, c_ip,method,cs_host,uri_stem,status,referer,user_agent,uri_query,cookie,edgeresult,edge_request,domain,protocol,bytes,time_taken,forwarded_for,ssl_protocol,ssl_cipher, x_edge_response_result_type,protocol_version 
 | count by edgeloc | sort _count 
  ```
- - you will see one node for each edge location, and it is color coded by volume of count
- - Name the panel something like Hits by edgeloc
+ - You will see one node for each edge location, and it is color coded by volume of count
+ - Name the panel something like Hits by edgeloc and Update Panel
 
 ## Map panels with geo location
 - Add a Map type panel. 
