@@ -282,6 +282,14 @@
                                 "value": "{{operation}}",
                                 "valueType": "StringTracingValue",
                                 "target": "any span"
+                            },
+                            {
+                                "type": "FieldDescriptor",
+                                "operator": "=",
+                                "field": "status",
+                                "value": "{{statusmessage}}",
+                                "valueType": "StringTracingValue",
+                                "target": "any span"
                             }
                         ]
                     },
@@ -291,14 +299,7 @@
                     "outputCardinalityLimit": 1000
                 }
             ],
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1h"
-                },
-                "to": null
-            }
+            "timeRange": null
         },
         {
             "id": null,
@@ -388,7 +389,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "These panels show the traces view. These panels **do not** support keyword or statusmessage level filtering.\n``` service={{service}} for any span, deployment.environment = {{environment}} for any span, operation={{operation}} for any span, num_errors > 0```"
+            "text": "These panels show the traces view. These panels **do not** support keyword level filtering.\n``` service={{service}} for any span, deployment.environment = {{environment}} for any span, operation={{operation}} for any span, num_errors > 0, status = {{statusmessage}} for any span```\n"
         }
     ],
     "variables": [
