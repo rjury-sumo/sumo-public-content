@@ -17,3 +17,10 @@ This enables users to
 note: change the url param to point to your instance for the click through in the table to a trace to work.
 
 ![](Tracing%20Errors%20-%20Span%20Details.png)
+
+# Tracing - Database Operations
+Shows tracing spans data relating to sql operation spans:
+- query performance
+- slow queries
+- errors
+- trends over time
