@@ -24,3 +24,5 @@ Shows tracing spans data relating to sql operation spans:
 - slow queries
 - errors
 - trends over time
+
+![](tracing.db.operations.png)
