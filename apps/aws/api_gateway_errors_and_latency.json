@@ -1,0 +1,514 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Api Gateway Errors and Latency",
+    "description": "",
+    "title": "Api Gateway Errors and Latency",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel086494ADB9B2F947",
+                "structure": "{\"height\":8,\"width\":16,\"x\":0,\"y\":16}"
+            },
+            {
+                "key": "panelEB6D2A67B4DA8B4F",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":16}"
+            },
+            {
+                "key": "panel5E39AB238D74CA42",
+                "structure": "{\"height\":9,\"width\":16,\"x\":0,\"y\":34}"
+            },
+            {
+                "key": "panel02A1E0F89EED284A",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":34}"
+            },
+            {
+                "key": "panel1F966AFCBF5F7A4F",
+                "structure": "{\"height\":8,\"width\":6,\"x\":6,\"y\":0}"
+            },
+            {
+                "key": "panelB8E2E03CBE76184E",
+                "structure": "{\"height\":8,\"width\":6,\"x\":12,\"y\":0}"
+            },
+            {
+                "key": "panel11C573A58F10CB4B",
+                "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":0}"
+            },
+            {
+                "key": "panel1B6DEE88953E7A4B",
+                "structure": "{\"height\":8,\"width\":6,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelE75864EB9A65F84B",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":43}"
+            },
+            {
+                "key": "panelA0464FB391067B44",
+                "structure": "{\"height\":10,\"width\":16,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel3B1411DCADB30A43",
+                "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":24}"
+            },
+            {
+                "key": "panelC608BAE6857EE949",
+                "structure": "{\"height\":8,\"width\":16,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panelA10B814D804AF843",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":8}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel086494ADB9B2F947",
+            "title": "5XX Errors By API",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=5XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum by apiname",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEB6D2A67B4DA8B4F",
+            "title": "Top 5XX Errors By apiname ",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=5XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}}| quantize using sum  | sum by apiname  | topk(10,sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5E39AB238D74CA42",
+            "title": "4XX Errors By API",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=4XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum | sum by apiname",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel02A1E0F89EED284A",
+            "title": "Top 4XX Errors By apiname",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=4XXError  Statistic=Sum apiname={{apiname}} accountid={{accountid}}| quantize using sum | sum by apiname  | topk(10,sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1F966AFCBF5F7A4F",
+            "title": "5XX Errors ",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Errors\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=5XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=5XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB8E2E03CBE76184E",
+            "title": "4XX Errors ",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Errors\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=4XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=4XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel11C573A58F10CB4B",
+            "title": "Latency",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Average Latency\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=Latency Statistic=average  apiname={{apiname}} accountid={{accountid}} \n| avg ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=Latency Statistic=average  apiname={{apiname}} accountid={{accountid}} \n| avg | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1B6DEE88953E7A4B",
+            "title": "Requests",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Errors\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=count Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=count Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE75864EB9A65F84B",
+            "title": "Top 50 5XX Errors By API",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0,\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"pivotBy\":[\"metric\"]},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"HTTP5XX\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=5XXError Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n|sum by apiname, account , region , accountid,_collector  //| topk (50,sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA0464FB391067B44",
+            "title": "Latency Per API",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=Latency Statistic=average  apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| avg by apiname",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3B1411DCADB30A43",
+            "title": "Top Average Latency",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=Latency Statistic=average  apiname={{apiname}} accountid={{accountid}} \n| avg by apiname | topk(10, avg)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC608BAE6857EE949",
+            "title": "Requests Per API",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=count Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum by apiname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA10B814D804AF843",
+            "title": "Top Requests Per API",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "Namespace=aws/apigateway metric=count Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum by apiname | topk(10, sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "apiname",
+            "displayName": "apiname",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "apiname"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "accountid",
+            "displayName": "accountid",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "accountid"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
