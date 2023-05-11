@@ -1,0 +1,632 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Lambda - Key Signals and Errors",
+    "description": "",
+    "title": "Lambda - Key Signals and Errors",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelC38FEC13967BF84A",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":9}"
+            },
+            {
+                "key": "panelE7161EB3B7421840",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":9}"
+            },
+            {
+                "key": "panel2745A5178D39A84F",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":9}"
+            },
+            {
+                "key": "panel0DED036983F16846",
+                "structure": "{\"height\":9,\"width\":7,\"x\":0,\"y\":27}"
+            },
+            {
+                "key": "panel6E3363699387F941",
+                "structure": "{\"height\":9,\"width\":7,\"x\":7,\"y\":27}"
+            },
+            {
+                "key": "panelEFF920FDA8D0494F",
+                "structure": "{\"height\":9,\"width\":5,\"x\":14,\"y\":27}"
+            },
+            {
+                "key": "panel1783C546BB8B194D",
+                "structure": "{\"height\":9,\"width\":5,\"x\":19,\"y\":27}"
+            },
+            {
+                "key": "panel4E59C124A5D8FB4A",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":18}"
+            },
+            {
+                "key": "panel867B62F6B196D84F",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":18}"
+            },
+            {
+                "key": "panel8387DCC0BFB9B846",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":18}"
+            },
+            {
+                "key": "panel15D2A612B1D5EA41",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":36}"
+            },
+            {
+                "key": "panel35C525E8BF43B947",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelF6E10EBE918D894D",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":0}"
+            },
+            {
+                "key": "panel97DD27E9989F6A48",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelC38FEC13967BF84A",
+            "title": "Invocations By Function",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{functionname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Invocations statistic=Sum  | quantize to 15m using sum | sum by functionname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE7161EB3B7421840",
+            "title": "Invocations Vs Last Week",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Invocations statistic=Sum | quantize to 15m using sum | sum ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Invocations statistic=Sum  | quantize to 15m using sum | sum | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel2745A5178D39A84F",
+            "title": "Invocations By Function",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Invocations statistic=Sum  | sum by functionname   | topk(10, sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0DED036983F16846",
+            "title": "Duration by FunctionName",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{functionname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration statistic=Sum  | quantize to 15m using sum | sum by functionname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6E3363699387F941",
+            "title": "Average Duration by FunctionName",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{functionname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration statistic=average   | quantize to 15m using avg  | avg by functionname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEFF920FDA8D0494F",
+            "title": "Top 10 Total Duration",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration statistic=Sum  | quantize to 15m using sum | sum by functionname | topk (10,sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1783C546BB8B194D",
+            "title": "Top 10 Average Duration",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"avg\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration statistic=average   | quantize to 15m using avg | avg by functionname | topk (10,avg)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4E59C124A5D8FB4A",
+            "title": "Errors By Function",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{functionname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Errors statistic=Sum  | quantize to 15m using sum| filter sum > 0 | sum by functionname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel867B62F6B196D84F",
+            "title": "Errors Vs Last Week",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Errors  statistic=Sum  | quantize to 15m using sum | sum ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Errors  statistic=Sum  | quantize to 15m using sum | sum | timeshift 7d",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8387DCC0BFB9B846",
+            "title": "Errors By Function",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Errors  statistic=Sum  | sum by functionname | filter sum > 0  | topk(10, sum)",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel15D2A612B1D5EA41",
+            "title": "Lambda Logs Events Likely to Be Errors",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudwatch* accountid= {{accountid}} account = {{account}} functionname={{functionname}}\n(err* or warn* or crit* or fatal or fail*)\n//| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n//\n| parse regex  \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex  \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex  \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex  \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) | substring(errormessage,0,150) as errormessage\n| parse regex field=functionname \"^(?<function>(?:[^_-]+[_-]*){1,3})\" nodrop | if (isempty(function),functionname,function) as function\n| if(length(functionname) > length(function),concat(function,\"*\"),function) as function\n| count as num_errors by accountid,account,errorMessage, function | sort num_errors | limit 100\n//| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc, account asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel35C525E8BF43B947",
+            "title": "Invocations By Account",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{account}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Invocations statistic=Sum  | quantize to 15m using sum | sum by account ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF6E10EBE918D894D",
+            "title": "Errors By Account",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{account}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Errors  statistic=Sum  | quantize to 15m using sum | sum by account ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel97DD27E9989F6A48",
+            "title": "Duration By Account",
+            "visualSettings": "{\"axes\":{\"axisY\":{\"title\":\"Invocations\"}},\"legend\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{account}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration   statistic=Sum  | quantize to 15m using sum | sum by account ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "account",
+            "displayName": "account",
+            "defaultValue": "*prod*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "account"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "accountid",
+            "displayName": "accountid",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "accountid"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "functionname",
+            "displayName": "functionname",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "",
+                "key": "functionname"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
