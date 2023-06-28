@@ -1,15 +1,15 @@
 (_view=data_volume_custom_tiers_sourcehost or  _view=data_volume_custom_tiers_other)
 dimension =sourcecategory
-//| where tolowercase(value) matches tolowercase("*")
+//| where tolowercase(item) matches tolowercase("*")
 //| where datatier matches "*"
 // remove long categories
 | bytes /1024/1024/1024 as gbytes 
-| sum(events) as  events,sum(gbytes) as gbytes by datatier, value,dimension
-| if (length(value) > 35,concat(substring(value,0,35),"..."),value) as value 
+| sum(events) as  events,sum(gbytes) as gbytes by datatier, item,dimension
+| if (length(item) > 35,concat(substring(item,0,35),"..."),item) as item 
 
-| count as rows,sum(events) as events,sum(gbytes) as gbytes by datatier, value,dimension
+| count as rows,sum(events) as events,sum(gbytes) as gbytes by datatier, item,dimension
 | total gbytes as tgb 
-| total gbytes as tgbs by value
+| total gbytes as tgbs by item
 | tgbs / tgb as fraction
 
 | fraction * 100 as percent
@@ -18,6 +18,6 @@ dimension =sourcecategory
 | if (datatier="Infrequent",gbytes * .4,credits) as credits
 | if (datatier="CSE",gbytes * 25,credits) as credits
 
-|sum(credits) as credits, sum(rows) as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,value
+|sum(credits) as credits, sum(rows) as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by datatier,dimension,item
 | credits/gbytes as %"cr/gb"
 | sort credits

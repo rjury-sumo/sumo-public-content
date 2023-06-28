@@ -1,12 +1,32 @@
-# Logs data volume tiers view based dashboards and sample queries
-In large sumo accounts the data volume with tiers can have high cardinaility and result in slow queries or timeouts due to the 'parse regex... multi' required to parse the data volume indexes.
+# Logs data volume tiers view based dashboard and sample queries
+In large sumo accounts the data volume with tiers can have high cardinaility and result in slow queries or timeouts due to the 'parse regex... multi' required to parse the data volume indexes. It's desirable for performance and scalability to:
+- create one or more custom views of data volume data
+- use a dashboard vs the custom view for fast highly scalable reporting over a longer time range.
 
 This solution demonstrates how to create one or more custom scheduled view to provide faster query performance and much greater scalability for larger accounts that have high cardinality in data volume diemsions, or want to run reporting over long time ranges.
 
+## Setup Steps: Create one or more views
+A) create a scheduled view query for each requiired dimensions
+e.g For the name use 'data_volume_custom_tiers_<dimension>' such as 'data_volume_custom_tiers_sourcecategory'
+
+B) If cardinality is a possible problem conside making a lower cardinality version
+For an example of how you could do this see
+data-tiers/data-tiers-viewbased-dashboard/scheduled-view-query-reduce-cardinality.sumo
+
+## Import the views dashboard
+A sample dashboard is provided data-tiers/data-tiers-viewbased-dashboard/Data Tiers Console - Custom Views.json
+if you are using custom view name(s) before import edit the-dashboard.json in a text editor and make sure this part of each panel query matches your views you have created:
+```
+(_view=data_volume_custom_*)
+```
+
+Copy the JSON body for the dashboard, then open the required import folder in the sumologic libray and select to import.
+
+# About Using Views on Datavolume
 The queries in this solution effectively replace origional this expensive parse regex multi in the original query:
 ```
 (_index=sumologic_volume) _sourcecategory=*_and_tier_volume
-| parse regex "\{\"field\":\"(?<value>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
+| parse regex "\{\"field\":\"(?<item>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
 
 ```
 with
@@ -18,83 +38,33 @@ Note: because scheduled views summarise data as it's ingested rather than by eve
 
 An alternative approach is to use scheduled searches running similar queries that 'save to index' rather than scheduled view. This allows for changes to custom queries over time and larger aggregation timeslices (say 15m rather than 1m).
 
-## Determine required number of views
+## View Architecture
+### How many dimensions to track?
+Most customers are only interested in sourcecategory break down so a single view will be fine for the sourcecategory dimension only.
+
+For example we would create a single scheduled view called say ```data_volume_custom_sourcecategory```:
+```
+(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume
+| parse regex "\{\"field\":\"(?<item>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
+| timeslice by 1m
+| parse field=_sourcecategory "*_and_tier_volume" as dimension
+| sum(count) as events,sum(sizeinbytes) as bytes by datatier, dimension,item,_timeslice
+// rate card may vary check your contract
+| bytes / 1024/1024/1024 as gbytes
+| 20 as credit_rate
+| if(datatier = "CSE",25,credit_rate) as credit_rate
+| if(datatier = "Infrequent",.4,credit_rate) as credit_rate
+| if(datatier = "Frequent",9,credit_rate) as credit_rate
+| gbytes * credit_rate as credits
+```
+There is actually one *_and_tier_volume for each built in metadata value so it might be worth tracking more than one if you need to track ingest by other dimensions.
+
+### High Cardinality Might Be a Problem
+For some customers with very high cardinality in the dimension (for example putting container guids in a metadata field like sourcecategory), will hamper effective reporting. It's worth checking how many variants you get for a category say for a few hours and if some are high cardinality.
+
 Run the data-tiers/data-tiers-viewbased-dashboard/scheduled-view-query.sumo for a recent period of 1 minute (say '-10m -9m') in the last 24 hours
 ideally this would be a peak ingest time where cardinality is highest.
 
-If either of the answers to the questions below are 'no' make multiple views instead of one view.
-- does the query execute in <15s?
+If either of the answers to the questions below are 'no' you might need to use a custom advanced query to lower cardinality.
 - does the query complete without a warning about regex?
 - do I get a very large number of result rows > 5000, (usually this will be just one 'dimension' that has high cardinality)?
-
-## Create one or more views
-A) single view (NO to all questions)
-Create a single scheduled view similar to the image shown below. For the name use 'data_volume_custom_tiers_all'
-
-B) Multiple views (YES to one or more questions)
-Create a single view for the highest cardinality dimension with a modified query for example:
-One or more high cardinatliy views:
-query: 
-```
-(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume
-...
-```
-
-name: data_volume_custom_tiers_sourcecategory
-
-Remaining catch all view:
-query: 
-```
-(_index=sumologic_volume) _sourcecategory=*_and_tier_volume
-not _sourcecategory=sourcecategory_and_tier_volume // exclude each high cardinatlity category
-...
-```
-name: data_volume_custom_tiers_other
-
-So say we might end up with two views: ```(_view=data_volume_custom_tiers_sourcehost or  _view=data_volume_custom_tiers_other)```
-
-## custom views for very high cardinality dimensions 3000+ per day
-Generally where there are lots of ephemeral container ids or similar in a data volume dimension such as sourcehost it's preferable to remove these to have a smaller number of view rows per interval (and much faster query performance.)
-
-You will see this when testing out the views queries in earlier steps where you say get 100s of pages of results for a 1m period. Ideally one would want less than 1000 result rows per dimension (sourcecategory, sourcehost etc) per minute. If there are greater than 5000 rows for a dimension per minute reporting will get very slow.
-
-In cases where a dimension such as _sourcehost might contain an ephemeral container guid as there are 10s of thousands of rows per day you may have to use a custom aggregation in the scheduled view query to remove the guid string to get good performance for example:
-```
-(_index=sumologic_volume) _sourcecategory=sourcehost_and_tier_volume 
-| parse regex "\{\"field\":\"(?<value>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi 
-| timeslice by 1m 
-| parse field=_sourcecategory "*_and_tier_volume" as dimension 
-| sum(count) as events,sum(sizeinbytes) as bytes by datatier, dimension,value,_timeslice
-// one or more such replacements might be useful here
-| replace (value,/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/,"GUID") as value
-| replace (value,/[a-f0-9]{20,}/,"GUID") as value
-| sum(events) as events,sum(bytes) as bytes by datatier, dimension,value,_timeslice
-```
-
-so say I had 100 rows of versions of a category with guid values like this:
-a/b/c/7f727381-389f-4ed1-ba24-2540e53a4007
-
-the view would have one row like this:
-a/b/c/GUID
-
-If it's likely that changes would be required to these custom aggregations over time there are several possible approaches:.
-1. version schedulded views. When a change is required disable the previous view and create a new version with no backfill with a version string in the view name for example _view=data_volume_custom_sourcecategory_v1 _view=data_volume_custom_sourcecategory_v2 etc
-2. consider using scheduled searches that save to a view instead of ascheduled view. This means changes can be made to the scheduled view over time to modify the custom aggregations
-
-## Import the views dashboard
-Open the-dashboard.json in a text editor and make sure this part of each panel query matches your views you have created:
-```
-(_view=data_volume_custom_tiers_sourcehost or  _view=data_volume_custom_tiers_other)
-```
-for example you might edit/replace this with ```_view=data_volume_custom_*``` instead.
-
-## Query Notes for Using the New Views
-### filtering
-filtering by type is done on the 'dimension' column instead of the _sourcecategory value.
-
-### bytes not sizeInBytes
-in this view query the 'sizeInBytes' parsed field is called bytes
-
-### sum not count
-to get totals of events or bytes make sure to sum(column) not count e.g ```sum(events) as events```
-

@@ -1,0 +1,24 @@
+(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume
+| parse regex "\{\"field\":\"(?<item>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
+| timeslice by 1m
+| parse field=_sourcecategory "*_and_tier_volume" as dimension
+| sum(count) as events,sum(sizeinbytes) as bytes by datatier, dimension,item,_timeslice
+| item as orig_category
+// cardinality limiter options
+// a the regex split
+| parse regex field = item "^\/{0,1}(?<many_slashes>(?:[^\/]+\/{0,1}){1,3})" nodrop
+| if (isempty(many_slashes) and (length(many_slashes) < length(item)),item,concat(many_slashes,"*")) as item
+
+// remove long categories
+| if (length(item) > 35,concat(substring(item,0,35),"..."),item) as item
+
+// now repeat rolloup
+| count as categories,sum(events) as events,sum(bytes) as bytes by datatier, dimension,item,_timeslice
+
+// rate card may vary check your contract
+| bytes / 1024/1024/1024 as gbytes
+| 20 as credit_rate
+| if(datatier = "CSE",25,credit_rate) as credit_rate
+| if(datatier = "Infrequent",.4,credit_rate) as credit_rate
+| if(datatier = "Frequent",9,credit_rate) as credit_rate
+| gbytes * credit_rate as credits

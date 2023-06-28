@@ -1,6 +1,6 @@
-(_index=sumologic_volume) _sourcecategory=*_and_tier_volume
-| parse regex "\{\"field\":\"(?<value>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
+//(_index=sumologic_volume) _sourcecategory=*_and_tier_volume
+(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume
+| parse regex "\{\"field\":\"(?<item>[^\"]+)\",\"dataTier\":\"(?<dataTier>[^\"]+)\",\"sizeInBytes\":(?<sizeInBytes>[^\"]+),\"count\":(?<count>[^\"]+)\}," multi
 | timeslice by 1m
 | parse field=_sourcecategory "*_and_tier_volume" as dimension
-| sum(count) as events,sum(sizeinbytes) as bytes by datatier, dimension,value,_timeslice
-
+| sum(count) as events,sum(sizeinbytes) as bytes by datatier, dimension,item,_timeslice
