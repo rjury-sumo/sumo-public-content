@@ -3,7 +3,7 @@
 The dashboard v2 cookbook provides a series of example dashboard panels for common and also advanced use cases. Each panel has an example query that would work with that type as well as comments about how to use them.
 
 See the four example pdfs in this folder for a static version of each:
-CustomTraining/TrainingOrg/1._Dashboard_Cookbook_-_Basics_-_Categorical__and_Honeycomb.json
+CustomTraining/TrainingOrg/1. Dashboard Cookbook - Basics - Categorical and Honeycomb.pdf
 CustomTraining/TrainingOrg/2. Dashboard Cookbook - Time Series.pdf
 CustomTraining/TrainingOrg/3. Dashboard Cookbook - Advanced Analytics .pdf
 CustomTraining/TrainingOrg/4. Dashboard Cookbook - Advanced Techniques.pdf
