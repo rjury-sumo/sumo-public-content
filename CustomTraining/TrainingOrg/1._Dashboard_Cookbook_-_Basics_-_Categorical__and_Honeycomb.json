@@ -1,0 +1,619 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "1. Dashboard Cookbook - Basics - Categorical  and Honeycomb",
+    "description": "Dashboard demonstration cookbook",
+    "title": "1. Dashboard Cookbook - Basics - Categorical  and Honeycomb",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-8A6DE20A857A584D",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panel8AD37560A8EA6945",
+                "structure": "{\"height\":10,\"width\":8,\"x\":0,\"y\":15}"
+            },
+            {
+                "key": "panelC747FEABBB4D7A45",
+                "structure": "{\"height\":10,\"width\":10,\"x\":0,\"y\":25}"
+            },
+            {
+                "key": "panel86E57D8EB8C1CB47",
+                "structure": "{\"height\":10,\"width\":7,\"x\":10,\"y\":25}"
+            },
+            {
+                "key": "panelPANE-11E0B2ECA2214941",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":35}"
+            },
+            {
+                "key": "panel7B5CFF2799F5784D",
+                "structure": "{\"height\":6,\"width\":9,\"x\":15,\"y\":0}"
+            },
+            {
+                "key": "panel9A268CD0A00CAA4F",
+                "structure": "{\"height\":8,\"width\":4,\"x\":8,\"y\":35}"
+            },
+            {
+                "key": "panelAC9475AF89B04B49",
+                "structure": "{\"height\":8,\"width\":6,\"x\":12,\"y\":35}"
+            },
+            {
+                "key": "panelB986369AB622CA47",
+                "structure": "{\"height\":8,\"width\":6,\"x\":18,\"y\":35}"
+            },
+            {
+                "key": "panel112854BC86E2B94D",
+                "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":43}"
+            },
+            {
+                "key": "panelAA20D74BA4C72B4E",
+                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":43}"
+            },
+            {
+                "key": "panel568A2C2BA256784D",
+                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":43}"
+            },
+            {
+                "key": "panel5EEABA4089B9CB4A",
+                "structure": "{\"height\":7,\"width\":15,\"x\":9,\"y\":63}"
+            },
+            {
+                "key": "panelCA4D53A4A55F5B48",
+                "structure": "{\"height\":15,\"width\":9,\"x\":0,\"y\":55}"
+            },
+            {
+                "key": "panelA9CD82B888991B44",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":52}"
+            },
+            {
+                "key": "panel4ED8426CA5781B41",
+                "structure": "{\"height\":10,\"width\":9,\"x\":15,\"y\":15}"
+            },
+            {
+                "key": "panel5AA2B859B6F5184B",
+                "structure": "{\"height\":10,\"width\":7,\"x\":8,\"y\":15}"
+            },
+            {
+                "key": "panel25146FA7AD324B44",
+                "structure": "{\"height\":4,\"width\":15,\"x\":9,\"y\":55}"
+            },
+            {
+                "key": "panel171E478291046945",
+                "structure": "{\"height\":4,\"width\":15,\"x\":9,\"y\":59}"
+            },
+            {
+                "key": "panel34C0F33D831A4946",
+                "structure": "{\"height\":6,\"width\":15,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelB03C99D485740B45",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panel4A17DEF5B0A2F842",
+                "structure": "{\"height\":10,\"width\":7,\"x\":17,\"y\":25}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-8A6DE20A857A584D",
+            "title": "Simple Aggregations",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#bff26c\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These examples show how to aggregate by a single dimension for charts like bar, pie to to show a table. \n\n```_sourceCategory=*cloudtrail* errorcode\n| json field=_raw \"errorCode\"\n| count by errorcode\n```\n\nWe can also aggregate by more than one operator or dimension: ```| sum(a) as a, avg(b) as b,count by d,e,f```\n\n**Some log panels can be filtered using the errorCode dashboard template variable**\n\nMetrics can also be used in aggregate panels often with an aggregate operator such as sum,avg, topk etc.\n```\nmetric = Disk_UsedPercent _contenttype=hostmetrics | max by _collector,devName | topk(10,latest) by _collector,devname \n```\n"
+        },
+        {
+            "id": null,
+            "key": "panel8AD37560A8EA6945",
+            "title": "Pie errorcode={{errorCode}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}} recipientaccountid\n| json field=_raw \"errorCode\"\n\n| count by errorcode | sort _count\n//| timeslice by 5m | count _timeslice, errorCode | transpose row _timeslice column errorCode",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC747FEABBB4D7A45",
+            "title": "Table with Two column errorcode={{errorCode}}",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}}\n| json field=_raw \"errorCode\"\n| json field=_raw \"userIdentity.arn\" as arn\n| where arn matches \"*12*\" \n| count by errorcode, arn  | sort _count\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel86E57D8EB8C1CB47",
+            "title": "Table With Multiple Columns errorcode={{errorCode}}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=labs/aws/cloudtrail* errorcode {{errorCode}}\n| json field=_raw \"errorCode\"\n| json field=_raw \"userIdentity.arn\" as arn\n| timeslice by 10m\n| count by errorcode, arn,_timeslice  \n| count_distinct(arn) as arns,min(_count) as min, max(_count) as max, sum(_count) as events by errorcode",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-11E0B2ECA2214941",
+            "title": "Single Values",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#4ae4f7\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Aggregate by a **single dimension** to use single value. You can color by numeric value ranges.\n\nMake sure you search finishes with a single value.\n\n```\n_sourceCategory=Labs/AWS/cloudtrail* errorcode\n | count```\n"
+        },
+        {
+            "id": null,
+            "key": "panel7B5CFF2799F5784D",
+            "title": "Tip: Template Variables",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#fceded\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Features:\nyou can add a template variable to the dashboard enabling reuse between environments/services or to add filtering. In each search add the placeholder in moustache format:\n\n```\n{{variable}}  or {{{variable}}} \n```\nAt search time it's replaced with value. Right now the errorCode variable for this dasbhoard is:  {{errorCode}}.\n\nMore info: https://help.sumologic.com/Visualizations-and-Alerts/Dashboard_(New)/Filter_with_template_variables - [moustache format](http://mustache.github.io/mustache.5.html)\n"
+        },
+        {
+            "id": null,
+            "key": "panel9A268CD0A00CAA4F",
+            "title": "SV With Color By Range i n Background",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"errors\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":11,\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#116b25\"},{\"from\":500,\"to\":600,\"color\":\"#933c03\"},{\"from\":600,\"to\":null,\"color\":\"#bf2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}}\n| json field=_raw \"errorCode\"\n| count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelAC9475AF89B04B49",
+            "title": "SV With color range Guage",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":11,\"thresholds\":[{\"from\":0,\"to\":500,\"color\":\"#16943E\"},{\"from\":500,\"to\":700,\"color\":\"#DFBE2E\"},{\"from\":700,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"max\":1000}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}}\n| json field=_raw \"errorCode\"\n| count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB986369AB622CA47",
+            "title": "SV Metric with sparkline",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"HTTP 5XX\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":11,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"\"},\"gauge\":{\"show\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=HTTPCode_ELB_5XX_Count namespace=aws/applicationelb | count",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Basic",
+                    "metricsQueryData": {
+                        "metric": "HTTPCode_ELB_5XX_Count",
+                        "aggregationType": null,
+                        "groupBy": null,
+                        "filters": [
+                            {
+                                "key": "namespace",
+                                "value": "aws/applicationelb",
+                                "negation": false
+                            }
+                        ],
+                        "operators": [
+                            {
+                                "operatorName": "count",
+                                "parameters": [
+                                    {
+                                        "key": "value",
+                                        "value": ""
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel112854BC86E2B94D",
+            "title": "Geo Lookup Maps",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#cbbfff\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "we can use geo lookup to add lat and long so we can use the map panel.\n\n\n\n```\n_sourceCategory = Labs/Akamai*| parse \"\\\"cliIP\\\":\\\"*\\\"\" as cliip\n| lookup latitude, longitude, country_code from geo://location on ip = cliip\n\n| count by latitude, longitude\n```\nNote to cheat on a live dash where you are only allowed 1000 groups you can avg by country_code:\n\n```\n| avg(latitude) as latitude, avg(longitude) as longitude, count by country_code\n```"
+        },
+        {
+            "id": null,
+            "key": "panelAA20D74BA4C72B4E",
+            "title": "Geo lookup",
+            "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory = Labs/Akamai*| parse \"\\\"cliIP\\\":\\\"*\\\"\" as cliip\n| lookup latitude, longitude, country_code from geo://location on ip = cliip\n| count by latitude, longitude",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel568A2C2BA256784D",
+            "title": "Geo lookup avg by country",
+            "visualSettings": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory = Labs/Akamai*| parse \"\\\"cliIP\\\":\\\"*\\\"\" as cliip\n| lookup latitude, longitude, country_code from geo://location on ip = cliip\n| avg(latitude) as latitude, avg(longitude) as longitude, count by country_code",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5EEABA4089B9CB4A",
+            "title": "Disk Used Percent  By Volume Color Coded",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"#28aa55\"},{\"from\":75,\"to\":85,\"color\":\"#f0731f\"},{\"from\":85,\"to\":null,\"color\":\"#bf2121\"}],\"shape\":\"circle\",\"groupBy\":[{\"label\":\"DevName\",\"value\":\"DevName\"}],\"aggregationType\":\"avg\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=Disk_UsedPercent  account=prod region=us-east-2  | avg by devname, instanceid, region",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelCA4D53A4A55F5B48",
+            "title": "Pods Running - Click on a Pod  To Open  Entity Explorer",
+            "visualSettings": "{\"general\":{\"type\":\"honeyComb\",\"aggregationType\":\"latest\"},\"honeyComb\":{\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#69DB4A\"},{\"from\":null,\"to\":null,\"color\":\"#E1C60E\"},{\"from\":0,\"to\":0.9,\"color\":\"#C73A25\"}],\"aggregationType\":\"latest\",\"groupBy\":[{\"label\":\"namespace\",\"value\":\"namespace\"}]},\"hiddenQueryKeys\":[\"B\",\"A\"],\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_origin=kubernetes   cluster=prod01.travellogic.info metric=kube_pod_container_status_ready | sum by pod, namespace",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                },
+                {
+                    "transient": false,
+                    "queryString": "_origin=kubernetes   cluster=prod01.travellogic.info _origin=kubernetes reason=completed | sum by pod, namespace",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                },
+                {
+                    "transient": false,
+                    "queryString": "#A + #B along pod, namespace as isHealthy",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-15m"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA9CD82B888991B44",
+            "title": "Honeycomb Charts",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#9bd3e6\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Honeycombs are great for presting the realtime status of a group of things. They can be color coded by metric count (such as cpu)\nOften a honeycomb is combined with the liked dashboard drilldown feature or for obserability solutions clicking on a node opens the entity explorer.\nHoneycombs are most often used with metrics data but can be used for logs also.\n"
+        },
+        {
+            "id": null,
+            "key": "panel4ED8426CA5781B41",
+            "title": "Column errorcode={{errorCode}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}} recipientaccountid\n| json field=_raw \"errorCode\"\n\n| count by errorcode | sort _count\n//| timeslice by 5m | count _timeslice, errorCode | transpose row _timeslice column errorCode",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5AA2B859B6F5184B",
+            "title": "Bar errorcode={{errorCode}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"title\":\"errorCode\",\"titleFontSize\":10,\"labelFontSize\":10},\"axisY\":{\"title\":\"_count\",\"titleFontSize\":8,\"titleFontFamily\":\"RobotoBold, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#666666\",\"titleFontWeight\":\"bold\",\"labelFontColor\":\"#9badbf\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":8,\"tickColor\":\"#dde4e9\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false}},\"axisY2\":{\"hideLabels\":true,\"title\":\"\",\"titleFontSize\":8,\"titleFontFamily\":\"RobotoBold, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#666666\",\"titleFontWeight\":\"bold\",\"labelFontColor\":\"#9badbf\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":8,\"tickColor\":\"#dde4e9\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*cloudtrail* errorcode {{errorCode}} recipientaccountid\n| json field=_raw \"errorCode\"\n\n| count by errorcode | sort _count | limit 10\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": null
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel25146FA7AD324B44",
+            "title": "Tip: Linked Dashboards",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#fceded\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "You can link dashboards together to quickly view related data. Each panel can have links to other dashboards. When you select a data point on the panel you'll have an option to click on linked dashboards. This allows you to quickly reference other related dashboards to investigate. \n\nClick on a section in the bar, column or pie charts and choose 'Panel Cookbook Drilldown' in linked dashboards. Links can also open the current dashboard with new template variable values.\n\nMore info: https://help.sumologic.com/Visualizations-and-Alerts/Dashboard_(New)/Link_Dashboard_(New)"
+        },
+        {
+            "id": null,
+            "key": "panel171E478291046945",
+            "title": "Tip: Entity Explorer",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#fceded\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Sumo Logic observability solutions create an entity heirarchy. You can click on a node in one of these node views to open the entity explorer. From there you can drill down to further content like relevant logs or metrics.\n\nMore info: https://help.sumologic.com/Visualizations-and-Alerts/Dashboard_(New)/Drill_down_to_discover_root_causes"
+        },
+        {
+            "id": null,
+            "key": "panel34C0F33D831A4946",
+            "title": "Welcome to the dashboards demo for dashboards!",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#fcfbfb\",\"textColor\":\"black\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This is one of a series of demonstration dashboards see:\n1. [Basics](https://live.us2.sumologic.com/ui/#/dashboardv2/0ZUvEAOsmEZnlu5BrlTTEjNOcKTRrJwtPTb9ND0rHaWgvgNZuhsPs4yXm8nY)\n2. [Time Series](https://live.us2.sumologic.com/ui/#/dashboardv2/jonCUekGgOgmRV3zOtvsV0bUwTJ9PqywgAIZsyeKTSMENEaREOn4mg1b6Og7)\n3. [Advanced Analytics](https://live.us2.sumologic.com/ui/#/dashboardv2/S8ceXywVXck8LY6AUEHwkNetzEU695b0tgUtZzPHwXq9tE70lfTuyMDHQfnp)\n4. [Advanced Techniques](https://live.us2.sumologic.com/ui/#/dashboardv2/Uj4L5UivaRM6kzwbldc0mJNhjiUIhJ3avLunzF5fljN4v00aNno71u2urXTx)\n\nCheckout these micro learning videos:\n- [Create a Dashboard ](https://www.youtube.com/watch?v=eiP5yUzGO0s) - [Create a Simple Dashboard](https://www.youtube.com/watch?v=A-O_E-NbxN8) - [Customize a Dashboard](https://www.youtube.com/watch?v=oTCRykqtL2M)  - [Share a Dashboard Inside Your Organization](https://www.youtube.com/watch?v=nQOAYaMad4Q)\n\nThis is a set of dashboards that demonstrate how to write and format search output, and match that to various panel types."
+        },
+        {
+            "id": null,
+            "key": "panelB03C99D485740B45",
+            "title": "Categorical Charting",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"backgroundColor\":\"#fcfbfb\",\"textColor\":\"black\",\"fontSize\":14}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "The categorical chart category includes a range of panel types: single value, bar, pie and others. To use categorical charts you must include an aggregate operation in your log query such as count, sum, avg, pct etc"
+        },
+        {
+            "id": null,
+            "key": "panel4A17DEF5B0A2F842",
+            "title": "Metrics Bar: TopK Disk Used Percent By Host and Disk",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{_collector}} {{devname}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric = Disk_UsedPercent _contenttype=hostmetrics | max by _collector,devName | topk(10,latest) by _collector,devname ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "errorCode",
+            "displayName": "errorCode",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_sourceCategory=Labs/*CloudTrail* errorcode | json \"errorCode\" | count by errorCode",
+                "field": "errorCode"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
