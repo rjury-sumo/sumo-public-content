@@ -2,24 +2,51 @@
 This lab uses the Training Org that is used in Sumo Certjams.
 Log in as a training user as per usual method such as training+analyst###@sumologic.com where ### is a number from 0001-999
 
+Start with New Button then choose Search
 
-Here is the search we will be using. 
-You can paste in the whole query and comment/comment sections as required
+**Note**: we will be searcing using Advanced Mode. You might find your UI is in basic mode so you will have to switch to Advanced as per: https://help.sumologic.com/docs/search/get-started-with-search/search-page/search-modes/
 
-## Adding and removing comment lines
+
+**Tip:** Adding and removing comment lines
 You can select lines and comment/uncomment them with ```Cmd + /``` (```Cntrl + /``` on Windows)
 
-## Reference Query
-```
-// cloudtrail api audit events have an errorCode key if the API call failed
-// This can be a very valuable source for both observability to find and fix broken workloads
-// And in the security domain to prevent,detect and respond to security threats
-// This will search for cloudtrail logs by sourcecategory, and return those that have errorCode as a keyword
-_sourceCategory = *cloudtrail*  errorcode
+**Tip:** Pressing Enter or Return runs the search. You can add a new line with Shift + Enter|Return.
 
-// by default Sumo auto parses JSON logs at search time but it's good query practice to parse out fields explicitly even though we don't have to
-// Here you see two parse operators - JSON and Parse (which uses pattern matching)
-| json field=_raw "errorCode" nodrop
+## Search AWS CloudTrail API logs
+Cloudtrail api audit events have an errorCode key if the API call failed.
+This can be a very valuable source for both observability to find and fix broken workloads and in the security domain to prevent,detect and respond to security threats.
+
+First we will search for cloudtrail logs by sourcecategory, and add errorcode as a keyword.
+
+Paste this into your new search window and run this search for "last 15m" which is the default.
+```
+_sourceCategory = *cloudtrail*  errorcode
+```
+
+Next open this docs link to explore the various options in the seach UI page
+Open this sumo docs page and you can see what the various parts of the search UI can do.
+https://help.sumologic.com/docs/search/get-started-with-search/search-page/
+
+A couple of key things to try before we go further:
+1. in the Field Browser on the left side tick the box next to some field names to add them to the results table. Review the docs page and about Field Browser features: https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/
+2. In the field browser, click on a text of a field name such as eventName to show a pop up. The pop up shows the breakdown of events for the first 100k results. 
+3.  Click on ```Top Values Over Time``` This will open a new search tab that adds to your base query. This adds timeslice and transpose to format a breakdown of event names over time.
+```
+| timeslice 10 buckets | count _timeslice, eventname | transpose row _timeslice column eventname
+```
+
+Next try changing the time range to another value say "last 3 hours" or you can put in a relative time like -6h. Let's try a different timeslice query with the times in 5 minute buckets. Once this search completes try out some of the different chart types in the Aggregates tab like Column, Area and Line:
+```
+_sourceCategory = *cloudtrail*  errorcode
+| timeslice 5m | count _timeslice, eventname | transpose row _timeslice column eventname
+```
+
+By default Sumo auto parses JSON logs at search time but it's good query practice to parse out fields explicitly even though we don't have to
+Here you see two parse operators - JSON and Parse (which uses pattern matching). Run this search:
+
+```
+_sourceCategory = *cloudtrail*  errorcode
+| json field=_raw "errorCode" 
 | json field=_raw "errorMessage"
 | parse "eventSource\":\"*\"" as event_source 
 | parse "\"eventName\":\"*\"" as event_name 
@@ -29,66 +56,26 @@ _sourceCategory = *cloudtrail*  errorcode
 // If a field is optional we want to add nodrop or sumo will filter out events that don't match
 | parse "\"userName\":\"*\"" as user nodrop
 | json "userIdentity.arn" as arn nodrop
-
-// 2 lets try searching for AccessDenied Errors to find out what API calls are failing authentication
-// add a where clause for accessdenied 
-//(note we could also have used AccessDenied as a keyword in this query too!)
-//| where errorcode = "AccessDenied"
-
-// 3
-// we want to know more about these access deined errors so we can break things down in more detail
-// in most cases high numbers of failures here will just indicate broken workloads in AWS that need cleaning up but can also are relevant in security domain.
-//| count by errorcode,errormessage,recipientaccountid,user,arn | sort _count
 ```
 
-# Create a log search.
-Start with New / Log Search
-Note: we will be searcing using Advanced Mode. You might find your UI is in basic mode so you will have to switch to Advanced as per: https://help.sumologic.com/docs/search/get-started-with-search/search-page/search-modes/
+You will find there is now an 'arn' field in the field browser.
 
-## 1 Paste in the reference query and review in Search Page
-Paste in the reference query and run it
-Since parts 2 and 3 are commented out it will return just Messages tab.
-
-Review the docs page: https://help.sumologic.com/docs/search/get-started-with-search/search-page/
-
-The fields you created will be visible in the Field Browser on left side. Review the docs page and about Field Browser features https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/
-
-Note how if you scroll across the messages window to the final Message column it's formatted in the UI to show the JSON structure.
-Try a right click on a a key name to see what options are avaialable and then the same for a key value.
-
-## 2 Search for AccessDenied Only
-Let's try searching for AccessDenied Errors to find out what API calls are failing authentication
-Add a where clause for accessdenied by uncommenting this line:
+Next we will use some filtering to narrow down search results.
+This will filter results just to AccessDenied in the errorcode field. Add this to your search and run:
 ```
 | where errorcode = "AccessDenied"
 ```
 
-Note you could also add AccessDenied as a keyword on line one of the search. This would be fast to run but might not get correct results if it was possible for AccessDenied to appear outside the errorcode field.
+Next we are going to use some aggregate operators to drill down further into the AccessDenied errors. We want to know more about these access deined errors so we can break things down in more detail. In most cases high numbers of failures here will just indicate broken workloads in AWS that need cleaning up but can also are relevant in security domain.
 
-Run the search and see what results are returned.
-
-## 3 Create an Insight with Aggregation
-A key technique in both Observabiltiy and Security with Sumo is to use search time fields to iterate on the data and use the fields you created to create valuable insights. This enables you to quickly understand trends and find root causes.
-
-Uncomment the section 3 line and run the query again.
+Add this to your search and run it again:
 ```
 | count by errorcode,errormessage,recipientaccountid,user,arn | sort _count
 ```
 
-You will now have a Aggregates tab and a table of summarized data that could quickly help us understand which users are having AccessDenied errors. A strip of new buttons can be found on the Aggregates results tab where a vizualzation other than the table we have now might apply to your data, or you can use this to add this search to a Dashboard.
+You will now have an Aggregates Tab. On the aggregates tab you can now choose options like Table, various charts or "Add to Dashboard". Depending on what syntax you chose for the search you will have various options for chart layouts.
 
-## 4 Building syntax with Field Browser
-Change back to the Messages tab that shows your raw messages.
-In field browser click on the name of the event_name field so a pop up window appears. It will show statistics.
-Click on ```Top Values Over Time```
-this will open a new search tab that adds to your base query, This adds timeslice and transpose to format a breakdown of event names over time.
-```
-| timeslice 10 buckets | count _timeslice, eventname | transpose row _timeslice column eventname
-```
-
-In the new aggregates tab try different chart types such as line, area and column to see how this could be formatted for easier review.
-
-## 5 Review Best Practices for Search
+## Review Best Practices for Search
 There are few key things to know to make fast efficient searches in Sumo. 
 
 Follow these key tips:
