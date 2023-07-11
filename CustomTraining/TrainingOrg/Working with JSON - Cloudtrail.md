@@ -99,11 +99,12 @@ _sourceCategory = *cloudtrail*  errorcode
 
 Since these fields are parsed manually in the search they are already included as columns in the search results tab (tick box in field browser).
 
-### index vs search time fields
+### Index vs search time fields
 Next to the Run search button open the settings cog and disable Auto Parse Mode for JSON logs. 
 
 ![](disable_auto_json_mode.png)
-Run the search again and note how the list of fields in the field browser is very much reduced, as only indexed fields or explicitly parsed fields are shown.
+
+Run the search again and note how the list of fields in the field browser is very much reduced, as only indexed fields or explicitly parsed fields are shown. Some fields may already exist without search time parsing such as built in metadata fields and those created by Administrators at ingestion time.
 
 ## 7. Filtering searches
 Next we will use some filtering to narrow down search results just to AccessDenied in the errorcode field. Run:
@@ -112,12 +113,6 @@ _sourceCategory = *cloudtrail*  errorcode
 | json field=_raw "errorCode" 
 | json field=_raw "errorMessage"
 | where errorcode = "AccessDenied"
-| parse "eventSource\":\"*\"" as event_source 
-| parse "\"eventName\":\"*\"" as event_name 
-| parse "awsRegion\":\"*\"" as aws_Region 
-| json field=_raw "recipientAccountId"
-| parse "\"userName\":\"*\"" as user nodrop
-| json "userIdentity.arn" as arn nodrop
 ```
 
 ## Iterating on a search to drill down further
