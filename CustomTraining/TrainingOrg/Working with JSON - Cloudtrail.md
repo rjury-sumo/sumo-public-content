@@ -36,6 +36,7 @@ Paste this into your new search window and run this search for "last 15m" (which
 This search is scoped using a metadata field (_sourcecategory) and a keyword so it will only include cloudtrail with errorcode as a string.
 
 You will now see Messages returned in the search window.
+![](search_result.png)
 
 In the "message" column note how the UI formats the logs as JSON events to make them more readable. You can right click on JSON key or values to bring up menu quick actions for working with the logs.
 
@@ -48,10 +49,14 @@ https://help.sumologic.com/docs/search/get-started-with-search/search-page/
 ![](histogram.png)
 There are two really useful features of the search histogram which shows messages over time. 
 a. You can click a segment to move to the messages page for that time range
-b. If you Shift + click on a selected histogram bar it will open a duplicate search window for just that time range. Try this and then return back to this search Tab.
+b. If you Shift + click on a selected histogram bar it will open a duplicate search window for just that time range. 
+Try both of these in a search window.
 
 ## 4. Using the Field Browser
-The [field browser](https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/) shows fields in the current search scope.  In your search window with results try the following:
+The [field browser](https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/) shows fields in the current search scope. 
+![](field_browser_seearch.png)
+
+ In your search window with results try the following:
 1. Tick a box next to some fields in the browser and note how this changes the columns displayed.  
 2. Type 'arn' in the search box in the top section of the field browser to see fields with 'arn' in the name.
 3. Click on the text of a field name to show a pop up. The pop up shows the breakdown of events for the first 100k results. 
@@ -65,12 +70,14 @@ Run the search below which counts each value of eventname but in 5 minute time b
 
 ```
 _sourceCategory = *cloudtrail*  errorcode
+| json field=_raw "eventName"
 | timeslice 5m 
 | count _timeslice, eventname 
 | transpose row _timeslice column eventname
 ```
+Since this includes aggregation there will now be two results tabs: Messages and Aggregates.
 
-Once this search completes try out some of the different chart types in the Aggregates tab like Column, Area and Line using the icons in the aggregates tab:
+Try out some of the chart option buttons for results in the Aggregates tab like Column, Area and Line using the icons in the aggregates tab.
 
 ## 6. Parsing Fields Manually
 By default Sumo auto parses JSON logs at search time but it's good query practice to parse out fields explicitly. Parsing is a key skill for working with logs as it enables you to create any required fields at search time.
@@ -90,10 +97,16 @@ _sourceCategory = *cloudtrail*  errorcode
 | json "userIdentity.arn" as arn nodrop
 ```
 
-Next to the Run search button open the settings cog and disable JSOM auto parse mode. Run the search again and note how the list of fields in the browser is reduced as only indexed fields or explicitly parsed fields are shown.
+Since these fields are parsed manually in the search they are already included as columns in the search results tab (tick box in field browser).
+
+### index vs search time fields
+Next to the Run search button open the settings cog and disable Auto Parse Mode for JSON logs. 
+
+![](disable_auto_json_mode.png)
+Run the search again and note how the list of fields in the field browser is very much reduced, as only indexed fields or explicitly parsed fields are shown.
 
 ## 7. Filtering searches
-Next we will use some filtering to narrow down search resultsj ust to AccessDenied in the errorcode field. Run:
+Next we will use some filtering to narrow down search results just to AccessDenied in the errorcode field. Run:
 ```
 _sourceCategory = *cloudtrail*  errorcode
 | json field=_raw "errorCode" 
@@ -108,9 +121,11 @@ _sourceCategory = *cloudtrail*  errorcode
 ```
 
 ## Iterating on a search to drill down further
-We want to know more about these access deined errors so we can break things down in more detail. In most cases high numbers of failures here will just indicate broken workloads in AWS but in a security context could point to security issues or malicous activity.
+One of the most valuable aspects of the Sumo Logic platform is how you can continually iterate a search to drill down to a new insight or root cause. 
 
-To provide more details, this new search version is an iteration that provides a higher level of detail and some aggregation to summarize the results in format suitable for a table.  
+For this lab say we want to know more about these access denied errors to better understand what workloads or users are experiencing authentication errors.
+
+To provide more details, this new search version is an iteration that provides a higher level of detail and  aggregation to summarize the results in format suitable for a table.  
 
 Here is the next version of the search to execute:
 ```
@@ -128,21 +143,20 @@ _sourceCategory = *cloudtrail*  errorcode
 ```
 On the aggregates choose the Table format.
 
-## Review Best Practices for Search
-There are few key things to know to make fast efficient searches in Sumo.
+## Bonus Time: Review Best Practices for Search
+If you still have time in the lab review the key things to know to make fast efficient searches in Sumo.
 
-Follow these key tips:
 ### Always use a sourcecategory or index in your search 
-A good built in metadta scope will reduce data scanned and speed up search for example:
+A good built in metadta scope will reduce data scanned and speed up search and using an index or sourcecategory usually works best. For example:
 ```
 _sourcecategory=prod/*
 _index=prod_data
 ```
 
 ### Keywords speed up searches
-Add a keyword to make your search specific if you can - even if it just gets rid of most events you don't want. Keywords make searches much faster than those that use just where to filter results.
+Add a keyword to make your search specific if you can - even if it just gets rid of most events you don't want. Keywords make searches much faster than those that use just where to filter results because less events must be retrieved to be processed later.
 
-In our above example we could do someting like:
+In our above example we could use accesdenied as a keyword:
 ```
 _sourceCategory = *cloudtrail*  AccessDenied
 | json field=_raw "errorCode" nodrop
