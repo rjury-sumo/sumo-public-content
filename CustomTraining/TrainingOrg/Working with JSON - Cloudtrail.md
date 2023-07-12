@@ -62,7 +62,7 @@ The [field browser](https://help.sumologic.com/docs/search/get-started-with-sear
 3. Click on the text of a field name to show a pop up. The pop up shows the breakdown of events for the first 100k results. 
 4.  In the pop up click on ```Top Values Over Time``` This will open a new search tab that adds to your base query in a new search window. Run this new search and note how there is now an 'Aggregates' tab as well as Messages. 
 
-## Messages and Aggregate Results
+## 5. Messages vs Aggregate Results and Charting
 Next try changing the time range to another value by entering a relative time expression:
 ```-6h```
 
@@ -99,7 +99,7 @@ _sourceCategory = *cloudtrail*  errorcode
 
 Since these fields are parsed manually in the search they are already included as columns in the search results tab (tick box in field browser).
 
-### Index vs search time fields
+### 6a. Index vs search time fields
 Next to the Run search button open the settings cog and disable Auto Parse Mode for JSON logs. 
 
 ![](disable_auto_json_mode.png)
@@ -115,7 +115,7 @@ _sourceCategory = *cloudtrail*  errorcode
 | where errorcode = "AccessDenied"
 ```
 
-## Iterating on a search to drill down further
+## 8. Iterating on a search
 One of the most valuable aspects of the Sumo Logic platform is how you can continually iterate a search to drill down to a new insight or root cause. 
 
 For this lab say we want to know more about these access denied errors to better understand what workloads or users are experiencing authentication errors.
