@@ -16,17 +16,21 @@ You can find this month's training password by going to your Sumo instance, then
 - Duplicate a panel
 
 # Lab Exercises
+In this lab we will use Cloudfront logs and build up a starting dashboard with a few different panel types.
+
 ## 1. Create a dashboard
 - Use the New menu to make an new dashboard
 - It should open a new tab with a mostly blank dashboard
 - First click the time range selector in the top right corner.
 - Tick 'set as dashboards's default time range' and change it to 'Last 60 Minutes'
 
+Dashboard panels can inheirit the global time range or have specific ones but starting with a inheirit approach and a sensible default is a good start.
+
 ## 2. Set a name
 - Change your dashboard name including your initials for example: ```My Demo Cloudfront Dashboard - RJ``` by clicking on the name to edit it.
   
 ## 3. Setup a template variable 
-[Filter template variables](https://help.sumologic.com/docs/dashboards-new/filter-template-variables/) allow flexible custom parameters within a dashboard. Uses can then filter the dashboard panels based on custom criteria.
+[Filter template variables](https://help.sumologic.com/docs/dashboards-new/filter-template-variables/) allow flexible custom parameters within a dashboard. Users can then filter the dashboard panels based on custom criteria.
 - Click Create new variable + to add a new parameter on top left of the dashboard (if you can't see this click the filter button in top right.)
 - For Variable Name use  ```keywords```
 - For Variable Type use ```Custom List```
@@ -36,7 +40,7 @@ You can find this month's training password by going to your Sumo instance, then
   ![](adding_template_var.png)
 
 ## 4. Add a Categorical panel
-[Categorical](https://help.sumologic.com/docs/dashboards-new/panels/#categorical-panel) panels are the most common type of aggregate search panel. Categorical panels provide information on the number of occurrences of distinct values. Categorical frequencies are typically shown in pie, table, and column charts.
+[Categorical](https://help.sumologic.com/docs/dashboards-new/panels/#categorical-panel) panels are the most common type of aggregate search panel. Categorical panels provide information on the number of occurrences of distinct values such as in pie, table, and column charts.
 
 These are best used to understand the distribution of data by categories. For example, understanding the number of CPUs used by machine type, or the number of requests handled by a pod.
 
@@ -63,24 +67,32 @@ This dashboard  has a filter defined, we called ```keywords``` . Filters make it
 - Put the value back to *
 
 ## 6. Duplicate and edit to create a Time Series Panel
-- Use the ellipsis button on the panel to bring up the panel menu on the top righ tof a panel. (You have to hover over the top right near the time range to see it).
+A fast way to build dashboards is to create different vizualiations or panels that use similar searches using an exisitng one as a base. In this step we will duplicate the panel and customize it to represent a time series view of the same data.
+
+If you mouse over or highlight a panel you will see an elipsis button in the top right of the panel.
+- Use the ellipsis button on the panel to bring up the panel menu
 - Choose Duplicate. 
-- Then choose Edit on the new panel. 
+  
+This will create a new panel the same with (Copy) on the panel name. Drag or resize this panel to where you want to place it.
+- Choose Edit on the new panel from the elipsis button on the panel. 
 - Remove the count line at the end. You can delete it or add ```//``` to the line to comment it out
 - Add a new aggregation instead:
+
 ```
 | timeslice
 | count by _timeslice
 ```
-- Change the panel type to **Time Series** 
-- Run the query 
+
+- Change the panel type to **Time Series**
+- Run the query
 - Change the panel time range to -3h and run again
 - Then try some different time series chart types such as line and area.
 
 ## 7. Using Time Compare
-[Time compare](https://help.sumologic.com/docs/search/time-compare/) is a very powerful way to understand if current performance is anomalous with previous performance.
+[Time compare](https://help.sumologic.com/docs/search/time-compare/) is a very powerful way to understand if current performance is typical compared to previous performance.
 - Edit the panel again and add: ``` | compare with timeshift 7d```
   The query should now be:
+
 ```
 _sourcecategory = *cloudfront* {{keywords}} 
 | parse "*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*" as _filedate,time,edgeloc, scbytes, c_ip,method,cs_host,uri_stem,status,referer,user_agent,uri_query,cookie,edgeresult,edge_request,domain,protocol,bytes,time_taken,forwarded_for,ssl_protocol,ssl_cipher, x_edge_response_result_type,protocol_version 
@@ -117,7 +129,8 @@ _sourcecategory = *cloudfront* {{keywords}}
 | parse "*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*\t*" as _filedate,time,edgeloc, scbytes, c_ip,method,cs_host,uri_stem,status,referer,user_agent,uri_query,cookie,edgeresult,edge_request,domain,protocol,bytes,time_taken,forwarded_for,ssl_protocol,ssl_cipher, x_edge_response_result_type,protocol_version 
 | count by edgeloc | sort _count 
  ```
- - You will see one node for each edge location, and it is color coded by volume of count
+
+You will see one node for each edge location, and it is color coded by volume of count
  - Name the panel something like Hits by edgeloc and Update Panel
 
 ## 10. Map panels with geo location
