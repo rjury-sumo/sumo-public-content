@@ -47,9 +47,10 @@ https://help.sumologic.com/docs/search/get-started-with-search/search-page/
 
 ## 3. Using the search histogram
 ![](histogram.png)
-There are two really useful features of the search histogram which shows messages over time. 
+There are two really useful features of the search histogram which shows messages over time.
 a. You can click a segment to move to the messages page for that time range
-b. If you Shift + click on a selected histogram bar it will open a duplicate search window for just that time range. 
+b. If you Shift + click on a selected histogram bar it will open a duplicate search window for just that time range.
+
 Try both of these in a search window.
 
 ## 4. Using the Field Browser
