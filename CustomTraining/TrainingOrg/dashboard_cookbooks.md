@@ -1,14 +1,16 @@
 # Dashboard v2 Cookbook
 
-The dashboard v2 cookbook provides a series of example dashboard panels for common and also advanced use cases. Each panel has an example query that would work with that type as well as comments about how to use them.
+The dashboard v2 cookbook dashboards provide a series of example dashboard panels for common and also advanced use cases. Each panel has an example query that would work with that type as well as comments about how to use them.
 
 See the four example pdfs in this folder for a static version of each:
-CustomTraining/TrainingOrg/1. Dashboard Cookbook - Basics - Categorical and Honeycomb.pdf
-CustomTraining/TrainingOrg/2. Dashboard Cookbook - Time Series.pdf
-CustomTraining/TrainingOrg/3. Dashboard Cookbook - Advanced Analytics .pdf
-CustomTraining/TrainingOrg/4. Dashboard Cookbook - Advanced Techniques.pdf
+- [Basics.pdf](1.%20Dashboard%20Cookbook%20-%20Basics%20-%20Categorical%20and%20Honeycomb.pdf)
+- [Time Series.pdf](2.%20Dashboard%20Cookbook%20-%20Time%20Series.pdf)
+- [Advanced Analytics.pdf](3.%20Dashboard%20Cookbook%20-%20Advanced%20Analytics%20.pdf)
+- [Advanced Techniques.pdf](4.%20Dashboard%20Cookbook%20-%20Advanced%20Techniques.pdf)
 
-There are four demos in the sumo logic Training instance. You must login using the credentials used for Certification to access these dashbaords (see the Certification portal page in the sumo ui for current training credentials).
+You can find each of the source demo dashboards in the Training instance at service.sumologic.com. 
+
+You must login using the credentials used for Certification to access these dashbaords (see the Certification portal page in the sumo ui for current training credentials).
 1. [Basics](https://service.sumologic.com/ui/#/dashboardv2/zAmNYflsUBLmbHKDjheFMPN8TJNMRleMfWy0IaG6aeW1IMWEMa5jg1QEqAyS)
 2. [Time Series](https://service.sumologic.com/ui/#/dashboardv2/XVwCzaTFlgVBpBwO19Q0YPe7YpG70nOfjQsSZPK1j8PqWivmlVCbbjnc9tot)
 3. [Advanced Analytics](https://service.sumologic.com/ui/#/dashboardv2/Y8bfaK7xavywMlJIOyYBUNBRCCzT2GDTIMmBfnGdlfQlhpL9n48i0QYsG8Dc)
