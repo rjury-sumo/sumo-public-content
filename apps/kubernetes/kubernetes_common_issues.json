@@ -1,0 +1,718 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Kubernetes - Common Issues",
+    "description": "",
+    "title": "Kubernetes - Common Issues",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-6h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel6CEA1069B4B62942",
+                "structure": "{\"height\":10,\"width\":14,\"x\":10,\"y\":2}"
+            },
+            {
+                "key": "panel35B909458FCA1B46",
+                "structure": "{\"height\":10,\"width\":10,\"x\":0,\"y\":2}"
+            },
+            {
+                "key": "panelPANE-030D552E9E4E6B4B",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel9CDC3483AEE38A47",
+                "structure": "{\"height\":2,\"width\":8,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel115128DC97ECFA4A",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":26}"
+            },
+            {
+                "key": "panel3F3357EB8B13BA4B",
+                "structure": "{\"height\":2,\"width\":8,\"x\":8,\"y\":24}"
+            },
+            {
+                "key": "panelF9282260ACD94843",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":26}"
+            },
+            {
+                "key": "panel216AFAF6B7C3684A",
+                "structure": "{\"height\":2,\"width\":8,\"x\":16,\"y\":24}"
+            },
+            {
+                "key": "panelPANE-9B262A7889886B4D",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":26}"
+            },
+            {
+                "key": "panel4CE2D34FA6477B48",
+                "structure": "{\"height\":2,\"width\":16,\"x\":0,\"y\":34}"
+            },
+            {
+                "key": "panelFE33DCA58A5BD849",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":36}"
+            },
+            {
+                "key": "panel0EDBEB4291B11A4D",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":36}"
+            },
+            {
+                "key": "panelF4C2A1FCAF19D944",
+                "structure": "{\"height\":2,\"width\":8,\"x\":0,\"y\":44}"
+            },
+            {
+                "key": "panel655A86AA9545FA47",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":46}"
+            },
+            {
+                "key": "panel50C6A09DB28F184A",
+                "structure": "{\"height\":2,\"width\":16,\"x\":8,\"y\":44}"
+            },
+            {
+                "key": "panelEDEFF98DAF6B484D",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":46}"
+            },
+            {
+                "key": "panelA1A21D6F83C65848",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":46}"
+            },
+            {
+                "key": "panelPANE-FB11C2EB863B0A41",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":64}"
+            },
+            {
+                "key": "panel062A4C4897511846",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":54}"
+            },
+            {
+                "key": "panel65FB5ED99FDB184A",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":56}"
+            },
+            {
+                "key": "panel9703BE1BA38BFB42",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":56}"
+            },
+            {
+                "key": "panel779652E4B2EAF848",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":56}"
+            },
+            {
+                "key": "panel777D83509DF10944",
+                "structure": "{\"height\":2,\"width\":8,\"x\":16,\"y\":34}"
+            },
+            {
+                "key": "panel2E4F3D6682B30A4C",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":36}"
+            },
+            {
+                "key": "panel7694D6E495FBAA49",
+                "structure": "{\"height\":10,\"width\":10,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel5363F1F5A1EBDA44",
+                "structure": "{\"height\":10,\"width\":14,\"x\":10,\"y\":14}"
+            },
+            {
+                "key": "panelBD38286186479844",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":12}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel6CEA1069B4B62942",
+            "title": "Container Waiting",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"sortBy\":\"_label\",\"aggregationType\":\"sum\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, container,reason",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel35B909458FCA1B46",
+            "title": "Container Waiting",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"reason\",\"value\":\"reason\"}],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, reason",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-030D552E9E4E6B4B",
+            "title": "Waiting or Pending Pods",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "If a Pod is stuck in the Waiting state, then it has been scheduled to a worker node, but it can't run on that machine. Again, the information from kubectl describe ... should be informative. The most common cause of Waiting pods is a failure to pull the image."
+        },
+        {
+            "id": null,
+            "key": "panel9CDC3483AEE38A47",
+            "title": "DaemonSet Misscheduled",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "A number of pods of daemonset are running where they are not supposed to run. [runbook](https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetmisscheduled/)\n"
+        },
+        {
+            "id": null,
+            "key": "panel115128DC97ECFA4A",
+            "title": "DaemonSet Misscheduled",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"sum\",\"noDataMessage\":\"\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_daemonset_status_number_misscheduled job=kube-state-metrics | filter _value > 0 | sum by cluster",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3F3357EB8B13BA4B",
+            "title": "DaemonSet Not Scheduled",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "A number of pods of daemonset are not scheduled. [runbook](https://runbooks.prometheus-operator.dev/runbooks/kubernetes/kubedaemonsetnotscheduled/)"
+        },
+        {
+            "id": null,
+            "key": "panelF9282260ACD94843",
+            "title": "Kubernetes - DaemonSet Not Scheduled",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"type\":\"number\",\"showThresholds\":true,\"fillRemainingGreen\":true,\"numberThresholds\":{\"critical\":{\"display\":false,\"comparator\":\"greater\",\"value\":0},\"warning\":{\"display\":true,\"comparator\":\"greater\",\"value\":0}}},\"hiddenQueryKeys\":[\"A\",\"B\"],\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"visible\":false}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"visible\":false}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"{{cluster}} {{daemonset}}\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_daemonset_status_desired_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_daemonset_status_current_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryType": "Metrics",
+                    "queryKey": "B",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "#A - #B along daemonset, cluster  | where _value > 0",
+                    "queryType": "Metrics",
+                    "queryKey": "C",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel216AFAF6B7C3684A",
+            "title": "Kube API Server Instance Count",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "KubeAPI node count should be consistent in Prometheus. If instances are not discoverable scaling may be in progress or nodes down."
+        },
+        {
+            "id": null,
+            "key": "panelPANE-9B262A7889886B4D",
+            "title": "Kube API Server Instance Count - Unexpected Drop Indicates API Server is Down",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{cluster}} \"}}],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"max\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cluster=* metric=up job=apiserver  | quantize to 15m using max | sum by cluster,instance | avg by cluster",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4CE2D34FA6477B48",
+            "title": "Nodes Ready State",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Kubernetes runs your workload by placing containers into Pods to run on Nodes. The conditions field describes the status of all Running nodes [conditions](https://kubernetes.io/docs/concepts/architecture/nodes/#node-status)"
+        },
+        {
+            "id": null,
+            "key": "panelFE33DCA58A5BD849",
+            "title": "kube-state-metrics Clusters With Nodes Not Ready",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize to 15m using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0EDBEB4291B11A4D",
+            "title": "Nodes Ready",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"max\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{cluster}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_node_status_condition job=kube-state-metrics  condition=ready  status=true | quantize to 15m using max | max by cluster,node | sum by cluster",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF4C2A1FCAF19D944",
+            "title": "Pods Terminating With Undesired States Such as OOMKilled",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "kube_pod_container_status_terminated_reason showing states such as OOMKilled. "
+        },
+        {
+            "id": null,
+            "key": "panel655A86AA9545FA47",
+            "title": "kube_pod_container_status_terminated_reason",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{cluster}} {{reason}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " metric=kube_pod_container_status_terminated_reason not reason=completed | filter _value > 0| quantize to 15m using max | filter max > 0 | max by cluster,reason,pod | sum by cluster,reason",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel50C6A09DB28F184A",
+            "title": "Containers Waiting",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel will show where you have CrashLoopBackoff occuring"
+        },
+        {
+            "id": null,
+            "key": "panelEDEFF98DAF6B484D",
+            "title": "Clusters With Nodes Not Condition Ready",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{cluster}} {{namespace}} {{reason}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize to 15m using max | sum by cluster,namespace,reason",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA1A21D6F83C65848",
+            "title": "Container Waiting Reasons",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"pivotBy\":[],\"sortBy\":\"_value\",\"aggregationType\":\"sum\",\"sortDir\":\"DESC\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | filter _value >0| max by container,reason ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-FB11C2EB863B0A41",
+            "title": "Kubelet Common Error Conditions Detailed",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n| parse field=event \"\\\"StartContainer\\\" for \\\"*\\\" with\" as container nodrop\n| trim(concat(type,\" \",keyindicator,\" \",container)) as type\n\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n//| sum(_count) by type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel062A4C4897511846",
+            "title": "Kubelet Events",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Well known error kubernetes events in Kubelet logs"
+        },
+        {
+            "id": null,
+            "key": "panel65FB5ED99FDB184A",
+            "title": "Kubelet Common Error Conditions",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n| count as errors by type | sort errors",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel9703BE1BA38BFB42",
+            "title": "Kubelet Common Error Conditions By Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| timeslice 1h | count by _timeslice,type | transpose row _timeslice column type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel779652E4B2EAF848",
+            "title": "Kubelet Common Error Conditions By Cluster",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| hostname as node\n| timeslice 1h | count by _timeslice,cluster | transpose row _timeslice column cluster",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel777D83509DF10944",
+            "title": "Containers Frequently Restarting",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "metric=kube_pod_container_status_restarts_total is a cumulative restart count so from this we can look for containers with high restart count (or possibly crash loops etc)"
+        },
+        {
+            "id": null,
+            "key": "panel2E4F3D6682B30A4C",
+            "title": "Containers Restarting Count",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{namespace}} {{container}}\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_pod_container_status_restarts_total job=kube-state-metrics | filter _value >0 | quantize to 5m using max | delta increasing   | sum by namespace,container  ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7694D6E495FBAA49",
+            "title": "Pod Phase: pending, unknown or failed",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"phase\",\"value\":\"phase\"}],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | filter _value > 0 | sum by cluster, namespace, phase",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5363F1F5A1EBDA44",
+            "title": "Pod Phase: pending, unknown or failed - Details",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"sortBy\":\"_label\",\"aggregationType\":\"latest\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | quantize to 5m using max | filter _value > 0 | sum by cluster, namespace, phase, pod, container ",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBD38286186479844",
+            "title": "Pods That Cannot Be Scheduled",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "If the pod is requesting more resources than any node can provide, it will not be scheduled. This can be solved by adding nodes, increasing node size, or reducing the resource requests of pods.\nTaints and tolerations work together to ensure that pods are not scheduled onto inappropriate nodes. One or more taints are applied to a node; this marks that the node should not accept any pods that do not tolerate the taints.\n\n"
+        }
+    ],
+    "variables": [],
+    "coloringRules": []
+}
