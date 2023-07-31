@@ -89,23 +89,23 @@
             },
             {
                 "key": "panelPANE-FB11C2EB863B0A41",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":64}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":74}"
             },
             {
                 "key": "panel062A4C4897511846",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":54}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":64}"
             },
             {
                 "key": "panel65FB5ED99FDB184A",
-                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":56}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":66}"
             },
             {
                 "key": "panel9703BE1BA38BFB42",
-                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":56}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":66}"
             },
             {
                 "key": "panel779652E4B2EAF848",
-                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":56}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":66}"
             },
             {
                 "key": "panel777D83509DF10944",
@@ -126,6 +126,14 @@
             {
                 "key": "panelBD38286186479844",
                 "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":12}"
+            },
+            {
+                "key": "panel901BD7A7BAFACA47",
+                "structure": "{\"height\":10,\"width\":16,\"x\":0,\"y\":54}"
+            },
+            {
+                "key": "panel3330AAC1ACBB394A",
+                "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":54}"
             }
         ]
     },
@@ -140,7 +148,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, container,reason",
+                    "queryString": "  cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, container,reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -167,7 +175,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, reason",
+                    "queryString": " cluster={{cluster}} metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -212,7 +220,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_daemonset_status_number_misscheduled job=kube-state-metrics | filter _value > 0 | sum by cluster",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_number_misscheduled job=kube-state-metrics | filter _value > 0 | sum by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -248,7 +256,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_daemonset_status_desired_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_desired_number_scheduled job=kube-state-metrics | quantize to 5m using max",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -261,7 +269,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "metric=kube_daemonset_status_current_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_current_number_scheduled job=kube-state-metrics | quantize to 5m using max",
                     "queryType": "Metrics",
                     "queryKey": "B",
                     "metricsQueryMode": "Advanced",
@@ -317,7 +325,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster=* metric=up job=apiserver  | quantize to 15m using max | sum by cluster,instance | avg by cluster",
+                    "queryString": " cluster={{cluster}}  metric=up job=apiserver  | quantize to 15m using max | sum by cluster,instance | avg by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -353,7 +361,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize to 15m using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize to 15m using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -380,7 +388,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_node_status_condition job=kube-state-metrics  condition=ready  status=true | quantize to 15m using max | max by cluster,node | sum by cluster",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition job=kube-state-metrics  condition=ready  status=true | quantize to 15m using max | max by cluster,node | sum by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -416,7 +424,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " metric=kube_pod_container_status_terminated_reason not reason=completed | filter _value > 0| quantize to 15m using max | filter max > 0 | max by cluster,reason,pod | sum by cluster,reason",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_terminated_reason not reason=completed | filter _value > 0| quantize to 15m using max | filter max > 0 | max by cluster,reason,pod | sum by cluster,reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -452,7 +460,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize to 15m using max | sum by cluster,namespace,reason",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize to 15m using max | sum by cluster,namespace,reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -479,7 +487,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | filter _value >0| max by container,reason ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | filter _value >0| max by container,reason ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -506,7 +514,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n| parse field=event \"\\\"StartContainer\\\" for \\\"*\\\" with\" as container nodrop\n| trim(concat(type,\" \",keyindicator,\" \",container)) as type\n\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n//| sum(_count) by type",
+                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n| parse field=event \"\\\"StartContainer\\\" for \\\"*\\\" with\" as container nodrop\n| trim(concat(type,\" \",keyindicator,\" \",container)) as type\n\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n//| sum(_count) by type",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -542,7 +550,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n| count as errors by type | sort errors",
+                    "queryString": "_sourcecategory=*kubelet*   cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n| count as errors by type | sort errors",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -569,7 +577,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| timeslice 1h | count by _timeslice,type | transpose row _timeslice column type",
+                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| timeslice 1h | count by _timeslice,type | transpose row _timeslice column type",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -596,7 +604,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet* \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| hostname as node\n| timeslice 1h | count by _timeslice,cluster | transpose row _timeslice column cluster",
+                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| hostname as node\n| timeslice 1h | count by _timeslice,cluster | transpose row _timeslice column cluster",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -632,7 +640,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_container_status_restarts_total job=kube-state-metrics | filter _value >0 | quantize to 5m using max | delta increasing   | sum by namespace,container  ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics | filter _value >0 | quantize to 5m using max | delta increasing   | sum by namespace,container  ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -659,7 +667,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | filter _value > 0 | sum by cluster, namespace, phase",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | filter _value > 0 | sum by cluster, namespace, phase",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -686,7 +694,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | quantize to 5m using max | filter _value > 0 | sum by cluster, namespace, phase, pod, container ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) | quantize to 5m using max | filter _value > 0 | sum by cluster, namespace, phase, pod, container ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -711,8 +719,78 @@
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
             "text": "If the pod is requesting more resources than any node can provide, it will not be scheduled. This can be solved by adding nodes, increasing node size, or reducing the resource requests of pods.\nTaints and tolerations work together to ensure that pods are not scheduled onto inappropriate nodes. One or more taints are applied to a node; this marks that the node should not accept any pods that do not tolerate the taints.\n\n"
+        },
+        {
+            "id": null,
+            "key": "panel901BD7A7BAFACA47",
+            "title": "Kubernetes Events Not Normal State",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"pivotBy\":[],\"sortBy\":\"_value\",\"aggregationType\":\"sum\",\"sortDir\":\"DESC\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " cluster={{cluster}}  _sourceCategory=*events \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.involvedObject.kind\" as type\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n| json field=_raw \"object.message\" as message\n| json field=_raw \"object.metadata.namespace\" as namespace\n\n\n| count by cluster,reason,type,level,namespace,name,message\n| sort _count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3330AAC1ACBB394A",
+            "title": "Kubernetes Events Not Normal State",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| concat(level,\"-\",reason) as event\n| timeslice | count by _timeslice,event | transpose row _timeslice column event",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
-    "variables": [],
+    "variables": [
+        {
+            "id": null,
+            "name": "cluster",
+            "displayName": "cluster",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "_contenttype=prometheus",
+                "key": "cluster"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
     "coloringRules": []
 }
