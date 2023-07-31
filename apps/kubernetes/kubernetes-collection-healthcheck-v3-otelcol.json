@@ -205,15 +205,15 @@
             },
             {
                 "key": "panelC5D557F18CBB2A47",
-                "structure": "{\"height\":9,\"width\":13,\"x\":11,\"y\":1}"
+                "structure": "{\"height\":9,\"width\":14,\"x\":10,\"y\":1}"
             },
             {
                 "key": "panel7D2B9E9EBEBCFA44",
-                "structure": "{\"height\":9,\"width\":6,\"x\":0,\"y\":1}"
+                "structure": "{\"height\":9,\"width\":5,\"x\":0,\"y\":1}"
             },
             {
                 "key": "panelF00B00B39D3D0B43",
-                "structure": "{\"height\":9,\"width\":5,\"x\":6,\"y\":1}"
+                "structure": "{\"height\":9,\"width\":5,\"x\":5,\"y\":1}"
             }
         ]
     },
@@ -228,7 +228,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster={{cluster}} namespace={{namespace}}  pod=*-sumologic-* metric=otelcol_process_cpu_seconds | rate | quantize 1m using avg | avg by cluster,container, pod | sum by cluster,pod ",
+                    "queryString": "cluster={{cluster}} namespace={{namespace}}  pod=*-sumologic-* metric=otelcol_process_cpu_seconds (pod=*trace* or pod=*instrumentation* )| rate | quantize 1m using avg | avg by cluster,container, pod | sum by cluster,pod ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -255,7 +255,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster={{cluster}} namespace={{namespace}} metric= otelcol_process_memory_rss \n| quantize 1m using avg | avg by cluster,container, pod | sum by cluster,pod ",
+                    "queryString": "cluster={{cluster}} namespace={{namespace}} metric= otelcol_process_memory_rss (pod=*trace* or pod=*instrumentation* )\n| quantize 1m using avg | avg by cluster,container, pod | sum by cluster,pod ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -309,7 +309,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster={{cluster}} namespace={{namespace}} metric= otelcol_exporter_queue_size  | quantize 1m using avg  | avg by container, pod | sum by pod ",
+                    "queryString": "cluster={{cluster}} namespace={{namespace}} metric= otelcol_exporter_queue_size (pod=*trace* or pod=*instrumentation* ) | quantize 1m using avg  | avg by container, pod | sum by pod ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1198,7 +1198,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster={{cluster}} metric= otelcol_process_memory_rss \n| quantize 1m using avg  | avg by container, pod | sum by pod ",
+                    "queryString": "cluster={{cluster}} metric= otelcol_process_memory_rss (pod=*trace* or pod=*instrumentation* )\n| quantize 1m using avg  | avg by container, pod | sum by pod ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1324,7 +1324,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*otelcol* \n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n| json field=some_json \"action\" nodrop\n| json field=some_json \"error\" nodrop\n| json field=some_json \"data_type\" nodrop\n| json field=some_json \"name\" nodrop\n| json field=some_json \"kind\" nodrop\n| json field=some_json \"pipeline\" nodrop\n| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
+                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n| json field=some_json \"kind\" nodrop\n| json field=some_json \"pipeline\" nodrop\n| if (length(error)>200,concat(substring(error,0,200),\"...\"),error) as error\n| count by cluster,level,file,error_type,error,kind,pipeline |sort _count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -1351,7 +1351,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*otelcol* \n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,error_type | transpose row _timeslice column error_type\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
+                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,error_type | transpose row _timeslice column error_type\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -1378,7 +1378,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*otelcol* \n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,deployment | transpose row _timeslice column deployment\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
+                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,deployment | transpose row _timeslice column deployment\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
