@@ -1336,7 +1336,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n| json field=some_json \"kind\" nodrop\n| json field=some_json \"pipeline\" nodrop\n| if (length(error)>200,concat(substring(error,0,200),\"...\"),error) as error\n| count by cluster,level,file,error_type,error,kind,pipeline |sort _count",
+                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n| json field=some_json \"kind\" nodrop\n| json field=some_json \"pipeline\" nodrop\n| if (length(error)>200,concat(substring(error,0,200),\"...\"),error) as error\n| count by cluster,pod,level,file,error_type,error,kind,pipeline |sort _count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -1383,14 +1383,14 @@
         {
             "id": null,
             "key": "panelF00B00B39D3D0B43",
-            "title": "By deployment",
+            "title": "By Pod",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,deployment | transpose row _timeslice column deployment\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
+                    "queryString": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n\n( warn or error or fatal) //not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,pod | transpose row _timeslice column pod\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
