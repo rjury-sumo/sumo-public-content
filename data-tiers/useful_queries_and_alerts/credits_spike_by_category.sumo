@@ -2,12 +2,15 @@
 This search can be used in an hourly or daily alert to notify if credits use per category is outside of expected norms
 Tune the last line based on your requirements for your environment.
 Create this as a scheduled search to email/webhook etc for example once a day for -24h or for more sensitive alerting say every 3h for -3h
+Test on a problem period to validate amounts then tune thresholds at end as required.
 */
 _index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume
 | parse regex "(?<data>\{[^\{]+\})" multi
 | json field=data "field","dataTier","sizeInBytes" as sourceCategory, dataTier, bytes
 | bytes/1Gi as gbytes 
 | sum(gbytes) as gbytes by dataTier,sourceCategory
+
+// compare with previous 3 time periods at same time
 
 // these are typical credits rates check your contract
 | 20 as credit_rate
@@ -16,7 +19,6 @@ _index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume
 | if(datatier = "Frequent",9,credit_rate) as credit_rate
 | gbytes * credit_rate as credits
 
-// compare with previous 3 time periods at same time
 | compare timeshift 7d 3 avg
 
 // this handles nulls for new or removed categories
@@ -24,13 +26,20 @@ _index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume
 | if(isNull(gbytes), 0, gbytes) as gbytes 
 | if(isNull(gbytes_21d_avg), "NEW", state) as state 
 | if(isNull(gbytes_21d_avg), 0, gbytes_21d_avg) as gbytes_21d_avg 
+| if(isNull(credits), 0, credits) as credits 
+| if(isNull(credits_21d_avg), 0, credits_21d_avg) as credits_21d_avg 
 
-// what is the change delta as a percentage vs baseline
-| ((gbytes - gbytes_21d_avg) / gbytes) * 100 as pct_increase 
+//// what is the change delta as a percentage vs baseline
+| ((gbytes - gbytes_21d_avg) / gbytes_21d_avg) * 100 as pct_increase_gb
+| ((credits - credits_21d_avg) / credits_21d_avg) * 100 as pct_increase_cr
 
-// Use this if you want to alert 
-// typically in a schedules search setup where then alert on events (rows) > 0
+| fields datatier,sourcecategory,gbytes,credits,credit_rate,gbytes_21d_avg,credits_21d_avg,state,pct_increase_gb,pct_increase_cr
 
-// this line is for your thresholds to get notified
-// consider tuning the  min size clause for your environment.
-| where (pct_increase > 50 or state = "NEW" ) and ( credits > 20  or gbytes > 1)
+| sort credits
+//
+//// Use this if you want to alert 
+//// typically in a schedules search setup where then alert on events (rows) > 0
+//
+//// this line is for your thresholds to get notified
+//// consider tuning the  min size clause for your environment.
+| where (pct_increase_cr > 150 or state = "NEW" ) and ( credits > 100 ) //or gbytes > 5)
