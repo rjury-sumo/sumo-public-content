@@ -37,7 +37,7 @@
             },
             {
                 "key": "panel6C02A01287E3C949",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":73}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":85}"
             },
             {
                 "key": "panelBDABBAD688F1D941",
@@ -77,7 +77,7 @@
             },
             {
                 "key": "panel47E85634BA656A46",
-                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":68}"
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":80}"
             },
             {
                 "key": "panel11E882FAAA33EA47",
@@ -105,11 +105,11 @@
             },
             {
                 "key": "panel1DFB7425A5825B4B",
-                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":95}"
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":107}"
             },
             {
                 "key": "panelA318AB91B1B04B4F",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":98}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":110}"
             },
             {
                 "key": "panel4CF41B0388065B4E",
@@ -137,11 +137,15 @@
             },
             {
                 "key": "panel2D96C69890E71B46",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":120}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":132}"
             },
             {
                 "key": "panel948F4BE284BC194D",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":122}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":134}"
+            },
+            {
+                "key": "panel0FB55627921A9846",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":68}"
             }
         ]
     },
@@ -318,7 +322,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(user_name) as users,count as queries,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events, pct(duration_s,50) as median_run_s , sum(slow) as %\"slow > 30s\", sum(fail) as %\"fail/cancelled\" by query_type\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events, pct(duration_s,50) as median_run_s , sum(slow) as %\"slow > 30s\", sum(fail) as %\"fail/cancelled\" by query_type\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -841,6 +845,33 @@
                 {
                     "transient": false,
                     "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\nstatus_message=\"Query Failed\"\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| round(range_s/60/60,1) as range_hour\n//| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(range_hour) as ranges_hours, values(range_day) as ranges_days,sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned,  avg(duration_s) as avg_duration_s by query_type,user_name,query,status_message,analytics_tier\n| sort  bytes_scanned\n| bytes_scanned / 1G as gb_scan\n| fields -bytes_scanned\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0FB55627921A9846",
+            "title": "User Search Stats",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count as queries,sum(duration_s) as total_sec,sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events, pct(duration_s,50) as median_run_s , sum(slow) as %\"slow > 30s\", sum(fail) as %\"fail/cancelled\" by user_name\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
