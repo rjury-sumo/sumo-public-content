@@ -21,7 +21,7 @@
         "layoutStructures": [
             {
                 "key": "panelCEDFC956BB946A41",
-                "structure": "{\"height\":12,\"width\":11,\"x\":13,\"y\":9}"
+                "structure": "{\"height\":12,\"width\":9,\"x\":15,\"y\":9}"
             },
             {
                 "key": "panel78FD946FAD6E5B4C",
@@ -89,7 +89,7 @@
             },
             {
                 "key": "panelD6FF1883BBF32A4E",
-                "structure": "{\"height\":12,\"width\":10,\"x\":3,\"y\":9}"
+                "structure": "{\"height\":12,\"width\":9,\"x\":6,\"y\":9}"
             },
             {
                 "key": "panel196798129B39D94E",
@@ -129,11 +129,11 @@
             },
             {
                 "key": "panelF6485A9982631B48",
-                "structure": "{\"height\":4,\"width\":3,\"x\":0,\"y\":17}"
+                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":9}"
             },
             {
                 "key": "panel4FE25CDF9D9BCB4D",
-                "structure": "{\"height\":4,\"width\":3,\"x\":0,\"y\":13}"
+                "structure": "{\"height\":4,\"width\":3,\"x\":0,\"y\":17}"
             },
             {
                 "key": "panel2D96C69890E71B46",
@@ -146,6 +146,18 @@
             {
                 "key": "panel0FB55627921A9846",
                 "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":68}"
+            },
+            {
+                "key": "panel8E982FE99E4A2842",
+                "structure": "{\"height\":4,\"width\":3,\"x\":0,\"y\":13}"
+            },
+            {
+                "key": "panel27871B65A1C61B47",
+                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":9,\"minHeight\":3,\"minWidth\":3}"
+            },
+            {
+                "key": "panelC6DA9444949BE84D",
+                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":9,\"minHeight\":3,\"minWidth\":3}"
             }
         ]
     },
@@ -774,14 +786,14 @@
         {
             "id": null,
             "key": "panelF6485A9982631B48",
-            "title": "Scan Ratio",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"x Daily Ingest\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":10000,\"to\":1000000,\"color\":\"#bf2121\"},{\"from\":5000,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":5000,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "title": "Search Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Users\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//( query_type=*view*)\n\n| sum(data_scanned_bytes) as bytes | bytes / (1024 * 1024 * 1024 ) as GB_Scan \n// make a lookup reference object of the last 24 hour scan total\n| \"YES\" as dummy\n| where [subquery from=(-24h): \n  _index=sumologic_volume _sourceCategory=\"view_and_tier_volume\"\n  | parse regex \"(?<data>\\{[^\\{]+\\})\" multi \n  | json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count   \n  | sum(bytes) as bytes | bytes/1024/1024/1024 as gb\n  | 1 as key\n  | save /temp/ingest\n  | \"YES\" as dummy | compose dummy\n]\n| 1 as key\n| lookup gb from /temp/ingest on key=key\n| gb_scan / gb as scan_ratio | fields scan_ratio",
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//( query_type=*view*)\n\n| count by user_name | count ",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -879,6 +891,94 @@
                     "tracesQueryData": null,
                     "spansQueryData": null,
                     "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8E982FE99E4A2842",
+            "title": "Scan Ratio",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"x Daily Ingest\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":10000,\"to\":1000000,\"color\":\"#bf2121\"},{\"from\":5000,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":5000,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//( query_type=*view*)\n\n| sum(data_scanned_bytes) as bytes | bytes / (1024 * 1024 * 1024 ) as GB_Scan \n// make a lookup reference object of the last 24 hour scan total\n| \"YES\" as dummy\n| where [subquery from=(-24h): \n  _index=sumologic_volume _sourceCategory=\"view_and_tier_volume\"\n  | parse regex \"(?<data>\\{[^\\{]+\\})\" multi \n  | json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count   \n  | sum(bytes) as bytes | bytes/1024/1024/1024 as gb\n  | 1 as key\n  | save /temp/ingest\n  | \"YES\" as dummy | compose dummy\n]\n| 1 as key\n| lookup gb from /temp/ingest on key=key\n| gb_scan / gb as scan_ratio | fields scan_ratio",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel27871B65A1C61B47",
+            "title": "Searches",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//( query_type=*view*)\n\n| count ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC6DA9444949BE84D",
+            "title": "Interactive Searches (incl Dash)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\nquery_type=interactive*\n\n| count ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
                     "timeSource": "Message",
                     "outputCardinalityLimit": 1000
                 }
