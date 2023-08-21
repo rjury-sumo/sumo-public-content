@@ -37,7 +37,7 @@
             },
             {
                 "key": "panel6C02A01287E3C949",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":85}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":90}"
             },
             {
                 "key": "panelBDABBAD688F1D941",
@@ -77,7 +77,7 @@
             },
             {
                 "key": "panel47E85634BA656A46",
-                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":80}"
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":85}"
             },
             {
                 "key": "panel11E882FAAA33EA47",
@@ -105,11 +105,11 @@
             },
             {
                 "key": "panel1DFB7425A5825B4B",
-                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":107}"
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":112}"
             },
             {
                 "key": "panelA318AB91B1B04B4F",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":110}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":115}"
             },
             {
                 "key": "panel4CF41B0388065B4E",
@@ -137,15 +137,15 @@
             },
             {
                 "key": "panel2D96C69890E71B46",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":132}"
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":162}"
             },
             {
                 "key": "panel948F4BE284BC194D",
-                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":134}"
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":166}"
             },
             {
                 "key": "panel0FB55627921A9846",
-                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":68}"
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":73}"
             },
             {
                 "key": "panel8E982FE99E4A2842",
@@ -153,11 +153,23 @@
             },
             {
                 "key": "panel27871B65A1C61B47",
-                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":9,\"minHeight\":3,\"minWidth\":3}"
+                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":13}"
             },
             {
                 "key": "panelC6DA9444949BE84D",
-                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":9,\"minHeight\":3,\"minWidth\":3}"
+                "structure": "{\"height\":4,\"width\":3,\"x\":3,\"y\":17}"
+            },
+            {
+                "key": "panel40CCD863A091B84D",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":137}"
+            },
+            {
+                "key": "panel8B991293BBC9AB44",
+                "structure": "{\"height\":22,\"width\":24,\"x\":0,\"y\":140}"
+            },
+            {
+                "key": "panel527ABBEA88BCAA42",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":68}"
             }
         ]
     },
@@ -280,7 +292,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(range_day) as range_days,avg(range_min) as range_minutes,avg(scanned_partition_count) as partitions, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,user_name,query\n| sort total_s | limit 100\n",
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(user_name) as user_names,values(range_day) as range_days,avg(range_min) as range_minutes,avg(scanned_partition_count) as partitions, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,query\n| bytes_scanned / 1G as gb_scan\n| fields -bytes_scanned\n| total_s / (60 * 60 ) as run_hours\n| sort total_s | limit 100 | fields -total_s\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -646,7 +658,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "These searches have the highest total scanned bytes in the account so are the most likely to benefit from search optimization.\n\nIf partition count is high add _index=<index> to search to ensure correct scoping. Using _sourcecategory may automatically scope search but not in all cases.\n\nFor more help see: [search best practices](https://help.sumologic.com/docs/search/get-started-with-search/build-search/best-practices-search)"
+            "text": "These searches have the highest total scanned bytes in the account so are the most likely to benefit from search optimization.\n\nIf partition count is greater than 1 or 2,  add ```_index=<index>``` to search to ensure correct scoping. Using _sourcecategory may automatically scope search but not in all cases.\n\nFor bulk reporting use cases very high scan searches might be better based on a scheduled view.\n\nFor more help see: [search best practices](https://help.sumologic.com/docs/search/get-started-with-search/build-search/best-practices-search)"
         },
         {
             "id": null,
@@ -658,7 +670,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(range_day) as range_days,avg(range_min) as range_minutes,avg(scanned_partition_count) as partitions, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,user_name,query\n| sort  bytes_scanned\n| bytes_scanned / 1G as gb_scan\n| limit 100\n| fields -bytes_scanned\n",
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(user_name) as user_names,values(range_day) as range_days,avg(range_min) as range_minutes,avg(scanned_partition_count) as partitions, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,query\n| sort  bytes_scanned\n| bytes_scanned / 1G as gb_scan\n| limit 100\n| fields -bytes_scanned\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -844,7 +856,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "These searches failed to complete."
+            "text": "These searches failed to complete.\n\nCommon failure reasons might be:\n- scope of query is too large for platform limit (such as regex or transaction operators)\n- query is too slow and times out\n- permission issue accessing a lookup created by another user."
         },
         {
             "id": null,
@@ -883,7 +895,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count as queries,sum(duration_s) as total_sec,sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events, pct(duration_s,50) as median_run_s , sum(slow) as %\"slow > 30s\", sum(fail) as %\"fail/cancelled\" by user_name\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n| if(scanned_partition_count > 3,1,0) as %\"scan ++ part\"\n| if(data_scanned_bytes > 1 * 1024 *1024*1024*1024,1,0) as %\"scan > 1TB\"\n| if(range_s / (60 * 60 * 24) > 10,1,0) as %\"range > 10d\" \n// AGGREGATE TO GET STATS\n| count as queries,sum(duration_s) as total_sec,sum(data_scanned_bytes) as bytes_scanned,  pct(duration_s,50) as median_run_s , sum(%\"scan ++ part\") as %\"scan >3 part\",sum(%\"scan > 1TB\") as %\"scan > 1TB\",sum(slow) as %\"slow > 30s\",sum(%\"range > 10d\") as %\"range > 10d\", sum(fail) as %\"fail/cancelled\" by user_name\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total scan_gb as tgb | 100 * (scan_gb/tgb) as scan_pct | fields -tgb\n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -987,6 +999,51 @@
             "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel40CCD863A091B84D",
+            "title": "Problem Searches - Highest Scan GB For Single User/Search",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These searches have the highest total scanned bytes in the account for a single user/searchso are the most likely to benefit from search optimization.\n\nIf partition count is greater than 1 or 2,  add ```_index=<index>``` to search to ensure correct scoping. Using _sourcecategory may automatically scope search but not in all cases.\n\nFor bulk reporting use cases very high scan searches might be better based on a scheduled view.\n\nFor more help see: [search best practices](https://help.sumologic.com/docs/search/get-started-with-search/build-search/best-practices-search)"
+        },
+        {
+            "id": null,
+            "key": "panel8B991293BBC9AB44",
+            "title": "Highest Scan Single Searches > 15s and >  by total Scan GB",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query {{{filter}}}\n| where execution_duration_ms > 15000 and data_scanned_bytes > 1000000000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(session_id) as ex_sessions,values(range_day) as range_days,avg(range_min) as range_minutes,avg(scanned_partition_count) as partitions, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,user_name,query\n| sort  bytes_scanned\n| bytes_scanned / 1G as gb_scan\n| limit 100\n| fields -bytes_scanned\n| substring(ex_sessions,0,136) as ex_sessions\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel527ABBEA88BCAA42",
+            "title": "Overall User Stats",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Generally slow or poor performing searches, or those with very high scans that can degrade performance across the organization have:\n- very high scan volume > 1TB\n- poor partition scoping (more than 3 - the ideal search is scoped to just 1 partition)\n- slow runtimes > 30s\n- repeatedly scan long time ranges > 7d, and would be better built as a scheduled view"
         }
     ],
     "variables": [
@@ -1036,7 +1093,7 @@
             "id": null,
             "name": "search_max_chrs",
             "displayName": "search_max_chrs",
-            "defaultValue": "300",
+            "defaultValue": "400",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "100,200,300,400,500,1000,10000"
