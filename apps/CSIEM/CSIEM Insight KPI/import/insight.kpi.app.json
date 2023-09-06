@@ -1,0 +1,1200 @@
+{
+    "type": "FolderSyncDefinition",
+    "name": "Insights KPI - cse_insights_status",
+    "description": "Requires insights v2 lookup cse_insights_status",
+    "children": [
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Insights (v2) - 20220830",
+            "description": "",
+            "title": "Insights (v2) - 20220830",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-15m"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelDF37382E88D0694C",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":32}"
+                    },
+                    {
+                        "key": "panel6BAFF8A6BA8DFA4F",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":20}"
+                    },
+                    {
+                        "key": "panelA258868193588844",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":20}"
+                    },
+                    {
+                        "key": "panel237EE73894F29948",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":20}"
+                    },
+                    {
+                        "key": "panelPANE-D83C9C4E9F1FE949",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":26}"
+                    },
+                    {
+                        "key": "panelE3B06DB29BD06A46",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":12}"
+                    },
+                    {
+                        "key": "panel9BAE2300B9D66A40",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":26}"
+                    },
+                    {
+                        "key": "panelAE0BC836ADD18A48",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":26}"
+                    },
+                    {
+                        "key": "panel0C675D23811CA840",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":32}"
+                    },
+                    {
+                        "key": "panelB555A7A494781941",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":39}"
+                    },
+                    {
+                        "key": "panelA33E7550B080D942",
+                        "structure": "{\"height\":14,\"width\":8,\"x\":16,\"y\":32}"
+                    },
+                    {
+                        "key": "panelC8973A29AE6CE94F",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":46}"
+                    },
+                    {
+                        "key": "panelPANE-AD9CE3ACB4CB8A49",
+                        "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel6F15D61FB051D842",
+                        "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":46}"
+                    },
+                    {
+                        "key": "panel511EA13D9586294F",
+                        "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":39}"
+                    },
+                    {
+                        "key": "panel2D2A8463A4D7CB49",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":12}"
+                    },
+                    {
+                        "key": "panel738DAC5A9B6B5B48",
+                        "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":12}"
+                    },
+                    {
+                        "key": "panelC48233C3A497DB46",
+                        "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":3}"
+                    },
+                    {
+                        "key": "panelE0573932A9734B42",
+                        "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":57}"
+                    },
+                    {
+                        "key": "panelF6100EDFABC5EB41",
+                        "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":66}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelDF37382E88D0694C",
+                    "title": "Insight Resolution Statuses",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stacked\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status=\"closed\"\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| count by resolution,severity | transpose row resolution column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6BAFF8A6BA8DFA4F",
+                    "title": "Average Hours To Response",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":3,\"color\":\"#16943E\"},{\"from\":3,\"to\":12,\"color\":\"#DFBE2E\"},{\"from\":12,\"to\":24,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":24},\"sparkline\":{\"show\":false},\"hideData\":false},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "\ncat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToResponse / 3600 as timeToResponse\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=1,\"1-LOW\", severity) as severity\n//| if (s=2,\"2-MEDIUM\", severity) as severity\n//| if (s=3,\"3-HIGH\", severity) as severity\n| avg(timeToResponse) as timeToResponse //by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA258868193588844",
+                    "title": "Average Hours to Remediation",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":3,\"color\":\"#16943E\"},{\"from\":3,\"to\":12,\"color\":\"#DFBE2E\"},{\"from\":12,\"to\":24,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":24},\"sparkline\":{\"show\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToRemediation / 3600 as timeToRemediation\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=1,\"1-LOW\", severity) as severity\n//| if (s=2,\"2-MEDIUM\", severity) as severity\n//| if (s=3,\"3-HIGH\", severity) as severity\n| avg(timeToRemediation) as timeToRemediation //by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel237EE73894F29948",
+                    "title": "Average Hours to Detection",
+                    "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":24,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":96,\"to\":168,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":168},\"sparkline\":{\"show\":false}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=1,\"1-LOW\", severity) as severity\n//| if (s=2,\"2-MEDIUM\", severity) as severity\n//| if (s=3,\"3-HIGH\", severity) as severity\n| avg(timeToDetection) as timeToDetection //by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-D83C9C4E9F1FE949",
+                    "title": "Average Hours to Detection",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1d\n| timeToDetection / 3600 as timeToDetection\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| avg(timeToDetection) as timeToDetection by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE3B06DB29BD06A46",
+                    "title": "Insights Closed by Day and Severity",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status = \"closed\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, severity\n| transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9BAE2300B9D66A40",
+                    "title": "Average Minutes to Response",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1d\n| timeToResponse / 3600 as timeToResponse\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| avg(timeToResponse) as timeToResponse by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "B",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelAE0BC836ADD18A48",
+                    "title": "Average Minutes to Remediation",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1d\n| timeToRemediation / 3600 as timeToRemediation\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| avg(timeToRemediation) as timeToRemediation by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0C675D23811CA840",
+                    "title": "Insight Closed By",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stacked\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status=\"closed\"\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| count by assignee,resolution | transpose row assignee column resolution",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelB555A7A494781941",
+                    "title": "Techniques",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":30,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| parse regex field=tags \"_mitreAttackTechnique:(?<technique>T[0-9]+\\.[0-9]+)\" multi\n| count_distinct(id) as insights by technique | sort technique asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelA33E7550B080D942",
+                    "title": "Entities and Total Severity Score",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stacked\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tostring(severity) as sev_string\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n| 4- s as true_s\n| sum(true_s) as total_severity by entityvalue,severity   | transpose row severity column entityvalue",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelC8973A29AE6CE94F",
+                    "title": "Top Insights By Severity and Confidence Score",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| count by date,insightid,confidence,severity,status,resolution,entityvalue //,assignee //,timeToDetection,timeToRemediation,timeToResponse\n| sort severity asc,confidence | limit 25 | fields -_count\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-AD9CE3ACB4CB8A49",
+                    "title": "About",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "This is an overview Insights generated in Cloud SIEM Enterprise (CSE) using a custom lookup table of the most recent status for each insight.\nSince it uses a lookup table of the most current status for each insight use the lookback parameter value (in days), not the time range picker to change the starting time range.\n\nIt uses a lookup table updated via a scheduled search every 15m. This should have been created by the CSE implementation team and should match the lookup parameter: {{{lookup}}}."
+                },
+                {
+                    "id": null,
+                    "key": "panel6F15D61FB051D842",
+                    "title": "Open Insights",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status != \"closed\"\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| count by date,insightid,severity,status,entityvalue,assignee | fields -_count\n| sort severity  //| limit 25\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel511EA13D9586294F",
+                    "title": "Analyst Performance",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"scheme1\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status=\"closed\"\n// severity used to be numeric but now it's not\n//| tostring(severity) as sev_string\n//| 0 as s\n//| if (sev_string matches /1|LOW/,1,s) as s\n//| if (sev_string matches /2|MEDIUM/,2,s) as s\n//| if (sev_string matches /3|HIGH/,3,s) as s\n//| if (sev_string matches /4|CRITICAL/,4,s) as s\n//| s as severity\n//| if(s = 1,\"LOW\",\"OTHER\") as severity\n//| if(s = 2,\"MEDIUM\",severity) as severity\n//| if(s = 3,\"HIGH\",severity) as severity\n//| if(s = 4,\"CRITICAL\",severity) as severity\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| avg(timeToRemediation) as timeToRemediation, avg(timeToResponse) as timeToResponse, avg(timeToDetection) as timeToDetection by assignee\n//| timeToResponse-timeToDetection as timeToResponse\n| timeToRemediation-timeToResponse as timeToRemediation\n//| transpose row severity column timeToDetection,timeToResponse,timeToRemediation",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-1d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel2D2A8463A4D7CB49",
+                    "title": "Insights By Last Update And Severity",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n//| where status = \"new\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, severity\n| transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel738DAC5A9B6B5B48",
+                    "title": "Insights Last Status",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n//| where status != \"closed\" and status != \"new\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, status\n| transpose row _timeslice column status",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelC48233C3A497DB46",
+                    "title": "Insights Closed By Resolution Status",
+                    "visualSettings": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status = \"closed\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, resolution\n| transpose row _timeslice column resolution",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-4w2d"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelE0573932A9734B42",
+                    "title": "Highest Severity Entities",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n\n| if (resolution = \"False Positive\",1,0) as fp\n| if(resolution = \"No Action\", 1, 0) as na\n| 4 - s as true_s\n| sum(true_s) as sev_score,values(severity) as severities,count_distinct(insightid) as insights,sum(fp) as false_positive,sum(na) as no_action,avg(confidence) as avg_conf by entityvalue \n| sort sev_score,insights ,avg_conf | avg_conf * 100 as avg_conf",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelF6100EDFABC5EB41",
+                    "title": "Mitre Technqiues Observed Map",
+                    "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n\n| parse regex field=tags \"_mitreAttackTactic:(?<tactic>[^\\\":\\r\\n]+)\" multi\n| parse regex field=tags \"_mitreAttackTechnique:(?<technique>[^\\\":\\r\\n]+)\" multi\n\n| \"\" as stage\n| if(tactic = \"TA0043\",\"a.Reconnaissance\",stage) as stage\n| if(tactic = \"TA0042\",\"b.Resource Development\",stage) as stage\n| if(tactic = \"TA0001\",\"c.Initial Access\",stage) as stage\n| if(tactic = \"TA0002\",\"d.Execution\",stage) as stage\n| if(tactic = \"TA0003\",\"e.Persistence\",stage) as stage\n| if(tactic = \"TA0004\",\"f.Privilege Escalation\",stage) as stage\n| if(tactic = \"TA0005\",\"g.Defense Evasion\",stage) as stage\n| if(tactic = \"TA0006\",\"h.Credential Access\",stage) as stage\n| if(tactic = \"TA0007\",\"i.Discovery\",stage) as stage\n| if(tactic = \"TA0008\",\"j.Lateral Movement\",stage) as stage\n| if(tactic = \"TA0009\",\"k.Collection\",stage) as stage\n| if(tactic = \"TA0011\",\"l.Command and Control\",stage) as stage\n| if(tactic = \"TA0010\",\"m.Exfiltration\",stage) as stage\n| if(tactic = \"TA0040\",\"n.Impact\",stage) as stage\n\n//// techniques per stage\n| count by insightid,stage,technique //,entitytype,entityvalue\n//| concat(\"https://attack.mitre.org/techniques/\",replace (technique,\".\",\"/\")) as mitre_url\n//| tourl(mitre_url,technique) as technique\n| sort stage asc, technique asc\n| now() as _messagetime\n| transactionize stage (merge stage takeFirst,technique takeDistinct)\n//| values (technique)  as techniques by stage\n| 1 as r\n| max(r) as r by stage,technique  \n| values(technique) as techniques by stage,r\n| transpose row r column stage | fields -r\n//",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "lookback",
+                    "displayName": "lookback",
+                    "defaultValue": "90",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "7,14,30,90"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                },
+                {
+                    "id": null,
+                    "name": "lookup",
+                    "displayName": "lookup",
+                    "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" "
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "Insights - Executive View (v2)",
+            "description": "",
+            "title": "Insights - Executive View (v2)",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-15m"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-C1BDF30092898A47",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":2}"
+                    },
+                    {
+                        "key": "panel33E9A247A017F949",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":14}"
+                    },
+                    {
+                        "key": "panel0C2A7B4DADA7DB43",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":8}"
+                    },
+                    {
+                        "key": "panel6C8018C8B7F2D846",
+                        "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":2}"
+                    },
+                    {
+                        "key": "panel1A24A38788909948",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":2}"
+                    },
+                    {
+                        "key": "panelPANE-71A277598932AB4B",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":11}"
+                    },
+                    {
+                        "key": "panel42FF2D53AE18194E",
+                        "structure": "{\"height\":9,\"width\":8,\"x\":0,\"y\":11}"
+                    },
+                    {
+                        "key": "panel9EC56DB8A2257A42",
+                        "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":20}"
+                    },
+                    {
+                        "key": "panelPANE-081C87C8844A4B4D",
+                        "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":0}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-C1BDF30092898A47",
+                    "title": "Insights by Month and Severity",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| count by month,severity \n\n\n| transpose row month column severity\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel33E9A247A017F949",
+                    "title": "Average Hours To Remediation",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToRemediation / 3600 as timeToRemediation\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| avg(timeToRemediation) as timeToRemediation by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0C2A7B4DADA7DB43",
+                    "title": "Average Hours To Response",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToResponse / 3600 as timeToResponse\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| avg(timeToResponse) as timeToResponse by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6C8018C8B7F2D846",
+                    "title": "Average Hours To Detection",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| avg(timeToDetection) as timeToDetection by _timeslice,severity | transpose row _timeslice column severity",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel1A24A38788909948",
+                    "title": "Insights by Hour",
+                    "visualSettings": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"overrides\":[{\"series\":[\"two_months_ago\"],\"queries\":[],\"properties\":{\"displayType\":\"smooth\",\"name\":\"Two Months Ago\"}}],\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 35))\n\n| formatDate(tolong(time),\"MM\") as month\n|  formatDate(tolong(time),\"HH\") as hour\n| count by month,hour\n\n| num(formatDate(now(),\"MM\")) as this_month\n| if(this_month = 1, 12, this_month - 1) as last_month\n| if(this_month = 1, 11,if(this_month = 2, 10, this_month - 2)) as two_months_ago\n\n| \"this_month\" as period\n| if (month = last_month,\"last_month\",period) as period\n| if (month = two_months_ago,\"two_months_ago\",period) as period\n| where period = \"this_month\"\n| sum(_count) as this_month by hour\n| fillmissing values(\"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \"20\", \"21\", \"22\", \"23\") in hour with 0 for this_month\n| order by hour asc\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 70))\n\n| formatDate(tolong(time),\"MM\") as month\n|  formatDate(tolong(time),\"HH\") as hour\n| count by month,hour\n\n| num(formatDate(now(),\"MM\")) as this_month\n| if(this_month = 1, 12, this_month - 1) as last_month\n| if(this_month = 1, 11,if(this_month = 2, 10, this_month - 2)) as two_months_ago\n\n| \"this_month\" as period\n| if (month = last_month,\"last_month\",period) as period\n| if (month = two_months_ago,\"two_months_ago\",period) as period\n| where period = \"last_month\"\n| sum(_count) as last_month by hour\n| fillmissing values(\"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \"20\", \"21\", \"22\", \"23\") in hour with 0 for last_month\n| order by hour asc\n",
+                            "queryType": "Logs",
+                            "queryKey": "B",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        },
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 70))\n\n| formatDate(tolong(time),\"MM\") as month\n|  formatDate(tolong(time),\"HH\") as hour\n| count by month,hour\n\n| num(formatDate(now(),\"MM\")) as this_month\n| if(this_month = 1, 12, this_month - 1) as last_month\n| if(this_month = 1, 11,if(this_month = 2, 10, this_month - 2)) as two_months_ago\n\n| \"this_month\" as period\n| if (month = last_month,\"last_month\",period) as period\n| if (month = two_months_ago,\"two_months_ago\",period) as period\n| where period = \"two_months_ago\"\n| sum(_count) as two_months_ago by hour\n| fillmissing values(\"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \"20\", \"21\", \"22\", \"23\") in hour with 0 for two_months_ago\n| order by hour asc\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "C",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-71A277598932AB4B",
+                    "title": "Insights Generated Vs False Positive Ratio",
+                    "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"month\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0},\"axisY2\":{\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[{\"series\":[\"fp_ratio\"],\"queries\":[],\"properties\":{\"axisYType\":\"secondary\"}}]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n| where status= \"closed\"\n| if(resolution = \"False Positive\", 1, 0) as fp_count\n| 1 as _row\n| count as insights,avg(confidence) as confidence_score,sum(fp_count) as fp_count by month\n| 100 * (fp_count/insights) as fp_ratio\n| sum(insights) as insights,avg(fp_ratio) as fp_ratio by month",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel42FF2D53AE18194E",
+                    "title": "Current Status Last 7 Days",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 7))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| count by status \n\n\n\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel9EC56DB8A2257A42",
+                    "title": "Top 10 Insights By Severity / Confidence Last 14d",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 14))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| count by date,insightid,confidence,severity,name,status,resolution,entityvalue,assignee,timeToDetection,timeToRemediation,timeToResponse,s\n| sort s,severity,confidence | limit 10\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Manual",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": {
+                        "type": "BeginBoundedTimeRange",
+                        "from": {
+                            "type": "RelativeTimeRangeBoundary",
+                            "relativeTime": "-15m"
+                        },
+                        "to": null
+                    },
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-081C87C8844A4B4D",
+                    "title": "About",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "This is an executive KPI view of Insights generated in Cloud SIEM Enterprise (CSE).\n\nIt uses a lookup table updated via a scheduled search every 15m. This should have been created by the CSE implementation team and should match the lookup parameter: {{{lookup}}}."
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "lookup",
+                    "displayName": "lookup",
+                    "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" "
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": false,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "FolderSyncDefinition",
+            "name": "Lookups",
+            "description": "",
+            "children": [
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Insight Status Lookup Table Schema Query",
+                    "search": {
+                        "queryText": "// Use this query to generate a csv you can download then upload to create a lookup table\n// use the insightid column as primary key and set a delete TTL to ensure the lookup never exceeds 100 MB (suggested 365d for starters, may need smaller for large accounts)\n// Schedule a version of this search to save to the lookup every 15m for -15m \n\n(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n| json field=_raw \"eventName\"\n| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by id,insightid,name,entitytype,entityvalue \n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| values(rule) as rules,max(_messagetime) as time,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(eventnames) as eventnames by id,insightid,name,entitytype,entityvalue // first(signals) as signals,\n\n// enable this line to write data to populate the lookup table with backdated data say one time for -90d\n// Schedule a version of this search to save to the lookup every 15m for -15m \n//| save path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\"\n",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "Manual",
+                        "defaultTimeRange": "Last 90 Days"
+                    },
+                    "searchSchedule": null,
+                    "description": "Creates an insight status schema to import as a lookup table schema"
+                }
+            ]
+        }
+    ]
+}
