@@ -21,11 +21,11 @@
         "layoutStructures": [
             {
                 "key": "panelPANE-4812862E82189944",
-                "structure": "{\"height\":14,\"width\":8,\"x\":0,\"y\":14}"
+                "structure": "{\"height\":14,\"width\":8,\"x\":0,\"y\":13}"
             },
             {
                 "key": "panel1842049480879A41",
-                "structure": "{\"height\":26,\"width\":8,\"x\":8,\"y\":0}"
+                "structure": "{\"height\":14,\"width\":8,\"x\":8,\"y\":0}"
             },
             {
                 "key": "panel03F8778F8DE1C84F",
@@ -33,15 +33,19 @@
             },
             {
                 "key": "panelPANE-B5CE7ADA802A594E",
-                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":7,\"width\":8,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panel5558021A83084848",
-                "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":8}"
+                "structure": "{\"height\":6,\"width\":8,\"x\":0,\"y\":7}"
             },
             {
                 "key": "panel9ECA31CB99A64A40",
-                "structure": "{\"height\":14,\"width\":8,\"x\":16,\"y\":0,\"minHeight\":3,\"minWidth\":3}"
+                "structure": "{\"height\":14,\"width\":8,\"x\":16,\"y\":14}"
+            },
+            {
+                "key": "panel1319B05FBA782843",
+                "structure": "{\"height\":14,\"width\":8,\"x\":8,\"y\":14}"
             }
         ]
     },
@@ -49,14 +53,14 @@
         {
             "id": null,
             "key": "panelPANE-4812862E82189944",
-            "title": "Metrics By DPM",
-            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25},\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"horizontalAlign\":\"right\",\"maxWidth\":400,\"maxHeight\":289,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "title": "Total Data Points",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"indexLabelFontSize\":10},\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"horizontalAlign\":\"right\",\"maxWidth\":400,\"maxHeight\":289,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| sum(dpm) as totalDp group by metric\n| round(totalDp / 60, 0) as dpm\n| order by dpm desc\n| fields -totalDp\n",
+                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| sum(dp) as totalDp group by metric\n| order by totaldp desc\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -77,13 +81,13 @@
             "id": null,
             "key": "panel1842049480879A41",
             "title": "Metrics By DPM Over Time By Metric",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":250,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"avg\",\"sum\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":250,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"avg\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| timeslice {{timeslice}}\n| sum(dpm) as totalDp group by metric,_timeslice\n| round(totalDp / 60, 0) as dpm\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| fields -totalDp | transpose row _timeslice column metric\n",
+                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| timeslice {{timeslice}}\n| (__timeslice_end - _timeslice)/ (1000 * 60) as ts_min\n| max(ts_min) as ts_min,sum(dpm) as totalDp group by metric,_timeslice\n| round(totalDp / ts_min, 0) as dpm\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| fields -totalDp,ts_min | transpose row _timeslice column metric\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -103,14 +107,14 @@
         {
             "id": null,
             "key": "panel03F8778F8DE1C84F",
-            "title": "DPM vs last week",
+            "title": "Estimated DPM vs last week",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| timeslice {{timeslice}}\n| sum(dpm) as totalDp by _timeslice\n| round(totalDp / 60, 0) as dpm\n| fields -totalDp | compare with timeshift 7d\n",
+                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| timeslice {{timeslice}}\n| (__timeslice_end - _timeslice)/ (1000 * 60) as ts_min\n|max(ts_min) as ts_min, sum(dp) as totalDp group by _timeslice\n| round(totalDp / ts_min, 0) as dpm | fields -ts_min,totaldp\n| compare with timeshift 7d\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -123,7 +127,14 @@
                 }
             ],
             "description": "",
-            "timeRange": null,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -143,19 +154,46 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "Your search with filters is:\n```\n(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| timeslice {{timeslice}}\n| sum(dpm) as totalDp group by metric,_timeslice\n| round(totalDp / 60, 0) as dpm\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| fields -totalDp | transpose row _timeslice column metric\n```\n\n\n"
+            "text": "Your search with filters is:\n```\n(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| sum(dp) as totalDp by metric\n| (queryendtime() - querystarttime())/(1000 * 60) as query_min\n| round(totalDp / query_min, 0) as dpm //| fields -query_min\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| sum(totaldp) as %\"Total Data Points\",sum(dpm) as %\"Est. DPM\", count as metrics by metric\n| sort %\"Est. DPM\"\n```\n\n\n"
         },
         {
             "id": null,
             "key": "panel9ECA31CB99A64A40",
-            "title": "Top DPM With Changes Vs Last Week",
+            "title": "Total Data Points With Changes Vs Last Week",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dpm\n| sum(dpm) as totalDp by metric\n| round(totalDp / 60, 0) as dpm| fields -totaldp\n| compare with timeshift 7d \n| 100 * ((dpm - dpm_7d )/dpm_7d ) as pct_change\n| where dpm > 0\n| sort dpm | limit 100\n",
+                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| sum(dp) as totalDp by metric\n| compare with timeshift 7d \n| 100 * ((totalDp - totalDp_7d )/totalDp_7d ) as pct_change\n| where totalDp > 0\n| sort totalDp | limit 100\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1319B05FBA782843",
+            "title": "Top DPM Tabular",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) {{keywords}}\n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| where singleRecord matches \"{{metric_matches}}\"\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| sum(dp) as totalDp by metric\n| (queryendtime() - querystarttime())/(1000 * 60) as query_min\n| round(totalDp / query_min, 0) as dpm //| fields -query_min\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| sum(totaldp) as %\"Total Data Points\",sum(dpm) as %\"Est. DPM\", count as metrics by metric\n| sort %\"Est. DPM\" //| limit 100\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -206,7 +244,7 @@
             "id": null,
             "name": "min_dpm_other",
             "displayName": "min_dpm_other",
-            "defaultValue": "10000",
+            "defaultValue": "5000",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "1000,5000,10000,50000"
