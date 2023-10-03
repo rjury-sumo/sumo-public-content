@@ -73,7 +73,11 @@
             },
             {
                 "key": "panelPANE-3BD643659E0BE849",
-                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":24,\"minHeight\":3,\"minWidth\":3}"
+                "structure": "{\"height\":6,\"width\":12,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel2DD1844B882FF843",
+                "structure": "{\"height\":6,\"width\":12,\"x\":12,\"y\":24}"
             }
         ]
     },
@@ -404,6 +408,33 @@
                 {
                     "transient": false,
                     "queryString": "(_index=sumologic_audit _sourceCategory=SCHEDULED_SEARCH) \n| parse \"*[\" as message\n| keyvalue regex \"=([^\\]]*)\\]\" \"Name\",\"AlertType\",\"Destination\",\"StatusCode\"  nodrop\n| where action not in (\"UPDATE\",\"START\",\"DELETE\",\"FINISH\",\"CREATE\") and message !=\"Scheduled search alert triggered \"\n| count by action, message\n| sort by action,_count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel2DD1844B882FF843",
+            "title": "Search Webhook Triggers With Non 200 Status Code",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH triggered statuscode\n| parse \"*[\" as message\n| keyvalue regex \"=([^\\]]*)\\]\" \"Name\",\"AlertType\",\"Destination\",\"StatusCode\"  nodrop\n//| where action not in (\"UPDATE\",\"START\",\"DELETE\",\"FINISH\",\"CREATE\") and message !=\"Scheduled search alert triggered \"\n| where !(statuscode=200)\n| count by  name, alerttype,destination,statuscode\n| sort by _count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
