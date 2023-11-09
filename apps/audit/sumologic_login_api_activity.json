@@ -21,51 +21,63 @@
         "layoutStructures": [
             {
                 "key": "panelPANE-75550DB790278A40",
-                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":34}"
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":33}"
             },
             {
                 "key": "panel054F975495C7EB4D",
-                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":64}"
+                "structure": "{\"height\":9,\"width\":10,\"x\":0,\"y\":82}"
             },
             {
                 "key": "panelPANE-20D6ECC786A9B84B",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":21}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":20}"
             },
             {
                 "key": "panelC7C728149C27E947",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":10}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":9}"
             },
             {
                 "key": "panelE38FEE42ABB72940",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":63}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":81}"
             },
             {
                 "key": "panelC7CC531DA4738B4C",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":52}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":51}"
             },
             {
                 "key": "panel247F875D8020FB45",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panelAC255F11BDF98A4B",
-                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":11}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":10}"
             },
             {
                 "key": "panel8F6CCF5AA77A6B47",
-                "structure": "{\"height\":9,\"width\":14,\"x\":10,\"y\":64}"
+                "structure": "{\"height\":9,\"width\":14,\"x\":10,\"y\":82}"
             },
             {
                 "key": "panel42D60C1A8F95C946",
-                "structure": "{\"height\":12,\"width\":12,\"x\":0,\"y\":22}"
+                "structure": "{\"height\":12,\"width\":12,\"x\":0,\"y\":21}"
             },
             {
                 "key": "panelD7BF46228CCECB40",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":41}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":40}"
             },
             {
                 "key": "panel726BD61D8ABC4A4E",
-                "structure": "{\"height\":12,\"width\":12,\"x\":12,\"y\":22}"
+                "structure": "{\"height\":12,\"width\":12,\"x\":12,\"y\":21}"
+            },
+            {
+                "key": "panelC76546B09451DA43",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":62}"
+            },
+            {
+                "key": "panelBD3870378B292940",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":65}"
+            },
+            {
+                "key": "panel17122486BBDDCA4E",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":73}"
             }
         ]
     },
@@ -185,7 +197,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard summarizes logins via UI, API activity (configuration changes and search job api access), and logins and search by the sumosupport user.\n\nFilters are available as below:\n- user: filter on a user keyword pattern. Use * for any. Evaluated: ```sourceuser={{user}}```\n\n**Filtering for Unexpected asn or geo locations**\n\nThis filter only works on panels where an ip is present. This flags activity outside expected regular expression pattern vs the computed asn_geo string.\n- expected_asn_geo_regex: a regex filter on geolocated country_name. Use .  or .* for any\n- show_asn_geo: vs location: *, exception or normal \n```\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n```\n"
+            "text": "This dashboard summarizes logins via UI, API activity (configuration changes and search job api access), collector registrations and activity for the sumosupport user.\n\nFilters are available as below:\n- user: filter on a user keyword pattern. Use * for any. Evaluated: ```sourceuser={{user}}```\n\n**Filtering for Unexpected asn or geo locations**\n\nThis filter only works on panels where an ip is present. This flags activity outside expected regular expression pattern vs the computed asn_geo string.\n- expected_asn_geo_regex: a regex filter on geolocated country_name. Use .  or .* for any\n- show_asn_geo: vs location: *, exception or normal \n```\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n```\n"
         },
         {
             "id": null,
@@ -306,6 +318,69 @@
                 {
                     "transient": false,
                     "queryString": "_view=sumologic_search_usage_per_query query_type=\"Search API\" user_name={{user}}\n| geoip remote_ip\n| lookup asn,organization from asn://default on ip=remote_ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events by user_name,asn_geo,location\n| bytes_scanned / 1024/1024/1024 as scan_gb | fields -bytes_scanned\n| concat(user_name,\" \",asn_geo) as %\"user_asn_geo\"\n// summarize\n| sum(searches)  as searches by %\"user_asn_geo\"\n| compare with timeshift 7d 2 | sort %\"user_asn_geo\" asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC76546B09451DA43",
+            "title": "Collector Registration and Creation",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Collectors can be registerd by legacy method (accessid/key) or the recommended [install token](https://help.sumologic.com/docs/manage/security/installation-tokens/) method. Audit events for the legacy method include user by not id used.\n\nNote install tokens are assocated with the organization not user so cannot be filtered by user."
+        },
+        {
+            "id": null,
+            "key": "panelBD3870378B292940",
+            "title": "Collector Registration Via Install Tokens",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated )\ntokenId\n| json field=_raw \"operator.name\" as tokenname \n| json field=_raw \"operator.tokenId\" as token nodrop\n\n| json field=_raw \"collectorIdentity.collectorId\" as collectorId\n| json field=_raw \"collectorIdentity.collectorName\" as collectorName\n| json \"eventName\",  \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName,  user, userid, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorDeleted\")\n\n//| where user matches \"*\"\n| json field=_raw \"operator.sourceIp\" as ip nodrop\n\n| \"Token\" as interface\n| count by _messagetime, ip,interface,subsystem,eventname,token,tokenname,collectorName, collectorid\n| sum(_count) as changes by ip,interface,subsystem,eventname,token,tokenname,collectorName, collectorid\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| geoip ip \n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| first(collectorName) as example_collector, sum(changes)  as changes by interface,subsystem,eventname,token,tokenname,asn_geo,location\n| sort changes ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel17122486BBDDCA4E",
+            "title": "Collector Creation / Registration By Legacy Accessid/key, UI or API",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated )\nnot tokenid\n| json field=_raw \"collectorIdentity.collectorId\" as collectorId nodrop\n| json field=_raw \"collectorIdentity.collectorName\" as collectorName nodrop\n| json \"eventName\",  \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName,  user, userid, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorDeleted\")\n\n//| where user matches \"*\"\n| json field=_raw \"operator.sourceIp\" as ip nodrop\n\n| count by _messagetime, ip,interface,subsystem,eventname,user,collectorName, collectorid\n| sum(_count) as changes by ip,interface,subsystem,eventname,user,collectorName, collectorid\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| geoip ip \n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n| if (interface = \"COLLECTOR\",\"Legcay Accessid/key\",interface) as interface\n| first(collectorName) as example_collector, sum(changes)  as changes by interface,subsystem,eventname,user,asn_geo,location\n| sort changes ",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
