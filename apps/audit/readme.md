@@ -9,6 +9,7 @@ Key use case is to vew and audit the following:
 - config changes made via a sumo API
 - search job api use
 - changes to API Access keys
+- registration or creation of a collector via id/key (legacy), install token, ui or API
 - sumosupport user account activity
 
 This is a single dashboard that summarises login, configuration changes via api, search job api and sumosupport account activity in a single pane of glass and:
@@ -31,6 +32,9 @@ This dashboard makes it easy to monitor for unexpected api activities.
 1. set expected_asn_geo_regex parameter to a regular expression that matches your expected asn_geo location signature strings such as Australia|New.Zealand
 2. you may want to make the expected pattern for your account the parameter default
 3. set the value of the show_asn_geo parameter to exception, so panels will be blank unless an exception to expected regular expression
+
+## Collector Registration
+These panels show registrations by legacy id/key or the recommended install tokens method, as well as UI / API creation of hosted collectors.
 
 ### Support account activity
 The bottom two panels show logins or search activty by the sumosupport user. 
