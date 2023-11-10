@@ -12,6 +12,7 @@ Key use case is to vew and audit the following:
 - changes to API Access keys
 - registration or creation of a collector via id/key (legacy), install token, ui or API
 - sumosupport user account activity
+- using geo location and asn lookups create a geo/asn signature for above activities to help identify if traffic origionates from expected locations.
 
 This is a single dashboard that summarises login, configuration changes via api, search job api and sumosupport account activity in a single pane of glass and:
 - adds geo and asn location by ip to enable security teams to audit access locations
