@@ -4,8 +4,8 @@ This folder contains custom app content for audit indexes in sumo logic.
 Import the raw version of the JSON below into your sumo org using the Import function in the library, then share the dashboard as appropriate with admin or security teams.
 
 ## Sumo Logic Login and API Activity
-Download the source from: [sumologic_login_api_activity.json](./sumologic_login_api_activity.json) and [import](https://help.sumologic.com/docs/get-started/library/#import-content into the relevant location in libary.
-)
+Download the source from: [sumologic_login_api_activity.json](./sumologic_login_api_activity.json) and [import](https://help.sumologic.com/docs/get-started/library/#import-content) into the relevant location in libary.
+
 Key use case is to vew and audit the following:
 - config changes made via a sumo API
 - search job api use
