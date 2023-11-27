@@ -9,28 +9,26 @@ You can find this month's training password by going to your Sumo instance, then
 
 Work through the exercises below.
 
-**Note**: In this lab we assume your searches are in Advanced Mode. You might find your UI is in 'basic mode' so you will have to switch to Advanced as per: https://help.sumologic.com/docs/search/get-started-with-search/search-page/search-modes/
+**Note**: In this lab we assume your searches are in Advanced Mode. You might find your UI is in 'basic mode' so you will have to [switch to Advanced](https://help.sumologic.com/docs/search/get-started-with-search/search-page/search-modes/)
 
-Tip:
-- Adding and removing comment lines. You can select lines and comment/uncomment them with ```Cmd + /``` (```Cntrl + /``` on Windows)
-- Pressing Enter or Return runs the search but
+**Tips**:
+- To add or removing comment lines select use shortcut keys:  ```Cmd + /``` (```Cntrl + /``` on Windows)
+- Pressing Enter or Return runs the search
 - Add a new line with ```Shift + Enter```  or ```Shift + Return```.
 
 ## In this Lab
 - How to run a basic search vs a JSON structured log and view results
 - How to navigate the UI: histogram, log message inspector, field browser
-- Raw messages vs Aggregate results
-- How to turn raw logs into insights by parsing fields and making charts
+- Use raw Messages vs Aggregate result tabs
+- How to turn raw logs into insights by parsing fields and making aggregation / charting.
 
 ## About AWS CloudTrail Logs
-Searching JSON structured logs is a common use case for Sumo Logic as JSON logs are used for many applications.
-A good example of JSON logs is AWS Cloudtrail - the audit log for all API calls vs APIs in an AWS account.
-So for this exercise we will use JSON formatted Cloudtrail logs in the lab environment.
+JSON structured logs are a common log type ingested into Sumo Logic. A good example of JSON logs is AWS Cloudtrail - the audit log for all API calls vs APIs in an AWS account.
 
-## Use Case Overview
+## Use Case Overview: Cloudtrail errorCodes
 When an AWS Cloudtrail API call fails, a CloudTrail event is logged containing errorCode and errorMessage keys. This can be a very valuable source for both observability to find and fix broken workloads and in the security domain to prevent, detect and respond to security threats.
 
-For example AccessDenied could indicate a broken workload or a failed authentication attempt by a malicious user.
+For example AccessDenied could indicate a broken workload or a failed authentication attempt by a malicious user. Rate limiting and exceeding account limits are other good examples of useful errors in Cloudtrail.
 
 In these exercises we will create some searches to drill into AWS API errors in AWS Cloudtrail logs and show how to turn JSON logs into insights.
 
@@ -62,9 +60,11 @@ Take a quick visit to the [Getting Started With Search docs page](https://help.s
 
 ## 2. Use Log Message Inspector To Drill Into Fields In An Event
 Hover over any message in the results and use the pop up menu on the right to open [Log Message Inspector](https://help.sumologic.com/docs/search/get-started-with-search/search-page/log-message-inspector/). 
+
 ![Alt text](./images/log-message-inspector-approach-2.png)
 
 This shows detailed field values for each field in the event in a single panel on the right of the UI.
+
 ![Alt text](images/lmi-more.png)
 
 **TIP**: You can use Log Messge Inspector to quickly add more filtering syntax to your query. In inspector select a field row and use the elipsis menu on right to 'Filter Selected Value'. You can use this to quickly build the next iteration of your search to return only specific field values.
@@ -73,9 +73,10 @@ This shows detailed field values for each field in the event in a single panel o
 The search histogram shows the count of results over time, and can be color coded by auto detected log level.
 
 There are several really useful features of the search histogram:
-a. You can click a segment of the histogram to move to the messages page for that time range
-b. If you ```Shift + click``` on a selected histogram bar it will open a duplicate search window for that new time range
-c. Events are color coded in the histogram by [auto detected log level](https://help.sumologic.com/docs/search/get-started-with-search/search-page/log-level/). You can click a level such as "ERROR" to filter to only logs of that level.
+- You can click a segment of the histogram to move to the messages page for that time range
+- If you ```Shift + click``` on a selected histogram bar it will open a duplicate search window for that new time range
+- Events are color coded in the histogram by [auto detected log level](https://help.sumologic.com/docs/search/get-started-with-search/search-page/log-level/). You can click a level such as "ERROR" to filter to only logs of that level.
+
 ![](./images/histogram.png)
 
 ## 4. Use the Field Browser For Quick Insights
@@ -88,16 +89,16 @@ By default sumo extracts every JSON field from logs at search time using "Auto P
 In your search window with results try the following:
 1. Tick a box next to some fields in the browser and note how this changes the columns displayed.  
 2. Type 'error' in the search box in the top section of the field browser to see fields with 'error' in the name. For Cloudtrail this would include errorCode and errorDescription.
-3. Click on the ```errorCode``` field name in browser to show a pop up. The pop up shows the breakdown of events for the first 100k results. This is a quick way to get insights about what is happening in your logs for key field dimensions.
+3. Click on the ```errorCode``` field name in browser to show a pop up. The pop up shows the breakdown of events for the first 100k results. This is a quick way to get insights about what is happening in your logs for key field dimensions. Clicking a single value in the popup will open a new query filtered to that field value.
 
 ## 5. Turning fields into insights with Aggregation
 By starting with raw logs, parsing fields and then using aggregation we can turn large volumes of log events into valuable insights in real time.
 
 Aggregate queries enable you to take the fields you have parsed in the search and turn these into insights or thresholds for alerting using a range of aggregation operations like: count, min, max, avg, pct & many others.
 
-In our current use case how can we answer the question: what are the top API errors by errorcode? 
+In our current use case how can we answer the question: what are the top API errors by errorcode?
 
-- At the bottom of the pop menu for the field click:  ```Top Values```. This will open a new search tab that adds to your base query in a new search window": 
+- At the bottom of the pop menu for the field click:  ```Top Values```. This will open a new search tab that adds to your base query in a new search window: 
 
 ```
 ( _sourcecategory = Labs/AWS/CloudTrail*  )
@@ -128,17 +129,17 @@ Since this is an aggregate query we will have both Messages and Aggregates tabs.
 - choose 'Change Properties' from the list
 - in the 'Stacking' section select Normal rather than None and click Save.
 The new stacked chart nicely shows the distribution of errors over time. Since this is a lab environment the errors are quite periodic.
+
 ![Alt text](images/chart_properties.png)
 
 ## 6. Parsing Fields Manually
 By default JSON logs are auto parsed and all fields extracted. It's a good search practice as you get more advanced with Sumo Logic to parse out fields using parsing operators - since other types of logs might not have an auto parse mode.
 
-Here you see an example search with parse operators - **JSON**, simple **Parse** anchor, and **parse regex** which are some of the many parse operators available. Don't worry if the search syntax is overwhelming right now - the key things to note are:
-- parsing is one of the key skills in Sumo Logic to extract fields and generate insights from structured or semi-structured logs
-- there are many parse operators for differnet log formats
+Here you see an example search with parse operators - **json**, simple **parse** anchor, and **parse regex** which are some of the many parse operators available. Don't worry if the search syntax is overwhelming right now - the key things to note are:
+- parsing is a key skill to extract fields and generate insights from structured or semi-structured logs
+- there are many parse operators for different log formats
 - parse operators act as a filter unless you use nodrop keyword.
 
-Run this search and you will see that parsed fields are already displayed as a column in results, and ticked in field browser.
 ```
  _sourcecategory = Labs/AWS/CloudTrail* errorcode
 // Parse a field using JSON operator
@@ -159,6 +160,8 @@ Run this search and you will see that parsed fields are already displayed as a c
 // Here is example using the parse regex capture group parser
 | parse regex field=arn "^arn:aws:[a-z]+::[0-9]+:(?<role>.+)" nodrop
 ```
+
+- Run this search and you will see that parsed fields are already displayed as a column in results, and ticked in field browser.
 
 ## Bonus Activities
 If you have finished that lab and have time to spare checkout these resources.
