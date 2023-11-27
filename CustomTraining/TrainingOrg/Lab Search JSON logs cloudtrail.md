@@ -1,4 +1,4 @@
-# Lab Search - Working with JSON Cloudtrail.
+# Lab Search - Working with JSON Cloudtrail
 This lab uses the Training Org that is used in Sumo Certjams.
 Log in as a training user as per usual method such as:
 - training+analyst###@sumologic.com 
