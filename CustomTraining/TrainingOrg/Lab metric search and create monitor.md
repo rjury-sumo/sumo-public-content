@@ -40,20 +40,20 @@ metric=HTTPCode_ELB_500_Count namespace=aws/applicationelb
 
 You now have a raw metrics query with one time series for each set of metric tag.
 
-## etrics Explorer: Discover and Filter Metric Dimensions
+## Metrics Explorer: Discover and Filter Metric Dimensions
 Review the [metrics explorer](https://help.sumologic.com/docs/metrics/metrics-queries/metrics-explorer/) docs page to understand what options are available.
 
 - Open the Time Series Tab in the results section. Time series helps with metric discovery, and important element to building metrics searches, since we need to discover and understand tags and values.
 - Scroll across to review the metric dimensions avilable in the query.
 - Locate the account column and a row value of 'prod'
-- Click the elipsis next to 'prod' and choose 'add to query and run'
+- Click the elipsis next to 'prod' and choose **add to query and run**
 
-Now the metrics chart will only show results for the 'prod' account tag.
+Now the metrics chart will only show results for the 'prod' value of account tag. This filters the monitor results just to our production environment.
 
 ![Alt text](images/metric_explore_addto.png)
 
 - Add an aggregation line to the query so the query is as per below. This will tidy up the data for later by showing only key dimensions:
-- Run the query again. It will look similar but the chart legend now defaults to key dimensions only.
+- Run the query again. It will look similar but the chart legend now defaults to key dimensions only. It's a good practice to add aggregation to monitor searches to cleary define the expected output.
   
 ```
 account="prod" metric=HTTPCode_ELB_500_Count namespace=aws/applicationelb 
