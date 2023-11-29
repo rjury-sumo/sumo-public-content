@@ -125,7 +125,7 @@ Query {{Query}}
 In the final playbook section this would enable admins to codify tribal knowledge for an on-call so they know what exactly to do when they receive an alert. Playbooks support markdown and are visible in the alert response page, or can be added to notifications via the ```{{Playbook}}``` variable.
 
 ## Final Review
-** Don't save the monitor just yet**
+**Don't save the monitor just yet**
 This is a training environment. You have two options at this point:
 
 ### 1. exit with out saving (recommended)
