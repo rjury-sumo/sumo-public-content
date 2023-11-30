@@ -20,6 +20,7 @@ It shows the key information around:
 - highest impacted entites for insights generated
 - closed insights by severity and resolution
 - Mitre technique mapping to insights signals
+- detection,response,resolution times
 
 
 ![Alt text](<Cloud SIEM Overview.png>)
