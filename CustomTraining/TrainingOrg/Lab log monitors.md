@@ -88,14 +88,15 @@ Monitors can have multiple trigger types: Critical, Warning or no data and each 
 - set value > 30 within 15 minute window
 - The recovery value will be set automatically. You can have custom recovery settings by selecting 'Edit Recovery Settings'
 
-- Change the "Historical Trend" graph time to -6h and wait for the graph to update. (sometimes it can get stuck running a previous query).
+- Change the "Historical Trend" graph time to -6h and wait for the graph to update.
+  **Tip: sometimes Historical Trend will get stuck running a previous query. To force refresh press Enter in the Query window to apply new query, 'trigger alerts on' or time range settings.
 
 ![Alt text](images/monitor_log_conditions.png)
 
 ### Other Settings
-There are many other monitor settings such as naming, notifications and payload. For info on these see the [metrics lab](<./Lab metric search and create monitor.md>).
+In this lab the focus is just on considerations for making log searches into monitors. There are many other monitor settings such as naming, notifications, payload variables and playbooks. For a lab on these settings try the: [metrics lab](<./Lab metric search and create monitor.md>).
 
-- **cancel the monitor** and return to the log search screen
+- **cancel out of the new monitor** and return to the log search screen
 
 ## 3. Create a Monitor for a timeslice query
 In some log monitor scenarios the query might contain a timeslice operator and that can impact final evaluation.
@@ -128,20 +129,22 @@ For this monitor trigger settings:
 - Press enter in the query box to execute the query.
 
 Often the graph does not render properly if you use a timeslice in the monitor query, and depending on the timeslice you pick it could make the final threshold evaluation hard to predict.
+If the graph does render ok note what the trend is over time. How does changing the 'when' period to say 15m or 60m affect the graph?
 
 ![Alt text](images/monitor_log_timesliced_error.png)
 
 ## Comparing the timeslice to simple count query
-Now modify this query to this version and press enter in query box to execute it.
+A good best practice unless using an outlier model is to remove the timeslice from your search. Let's try this now.
+Modify this query to this version and press enter in query box to execute it. It's the same but there is no timeslice now only a straight count.
+
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
 | json "stream","log" | where stream="stderr"
-//| timeslice 5m | count by _timeslice
 | count
 ```
 
-You will see that the way the monitor evaluates the results the data from the log query is effectively timesliced even though it's a straight count. So when creating log monitors it's a good practice to timeslice them in log search - to understand trend, but not timeslice them in the actual monitor version to avoid confusion.
+You will see that the way the monitor evaluates the results the data from the log query is *effectively timesliced* even though it's a straight count. If you are modelling the series over time in the log search window or dashboard you still need to timeslice the data to infer what the equivalent trend is over time.
 
 ![Alt text](images/monitor_log_static_thresholds.png)
 
@@ -175,6 +178,9 @@ Since the histogram doesn't yet support log alert group threshold prediction, to
 - open a new log search
 - select -6h
 - paste and execute this query:
+
+The timeslice, count by timeslice, transpose syntax below is the standard method in Sumo Logic to graph multiple values of a field as seperate dynamic series over time.
+
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
@@ -182,6 +188,6 @@ _loglevel=error
 | timeslice 15m | count by container, _timeslice |transpose row _timeslice column container
 ```
 
-This search shows that both the containers with errors would have over 15 but less than 30 errors in the current time range in any 15m period.
+This search shows that both the containers with errors would have over 15 but less than 30 errors in the current time range in any 15m period. So this query would provide a good basis for evaluating a good threshold level for a monitor query - even though we would not use timeslice in the final monitor version!
 
 ![Alt text](images/log_search_timeslice_transpose.png)
