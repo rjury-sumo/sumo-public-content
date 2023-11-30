@@ -1,0 +1,501 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Cloud SIEM Overview",
+    "description": "",
+    "title": "Cloud SIEM Overview",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-8D5F50659ECBF849",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":79}"
+            },
+            {
+                "key": "panel83966C6E8CD5DA47",
+                "structure": "{\"height\":13,\"width\":8,\"x\":0,\"y\":66}"
+            },
+            {
+                "key": "panelC4D375CFA77EA845",
+                "structure": "{\"height\":13,\"width\":16,\"x\":8,\"y\":66}"
+            },
+            {
+                "key": "panelPANE-BED67CE6A08D0949",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":63}"
+            },
+            {
+                "key": "panel652CCF58A74C4847",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":34}"
+            },
+            {
+                "key": "panel9BE8A1F193002B45",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelF3E23EDDB6546B4B",
+                "structure": "{\"height\":12,\"width\":8,\"x\":0,\"y\":38}"
+            },
+            {
+                "key": "panel67C66C28B11F194F",
+                "structure": "{\"height\":12,\"width\":16,\"x\":8,\"y\":38}"
+            },
+            {
+                "key": "panelE7D3444C989FC84F",
+                "structure": "{\"height\":13,\"width\":8,\"x\":0,\"y\":50}"
+            },
+            {
+                "key": "panel8DC0491A9E22194E",
+                "structure": "{\"height\":13,\"width\":8,\"x\":16,\"y\":50}"
+            },
+            {
+                "key": "panel6E8C1AC388418949",
+                "structure": "{\"height\":13,\"width\":8,\"x\":8,\"y\":50}"
+            },
+            {
+                "key": "panel09135D449661384C",
+                "structure": "{\"height\":12,\"width\":8,\"x\":0,\"y\":4}"
+            },
+            {
+                "key": "panel82B6ABFC859E7A47",
+                "structure": "{\"height\":12,\"width\":10,\"x\":8,\"y\":4}"
+            },
+            {
+                "key": "panel47BE6ED3A37E384F",
+                "structure": "{\"height\":12,\"width\":6,\"x\":18,\"y\":4}"
+            },
+            {
+                "key": "panelF1B10F6580AD8B44",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":16}"
+            },
+            {
+                "key": "panelA8675D38BF217B47",
+                "structure": "{\"height\":11,\"width\":12,\"x\":0,\"y\":23}"
+            },
+            {
+                "key": "panel56B1486EA24FC847",
+                "structure": "{\"height\":11,\"width\":12,\"x\":12,\"y\":23}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-8D5F50659ECBF849",
+            "title": "Parsing and Mapping Failures",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_record_failure*| metadata_orgId as org_id\n| count as failed by metadata_sourceCategory, %\"fields.reason\",metadata_parser,metadata_vendor,metadata_product,objectType,org_id\n| sort failed\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel83966C6E8CD5DA47",
+            "title": "Records Ingested: Vendor - Product",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _index=sec_record_* \n| where _view != \"sec_record_failure\"  \n| metadata_vendor as vendor | metadata_product as product | metadata_sourceCategory as sourcecategory\n| concat (vendor,\" - \", product) as vendor_product\n| count as records by vendor_product //,objectType \n| sort records\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC4D375CFA77EA845",
+            "title": "Records Ingested: Sourcecategory and Mapping",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _index=sec_record_* \n| where _view != \"sec_record_failure\"  \n| metadata_sourceCategory as sourcecategory |  metadata_parser as parser | metadata_mapperName as mappername\n| count as records by sourcecategory,parser,mappername\n| sort records\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-BED67CE6A08D0949",
+            "title": "Records",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Records are normalized log events ingested into Sumo Logic from core platform (_siemforward=true).\n\nRecords are normalized to the [Cloud SIEM Schema](https://help.sumologic.com/docs/cse/schema/) via parsers and mappers."
+        },
+        {
+            "id": null,
+            "key": "panel652CCF58A74C4847",
+            "title": "Signals",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Signals are events of interest generated by active Rules. \n\nA Signal is an individual security event. The entity in a Signal is something like an IP address, MAC address, or hostname. The entity tells us who or what was involved in the event that the record described. The stage or tags are assigned based on where the event fits in the MITRE ATT&CK framework. This can tell us a bit about how or why the event occurred. The severity is a number between 0 and 10 that tells Cloud SIEM how serious the potential threat is.\n\nSignals may be suppressed if repeats or via suppression configuration."
+        },
+        {
+            "id": null,
+            "key": "panel9BE8A1F193002B45",
+            "title": "Insights",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Each record ingested into Cloud SIEM is compared to hundreds of built-in and custom rules. If a record matches the criteria specified in a rule, then Cloud SIEM creates a Signal.  Cloud SIEM typically processes thousands or millions of records and boils them down into hundreds of Signals. Cloud SIEM takes everything one step further and correlates those Signals into a manageable number of Insights. \n\nAn Insight is a group of Signals clustered around a single entity. An Insight is created when the sum of the severity scores of Signals with the same entity goes above a certain activity score within a certain timeframe. By default, this is an activity score of 12 within the last 14 days. For example, if a rule was triggered with a severity of 5, and then ten days later another rule with the same entity and a severity of 5 was triggered, the total activity score would only be 10 in the last 14 days, so an Insight would not be created. However, if those same two rules had a severity score of 7, an Insight would be created."
+        },
+        {
+            "id": null,
+            "key": "panelF3E23EDDB6546B4B",
+            "title": "Signals Generated: Vendor - Product",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n| where (isempty(suppressedreasons))\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n//| concat (ruleid,\" \",rulename) as rule\n| concat (vendor,\" - \",product) as vendor_product\n////|timeslice \n//|  count by _timeslice,vendor_product| transpose row _timeslice column vendor_product\n\n|timeslice \n|  count  as signals by vendor_product //| transpose row _timeslice column vendor_product\n| sort signals",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel67C66C28B11F194F",
+            "title": "Signals: Rules By Total Severity Impact",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| count_distinct(entityid) as enitities,sum(is_suppressed) as suppressed,sum(is_generated) as generated by rule,severity\n| severity * generated as total_severity\n| sort total_severity",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE7D3444C989FC84F",
+            "title": "Signals: Generated Mitre Technique Tags",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n| where is_generated=1\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n| parse regex field=tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n//| count by attack_stage,tags | sort _count\n\n| where tagname matches \"_mitreAttackTech*\"\n//|  sum(is_generated) as created by tagvalue,rule,product,vendor,entityid,severity,description| created * severity as total_sev | sort total_sev\n| sum(severity) as total_severity,max(severity) as max_sev,count_distinct(entityid) as entities,count_distinct(rule) as rules by tagvalue \n| sort total_severity",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8DC0491A9E22194E",
+            "title": "Signals: Highest Impacted Entities",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| count_distinct(rule) as rules,sum(is_suppressed) as suppressed,sum(is_generated) as generated by entityid,severity\n| severity * generated as total_severity\n| sort total_severity",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6E8C1AC388418949",
+            "title": "Signals: Other Or Custom Tags",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n| where is_generated=1\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n| parse regex field=tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n//| count by attack_stage,tags | sort _count\n\n| where !(tagname matches \"_mitreAttack*\")\n//|  sum(is_generated) as created by tagvalue,rule,product,vendor,entityid,severity,description| created * severity as total_sev | sort total_sev\n| sum(severity) as total_severity,max(severity) as max_sev,count_distinct(entityid) as entities,count_distinct(rule) as rules by tagvalue \n| sort total_severity",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel09135D449661384C",
+            "title": "New Insights By Severity",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\n//OR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated //)\n\nnew\n\n//| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n//| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n//| json field=_raw \"insight.confidence\" as confidence\n//| json field=_raw \"insight.signals\" as signals\n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n//\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| where status=\"new\"\n\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=\"1\" or s = \"LOW\",\"1-LOW\", severity) as severity\n//| if (s=\"2\" or s = \"MEDIUM\",\"2-MEDIUM\", severity) as severity\n//| if (s=\"3\" or s = \"HIGH\",\"3-HIGH\", severity) as severity\n//\n| count by %\"insight.severityname\",insightid,entitytype,entityvalue,%\"insight.riskscore\",%\"insight.confidence\"\n\n| %\"insight.severityname\" as severity | %\"insight.riskscore\" as riskscore | %\"insight.confidence\" as confidence\n| count by severity",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel82B6ABFC859E7A47",
+            "title": "New Insights By Entity Risk Score",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\n//OR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated //)\n\nnew\n\n//| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n//| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n//| json field=_raw \"insight.confidence\" as confidence\n//| json field=_raw \"insight.signals\" as signals\n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n//\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| where status=\"new\"\n\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=\"1\" or s = \"LOW\",\"1-LOW\", severity) as severity\n//| if (s=\"2\" or s = \"MEDIUM\",\"2-MEDIUM\", severity) as severity\n//| if (s=\"3\" or s = \"HIGH\",\"3-HIGH\", severity) as severity\n//\n| count by %\"insight.severityname\",insightid,entitytype,entityvalue,%\"insight.riskscore\",%\"insight.confidence\"\n\n| %\"insight.severityname\" as severity | %\"insight.riskscore\" as riskscore | %\"insight.confidence\" as confidence\n| count by insightid,entitytype,entityvalue,severity,riskscore,confidence | sort riskscore\n| entityvalue as entity\n| count as insights, sum(riskscore) as riskscore, avg(confidence) as confidence by entity,entitytype | sort riskscore",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel47BE6ED3A37E384F",
+            "title": "Insights Closed By Severity and Resolution",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\nclosed\n\n| json field=_raw \"eventName\"\n| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.severityName\" as severityname\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events,first(severityname) as severityname,first(status) as status,first(tags) as tags, max(s) as max_sev,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue ,_timeslice\n\n| where status=\"closed\"\n\n| count by severityname,resolution\n\n// ensure we only store the most recent result\n | transpose row resolution column severityname",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF1B10F6580AD8B44",
+            "title": "Insights: Mitre Technique Tags In Singals Mapped to Stage",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n// explode signals array embedded in insight to get individual severities and tags\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n| json field=signal \"id\" as s_id\n| json field=signal \"tags\" as signaltags\n| parse regex field=signaltags \"\\\"(?<s_tag>[^\\\"\\:]+):(?<s_value>[^\\\"]+)\" multi\n| parse regex field=tags \"_mitreAttackTactic:(?<tactic>[^\\\":\\r\\n]+)\" multi\n| parse regex field=tags \"_mitreAttackTechnique:(?<technique>[^\\\":\\r\\n]+)\" multi\n| parse regex field=signals \"\\\"severity\\\":\\\"(?<s_severity>[0-9]+)\" \n\n| \"\" as stage\n| if(tactic = \"TA0043\",\"a.Reconnaissance\",stage) as stage\n| if(tactic = \"TA0042\",\"b.Resource Development\",stage) as stage\n| if(tactic = \"TA0001\",\"c.Initial Access\",stage) as stage\n| if(tactic = \"TA0002\",\"d.Execution\",stage) as stage\n| if(tactic = \"TA0003\",\"e.Persistence\",stage) as stage\n| if(tactic = \"TA0004\",\"f.Privilege Escalation\",stage) as stage\n| if(tactic = \"TA0005\",\"g.Defense Evasion\",stage) as stage\n| if(tactic = \"TA0006\",\"h.Credential Access\",stage) as stage\n| if(tactic = \"TA0007\",\"i.Discovery\",stage) as stage\n| if(tactic = \"TA0008\",\"j.Lateral Movement\",stage) as stage\n| if(tactic = \"TA0009\",\"k.Collection\",stage) as stage\n| if(tactic = \"TA0011\",\"l.Command and Control\",stage) as stage\n| if(tactic = \"TA0010\",\"m.Exfiltration\",stage) as stage\n| if(tactic = \"TA0040\",\"n.Impact\",stage) as stage\n\n//|max(_messagetime) as _messagetime,first(status) as status,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution by insightid,name,entitytype,entityvalue,s_id,s_severity,s_tag,s_value, stage, tactic,technique\n//\n\n\n\n// unique signals per stage and technique\n//| count_distinct(s_id) as signals by stage,technique\n//| transpose row technique column stage\n//\n// unique insights per stage and technique \n//| count_distinct(insightid) as insights by stage,technique\n//| transpose row technique column stage\n\n// techniques per stage\n| count by insightid,s_id,stage,technique,entitytype,entityvalue\n//| concat(\"https://attack.mitre.org/techniques/\",replace (technique,\".\",\"/\")) as mitre_url\n| sort stage asc, technique asc\n| now() as _messagetime\n| transactionize stage (merge stage takeFirst,technique takeDistinct)\n//| values (technique)  as techniques by stage\n| 1 as r\n| max(r) as r by stage,technique  \n| values(technique) as techniques by stage,r\n| transpose row r column stage | fields -r",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA8675D38BF217B47",
+            "title": "Insights: How Signal Rules Impact Insight Generation",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\",\\\"\",\" \") as rule\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n| parse regex field=signals \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\" as signal_id\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| avg(severity) as sev, count_distinct(insightid) as insights,count_distinct(entityvalue) as entities, count_distinct(signal_id) as signals by rule  //,first(signals) as signals,\n| sev * signals as total_sev | sort total_sev",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel56B1486EA24FC847",
+            "title": "Insights: How 0 Rules Tags Insight Generation",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\",\\\"\",\" \") as rule\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n| parse regex field=signals \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\" as signal_id\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| avg(severity) as sev, count_distinct(insightid) as insights,count_distinct(entityvalue) as entities, count_distinct(signal_id) as signals by tag  //,first(signals) as signals,\n| sev * signals as total_sev | sort total_sev\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [],
+    "coloringRules": []
+}
