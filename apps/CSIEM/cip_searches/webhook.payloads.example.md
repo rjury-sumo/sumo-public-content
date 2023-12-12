@@ -1,9 +1,9 @@
-# This page shows examples for webhook payloads to use with the insighcreated search.
+# This page shows examples for webhook payloads to use with the insightcreated search
 
 configure webhooks for this query to use in alerting with one webhook per event
 s/s version add 	"AlertURL": "{{AlertResponseURL}}", for monitor
 
-fields in our Query
+## fields in our Query
 
 ```
 {{ResultsJson._messagetime}}
@@ -26,7 +26,7 @@ fields in our Query
 
 ```
 
-example payload
+## example payload
 
 ```
 {
@@ -44,4 +44,4 @@ example payload
   "DetectionTimeHours":"{{ResultsJson.timeToDetection}}"
 }
 
-``````
+```
