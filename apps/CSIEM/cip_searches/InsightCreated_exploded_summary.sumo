@@ -63,10 +63,12 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 
 | sort insightid asc, signal_created asc
 // final aggregation to save to a lookup with only one row for most recent status of insight
-|  values(sig_blob) as signal_timeline,values(tag) as tags,values(rule) as rules, count as rows by _messagetime,time,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,description,timeToDetection
+| count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(tag) as tags,values(rule) as rules, count as rows by _messagetime,time,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,description,timeToDetection
 
 
 | sort _messagetime asc | fields -rows
+
+
 
 /*
 onfigure webhooks for this query to use in alerting with one webhook per event
