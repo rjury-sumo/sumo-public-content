@@ -1,8 +1,7 @@
-(//_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated
+//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated
 //OR
 _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 //)
-
 
 | json field=_raw "insight.description" as description
 | json field=_raw "insight.riskScore" as riskscore
@@ -35,10 +34,10 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 | if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse
 | if (isnull(timeToDetection),-1,round(timeToDetection/3600)) as timeToDetection
 | if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation
-//| sort _messagetime
+| sort _messagetime
 
 // ensure we only store the most recent result
-| max(_messagetime) as _messagetime,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,description,signals,tags,assignee,resolution
+| max(_messagetime) as _messagetime,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count, first(status) as status, first(resolution) as resolution,first(assignee) as assignee, first(signals) as signals, first(tags) as tags, max(riskscore) as riskscore,first(eventname) as eventname, first(severity) as severity, first(severityname) as severityname, first(confidence) as confidence by created,insightid,name,entitytype,entityvalue
 
 // **** This code explodes out the embedded json arrays of tags and signals then will will squash down after *****
 
@@ -46,7 +45,7 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 //| replace(tag,"_mitreAttack","") as tag
 
 // compress back post rules expand
-| values(tag) as tags,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,_messagetime,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,description,signals,assignee,resolution
+| values(tag) as tags,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,_messagetime,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,signals,assignee,resolution
 
 | formatdate(tolong(_messagetime),"yyyy-MM-dd HH:mm:ss ZZZ") as updated
 
@@ -65,7 +64,9 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 | concat(signal_created,"\t",signal_severity,"\t",signal_summary) as sig_blob
 
 // compress back to one row per insight with summary values
-| count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(r) as rules, count as rows by created,_messagetime,updated,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,description,timeToResponse,timeToDetection,timeToRemediation,tags
+| count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(r) as rules  by created,_messagetime,updated,insightid,name,riskscore,severityname,entitytype,entityvalue,status,resolution,confidence //,timeToResponse,timeToDetection,timeToRemediation,tags
+| num(riskscore) as riskscore
+| sort riskscore | fields -_messagetime
 
-| sort _messagetime 
-
+//| tourl(concat("https://","{{cse_instance}}","/sec/insight/",insightid),insightid) as insightid
+//|tourl( concat("https://{{cse_instance}}/sec/entity?entityId=",entitytype,"-",entityvalue),entityvalue) as entityvalue
