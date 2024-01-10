@@ -1,0 +1,304 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Automation / SOAR Audit Actions",
+    "description": "",
+    "title": "Automation / SOAR Audit Actions",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-B54E3F6DBE164A4D",
+                "structure": "{\"height\":17,\"width\":24,\"x\":0,\"y\":26}"
+            },
+            {
+                "key": "panel205CD2B98E34A844",
+                "structure": "{\"height\":10,\"width\":5,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel0268BD4F9ADAAB41",
+                "structure": "{\"height\":10,\"width\":5,\"x\":5,\"y\":5}"
+            },
+            {
+                "key": "panelA7DE70BF8B0EC849",
+                "structure": "{\"height\":10,\"width\":5,\"x\":10,\"y\":5}"
+            },
+            {
+                "key": "panel08FB1012BF86AA40",
+                "structure": "{\"height\":10,\"width\":9,\"x\":15,\"y\":5}"
+            },
+            {
+                "key": "panelPANE-26CB4CF8A68A1A47",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel403FDCFEAE6E094F",
+                "structure": "{\"height\":11,\"width\":8,\"x\":0,\"y\":15}"
+            },
+            {
+                "key": "panel8863FA2DAF5DDA4F",
+                "structure": "{\"height\":11,\"width\":8,\"x\":8,\"y\":15}"
+            },
+            {
+                "key": "panel9150A758BD9D5A4C",
+                "structure": "{\"height\":11,\"width\":8,\"x\":16,\"y\":15}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-B54E3F6DBE164A4D",
+            "title": "Audit Event Log",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n//| json field=_raw \"ReportIdentity.name\" as r_name nodrop\n//| json field=_raw \"WidgetIdentity.name\" as w_name nodrop\n//| json field=_raw \"DashboardIdentity.name\" as d_name nodrop\n//| json field=_raw \"AutomationActionIdentity.name\" as aai_name nodrop\n//| json field=_raw \"GroupIdentity.name\" as g_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n\n//| where isempty(item_name)\n\n// \n| count as events by _messagetime,eventname,subsystem,item_name,email,interface,source_ip\n| sort _messagetime | fields -events",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel205CD2B98E34A844",
+            "title": "By Eventname",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n// \n| count as events by eventname \n| sort events \n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0268BD4F9ADAAB41",
+            "title": "By Subsystem",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n\n| count as events by subsystem \n| sort events \n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA7DE70BF8B0EC849",
+            "title": "By User Email",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n| count as events by email \n| sort events \n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel08FB1012BF86AA40",
+            "title": "Action Summary",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n| count as events by eventname,subsystem \n| sort events \n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-26CB4CF8A68A1A47",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard surfaces Cloud SOAR or Automation service audit events in the sumologic_audit_events index. For more info on auditing see: https://help.sumologic.com/docs/cloud-soar/audit-event-index/\n\nYou can filter results using the keywords parameter by supplying any valid keyword expression such as:\n```\nIncidentCreated\n( TaskUpdated or PlaybookExecutionCreated or AppCentralPackageCreated)\nuser1@foobar.com\n(task* and *updated)\n```"
+        },
+        {
+            "id": null,
+            "key": "panel403FDCFEAE6E094F",
+            "title": "Events Over Time By Eventname",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{\"A_AppCentralPackageCreated\":{\"visible\":true},\"A_AutomationActionUpdated\":{\"visible\":true},\"A_CustomFieldUpdated\":{\"visible\":true},\"A_DaemonCreated\":{\"visible\":true},\"A_DaemonUpdated\":{\"visible\":true},\"A_DashboardCreated\":{\"visible\":true},\"A_DashboardUpdated\":{\"visible\":true},\"A_EntityCreated\":{\"visible\":true},\"A_EntityUpdated\":{\"visible\":true},\"A_GroupCreated\":{\"visible\":true},\"A_GroupUpdated\":{\"visible\":true},\"A_IncidentAttachmentCreated\":{\"visible\":true},\"A_IncidentCreated\":{\"visible\":true},\"A_IncidentDeleted\":{\"visible\":true},\"A_IncidentInvestigatorCreated\":{\"visible\":true},\"A_IncidentInvestigatorUpdated\":{\"visible\":true},\"A_IncidentNoteCreated\":{\"visible\":true},\"A_IncidentUpdated\":{\"visible\":true},\"A_IntegrationCreated\":{\"visible\":true},\"A_IntegrationResourceUpdated\":{\"visible\":true},\"A_PlaybookExecutionCreated\":{\"visible\":true},\"A_PlaybookRevisionCreated\":{\"visible\":true},\"A_PlaybookRevisionDeleted\":{\"visible\":true},\"A_PlaybookRevisionUpdated\":{\"visible\":true},\"A_ReportCreated\":{\"visible\":true},\"A_ReportUpdated\":{\"visible\":true},\"A_TaskCreated\":{\"visible\":true},\"A_TaskUpdated\":{\"visible\":true},\"A_WidgetCreated\":{\"visible\":true},\"A_WidgetDeleted\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n// \n| timeslice\n| count as events by eventname ,_timeslice\n| transpose row _timeslice column eventname\n\n//| sort _messagetime | fields -events",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8863FA2DAF5DDA4F",
+            "title": "Events Over Time By Subsystem",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n// \n| timeslice\n| count as events by subsystem ,_timeslice\n| transpose row _timeslice column subsystem\n\n//| sort _messagetime | fields -events",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel9150A758BD9D5A4C",
+            "title": "Events Over Time By User Email",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n| timeslice\n| count as events by email ,_timeslice\n| transpose row _timeslice column email\n\n//| sort _messagetime | fields -events",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "// any keyword expression for audit events"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
