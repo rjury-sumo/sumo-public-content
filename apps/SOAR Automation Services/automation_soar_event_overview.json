@@ -61,11 +61,11 @@
             },
             {
                 "key": "panel04DA26D2A83ACB45",
-                "structure": "{\"height\":11,\"width\":14,\"x\":10,\"y\":78}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":89}"
             },
             {
                 "key": "panel1B5EA2E89A0A3949",
-                "structure": "{\"height\":10,\"width\":14,\"x\":0,\"y\":68}"
+                "structure": "{\"height\":10,\"width\":14,\"x\":10,\"y\":68}"
             },
             {
                 "key": "panelPANE-A332B542B596DA45",
@@ -73,7 +73,7 @@
             },
             {
                 "key": "panelEC0DB695B4CFAA4E",
-                "structure": "{\"height\":10,\"width\":10,\"x\":14,\"y\":68}"
+                "structure": "{\"height\":10,\"width\":10,\"x\":0,\"y\":68}"
             },
             {
                 "key": "panelA4C4EE43AB2E684C",
@@ -85,15 +85,15 @@
             },
             {
                 "key": "panel46860BCD98FBE947",
-                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":89}"
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":100}"
             },
             {
                 "key": "panelDCD940B9AB3EAA40",
-                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":99}"
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":110}"
             },
             {
                 "key": "panel4D4CFA9E8B1DE846",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":90}"
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":101}"
             },
             {
                 "key": "panel1E290768BC465948",
@@ -126,6 +126,10 @@
             {
                 "key": "panel199F4210AF8E394D",
                 "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":20}"
+            },
+            {
+                "key": "panel45F23AD396847947",
+                "structure": "{\"height\":11,\"width\":14,\"x\":10,\"y\":78}"
             }
         ]
     },
@@ -278,13 +282,13 @@
             "id": null,
             "key": "panel403FDCFEAE6E094F",
             "title": "Events Over Time By Eventname",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{\"A_AutomationActionUpdated\":{\"visible\":true},\"A_DashboardUpdated\":{\"visible\":true},\"A_GroupCreated\":{\"visible\":true},\"A_GroupUpdated\":{\"visible\":true},\"A_IncidentInvestigatorCreated\":{\"visible\":true},\"A_IntegrationCreated\":{\"visible\":true},\"A_ReportCreated\":{\"visible\":true},\"A_ReportUpdated\":{\"visible\":true},\"A_WidgetCreated\":{\"visible\":true},\"A_WidgetDeleted\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{\"A_AutomationActionUpdated\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// \n| timeslice\n| count as events by eventname ,_timeslice\n| transpose row _timeslice column eventname\n\n//| sort _messagetime | fields -events",
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// \n| timeslice {{graph_timeslice}}\n| count as events by eventname ,_timeslice\n| transpose row _timeslice column eventname\n\n//| sort _messagetime | fields -events",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -311,7 +315,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n\n// \n| timeslice\n| count as events by subsystem ,_timeslice\n| transpose row _timeslice column subsystem\n\n//| sort _messagetime | fields -events",
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n\n// \n| timeslice {{graph_timeslice}}\n| count as events by subsystem ,_timeslice\n| transpose row _timeslice column subsystem\n\n//| sort _messagetime | fields -events",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -338,7 +342,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+)\" nodrop\n// \n| concat (type,\" - \",item_name ) as item\n| timeslice\n| count as events by item ,_timeslice\n| transpose row _timeslice column item\n\n//| sort _messagetime | fields -events",
+                    "queryString": " _sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+)\" nodrop\n// \n| concat (type,\" - \",item_name ) as item\n| timeslice {{graph_timeslice}}\n| count as events by item ,_timeslice\n| transpose row _timeslice column item\n\n//| sort _messagetime | fields -events",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -385,7 +389,7 @@
         {
             "id": null,
             "key": "panel04DA26D2A83ACB45",
-            "title": "Playbook Execution Completion",
+            "title": "Playbook Execution Completion Event Log",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
@@ -455,7 +459,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " _sourcecategory=oar* {{keywords}} errors\n PlaybookExecution  \nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n//\n\n| json field=details \"running_id\" as id\n| json field=details \"type\"\n| json field=details \"status\"\n| json field=details \"playbook_name\"\n| timeslice \n| count as events by _timeslice,playbook_name | transpose row _timeslice column playbook_name\n",
+                    "queryString": " _sourcecategory=oar* {{keywords}} errors\n PlaybookExecution  \nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n//\n\n| json field=details \"running_id\" as id\n| json field=details \"type\"\n| json field=details \"status\"\n| json field=details \"playbook_name\"\n| timeslice {{graph_timeslice}}\n| count as events by _timeslice,playbook_name | transpose row _timeslice column playbook_name\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -768,6 +772,33 @@
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
             "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel45F23AD396847947",
+            "title": "Playbook Execution Duration Profile",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"boxAndWhisker\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": " _sourcecategory=oar* {{keywords}}\n PlaybookExecutionUpdated Completed  \nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n//\n| json field=details \"start\" nodrop\n| json field=details \"end\" nodrop\n| json field=details \"running_id\" as id\n| json field=details \"type\"\n| json field=details \"status\"\n| json field=details \"playbook_name\"\n| (end - start) as duration\n| timeslice {{graph_timeslice}}\n| pct(duration,1,25,50,75,100), min(duration),max(duration) by _timeslice\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
     "variables": [
@@ -779,6 +810,20 @@
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "// any keyword expression for audit events"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "graph_timeslice",
+            "displayName": "graph_timeslice",
+            "defaultValue": "1h",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5m,15m,1h,3h,1d"
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
