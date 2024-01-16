@@ -3,7 +3,7 @@
 ## Keyword Log Explorer
 A custom dashboard that enables you to start with a search say by category, collector and /or keywords, then drill down to a new search tab only showing surrounding messages.
 
-The new search window will show events from just that source file up to n events, +/- seconds (set in filters) centered on the event matching the search string. Keywords in the new search are included as an "OR" so they are still highlighted but all rows of the log are shown.
+The new search window will show events from just that source metadata selected and scope time range to first - last matching event.
 
 Here is how you use it.
 1. open the filters panel at the top of the dashboard
