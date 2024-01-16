@@ -1,0 +1,247 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Log Explorer 2024",
+    "description": "",
+    "title": "Log Explorer 2024",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-6h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel8701d0e58f846b4c",
+                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel0ae8759fa9d6884f",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":19}"
+            },
+            {
+                "key": "panel279fcddd9fdc1847",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panel883FF8CF88650840",
+                "structure": "{\"height\":16,\"width\":24,\"x\":0,\"y\":29}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel279fcddd9fdc1847",
+            "title": "New Specific Metadata Search",
+            "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| min(_messagetime) as f, max(_messagetime) as l, count by _sourcecategory,_collector,_source,sk,_view,_sourcename\n| sort _sourcecategory asc, _collector asc,_source asc\n\n// prepare the category strings\n| if(_view=\"\",\"SumologicDefault\",_view) as index\n| concat(\"_index=\",index) as  i\n| concat(\"_sourcecategory=\",_sourcecategory) as sc\n| concat(\"_collector=\",_collector) as c\n| concat(\"_source=\",_source) as s \n| concat(\"_sourcename=\",_sourcename) as sn\n\n| if(\"yes\" = \"{{add_index}}\",i,\"\") as i\n| if(\"yes\" = \"{{add_sourcecategory}}\",sc,\"\") as sc\n| if(\"yes\" = \"{{add_collector}}\",c,\"\") as c\n| if(\"yes\" = \"{{add_source}}\",s,\"\") as s\n| if(\"yes\" = \"{{add_sourcename}}\",sn,\"\") as sn\n\n| toint(floor((now()-f ) / (1000 * 60))) as f_min_ago\n| toint(ceil((now()-l ) / (1000 * 60))) as l_min_ago\n| concat(\"-\",f_min_ago,\"m -\",l_min_ago,\"m\") as rel_expression\n| fields -f_min_ago,l_min_ago\n\n// suppress scientific notation must be epoch\n| format( \"%.0f\",f) as f\n| format( \"%.0f\",l) as l\n\n// fix if they put a space in their stuff\n\n| replace(i,\" \",\"?\") as i\n| replace(sc,\" \",\"?\") as sc\n| replace(c,\" \",\"?\") as c\n| replace(s,\" \",\"?\") as s\n| replace(sn,\" \",\"?\") as sn\n\n\n// create one meta to avoid the 10 param limit on concat using multiple concats.\n| i as meta\n| concat (meta,\"\\n \",sc,\" \",c) as meta\n| concat (meta,\"\\n \",s,\" \",sn,\"\\n\") as meta\n| trim(meta) as meta\n| concat(meta,\"\\n \",sk) as search\n\n| tourl(concat(\"https://{{my_org}}/ui/#/search/@\",f,\",\",l,\"@\",urlencode(search)),\"Right Click Open Search Tab\") as  %\"Open This Search\" | fields -sc ,sk,c,s,f,l,i,sn,meta\n\n| sort _sourcecategory asc, _collector asc, _source asc, _view asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": null,
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8701d0e58f846b4c",
+            "title": "About",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"text\",\"displayType\":\"default\",\"mode\":\"TextPanel\"},\"legend\":{\"enabled\":false},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard shows the Sumo Logic metadata fields for logs matching your provided category and keyword filters, with clickable links to open a new search.\n\n\n**to use**\n1. open the filters panel at the top of the dashboard\n2. enter a **keyword** and optional **_sourcecategory**.\n3. the query panel will update. The link on the right side will open a new search window with just the category string or all meta with your provided query keyword(s). Right click to open a \"new Sumo Tab\"\n4. select yes/no to include various metadata expressions in the drill down metadata query string.\n\n"
+        },
+        {
+            "id": null,
+            "key": "panel0ae8759fa9d6884f",
+            "title": "Matching Log Metadata Values",
+            "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| _view as index\n| count_distinct(_collector) as collectors, count_distinct(_source) as sources, count_distinct(_sourcename) as sourcenames,min(_messagetime) as f, max(_messagetime) as l, count by _sourcecategory,index\n| if(isempty(index),\"SumologicDefault\",index) as index\n| formatdate(tolong(f),\"yyyy/MM/dd HH:mm:ss ZZZ\") as first_event\n| formatdate(tolong(l),\"yyyy/MM/dd HH:mm:ss ZZZ\") as last_event\n| round((l-f) / (1000 * 60)) as range_min\n| toint(floor((now()-f ) / (1000 * 60))) as f_min_ago\n| toint(ceil((now()-l ) / (1000 * 60))) as l_min_ago\n| concat(f_min_ago,\"m \",l_min_ago,\"m\") as rel_expression\n| fields -f,l,f_min_ago,l_min_ago\n| sort _sourcecategory asc,index asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": null,
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel883FF8CF88650840",
+            "title": "Example Log Events",
+            "visualSettings": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| _view as index\n| values(index) as indexes,first(_raw) as example,values(_collector) as collectors, values(_source) as sources, values(_sourcename) as sourcenames, count by _sourcecategory\n| if(length(example)>500,concat(substring(example,0,500),\"...\"),example) as example\n| sort _sourcecategory asc,indexes asc,_count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": null,
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "category",
+            "displayName": "category",
+            "defaultValue": "Labs*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Labs*,prod*,test*,stage*,dev*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "search_keywords",
+            "displayName": "search_keywords",
+            "defaultValue": "rick",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "rick"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "add_index",
+            "displayName": "add_index",
+            "defaultValue": "yes",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "yes,no"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "add_sourcecategory",
+            "displayName": "add_sourcecategory",
+            "defaultValue": "yes",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "yes,no"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "add_collector",
+            "displayName": "add_collector",
+            "defaultValue": "no",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "yes,no"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "add_source",
+            "displayName": "add_source",
+            "defaultValue": "yes",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "yes,no"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "add_sourcename",
+            "displayName": "add_sourcename",
+            "defaultValue": "yes",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "yes,no"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "my_org",
+            "displayName": "my_org",
+            "defaultValue": "live.us2.sumologic.com",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "live.us2.sumologic.com"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
