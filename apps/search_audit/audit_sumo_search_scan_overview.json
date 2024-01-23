@@ -1,0 +1,604 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Audit: Sumo Search Scan Overview",
+    "description": "A dashboard for viewing search scan overview and trends",
+    "title": "Audit: Sumo Search Scan Overview",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel55606FEC9E703A4D",
+                "structure": "{\"height\":15,\"width\":15,\"x\":9,\"y\":21}"
+            },
+            {
+                "key": "panel5B92DD94845BC942",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel19F1D9069144BB41",
+                "structure": "{\"height\":9,\"width\":6,\"x\":18,\"y\":11}"
+            },
+            {
+                "key": "panel1DFB7425A5825B4B",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":4}"
+            },
+            {
+                "key": "panel59A9028A819B2B4A",
+                "structure": "{\"height\":9,\"width\":6,\"x\":12,\"y\":11}"
+            },
+            {
+                "key": "panelE1FFC3C0A972784D",
+                "structure": "{\"height\":6,\"width\":3,\"x\":6,\"y\":5}"
+            },
+            {
+                "key": "panel4FE25CDF9D9BCB4D",
+                "structure": "{\"height\":6,\"width\":3,\"x\":9,\"y\":5}"
+            },
+            {
+                "key": "panel8E982FE99E4A2842",
+                "structure": "{\"height\":6,\"width\":6,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel6A67D43DBEDDDB4F",
+                "structure": "{\"height\":9,\"width\":6,\"x\":6,\"y\":11}"
+            },
+            {
+                "key": "panelE2C7E427A931BA46",
+                "structure": "{\"height\":9,\"width\":6,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panel917FE145BAB7A94A",
+                "structure": "{\"height\":15,\"width\":4,\"x\":0,\"y\":21}"
+            },
+            {
+                "key": "panelD3C86792AA057A4C",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":36}"
+            },
+            {
+                "key": "panel5D025AC8A6370A41",
+                "structure": "{\"height\":11,\"width\":6,\"x\":0,\"y\":38}"
+            },
+            {
+                "key": "panel108B24BBA17F994E",
+                "structure": "{\"height\":6,\"width\":3,\"x\":15,\"y\":5}"
+            },
+            {
+                "key": "panel13D8CCD58A69FB43",
+                "structure": "{\"height\":6,\"width\":3,\"x\":21,\"y\":5}"
+            },
+            {
+                "key": "panelEFBC6803AF4F3949",
+                "structure": "{\"height\":1,\"width\":15,\"x\":9,\"y\":20}"
+            },
+            {
+                "key": "panel547D06BDB3971842",
+                "structure": "{\"height\":6,\"width\":3,\"x\":18,\"y\":5}"
+            },
+            {
+                "key": "panel36EF58978C9C3A44",
+                "structure": "{\"height\":6,\"width\":3,\"x\":12,\"y\":5}"
+            },
+            {
+                "key": "panel1114182587E9194B",
+                "structure": "{\"height\":11,\"width\":18,\"x\":6,\"y\":38}"
+            },
+            {
+                "key": "panel6FBFDB3284E08A4A",
+                "structure": "{\"height\":15,\"width\":5,\"x\":4,\"y\":21}"
+            },
+            {
+                "key": "panelB3CD264EAFAE8945",
+                "structure": "{\"height\":1,\"width\":9,\"x\":0,\"y\":20}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel55606FEC9E703A4D",
+            "title": "Top Scanners > 100GB: User and Query Type. Use this panel to locate the user / workload combinations that drive high scans.",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n\n| where data_scanned_bytes > (100 * 1G)\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 200",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5B92DD94845BC942",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard uses the [search audit index](https://help.sumologic.com/Manage/Security/Search_Audit_Index) to help show overall search scan in your account.  High scan users will get poor search performance and can impact performance of other users in your sumo account.\n\nFilters:\n- **timeslice**: enter a timeslice value for the time series panels\n"
+        },
+        {
+            "id": null,
+            "key": "panel19F1D9069144BB41",
+            "title": "Gb Scan Top Users Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":35,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n| timeslice by {{timeslice}}\n|sum(data_scanned_bytes) as bytes   by _timeslice,user_name\n| total bytes as tb by _timeslice\n | bytes / tb as f | if (f <.05,\"other\",user_name) as user_name\n| bytes / 1G as gb\n| sum(gb) as gb_scan by _timeslice,user_name | replace (user_name,/@.+/,\"\") as user_name  \n| fillmissing timeslice({{timeslice}}) with 0 for\tgb_scan | transpose row _timeslice column user_name",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1DFB7425A5825B4B",
+            "title": "Search Scan Overview and KPIs",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel59A9028A819B2B4A",
+            "title": "Gb Scan Top Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":20,\"mode\":\"distribution\",\"indexLabelFontSize\":12},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n| timeslice by {{timeslice}}\n|sum(data_scanned_bytes) as bytes   by user_name | replace (user_name,/@.+/,\"\") as user_name  \n| bytes / 1G as gb\n| sum(gb) as gb by user_name | sort gb ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE1FFC3C0A972784D",
+            "title": "TB Scanned",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"TB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n\n| sum(data_scanned_bytes) as bytes | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | fields tb_scan",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4FE25CDF9D9BCB4D",
+            "title": "Account Ingest",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"TB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":3,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourceCategory=\"view_and_tier_volume\"\n  | parse regex \"(?<data>\\{[^\\{]+\\})\" multi \n  | json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count   \n  | sum(bytes) as bytes | bytes/1024/1024/1024 /1024 as tb\n| avg(tb) as ingest",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8E982FE99E4A2842",
+            "title": "Scan Ratio (scan / ingest)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"x Daily Ingest\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":7000,\"to\":1000000,\"color\":\"#bf2121\"},{\"from\":2500,\"to\":7000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":2500,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"min\":0,\"max\":20000}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n\n| sum(data_scanned_bytes) as bytes | bytes / (1024 * 1024 * 1024 ) as GB_Scan \n// make a lookup reference object of the last 24 hour scan total\n| \"YES\" as dummy\n| where [subquery: \n  _index=sumologic_volume _sourceCategory=\"view_and_tier_volume\"\n  | parse regex \"(?<data>\\{[^\\{]+\\})\" multi \n  | json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count   \n  | sum(bytes) as bytes | bytes/1024/1024/1024 as gb\n  | 1 as key\n  | save /temp/ingest\n  | \"YES\" as dummy | compose dummy\n]\n| 1 as key\n| lookup gb from /temp/ingest on key=key\n| gb_scan / gb as scan_ratio | fields scan_ratio",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6A67D43DBEDDDB4F",
+            "title": "TB Scan By Query Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":15,\"mode\":\"distribution\",\"indexLabelFontSize\":12},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n\n| sum(data_scanned_bytes) as bytes by query_type | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(TB_Scan) as TB_Scan by query_type | sort tb_scan",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE2C7E427A931BA46",
+            "title": "Scan Vs Last Week",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":35,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[\"gb_scan_7d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\",\"lineThickness\":2,\"color\":\"#ff5d5d\",\"name\":\"Last Week\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n| timeslice by {{timeslice}}\n| data_scanned_bytes / 1G as gb\n| sum(gb) as gb_scan by _timeslice | compare with timeshift 7d",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel917FE145BAB7A94A",
+            "title": "Searches > 100G Scan. Distribution of Scanned Partition Band By Query Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"query_type\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"title\":\"total bytes scanned\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//| where execution_duration_ms > 30000\n//not query_type = view*\nnot query_type = sumo*\n| where data_scanned_bytes > (100 * 1G)\n\n//| where scanned_partition_count >5\n| sum(data_scanned_bytes) as bytes by query_type,scanned_partition_count\n\n| toint(ceil(scanned_partition_count/5) * 5) as part_range\n| sum(bytes) as bytes by part_range,query_type\n| transpose row query_type column part_range",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD3C86792AA057A4C",
+            "title": "Infrequent Tier Scanners",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Infrequent tier is a Enterprise Suite pricing plan where data can be ingested at a very low rate but each search incurs a scan charge. These panels summarize infrequent scan activity and estimate scan charge @0.16 credits / GB scanned.\n"
+        },
+        {
+            "id": null,
+            "key": "panel5D025AC8A6370A41",
+            "title": "Infrequent Scan GB by User",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n\nanalytics_tier=*infrequent*\n\n//| parse field=\"scanned_bytes_breakdown -> *)\" as scanned_bytes_breakdown \n| json field =scanned_bytes_breakdown \"Continuous\" as  scan_c nodrop\n| json field =scanned_bytes_breakdown \"Frequent\" as  scan_f nodrop\n| json field =scanned_bytes_breakdown \"Infrequent\" as  scan_inf nodrop\n\n// AGGREGATE TO GET STATS\n///| parse \" query -> *, scanned_partition_count -> \" as the_real_query\n//| sort execution_duration_ms\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)(?<scope>(?:_datatier|_index|_view) *= *[a-zA-Z]+)\" nodrop\n//| if (isempty(datatier),\"index\",datatier) as datatier\n\n| count as queries,count as searches, sum(data_scanned_bytes) as total_bytes,pct(range_days,50,95),avg(scanned_partition_count) as partitions, sum(scan_c) as cont_scan,sum(scan_f) as freq_scan,sum(scan_inf) as infreq_scan, values(status_message) as statuses,values(query_type) as types by user_name,scope | limit 100 //,session_id\n\n| round(cont_scan/1G,2) as cont_scan_gb\n| round(freq_scan/1G,2) as freq_scan_gb\n| round(infreq_scan/1G,2) as inf_scan_gb\n| total_bytes / 1G as total_scan_gb\n| round(inf_scan_gb * 0.016,2) as scan_credits //| fields -bytes\n\n| fields -cont_scan,freq_scan,infreq_scan,total_bytes\n| sum(inf_scan_gb) as inf_scan_gb by user_name | sort inf_scan_gb\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel108B24BBA17F994E",
+            "title": "> 10 TB Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":1,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":0,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n| where data_scanned_bytes > 1000000000\n| sum(data_scanned_bytes) as bytes by query | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(tb_scan) as scan_tb by query | where scan_tb > 10 | count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel13D8CCD58A69FB43",
+            "title": "> 1 PB Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\",\"noDataMessage\":\"0\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":1,\"to\":10000,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":0,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n| where data_scanned_bytes > 1000000000\n| sum(data_scanned_bytes) as bytes by query | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(tb_scan) as scan_tb by query | where scan_tb > 1000 | count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEFBC6803AF4F3949",
+            "title": "High Scanners View",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel547D06BDB3971842",
+            "title": "> 100 TB Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\",\"noDataMessage\":\"0\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":1,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":0,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n| where data_scanned_bytes > 1000000000\n| sum(data_scanned_bytes) as bytes by query | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(tb_scan) as scan_tb by query | where scan_tb > 100 | count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel36EF58978C9C3A44",
+            "title": "> 1 TB Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":1,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":0,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n| where data_scanned_bytes > (1 * 1G)\n| sum(data_scanned_bytes) as bytes by query | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(tb_scan) as scan_tb by query | where scan_tb > 1 | count",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1114182587E9194B",
+            "title": "Infrequent Queries Sorted By Scan Credits Estimate (@.016/scan GB)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n\nanalytics_tier=*infrequent*\n\n//| parse field=\"scanned_bytes_breakdown -> *)\" as scanned_bytes_breakdown \n| json field =scanned_bytes_breakdown \"Continuous\" as  scan_c nodrop\n| json field =scanned_bytes_breakdown \"Frequent\" as  scan_f nodrop\n| json field =scanned_bytes_breakdown \"Infrequent\" as  scan_inf nodrop\n\n// AGGREGATE TO GET STATS\n///| parse \" query -> *, scanned_partition_count -> \" as the_real_query\n//| sort execution_duration_ms\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)(?<scope>(?:_datatier|_index|_view) *= *[a-zA-Z_]+)\" nodrop\n//| if (isempty(datatier),\"index\",datatier) as datatier\n\n| count as queries,count as searches, sum(data_scanned_bytes) as total_bytes,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_c) as cont_scan,sum(scan_f) as freq_scan,sum(scan_inf) as infreq_scan, values(status_message) as statuses,values(query_type) as types by user_name,scope,query | limit 100 //,session_id\n\n| round(cont_scan/1G,2) as cont_scan_gb\n| round(freq_scan/1G,2) as freq_scan_gb\n| round(infreq_scan/1G,2) as inf_scan_gb\n| total_bytes / 1G as total_scan_gb\n| round(inf_scan_gb * 0.016,2) as scan_credits //| fields -bytes\n\n| fields -cont_scan,freq_scan,infreq_scan,total_bytes\n| sort scan_credits\n\n| scan_credits/queries as cr_per_query\n\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6FBFDB3284E08A4A",
+            "title": "Searches > 100G Scan Top 50.  Distribution of Scanned Partition Band By user",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"query_type\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"title\":\"total bytes scanned\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n//| where execution_duration_ms > 30000\n//not query_type = view*\nnot query_type = sumo*\n| where data_scanned_bytes > (100 * 1G)\n\n//| where scanned_partition_count >5\n| sum(data_scanned_bytes) as bytes by user_name,scanned_partition_count\n\n| toint(ceil(scanned_partition_count/5) * 5) as part_range\n| sum(bytes) as bytes by part_range,user_name | replace(user_name,/\\@.+/,\"\") as user_name\n| sort bytes | limit 50\n| transpose row user_name column part_range",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB3CD264EAFAE8945",
+            "title": "Partitions Scanned For High Scan Searches",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "1d",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "1h,15m,1d,10m,5m"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}

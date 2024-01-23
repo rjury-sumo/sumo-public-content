@@ -1,6 +1,13 @@
 ## Search Audit Apps
 
 Dashboards for search audit index.
+## Audit: Sumo Search Scan Overview
+A high level overview of search scan volumes and activity in your sumo account.
+Will show who high scanners are and total breakdown of scan by query type and user.
+
+For detailed investigation use the Optimization dashboard below.
+
+![Alt text](audit.overview.1.png)
 
 ## Audit: Sumo Search Scan Optmization
 This dashboard uses the [search audit index](https://help.sumologic.com/Manage/Security/Search_Audit_Index) to help you identify high search scan users who have inefficient searches that over scan your account - for example a monitor or schedule that scans all partitions will have poor performance and can degrade search performance for all users.
