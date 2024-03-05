@@ -21,7 +21,7 @@
         "layoutStructures": [
             {
                 "key": "panel55606FEC9E703A4D",
-                "structure": "{\"height\":15,\"width\":15,\"x\":9,\"y\":21}"
+                "structure": "{\"height\":15,\"width\":15,\"x\":9,\"y\":30}"
             },
             {
                 "key": "panel5B92DD94845BC942",
@@ -29,7 +29,7 @@
             },
             {
                 "key": "panel19F1D9069144BB41",
-                "structure": "{\"height\":9,\"width\":6,\"x\":18,\"y\":11}"
+                "structure": "{\"height\":9,\"width\":6,\"x\":6,\"y\":20}"
             },
             {
                 "key": "panel1DFB7425A5825B4B",
@@ -37,7 +37,7 @@
             },
             {
                 "key": "panel59A9028A819B2B4A",
-                "structure": "{\"height\":9,\"width\":6,\"x\":12,\"y\":11}"
+                "structure": "{\"height\":9,\"width\":6,\"x\":0,\"y\":20}"
             },
             {
                 "key": "panelE1FFC3C0A972784D",
@@ -61,15 +61,15 @@
             },
             {
                 "key": "panel917FE145BAB7A94A",
-                "structure": "{\"height\":15,\"width\":4,\"x\":0,\"y\":21}"
+                "structure": "{\"height\":15,\"width\":4,\"x\":0,\"y\":30}"
             },
             {
                 "key": "panelD3C86792AA057A4C",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":36}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":45}"
             },
             {
                 "key": "panel5D025AC8A6370A41",
-                "structure": "{\"height\":11,\"width\":6,\"x\":0,\"y\":38}"
+                "structure": "{\"height\":11,\"width\":6,\"x\":0,\"y\":47}"
             },
             {
                 "key": "panel108B24BBA17F994E",
@@ -81,7 +81,7 @@
             },
             {
                 "key": "panelEFBC6803AF4F3949",
-                "structure": "{\"height\":1,\"width\":15,\"x\":9,\"y\":20}"
+                "structure": "{\"height\":1,\"width\":15,\"x\":9,\"y\":29}"
             },
             {
                 "key": "panel547D06BDB3971842",
@@ -93,15 +93,19 @@
             },
             {
                 "key": "panel1114182587E9194B",
-                "structure": "{\"height\":11,\"width\":18,\"x\":6,\"y\":38}"
+                "structure": "{\"height\":11,\"width\":18,\"x\":6,\"y\":47}"
             },
             {
                 "key": "panel6FBFDB3284E08A4A",
-                "structure": "{\"height\":15,\"width\":5,\"x\":4,\"y\":21}"
+                "structure": "{\"height\":15,\"width\":5,\"x\":4,\"y\":30}"
             },
             {
                 "key": "panelB3CD264EAFAE8945",
-                "structure": "{\"height\":1,\"width\":9,\"x\":0,\"y\":20}"
+                "structure": "{\"height\":1,\"width\":9,\"x\":0,\"y\":29}"
+            },
+            {
+                "key": "panel3E4626878838584F",
+                "structure": "{\"height\":18,\"width\":12,\"x\":12,\"y\":11}"
             }
         ]
     },
@@ -116,7 +120,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query \n\n| where data_scanned_bytes > (100 * 1G)\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec\n| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 200",
+                    "queryString": "_view=sumologic_search_usage_per_query \n\n| where data_scanned_bytes > (100 * 1G)\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec,users\n| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 200",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -582,6 +586,33 @@
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
             "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel3E4626878838584F",
+            "title": "Top Scan Jobs > 10GB:  by user,type and content_name (if applicable)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n\n| where data_scanned_bytes > (10 * 1G)\n//| (query_end_time - query_start_time)/1000 as range_s\n//| execution_duration_ms /1000 as duration_s\n| if(isempty(content_name),substring(query,0,80),content_name) as item\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type,item\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024/1024 as scan_tb\n| fields -bytes_scanned,unique_queries,%\"fail/cancelled\",max_partitions,users\n//| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 50",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
     "variables": [
