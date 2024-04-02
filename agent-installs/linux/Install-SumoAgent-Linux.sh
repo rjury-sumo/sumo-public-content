@@ -18,7 +18,12 @@
 # the agent will not start and later scripts should setup user.properties and json source config before registration
 # this is a good approach as you can put the install script in an image such as AMI and add other config later.
 
-if cat /etc/os-release | grep debian; then
+if uname -a | grep "aarch64 GNU/Linux"; then
+    echo "running command line installer or arm64"
+    wget -q -O /tmp/collector.deb https://collectors.sumologic.com/rest/download/deb/aarch/64
+    dpkg -i /tmp/collector.deb
+    rm /tmp/collector.deb
+elif cat /etc/os-release | grep debian; then
     echo "running dpkg installer..."
     wget -q -O /tmp/collector.deb https://collectors.us2.sumologic.com/rest/download/deb/64
     dpkg -i /tmp/collector.deb
