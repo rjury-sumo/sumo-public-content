@@ -98,6 +98,8 @@ if $RESTARTAGENT; then
     echo "service collector status"
     echo "tail /opt/SumoCollector/logs/collector.log"
     echo "cat /opt/SumoCollector/config/user.properties"
+    echo "to test the dummy log source in this demo try:"
+    echo "echo \"\`date\` \`uname -a\` host=\`hostname\`\" > /tmp/dummy.log"
 else
   printf "A restart wasn't requested. You'll need to restart the Sumo Agent for the config changes to take affect\n"
 fi
