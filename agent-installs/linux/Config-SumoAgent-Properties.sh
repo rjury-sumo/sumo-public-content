@@ -69,10 +69,13 @@ generate_user_properties_file() {
     SUPPORTED_OPTIONS=(
         ["SUMO_ACCESS_ID"]="accessid"
         ["SUMO_ACCESS_KEY"]="accesskey"
+        ["SUMO_INSTALLATION_TOKEN"]="token"
         ["SUMO_RECEIVER_URL"]="url"
         ["SUMO_COLLECTOR_NAME"]="name"
+        ["SUMO_COLLECTOR_HOSTNAME"]="hostName"
         ["SUMO_SOURCES_JSON"]="sources"
         ["SUMO_SYNC_SOURCES"]="syncSources"
+        ["SUMO_COLLECTOR_EPHEMERAL"]="ephemeral"
         ["SUMO_PROXY_HOST"]="proxyHost"
         ["SUMO_PROXY_PORT"]="proxyPort"
         ["SUMO_PROXY_USER"]="proxyUser"
@@ -80,10 +83,11 @@ generate_user_properties_file() {
         ["SUMO_PROXY_NTLM_DOMAIN"]="proxyNtlmDomain"
         ["SUMO_CLOBBER"]="clobber"
         ["SUMO_DISABLE_SCRIPTS"]="disableScriptSource"
+        ["SUMO_ENABLE_SCRIPTS"]="enableScriptSource"
         ["SUMO_JAVA_MEMORY_INIT"]="wrapper.java.initmemory"
         ["SUMO_JAVA_MEMORY_MAX"]="wrapper.java.maxmemory"
-        ["SUMO_EPHEMERAL"]="ephemeral"
-        ["SUMO_FIELDS"]="fields"
+        ["SUMO_COLLECTOR_FIELDS"]="fields"
+        ["SUMO_COLLECTOR_CATEGORY"]="category"
     )
 
     USER_PROPERTIES=""
