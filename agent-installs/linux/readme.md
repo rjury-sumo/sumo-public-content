@@ -27,6 +27,9 @@ docker run -it -e SUMO_ACCESS_ID=$SUMO_ACCESS_ID -e SUMO_ACCESS_KEY=$SUMO_ACCESS
 # no fields
 docker run -it -e SUMO_ACCESS_ID=$SUMO_ACCESS_ID -e SUMO_ACCESS_KEY=$SUMO_ACCESS_KEY -e ENVIRONMENT=test sumo_agent 
 
+# no fields using TOKEN
+docker run -it -e SUMO_INSTALLATION_TOKEN=$SUMOLOGIC_INSTALLATION_TOKEN -e ENVIRONMENT=test sumo_agent 
+
 # install the agent unregistered
 ./Install-SumoAgent-Linux.sh
 

@@ -11,6 +11,8 @@ mkdir -p $CONFIG_PATH
 # get id and key from params or using AWS SSM
 if [ -n "$SUMO_ACCESS_ID" ] || [ -n "$SUMO_ACCESS_ID" ]; then
     echo "using overide SUMO_ACCESS_ID  and key $SUMO_ACCESS_ID"
+elif [ -n "$SUMO_INSTALLATION_TOKEN" ]; then
+    echo "installation token supplied Using SUMO_INSTALLATION_TOKEN"
 else
     echo 'no key supplied generating from SSM'
     SUMO_ACCESS_ID="$(aws ssm get-parameters --names 'sumo.accessid' --with-decryption --region $Region | grep -Po '(?<="Value": ")[^"]*')"
@@ -50,10 +52,17 @@ else
 fi
 
 generate_user_properties_file() {
-    if [ -z "$SUMO_ACCESS_ID" ] || [ -z "$SUMO_ACCESS_KEY" ]; then
-      echo "FATAL: Please provide credentials, either via the SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables,"
-      echo "       or as the first two command line arguments!"
-      exit 1
+    if [ -z "$SUMO_ACCESS_ID" ] && [ -z "$SUMO_ACCESS_KEY" ]; then
+      if [ -z "$SUMO_INSTALLATION_TOKEN" ]; then
+        echo "FATAL: Please provide credentials via:"
+        echo "       * the SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables,"
+        echo "       * as the first two command line arguments, or"
+        echo "       * in files references by SUMO_ACCESS_ID_FILE and SUMO_ACCESS_KEY_FILE"
+        echo "       You can also provide an installation token via:"
+        echo "       * the SUMO_INSTALLATION_TOKEN environment variable, or"
+        echo "       * in a file referenced by the SUMO_INSTALLATION_TOKEN_FILE environment variable"
+        exit 1
+      fi
     fi
 
     if [ "${SUMO_SYNC_SOURCES}" == "true" ]; then
@@ -110,9 +119,7 @@ $SUMO_GENERATE_USER_PROPERTIES && {
     generate_user_properties_file
 }
 
-echo "###################  user.properties #########################"
-grep -v key $FILE
+echo "###################  user.properties $FILE #########################"
+grep -v key $FILE | grep -v token
 
-echo "###################  SUMO env.vars  #########################"
-env | grep SUMO | grep -v KEY
-
+echo "Execute ./Config-SumoAgent-Properties.sh to register Agent"
