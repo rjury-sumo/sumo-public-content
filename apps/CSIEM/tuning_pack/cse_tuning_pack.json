@@ -1,6 +1,6 @@
 {
     "type": "FolderSyncDefinition",
-    "name": "Cloud SIEM Tuning Pack - Aug 23",
+    "name": "Cloud SIEM Tuning Pack - Apr 24",
     "description": "A selection of useful Cloud SIEM dashboards that report on reflected records, signals and insights.",
     "children": [
         {
@@ -944,7 +944,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{rule}}}\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.riskScore\" as riskscore\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue ,risk_score,confidence\n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\",\\\"\",\" \") as rule\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n| parse regex field=signals \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\" as signal_id\n\n\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| values(resolution) as resolutions,avg(risk_score) as risk,avg(confidence) as confidence,values(insightid) as insight,avg(severity) as sev, count_distinct(insightid) as insights,count_distinct(entityvalue) as entities, count_distinct(signal_id) as signals by rule ,entityvalue //,first(signals) as signals,\n| sort rule asc | where rule matches /(?i){{{rule}}}/\n| sev * signals as total_sev | sort total_sev",
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{rule}}}\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.riskScore\" as riskscore\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue ,risk_score,confidence\n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\",\\\"\",\" \") as rule\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n| parse regex field=signals \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\" as signal_id\n\n\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| values(resolution) as resolutions,avg(risk_score) as risk,avg(confidence) as confidence,values(insightid) as insight,avg(severity) as sev, count_distinct(insightid) as insights,count_distinct(entityvalue) as entities, count_distinct(signal_id) as signals by rule ,entityvalue //,first(signals) as signals,\n| sort rule asc | where rule matches \"{{{rule}}}\"\n| sev * signals as total_sev | sort total_sev",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1133,7 +1133,7 @@
                     "queries": [
                         {
                             "transient": false,
-                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n*Rule*\n\n{{{rule}}}\n//THRESHOLD-S00096\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"templatedMatchRule\" as rulea nodrop\n| json field=_raw \"matchRule\" as ruleb nodrop\n| json field=_raw \"yaraRule\" as rulec nodrop\n| json field=_raw \"thresholdRule\" as ruled nodrop\n| json field=_raw \"chainRule\" as rulee nodrop\n| json field=_raw \"aggregationRule\" as rulef nodrop\n\n| rulea as rule\n| if(isempty(rule),ruleb,rule) as rule\n| if(isempty(rule),rulec,rule) as rule\n| if(isempty(rule),ruled,rule) as rule\n| if(isempty(rule),rulee,rule) as rule\n| if(isempty(rule),rulef,rule) as rule\n\n//| where isempty(rule)\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=rule \"readableId\" as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\"  nodrop\n| json field=rule \"expression\"  nodrop\n| json field=rule \"severityMapping\"  nodrop\n| json field=rule \"tuningExpressions\"  nodrop\n| json field=rule \"isPrototype\"  nodrop\n| json field=rule \"tags\"  nodrop\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,interface,name,enabled,isPrototype,operator,expression,severitymapping,tuningexpressions,tags, old,new | fields -_count // tuningexpressions\n| where id matches /(?i){{{rule}}}/\n| sort _messagetime  | fields -_messagetime",
+                            "queryString": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n{{{rule}}}\n\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n| where operator=\"sumo\"\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if((isempty(id)),concat(rule_type,\"-\",yid),id) as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| json field=rule \"tuningExpressions\" nodrop\n| json field=rule \"descriptionExpression\" nodrop\n\n// variants\n| json field=rule \"filterExpression\" nodrop\n| json field=rule \"expression\" as hasexp nodrop\n| json field=rule \"expressionsAndLimits\" nodrop\n| concat (filterexpression,hasexp,expressionsAndLimits) as expression\n\n| json field=rule \"severity\" as s nodrop\n| json field=rule \"severityMapping\" nodrop\n| concat(s,severitymapping) as severity\n//| first(rule) as rule by rule_type,change\n| count by _messagetime,change,operator,interface,rule_type,id,name,enabled,isPrototype,tags,descriptionExpression,severity,expression\n| sort _messagetime | fields -_count",
                             "queryType": "Logs",
                             "queryKey": "A",
                             "metricsQueryMode": null,
@@ -1211,6 +1211,398 @@
             "name": "CSE Rules and Mapping Changes (Tuning Pack)",
             "description": "View changes to CSE rules and mappings using audit event data.",
             "title": "CSE Rules and Mapping Changes (Tuning Pack)",
+            "theme": "Dark",
+            "topologyLabelMap": {
+                "data": {}
+            },
+            "refreshInterval": 0,
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w"
+                },
+                "to": null
+            },
+            "layout": {
+                "layoutType": "Grid",
+                "layoutStructures": [
+                    {
+                        "key": "panelPANE-7E82F798AB8C5942",
+                        "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":36}"
+                    },
+                    {
+                        "key": "panel82AFBE9A9529B94C",
+                        "structure": "{\"height\":10,\"width\":6,\"x\":0,\"y\":14}"
+                    },
+                    {
+                        "key": "panelB385C1DA9D89AA4C",
+                        "structure": "{\"height\":10,\"width\":7,\"x\":6,\"y\":14}"
+                    },
+                    {
+                        "key": "panelPANE-AB19AA6FB9B53A47",
+                        "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":0}"
+                    },
+                    {
+                        "key": "panel2A05B6AD83504B4D",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":3}"
+                    },
+                    {
+                        "key": "panelDAC9736494B82B4D",
+                        "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":68}"
+                    },
+                    {
+                        "key": "panelF39B4A26B12B0B4F",
+                        "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":67}"
+                    },
+                    {
+                        "key": "panelF23B00C9B8A96A4D",
+                        "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":24}"
+                    },
+                    {
+                        "key": "panel6D25136081E11B4B",
+                        "structure": "{\"height\":10,\"width\":8,\"x\":0,\"y\":4}"
+                    },
+                    {
+                        "key": "panel928891968ADDDA4F",
+                        "structure": "{\"height\":10,\"width\":8,\"x\":8,\"y\":4}"
+                    },
+                    {
+                        "key": "panel61E2D790BACF7A4B",
+                        "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":4}"
+                    },
+                    {
+                        "key": "panel0B5ADFCEB677AA4D",
+                        "structure": "{\"height\":17,\"width\":24,\"x\":0,\"y\":50}"
+                    },
+                    {
+                        "key": "panelDD8652D182387B4D",
+                        "structure": "{\"height\":10,\"width\":11,\"x\":13,\"y\":14}"
+                    }
+                ]
+            },
+            "panels": [
+                {
+                    "id": null,
+                    "key": "panelPANE-7E82F798AB8C5942",
+                    "title": "Rule Created, Updated Or Changed By Sumo Logic",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n{{{keywords}}}\n\n\n\"\\\"source\\\": \\\"sumo\\\"\"\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n| where operator=\"sumo\"\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if((isempty(id)),concat(rule_type,\"-\",yid),id) as id\n\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| json field=rule \"tuningExpressions\" nodrop\n| json field=rule \"descriptionExpression\" nodrop\n\n// variants\n| json field=rule \"filterExpression\" nodrop\n| json field=rule \"expression\" as hasexp nodrop\n| json field=rule \"expressionsAndLimits\" nodrop\n| concat (filterexpression,hasexp,expressionsAndLimits) as expression\n\n| json field=rule \"severity\" as s nodrop\n| json field=rule \"severityMapping\" nodrop\n| concat(s,severitymapping) as severity\n//| first(rule) as rule by rule_type,change\n| count as changes by change,operator,interface,rule_type,id,name\n| sort id ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel82AFBE9A9529B94C",
+                    "title": "Rule Changes Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\" or eventname matches \"*Mapping*\"\n| timeslice | count by _timeslice, eventname | transpose row _timeslice column eventname",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelB385C1DA9D89AA4C",
+                    "title": "Rule Changes By Operator Over Time",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\" or eventname matches \"*Mapping*\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n\n| timeslice | count by _timeslice, operator | transpose row _timeslice column operator",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelPANE-AB19AA6FB9B53A47",
+                    "title": "About",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": "Use this dashboard to review changes to your CSE rule set. \n\nFor the release history of Sumo Logic managed content changes see: https://help.sumologic.com/Release-Notes/Cloud_SIEM_Enterprise_Release_Notes"
+                },
+                {
+                    "id": null,
+                    "key": "panel2A05B6AD83504B4D",
+                    "title": "Rules Changes",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelDAC9736494B82B4D",
+                    "title": "Log Mapping Change Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n\n*Mapping*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Mapping*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"logMapping\"\n\n//\n| json field=logMapping \"id\" \n| json field=logMapping \"name\"\n| json field=logMapping \"source\"\n| json field=logMapping \"recordType\"\n| json field=logMapping \"enabled\"\n| json field=logMapping \"vendor\"\n| json field=logMapping \"product\"\n| json field=logMapping \"fields\" nodrop\n\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,source,recordtype,vendor,product,fields | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": null
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelF39B4A26B12B0B4F",
+                    "title": "Log Mappings",
+                    "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "TextPanel",
+                    "text": ""
+                },
+                {
+                    "id": null,
+                    "key": "panelF23B00C9B8A96A4D",
+                    "title": "Rule Created, Updated Or Changed By Customer Users",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n\n{{{keywords}}}\n\n\nnot  \"\\\"source\\\": \\\"sumo\\\"\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if((isempty(id)),concat(rule_type,\"-\",yid),id) as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| json field=rule \"tuningExpressions\" nodrop\n| json field=rule \"descriptionExpression\" nodrop\n\n// variants\n| json field=rule \"filterExpression\" nodrop\n| json field=rule \"expression\" as hasexp nodrop\n| json field=rule \"expressionsAndLimits\" nodrop\n| concat (filterexpression,hasexp,expressionsAndLimits) as expression\n\n| json field=rule \"severity\" as s nodrop\n| json field=rule \"severityMapping\" nodrop\n| concat(s,severitymapping) as severity\n//| first(rule) as rule by rule_type,change\n| count as changes by change,operator,interface,rule_type,id,name\n| sort id ",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel6D25136081E11B4B",
+                    "title": "Rules Created",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n//(*ruleUpdated or *rulecreated or *ruledeleted))\n*rulecreated\n{{{keywords}}}\n\n\n//not  \"\\\"source\\\": \\\"sumo\\\",\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n\n| count by rule_type,operator | transpose row rule_type column operator\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel928891968ADDDA4F",
+                    "title": "Rules Updated",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n//(*ruleUpdated or *rulecreated or *ruledeleted))\n*ruleUpdated\n{{{keywords}}}\n\n\n//not  \"\\\"source\\\": \\\"sumo\\\",\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n\n| count by rule_type,operator | transpose row rule_type column operator\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel61E2D790BACF7A4B",
+                    "title": "Rules Deleted",
+                    "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n//(*ruleUpdated or *rulecreated or *ruledeleted))\n*ruledeleted\n{{{keywords}}}\n\n\n//not  \"\\\"source\\\": \\\"sumo\\\",\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n\n| count by rule_type,operator | transpose row rule_type column operator\n",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panel0B5ADFCEB677AA4D",
+                    "title": "Full Rule Change Details",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n{{{keywords}}}\n\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n| where operator=\"sumo\"\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if((isempty(id)),concat(rule_type,\"-\",yid),id) as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| json field=rule \"tuningExpressions\" nodrop\n| json field=rule \"descriptionExpression\" nodrop\n\n// variants\n| json field=rule \"filterExpression\" nodrop\n| json field=rule \"expression\" as hasexp nodrop\n| json field=rule \"expressionsAndLimits\" nodrop\n| concat (filterexpression,hasexp,expressionsAndLimits) as expression\n\n| json field=rule \"severity\" as s nodrop\n| json field=rule \"severityMapping\" nodrop\n| concat(s,severitymapping) as severity\n//| first(rule) as rule by rule_type,change\n| count by _messagetime,change,operator,interface,rule_type,id,name,enabled,isPrototype,tags,descriptionExpression,severity,expression\n| sort _messagetime | fields -_count",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                },
+                {
+                    "id": null,
+                    "key": "panelDD8652D182387B4D",
+                    "title": "Rule Changes By Impacted Tags",
+                    "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+                    "keepVisualSettingsConsistentWithParent": true,
+                    "panelType": "SumoSearchPanel",
+                    "queries": [
+                        {
+                            "transient": false,
+                            "queryString": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if(!(isempty(yid)),concat(rule_type,\"-\",yid),yid) as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| parse regex field=tags \"(?<tag_name>[^\\\"\\[:]+):(?<tag_value>[^\\\"\\[:]+)\" multi\n| count by tag_name,tag_value,id,change,rule_type,operator\n| count_distinct(id) as rules,count as changes by tag_name,tag_value,change,rule_type,operator\n| sort tag_name asc, tag_value asc",
+                            "queryType": "Logs",
+                            "queryKey": "A",
+                            "metricsQueryMode": null,
+                            "metricsQueryData": null,
+                            "tracesQueryData": null,
+                            "spansQueryData": null,
+                            "parseMode": "Auto",
+                            "timeSource": "Message",
+                            "outputCardinalityLimit": 1000
+                        }
+                    ],
+                    "description": "",
+                    "timeRange": null,
+                    "coloringRules": null,
+                    "linkedDashboards": []
+                }
+            ],
+            "variables": [
+                {
+                    "id": null,
+                    "name": "keywords",
+                    "displayName": "keywords",
+                    "defaultValue": "*",
+                    "sourceDefinition": {
+                        "variableSourceType": "CsvVariableSourceDefinition",
+                        "values": "keyword,*starword,"
+                    },
+                    "allowMultiSelect": false,
+                    "includeAllOption": true,
+                    "hideFromUI": false,
+                    "valueType": "Any"
+                }
+            ],
+            "coloringRules": []
+        },
+        {
+            "type": "DashboardV2SyncDefinition",
+            "name": "CSE Rules and Mapping Changes (Tuning Pack) -old",
+            "description": "View changes to CSE rules and mappings using audit event data.",
+            "title": "CSE Rules and Mapping Changes (Tuning Pack) -old",
             "theme": "Dark",
             "topologyLabelMap": {
                 "data": {}
@@ -2774,6 +3166,21 @@
             "name": "Searches",
             "description": "",
             "children": [
+                {
+                    "type": "SavedSearchWithScheduleSyncDefinition",
+                    "name": "Insight Latest State Summary",
+                    "search": {
+                        "queryText": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n)\n\n| json field=_raw \"insight.description\" as description  nodrop\n| json field=_raw \"insight.riskScore\" as riskscore  nodrop\n| json field=_raw \"insight.severityName\" as severityname  nodrop\n| json field=_raw \"eventName\"  nodrop\n| json field=_raw \"insightIdentity.id\" as id  nodrop\n| json field=_raw \"insightIdentity.readableId\" as insightid nodrop\n| json field=_raw \"insight.status\" as status  nodrop\n| json field=_raw \"insight.name\" as name  nodrop\n| json field=_raw \"insight.entityType\" as entitytype  nodrop\n| json field=_raw \"insight.entityValue\" as entityvalue  nodrop\n| json field=_raw \"insight.tags\" as tags  nodrop\n| json field=_raw \"insight.severity\" as severity  nodrop\n| json field=_raw \"insight.confidence\" as confidence  nodrop\n| json field=_raw \"insight.signals\" as signals  nodrop\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as updates nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,round(timeToDetection/3600)) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| first(_messagetime) as _messagetime, first(status) as status,first(severity) as severity,first(severityname) as severityname, \n  first(confidence) as confidence, first(riskscore) as riskscore,first(description) as description, first(signals) as signals,\n  first(tags) as tags,max(timeToDetection) as timeToDetection,\n  max(timeToResponse) as timeToResponse,max(timeToRemediation) as timeToRemediation,\n  first(assignee) as assignee, first(resolution) as resolution\n   by insightid,name,eventname,entitytype,entityvalue \n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm:ss\") as time\n\n\n// ***************************************************************************************************************\n// **** This code explodes out the embedded json arrays of tags and signals then will will squash down after *****\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]*\\\")\" multi\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| replace(tag,\"_mitreAttack\",\"\") as tag\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| json field=signal \"tags\" as signal_tags\n//| parse regex field=signal_tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n\n| json field=signal \"id\" as signal_id nodrop\n| json field=signal \"created\" as signal_created nodrop\n| json field=signal \"name\" as signal_name nodrop\n| json field=signal \"summary\" as signal_summary nodrop\n| json field=signal \"severity\" as signal_severity nodrop\n| json field=signal \"ruleId\" as ruleid nodrop\n| json field=signal \"ruleName\" as rulename nodrop\n//| json field=signal \"description\" as sig_description nodrop\n//| substring(sig_description,0,250) as sig_description\n\n\n//| concat(\"{\\\"time\\\":\\\"\",signal_created,\"\\\",\\\"name\\\":\\\"\",signal_name,\"\\\",\\\"sev\\\":\",signal_severity,\",\\\"summary\\\":\\\"\",signal_summary,\"\\\",\\\"rule\\\":\\\"\",rulename,\"\\\"}\") as sig_blob\n| if(isempty(signal_summary),signal_name,signal_summary) as signal_summary\n| concat(signal_created,\"\\t\",signal_summary) as sig_blob\n\n| sort insightid asc, signal_created asc\n\n// ***************************************************************************************************************\n\n|  values(sig_blob) as signal_timeline,values(tag) as tags,values(rule) as rules, count as rows by insightid,name,eventName,entitytype,entityvalue,_messagetime,status,severity,severityname,confidence,riskscore,description,timeToDetection,timeToResponse,timeToRemediation,assignee,resolution,time\n\n| sort _messagetime asc | fields -rows\n\n\n",
+                        "byReceiptTime": false,
+                        "viewName": "",
+                        "viewStartTime": "1970-01-01T00:00:00Z",
+                        "queryParameters": [],
+                        "parsingMode": "AutoParse",
+                        "defaultTimeRange": "Last 24 Hours"
+                    },
+                    "searchSchedule": null,
+                    "description": "A query with output fields useful for summary of new insight to webhook, email to external systems."
+                },
                 {
                     "type": "SavedSearchWithScheduleSyncDefinition",
                     "name": "New Insight Alert",
