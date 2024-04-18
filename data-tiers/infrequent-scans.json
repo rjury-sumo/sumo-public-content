@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Infrequent Scans",
+    "name": "Infrequent Scans (TAM Custom Dashboard)",
     "description": "",
-    "title": "Infrequent Scans",
+    "title": "Infrequent Scans (TAM Custom Dashboard)",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -12,7 +12,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
             "type": "RelativeTimeRangeBoundary",
-            "relativeTime": "-1d"
+            "relativeTime": "-1w"
         },
         "to": null
     },
@@ -25,11 +25,11 @@
             },
             {
                 "key": "panelF9D17532A93D0846",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":26}"
+                "structure": "{\"height\":16,\"width\":24,\"x\":0,\"y\":32}"
             },
             {
                 "key": "panel8238C2A79B7B4B4E",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":18}"
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":12}"
             },
             {
                 "key": "panelPANE-A433B676868B0B46",
@@ -40,8 +40,12 @@
                 "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":4}"
             },
             {
-                "key": "panelAB426AB48070CB42",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":10}"
+                "key": "panel945992EEBDA22947",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":10}"
+            },
+            {
+                "key": "panelC764B8499961BB4D",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":24}"
             }
         ]
     },
@@ -77,13 +81,13 @@
             "id": null,
             "key": "panelF9D17532A93D0846",
             "title": "Queries Detail Top 100 by credits",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":4},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time  - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier=(?<datatier>[a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| (scan_inf/1024/1024/1024 ) as scan_gb \n| count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_gb) as scan_gb,values(status_message) as statuses, values(analytics_tier) as tiers , avg(execution_duration_ms) as avg_exec_ms by user_name,query_type,query,datatier  //,session_id\n\n| sort credits | limit 100\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| replace(status_message,/,.*/,\"\") as status_message\n| round(range_days,1) as range_days\n| min(query_start_time) as f,max(query_start_time) as l,count_distinct(query_start_time) as start_times,count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,values(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf,values(status_message) as statuses, values(query_type) as types by user_name,query,datatier  //,session_id\n\n//| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| ( l -f) / (1000 * 60) as start_time_spread_min\n| fields -scan_inf,l,f\n| sort credits | limit 100\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -110,7 +114,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier=(?<datatier>[a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"index\",datatier) as datatier\n\n| count as queries,count as searches, sum(data_scanned_bytes) as total_bytes,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf, values(status_message) as statuses by user_name,query_type,datatier,analytics_tier //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n\n| fields -scan_inf,total_bytes\n| sort credits | limit 100\n| credits/queries as cr_per_query\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as scope\n| replace(status_message,/,.*/,\"\") as status_message\n| count_distinct(query) as queries,count as searches, sum(data_scanned_bytes) as total_bytes,  sum(retrieved_message_count) as retrieved_events,sum(range_days) as range_days,avg(scanned_partition_count) as avg_partitions, sum(scan_inf) as scan_inf, values(status_message) as statuses by user_name,scope,query_type | limit 100 //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| (total_bytes/1024/1024/1024 ) as total_gb\n\n| fields -scan_inf,total_bytes\n| sort credits\n\n| sort credits\n| credits/queries as cr_per_query\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -165,30 +169,21 @@
         },
         {
             "id": null,
-            "key": "panelAB426AB48070CB42",
-            "title": "Infrequent Scheduled Search Over Scans",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "key": "panel945992EEBDA22947",
+            "title": "This Panel Shows Statistics By User",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type=sched*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as range_minutes\n\n| count as queries,  sum(retrieved_message_count) as retrieved_events,avg(range_minutes) as range_minutes,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf by user_name,query //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n\n| fields -scan_inf\n| credits/queries as cr_per_query\n\n| (queryTimeRange() / ( 1000 * 60 ) ) / queries as frequency_minutes \n| range_minutes / frequency_minutes as scan_ratio | sort scan_ratio,credits\n| where scan_ratio > 1.5",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
+            "panelType": "TextPanel",
+            "text": "This will show overall contributions. The datatier column shows what scope was used: datatier or index."
+        },
+        {
+            "id": null,
+            "key": "panelC764B8499961BB4D",
+            "title": "Detailed Top 100 Searches By Total Scan",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Shows user_name and query\n- datatier: what type of scope operator used. Best practice is to use ```_index=``` or ```_view``` not ```_datatier``` to minimize scan\n- start_times: how many query start times are observed. Useful to understand if a user is repeating the same search\n- searches: number of searches run\n- credits: credits for scan at standard contract UOM\n- retrieved_events: events retrieved by search\n- range_days: day range of the query. Larger days will resut in higher scan\n- partitions: partitions scanned. Ideally an infrequent scan hits only 1 or 2 speicifc partitions. Numbers over 3 suggest poor scoping and user should add _index\n- statuses: statuses observed for query. If cancelled and failed user is being charged for failed searches where there session might have timed out.\n- types: caller module used (usually UI or API)\n- scan_gb: total scan gb\n- start_time_spread_min: spread of start times. For repeated searches indicate if users is repeating over short or longer time intervals."
         }
     ],
     "variables": [
