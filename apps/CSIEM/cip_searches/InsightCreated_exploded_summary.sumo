@@ -48,7 +48,7 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 | values(tag) as tags,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,_messagetime,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,signals,assignee,resolution
 
 // explode embedded signals array
-| json field=signals "[*]" as s
+| replace(signals,",{\"id\":","\n{\"id\":") as signals
 
 // now each signal has a \r \n termination which is good because otherwise super hard to parse them with certainty
 | parse regex field=signals "(?<signal>\{\"id\":\"[^\r\n]+\})" multi 
