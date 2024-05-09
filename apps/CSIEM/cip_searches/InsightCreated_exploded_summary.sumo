@@ -41,16 +41,18 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 
 // **** This code explodes out the embedded json arrays of tags and signals then will will squash down after *****
 
-| parse regex field=tags "\"(?<tag>[^\":,]+:[^\",:]+)\"" multi
+| parse regex field=tags "\"(?<tag>[^\":,]+:[^\",:]+)\"" multi nodrop
 //| replace(tag,"_mitreAttack","") as tag
 
 // compress back post rules expand
 | values(tag) as tags,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,_messagetime,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,signals,assignee,resolution
 
-| formatdate(tolong(_messagetime),"yyyy-MM-dd HH:mm:ss ZZZ") as updated
-
 // explode embedded signals array
-| parse regex field=signals "(?<signal>\{\"id\":\"[^\}]+\})" multi
+| json field=signals "[*]" as s
+
+// now each signal has a \r \n termination which is good because otherwise super hard to parse them with certainty
+| parse regex field=signals "(?<signal>\{\"id\":\"[^\r\n]+\})" multi 
+
 | json field=signal "id" as signal_id nodrop
 | json field=signal "created" as signal_created nodrop
 | json field=signal "name" as signal_name nodrop
@@ -60,13 +62,17 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated
 | json field=signal "ruleName" as rulename nodrop
 | concat(ruleid," ", rulename, " sev:",signal_severity) as r
 
-| concat("{\"time\":\"",signal_created,"\",\"name\":\"",signal_name,"\",\"sev\":",signal_severity,",\"summary\":\"",signal_summary,"\",\"rule\":\"",rulename,"\"}") as sig_json
+
+// GET THE first and last signal per insight
+| sort insightid asc, signal_created asc
+
+// create a summary version for formatting later
+//| concat("{\"time\":\"",signal_created,"\",\"name\":\"",signal_name,"\",\"sev\":",signal_severity,",\"summary\":\"",signal_summary,"\",\"rule\":\"",rulename,"\"}") as sig_json
 | concat(signal_created,"\t",signal_severity,"\t",signal_summary) as sig_blob
-
+//
 // compress back to one row per insight with summary values
-| count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(r) as rules  by created,_messagetime,updated,insightid,name,riskscore,severityname,entitytype,entityvalue,status,resolution,confidence //,timeToResponse,timeToDetection,timeToRemediation,tags
+| count_distinct(signal_id) as sig_count,first(signal_id) as sig_id_first,first(signal_created) as sig_first_time,last(signal_created) as sig_last_time,last(signal_id) as sg_id_last,count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(r) as rules  by created,_messagetime,insightid,name,riskscore,severityname,entitytype,entityvalue,confidence, tags,timeToDetection //,timeToResponse,timeToDetection,timeToRemediation,resolution,status
 | num(riskscore) as riskscore
-| sort riskscore | fields -_messagetime
-
-//| tourl(concat("https://","{{cse_instance}}","/sec/insight/",insightid),insightid) as insightid
-//|tourl( concat("https://{{cse_instance}}/sec/entity?entityId=",entitytype,"-",entityvalue),entityvalue) as entityvalue
+| sort insightid asc | fields -_messagetime
+//
+//
