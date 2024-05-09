@@ -1,0 +1,88 @@
+//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated
+//OR
+_index=sumologic_system_events _sourcecategory=cseinsight insightcreated
+//)
+| json field=_raw "insight.description" as description
+| json field=_raw "insight.riskScore" as riskscore
+| json field=_raw "insight.severityName" as severityname
+| json field=_raw "eventName"
+//| json field=_raw "insightIdentity.id" as id
+| json field=_raw "insightIdentity.readableId" as insightid
+| json field=_raw "insight.status" as status
+| json field=_raw "insight.name" as name
+| json field=_raw "insight.entityType" as entitytype
+| json field=_raw "insight.entityValue" as entityvalue
+| json field=_raw "insight.tags" as tags
+| json field=_raw "insight.severity" as severity
+| json field=_raw "insight.confidence" as confidence nodrop
+| json field=_raw "insight.signals" as signals
+| json field=_raw "insight.created" as created
+
+// in closed events
+| json field=_raw "insight.assignee" as assignee nodrop
+| json field=_raw "insight.resolution" as resolution nodrop
+
+// in update events 
+//| json field=_raw "to" as updates nodrop
+
+// may exist after an update
+| json field=_raw "insight.timeToResponse" as timeToResponse nodrop
+| json field=_raw "insight.timeToDetection" as timeToDetection nodrop
+| json field=_raw "insight.timeToRemediation" as timeToRemediation nodrop
+
+| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse
+| if (isnull(timeToDetection),-1,round(timeToDetection/3600)) as timeToDetection
+| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation
+| sort _messagetime
+
+// ensure we only store the most recent result
+| max(_messagetime) as _messagetime,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count, first(status) as status, first(resolution) as resolution,first(assignee) as assignee, first(signals) as signals, first(tags) as tags, max(riskscore) as riskscore,first(eventname) as eventname, first(severity) as severity, first(severityname) as severityname, first(confidence) as confidence by created,insightid,name,entitytype,entityvalue
+
+// **** This code explodes out the embedded json arrays of tags and signals then will will squash down after *****
+
+| parse regex field=tags "\"(?<tag>[^\":,]+:[^\",:]+)\"" multi nodrop
+//| replace(tag,"_mitreAttack","") as tag
+
+// compress back post rules expand
+| values(tag) as tags,max(timeToResponse) as timeToResponse, max(timeToDetection) as timeToDetection, max(timeToRemediation) as timeToRemediation, count by created,_messagetime,insightid,name,eventname,entitytype,entityvalue,status,severity,severityname,confidence,riskscore,signals,assignee,resolution
+
+// explode embedded signals array
+| replace(signals,",{\"id\":","\n{\"id\":") as signals
+
+// now each signal has a \r \n termination which is good because otherwise super hard to parse them with certainty
+| parse regex field=signals "(?<signal>\{\"id\":\"[^\r\n]+\})" multi 
+//  
+| json field=signal "id" as signal_id nodrop
+| json field=signal "created" as signal_created nodrop
+| json field=signal "name" as signal_name nodrop
+| json field=signal "summary" as signal_summary nodrop
+| json field=signal "severity" as signal_severity nodrop
+| json field=signal "ruleId" as ruleid nodrop
+| json field=signal "ruleName" as rulename nodrop
+| concat(ruleid," ", rulename, " sev:",signal_severity) as r
+
+
+// GET THE first and last signal per insight
+//| sort insightid asc, signal_created asc
+
+// create a summary version for formatting later
+//| concat("{\"time\":\"",signal_created,"\",\"name\":\"",signal_name,"\",\"sev\":",signal_severity,",\"summary\":\"",signal_summary,"\",\"rule\":\"",rulename,"\"}") as sig_json
+//| concat(signal_created,"\t",signal_severity,"\t",signal_summary) as sig_blob
+
+//
+// compress back to one row per insight with summary values
+//| count_distinct(signal_id) as sig_count,first(signal_id) as sig_id_first,first(signal_created) as sig_first_time,last(signal_created) as sig_last_time,last(signal_id) as sg_id_last,count_distinct(signal_id) as signals, values(sig_blob) as signal_timeline,values(r) as rules  by created,_messagetime,insightid,name,riskscore,severityname,entitytype,entityvalue,confidence, tags,timeToDetection //,timeToResponse,timeToDetection,timeToRemediation,resolution,status
+//| num(riskscore) as riskscore
+//| sort insightid asc | fields -_messagetime
+////
+////
+
+// this would save a lookup to flag we have already 'seen' the insight
+// later we can pull values back out per insight 
+| created as insight_created
+| replace(insight_created,"T"," ") as insight_created
+| replace(signal_created,"T"," ") as signal_created
+| concat(formatdate(tolong(_messagetime),"yyyy-MM-dd HH:mm:ss.SSS","ETC/Utc"),"Z") as audit_time
+| name as insight_name
+| count by signal_id,insightid,ruleid,rulename,signal_name,insight_name,entityvalue,signal_created,insight_created,audit_time,timetodetection,tags,confidence
+| sort insightid asc, signal_created asc
