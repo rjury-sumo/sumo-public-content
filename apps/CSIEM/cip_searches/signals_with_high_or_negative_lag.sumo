@@ -1,0 +1,10 @@
+_index=sec_record_* //| limit 100
+
+| ceil((metadata_parseTime - timestamp) / (1000)) as lag_s_time_to_parse
+| formatdate(_receipttime,"yyyy-MM-dd HH:mm:ss.SSS'Z'","ETC/Utc") as log_received 
+| formatdate(_messagetime,"yyyy-MM-dd HH:mm:ss.SSS'Z'","ETC/Utc") as log_timestamp 
+| ceil((_receipttime - _messagetime)  / (1000)) as lag_s_ingest
+
+| avg(lag_s_ingest) as avg_lag_ingest,avg(lag_s_time_to_parse) as avg_lag_to_parse,max(lag_s_ingest) as max_lag_ingest,max(lag_s_time_to_parse) as max_lag_to_parse,min(lag_s_ingest) as min_lag_ingest,min(lag_s_time_to_parse) as min_lag_to_parse by metadata_sourceCategory,metadata_mapperName
+
+| where min_lag_ingest < 0  or max_lag_ingest > 300 or max_lag_to_parse > 300 // bad future timestamping negative, or > 5 minutes lag
