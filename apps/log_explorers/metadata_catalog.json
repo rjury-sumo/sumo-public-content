@@ -1,0 +1,300 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "SumoLogic Metadata Catalog",
+    "description": "",
+    "title": "SumoLogic Metadata Catalog",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-DC07B800885D8941",
+                "structure": "{\"height\":15,\"width\":24,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panel55B32B81B1A8C942",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":23}"
+            },
+            {
+                "key": "panelDF35329D94A9B84B",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":34}"
+            },
+            {
+                "key": "panel61F2F3AA9C51C848",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":43}"
+            },
+            {
+                "key": "panel23875E72A97D594D",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":52}"
+            },
+            {
+                "key": "panel41073C1CBAF5F84B",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":61}"
+            },
+            {
+                "key": "panelPANE-4ADD44A1A140F949",
+                "structure": "{\"height\":8,\"width\":13,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel4382B1A8B06F594C",
+                "structure": "{\"height\":8,\"width\":11,\"x\":13,\"y\":0}"
+            },
+            {
+                "key": "panelECA07D599034194C",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":61,\"minHeight\":3,\"minWidth\":3}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-DC07B800885D8941",
+            "title": "Matching Keywords Found With Metadata Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=*_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n//| sum(count) as events,sum(gbytes) as gbytes by collector\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| count by meta_value,_sourcecategory\n\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk //| fields -junk,_sourcecategory,_some_matched \n| parse regex field=meta_value \"(?<string>[a-z][0-9a-z-]{2,})\" multi\n| count by meta_type,string | sort meta_type asc,string asc\n| now() as _messagetime \n| transactionize meta_type (merge meta_type takefirst, string join with \" \")\n| fields -_messagetime\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel55B32B81B1A8C942",
+            "title": "SourceCategory Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=sourceCategory_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelDF35329D94A9B84B",
+            "title": "Collector Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=collector_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel61F2F3AA9C51C848",
+            "title": "Source Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=source_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel23875E72A97D594D",
+            "title": "SourceName Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=source_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel41073C1CBAF5F84B",
+            "title": "SourceHost Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=sourcehost_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-4ADD44A1A140F949",
+            "title": "How To Use This Dashboard",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard shows log metadata from recent ingestion in your sumo logic account and enables you to search this data to find correct metadata for scoping your search.\n\nYou can search the metadata using two parameters which are matched agains the metadata value string:\n- keyword_matches: a matches expression such as ```*foo*``` or ```*bar*```\n- keyword_regular_expression: this can be any [regular expression](https://github.com/google/re2/blob/main/doc/syntax.txt) such as ```.*```   ```labs``` ```i-[a-z0-9]``` etc\n\nData is ingested by default into 'Continuous' tier. Some accounts also use the Frequent or Infrequent log tiers which have reduced features and require an index added to search scope to return results.  \n\nIf you are not sure which is the correct index value contact your sumo administrator, or run a search over a short time range (-15m) with ```_datatier=infrequent``` added and check what the correct index name is in the returned data.\n"
+        },
+        {
+            "id": null,
+            "key": "panel4382B1A8B06F594C",
+            "title": "SumoLogic Metadata",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Best practice is to include following metadata in your Sumologic query:\n- ```_sourcecategory=```  and/or ```_index=``` ( ```_view``` or ```_index``` is the name of the partition where logs are stored.)\n\nYou can also add one or more other metadata to better scope search:\n- collector: the name of the collector that hosts the ingestion source. For installed collectors this is the agent name.\n- source: the name of the source configuration or endpoint for ingestion\n- sourcename: the path of the file if it's from a file system\n- sourcehost: for installed agents the hostname of the agent\n\n\n\n"
+        },
+        {
+            "id": null,
+            "key": "panelECA07D599034194C",
+            "title": "View (also known as index or partition) Found With Search String",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume \n_sourcecategory=view_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| if(meta_value = \"Default Index\",\"sumologic_default\",meta_value) as meta_value\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keyword_matches",
+            "displayName": "keyword_matches",
+            "defaultValue": "*some_value*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*keyword*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "keyword_regular_expression",
+            "displayName": "keyword_regular_expression",
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}

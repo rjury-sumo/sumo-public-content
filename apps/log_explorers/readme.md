@@ -1,5 +1,8 @@
 # Log Explorers
 
+# Metadata Catalog
+A dashboard to search recent ingestion metadata using a matches or regular expression search. Enables users to find correct metadata strings to use in their searches.
+
 ## Keyword Log Explorer
 A custom dashboard that enables you to start with a search say by category, collector and /or keywords, then drill down to a new search tab only showing surrounding messages.
 
