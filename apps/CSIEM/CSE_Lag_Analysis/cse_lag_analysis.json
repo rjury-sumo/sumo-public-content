@@ -1,0 +1,271 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "CSE Lag Analysis",
+    "description": "",
+    "title": "CSE Lag Analysis",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-6h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-D2C6CE5EB901F84D",
+                "structure": "{\"height\":15,\"width\":24,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panelPANE-027969498C19484E",
+                "structure": "{\"height\":6,\"width\":11,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelPANE-D8E75FD58CEFB848",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":45}"
+            },
+            {
+                "key": "panel9232DB8086A09A4E",
+                "structure": "{\"height\":5,\"width\":11,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel4ED7AA9B81643A43",
+                "structure": "{\"height\":6,\"width\":13,\"x\":11,\"y\":5}"
+            },
+            {
+                "key": "panelC3A09B2FB6343A45",
+                "structure": "{\"height\":5,\"width\":13,\"x\":11,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-59CAA507A252A94F",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":29}"
+            },
+            {
+                "key": "panelPANE-7F45FAB89D538B44",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":26}"
+            },
+            {
+                "key": "panel90A0585E8A1DB944",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":42}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-D2C6CE5EB901F84D",
+            "title": "Insights: Record, Signal Timing for Generated Insight where signal metadata_sourceCategory matches: {{raw_log_sourcecategory}} and sec_signal keywords: {{signal_keywords}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "// FOR A INSIGHT GENERATION TIME RANGE\n// RETURN INSIGHTS CREATED\n// EXTRACT LATEST SIGNAL EVENT\n// RETURN PARENT SUBQUERY OF SIGNAL RECORDS IN TIME RANGE\n// ANNOTATE WITH SIGNAL - INGSIGHT TIMINGS\n// PROVIDE DIRECT CLICK THROUGH LINK TO RAW EVENT WITH SPECIFIC TIME RANGE\n\n// SIGNAL LEVEL \n_index=sec_signal \n{{signal_keywords}}\n[subquery:\n\n       // INSIGHT LEVEL\n    _index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n    | json field=_raw \"insight.riskScore\" as riskscore\n    | json field=_raw \"insight.severityName\" as severityname\n    | json field=_raw \"insightIdentity.readableId\" as insightid\n    | json field=_raw \"insight.name\" as name\n    | json field=_raw \"insight.entityType\" as entitytype\n    | json field=_raw \"insight.entityValue\" as entityvalue\n    | json field=_raw \"insight.tags\" as tags\n    | json field=_raw \"insight.severity\" as severity\n    | json field=_raw \"insight.confidence\" as confidence nodrop\n    | json field=_raw \"insight.signals\" as signals\n    | json field=_raw \"insight.created\" as created\n \n    | json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n\n    | if (isnull(timeToDetection),-1,round(timeToDetection/3600)) as timeToDetection\n    \n    // ensure we only store the most recent result\n    | max(_messagetime) as _messagetime,max(timeToDetection) as timeToDetection, first(status) as status, first(signals) as signals, first(tags) as tags, max(riskscore) as riskscore,first(severity) as severity, first(severityname) as severityname, first(confidence) as confidence by created,insightid,name,entitytype,entityvalue\n    \n    // explode embedded signals array\n    | replace(signals,\",{\\\"id\\\":\",\"\\n{\\\"id\\\":\") as signals\n    \n    // now each signal has a \\r \\n termination which is good because otherwise super hard to parse them with certainty\n    | parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\r\\n]+\\})\" multi \n\n    | json field=signal \"id\" as signal_id nodrop\n    | json field=signal \"created\" as signal_created nodrop\n    | json field=signal \"name\" as signal_name nodrop\n    | json field=signal \"summary\" as signal_summary nodrop\n    | json field=signal \"severity\" as signal_severity nodrop\n    | json field=signal \"ruleId\" as ruleid nodrop\n    | json field=signal \"ruleName\" as rulename nodrop\n    | concat(ruleid,\" \", rulename, \" sev:\",signal_severity) as r\n    \n   // we should only need the last signal as this is the time the insight was generated and best indicator of any possible lag between ingest and insight creation.\n   | sort insightid asc, signal_created asc\n   \n    // this would save a lookup\n    // later we can pull values back out per insight in parent\n    | created as insight_created\n    | replace(insight_created,\"T\",\" \") as insight_created\n    | replace(signal_created,\"T\",\" \") as signal_created\n    | concat(formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm:ss.SSS\",\"ETC/Utc\"),\"Z\") as audit_time\n    | name as insight_name\n    | last(signal_created) as signal_created,last(signal_id) as signal_id, last(ruleid) as ruleid,last(rulename) as rulename,last(signal_name) as signal_name by insightid,insight_name,entityvalue,insight_created,audit_time,timetodetection,tags,confidence\n    | sort insightid asc\n    \n    // if we save a lookup by id we can pull this info back in later in parent queries\n    | save /temp/lookups/signals_that_created_insight\n    \n    // compose to parent\n    | signal_id as id\n    | count by id | compose id\n\n]\n\n// *** CONTINUE SIGNAL LEVEL  ***\n| parse regex field=fullrecords \"(?<blob>metadata_device.+?\\\"uid\\\":\\\"[^\\\"]+\\\")\" multi\n| parse field = blob \"metadata_mapperName\\\":\\\"*\\\",\" as mapper nodrop\n| parse field = blob \"metadata_parseTime\\\":*,\" as parsetime nodrop\n| parse field = blob \"metadata_sourceCategory\\\":\\\"*\\\",\" as sourcecategory nodrop\n| where tolowercase(sourcecategory) matches trim(tolowercase(\"{{raw_log_sourcecategory}}\"))\n| parse field = blob \"metadata_sourceMessageId\\\":\\\"*\\\",\" as mid nodrop\n| parse field = blob \"uid\\\":\\\"*\\\",\" as record_uid nodrop\n| parse field = blob \"timestamp\\\":*,\" as event_timestamp nodrop\n| parse field = blob \"objectType\\\":\\\"*\\\",\" as type nodrop\n| _receipttime as sig_received\n| count by id,record_uid,mapper,mid,type,sourcecategory,parsetime,event_timestamp,sig_received,timestamp\n| tolong(parsetime) as parsetime\n| tolong(event_timestamp ) as event_timestamp\n| tolong(timestamp ) as timestamp\n| ceil((parsetime - event_timestamp) / (1000)) as t_rec_to_parse\n| ceil((sig_received -parsetime ) / (1000)) as t_parse_to_sigr\n| ceil((parsetime - timestamp) / (1000 )) as t_parse_to_sigt\n| ceil((sig_received - timestamp) / (1000 )) as t_sig_lag_rt\n\n/// enrich with temp insight info lookup in subquery\n| lookup insight_created,insight_created,insightid from /temp/lookups/signals_that_created_insight on id=signal_id\n\n| parsedate (insight_created,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as ict\n| ceil((ict - sig_received) / (1000 )) as t_sigr_to_insight\n| ceil((ict - event_timestamp) / (1000 )) as t_rec_to_insight\n\n| formatdate(parsetime,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as parsetime\n| formatdate(timestamp,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as  sig_timestamp\n| formatdate(event_timestamp,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as  rec_timestamp\n| formatdate(sig_received,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as  sig_received\n\n| fields -_count,ict,timestamp,event_timestamp\n| parsetime as rec_parsetime\n| id as signal_id\n| type as rec_type\n| count by insightid,signal_id,record_uid,insight_created,rec_timestamp,rec_parsetime,sig_timestamp,sig_received,t_rec_to_parse,t_parse_to_sigr,t_parse_to_sigt,t_sig_lag_rt,t_sigr_to_insight,t_rec_to_insight,rec_type,mapper,mid,sourcecategory\n\n// generate raw source link in format: https://xxx.us2.sumologic.com/ui/#/search/@1715298782000,1715298812000@<urlencoded_query>\n// *** your instance of sumo here ***\n| concat(\"{{cip_instance}}\" ,\"/ui/#/search/@\") as instance\n\n| parsedate(sig_timestamp,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as s\n\n// add a buffer for raw log search time range +/- 60s\n| s - 60000 as s\n| s + 120000 as e\n| format( \"%.0f\",s) as start\n| format( \"%.0f\",e) as end\n| concat(\"_sourcecategory=\",sourcecategory,\" _messageid=\",mid, \"\\n| formatdate(_receipttime,\\\"yyyy-MM-dd HH:mm:ss.SSS'Z'\\\",\\\"ETC/Utc\\\") as log_received \\n| formatdate(_messagetime,\\\"yyyy-MM-dd HH:mm:ss.SSS'Z'\\\",\\\"ETC/Utc\\\") as log_timestamp \\n| (_receipttime - _messagetime)  / (1000) as ingest_lag_seconds\") as raw_q  \n| tourl(concat(instance,start,\",\",end,\"@\",urlencode(raw_q)),\"log search\") as raw_log_search\n| concat(\"_sourcecategory=\",sourcecategory,\" \\n_messageid\",mid) as raw_meta\n| concat(\"sec_sig_id:\",signal_id,\"\\nsec_record_*_id:\",record_uid,\"\\n_raw_mid:\",mid) as ids \n| fields -_count,start,end,s,e,raw_q,mid,sourcecategory,instance,t_parse_to_sigr,t_parse_to_sigt,t_parse_to_sigt,signal_id,record_uid,t_sigr_to_insight,sig_timestamp\n//\n| sort t_rec_to_insight",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-027969498C19484E",
+            "title": "Insights Generated",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel shows the timings for the signal that triggered each insight generation.  (A insight can contain multiple signals over a 2 week time range).\n\nThis panel uses nested subquery to:\n- return insights matching criteria\n- get latest signal id\n- filter parent query vs sec_signal by id\n- combine matching signal /record / info with timings."
+        },
+        {
+            "id": null,
+            "key": "panelPANE-D8E75FD58CEFB848",
+            "title": "Raw Log CIP Event Ingest Lag Stats for _sourcecategory={{raw_log_sourcecategory}}  _siemforward=true. log keywords: {{raw_log_keywords}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourcecategory={{raw_log_sourcecategory}}\n{{raw_log_keywords}}\n_siemforward=true\n| ceil((_receipttime - _messagetime)  / (1000)) as lag_s_ingest\n| values(_collector) as collectors,values(_source) as sources,count as events,min(lag_s_ingest) as min_lag_receipt, avg(lag_s_ingest) as avg_lag_receipt,max(lag_s_ingest) as max_lag_receipt by _sourcecategory\n| \"1.OK\" as state\n| if(max_lag_receipt > {{max_lag_error_secs}},\"2.ERR: high lag\\nCheck ingest pipeline.\", state) as state\n| if(min_lag_receipt <0,\"3.TZERR: future time\\nCheck source TZ config.\",state) as state\n| sort state,max_lag_receipt\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel9232DB8086A09A4E",
+            "title": "How To Use This Dashboard",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Some of these search panels have **heavy load in large orgs. Filtering or specific time ranges (say -3h) are recommended** for good performance."
+        },
+        {
+            "id": null,
+            "key": "panel4ED7AA9B81643A43",
+            "title": "Insights Generated: How To Interpret Timing Info",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These values are in seconds.\n- A. t_rec_to_parse: offset between the record timestamp and the time parsing engine ingested as a record. A high value here usually indicates ingest lag BEFORE cip but could also be a processing lag between CIP and parser engine.\n- B. t_sig_lag_rt: offset between signal _receipttime and signal _messagetime (record timestamp). The higher this value the more lag between the timestamp of the event and the time signal was written to sec_signal.\n- C. t_rec_to_insight: time from record timestamp to signal generation. If this value is high there could be lag somewhere in the chain: source -> ingest cip -> parser q -> rule engine to signal -> signal to insight \n\n"
+        },
+        {
+            "id": null,
+            "key": "panelC3A09B2FB6343A45",
+            "title": "Dashboard Filters",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Filters apply to SOME PANELS ONLY.\n- raw_log_sourcecategory: applied to raw event search and sec_signal metadata_sourcecategory\n- raw_log_keywords: keyword expression for raw log search, also works on sec_record_* and sec_signals_* panels (because contains fullrecords also)\n- signal_keywords: keywords sec_signal or signals[*] array within insight payload. Note no records level info in insights.\n- cip_instance: used for clickalble ui links"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-59CAA507A252A94F",
+            "title": "sec_record_* metadata_sourceCategory={{raw_log_sourcecategory}} and raw (fullrecords) keywords: {{raw_log_keywords}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1200},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":600}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"A:max_lag_receipt\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_record_* //| limit 100\n{{raw_log_keywords}}\nmetadata_sourceCategory={{raw_log_sourcecategory}}\n//| ceil((metadata_parseTime - timestamp) / (1000)) as lag_s_time_to_parse\n//| formatdate(_receipttime,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as log_received \n//| formatdate(_messagetime,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as log_timestamp \n| ceil((_receipttime - _messagetime)  / (1000)) as lag_s_ingest\n\n|values(_view) as indexes,count as records,min(lag_s_ingest) as min_lag_receipt, avg(lag_s_ingest) as avg_lag_receipt,max(lag_s_ingest) as max_lag_receipt by metadata_vendor,metadata_product,metadata_sourceCategory,metadata_mapperName\n| \"1.OK\" as state\n| if(max_lag_receipt > {{max_lag_error_secs}},\"2.ERR: high lag\\nCheck ingest pipeline.\", state) as state\n| if(min_lag_receipt <0,\"3.TZERR: future time\\nCheck source TZ config.\",state) as state\n| sort state,max_lag_receipt\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-7F45FAB89D538B44",
+            "title": "sec_record Ingestion Lag",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel shows offset between receipttime of sec_record event and the log timestamp. The timestamp is derived from specified parser or _messagetime of event.\n\nValues are in seconds. The larger the value is the more time there is between the actual message time and the time it was parsed into sumo. This could be lag BEFORE log ingestion into CIP or a delay in record processing (CIP -> CSE). If there is a high lag issue check the raw logs to see if the lag was pre - Sumo or CIP -> CSE.\n\n"
+        },
+        {
+            "id": null,
+            "key": "panel90A0585E8A1DB944",
+            "title": "CIP Raw Log Ingestion Lag",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This panel shows offset between receipttime vs _messagetime for raw log event ingestion into core platform. \n\nValues are in seconds. The larger the value is the more time there is between the actual message time and the time it was received by Sumo Logic core platform receiver. Any lag here suggest an ingestion issue in the customer environment, or there could be timestamp misconfiguration on the ingestion source.\n\n"
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "raw_log_sourcecategory",
+            "displayName": "raw_log_sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_index=sec_record_* | count by metadata_sourceCategory | sort metadata_sourceCategory asc",
+                "field": "metadata_sourceCategory"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "raw_log_keywords",
+            "displayName": "raw_log_keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Any keywords in raw log or record fields,foo,bar*,(foo or bar)"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "signal_keywords",
+            "displayName": "signal_keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Any keyword(s) in signal payload. foo,bar*,( foo or bar)"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "cip_instance",
+            "displayName": "cip_instance",
+            "defaultValue": "https://live.us2.sumologic.com",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "https://service.sumologic.com"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "max_lag_error_secs",
+            "displayName": "max_lag_error_secs",
+            "defaultValue": "1200",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "1200"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
