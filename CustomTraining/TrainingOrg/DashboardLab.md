@@ -28,7 +28,7 @@ In this lab we will use [AWS Cloudfront logs](https://docs.aws.amazon.com/Amazon
 - Use the + New button, on the top of the Sumo UI and click Dashboard to make an new dashboard
 - It should open a new tab with a mostly blank dashboard
 - First click the time range selector in the top right corner.
-- Tick 'set as dashboards's default time range' and change it to 'Last 60 Minutes'
+- Change the time range to last 60 minutes from the relative list.
 - It will color blue to indicate this is not the default range for future users. Click the downward icon in the time selector and select 'Set as default time range'
 
 Choosing a good default time range for the dashboard use case means usually other panels can just inherit the dashboard level setting.
