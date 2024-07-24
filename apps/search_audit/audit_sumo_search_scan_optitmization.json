@@ -61,7 +61,7 @@
             },
             {
                 "key": "panel2FA162F4B4B37B49",
-                "structure": "{\"height\":10,\"width\":6,\"x\":0,\"y\":85}"
+                "structure": "{\"height\":10,\"width\":6,\"x\":0,\"y\":99}"
             },
             {
                 "key": "panel821D9B8A813A0A45",
@@ -93,23 +93,23 @@
             },
             {
                 "key": "panel141CB72EB5D51A4F",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":76}"
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":90}"
             },
             {
                 "key": "panel917FE145BAB7A94A",
-                "structure": "{\"height\":10,\"width\":6,\"x\":6,\"y\":85}"
+                "structure": "{\"height\":10,\"width\":6,\"x\":6,\"y\":99}"
             },
             {
                 "key": "panel87D86E3CBA458947",
-                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":85}"
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":99}"
             },
             {
                 "key": "panelD3C86792AA057A4C",
-                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":95}"
+                "structure": "{\"height\":6,\"width\":24,\"x\":0,\"y\":109}"
             },
             {
                 "key": "panel5D025AC8A6370A41",
-                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":101}"
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":115}"
             },
             {
                 "key": "panel108B24BBA17F994E",
@@ -133,11 +133,19 @@
             },
             {
                 "key": "panel1114182587E9194B",
-                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":115}"
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":129}"
             },
             {
                 "key": "panel8009BB2294CC5B4E",
                 "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":36}"
+            },
+            {
+                "key": "panel0573E9C68CD5794E",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":60}"
+            },
+            {
+                "key": "panel92567E8A8CBF7B4F",
+                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":72}"
             }
         ]
     },
@@ -853,6 +861,60 @@
                 {
                     "transient": false,
                     "queryString": "_view=sumologic_search_usage_per_query \n{{{filter}}}\n\n| where data_scanned_bytes > ({{min_scan_gb_per_search}} * 1G)\n\n//| (query_end_time - query_start_time)/1000 as range_s\n//| execution_duration_ms /1000 as duration_s\n| if(isempty(content_name),substring(query,0,200),content_name) as item\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type,item\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024/1024 as scan_tb\n| fields -bytes_scanned,unique_queries,users\n//| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 200",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0573E9C68CD5794E",
+            "title": "Dashboards: Highest Scan By Dashboard Name",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n{{{filter}}}\nquery_type=*dash*\n| where data_scanned_bytes > ({{min_scan_gb_per_search}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| count_distinct(query) as unique_searches,avg(scanned_partition_count) as avg_partitions,values(user_name) as user_names,values(range_day) as range_days,avg(range_min) as range_minutes, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by content_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,{{search_max_chrs}}) as query\n| bytes_scanned / 1G as gb_scan\n| fields -bytes_scanned\n| total_s / (60 * 60 ) as run_hours\n| sort gb_scan | limit 100 | fields -total_s,run_hours,range_minutes\n//| replace (partitions,\"\\n\",\", \") as partitions\n| replace (range_days,\"\\n\",\", \") as range_days\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel92567E8A8CBF7B4F",
+            "title": "Highest Scan Searches by total Scan GB. Use this panel to drill down to specific high scan searches.",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n{{{filter}}}\n| where data_scanned_bytes > ({{min_scan_gb_per_search}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| values(scanned_partition_count) as partitions,values(user_name) as user_names,values(range_day) as range_days,avg(range_min) as range_minutes, sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as retrieved_events, avg(duration_s) as avg_duration_s by query_type,query,content_name\n| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n| substring(query,0,{{search_max_chrs}}) as query\n| bytes_scanned / 1G as gb_scan\n| fields -bytes_scanned\n| total_s / (60 * 60 ) as run_hours\n| sort gb_scan | limit 100 | fields -total_s,_some_matched,run_hours\n| replace (partitions,\"\\n\",\", \") as partitions\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
