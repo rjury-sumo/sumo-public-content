@@ -1,0 +1,484 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Sumo Search Poor Performers",
+    "description": "",
+    "title": "Sumo Search Poor Performers",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-9452E87BB98E4947",
+                "structure": "{\"height\":11,\"width\":8,\"x\":8,\"y\":5}"
+            },
+            {
+                "key": "panelPANE-0182EB4C89A2694F",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelBFA7D284A1C14B46",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":77}"
+            },
+            {
+                "key": "panelA730776E87C6084D",
+                "structure": "{\"height\":11,\"width\":8,\"x\":8,\"y\":16}"
+            },
+            {
+                "key": "panel8179E211A3187B4C",
+                "structure": "{\"height\":11,\"width\":8,\"x\":0,\"y\":16}"
+            },
+            {
+                "key": "panel40EC77C085C34A4D",
+                "structure": "{\"height\":11,\"width\":8,\"x\":16,\"y\":5}"
+            },
+            {
+                "key": "panel1B741DB6B8EB9B4F",
+                "structure": "{\"height\":11,\"width\":8,\"x\":16,\"y\":16}"
+            },
+            {
+                "key": "panelABB560FFA7C75A4D",
+                "structure": "{\"height\":11,\"width\":8,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel16603D71A4402B48",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":62}"
+            },
+            {
+                "key": "panelDE6FEE85BB872A43",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":49}"
+            },
+            {
+                "key": "panel0974EC9484E7B943",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":32}"
+            },
+            {
+                "key": "panel6DBC43A4897E7A4D",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":95}"
+            },
+            {
+                "key": "panel8D0EAA758940BB45",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":27}"
+            },
+            {
+                "key": "panelD9896AD5B8F3AA4B",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":45}"
+            },
+            {
+                "key": "panel5B1B0401B10C7A44",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":75}"
+            },
+            {
+                "key": "panel39E3E9A5B9841B4D",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":90}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-9452E87BB98E4947",
+            "title": "Over 30s Runtime - Other Types",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\nnot query_type=\"Interactive Dashboard\"\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches by query_type,query,content_name, range_day,user_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sum(over_30s_runtime) as over_30s_runtime by query_type, user_name | where over_30s_runtime > 0\n| transpose row query_type column user_name\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-0182EB4C89A2694F",
+            "title": "Common Poor Performance Indicators",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Poor performing of high load searches usually have one or more of following issues:\n- high runtime > 30s\n- scan volume is very high: > 10TB per search, or very large volumes over a 24 hour period\n- scans all or far too many partitions due to poor scoping\n- use all search time parse/where rather than faster options like: kewords, field extraction rules or scheduled views"
+        },
+        {
+            "id": null,
+            "key": "panelBFA7D284A1C14B46",
+            "title": "Searches Over 30s Runtime Sorted By Average Runtime",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n//query_type=*dash*\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n\n\n| querytimerange() / (1000 * 60) as qrm \n| range_day * 1440 as range_minutes\n| qrm / searches as ran_every\n| range_minutes / ran_every as %\"range:schedule\"\n\n| where over_30s_runtime > 0 \n| fields -over_30s_runtime,scans_many_partitions,gt_7d_range,gt_30d_range,scan_gt_10tb,scan_gt_100tb,qrm\n| sort avg_run_secs \n| limit 50 ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA730776E87C6084D",
+            "title": "Scans Over 100 TB Per Search",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches by query_type,query,content_name, range_day,user_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sum(scan_gt_100tb) as scan_gt_100tb by query_type, user_name | where scan_gt_100tb > 0\n| transpose row query_type column user_name\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8179E211A3187B4C",
+            "title": "Scans Over 10 TB Per Search",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches by query_type,query,content_name, range_day,user_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sum(scan_gt_10tb) as scan_gt_10tb by query_type, user_name | where scan_gt_10tb > 0\n| transpose row query_type column user_name\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel40EC77C085C34A4D",
+            "title": "Total Scan For Scans Over 10 Partitions",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"query_type\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"minimum\":0}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches,sum(scan_tb) as scan_tb by query_type,query,content_name, range_day,user_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| where scans_many_partitions > 0 and scan_tb > 0\n| sum(scan_tb) as scan_tb by query_type, user_name \n| transpose row query_type column user_name\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1B741DB6B8EB9B4F",
+            "title": "Top 50 Total Scan By Saved Item or User Name",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"horizontalAlign\":\"right\",\"maxWidth\":440.2982177734375,\"maxHeight\":50,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| values(user_name) as users, sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,sum(scan_tb) as scan_tb,count as searches by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sort scan_tb | limit 50\n| if(isempty(content_name),users,content_name) as name_or_user\n| sum(scan_tb) as scan_tb by query_type, name_or_user \n| transpose row query_type column name_or_user\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelABB560FFA7C75A4D",
+            "title": "Over 30s Runtime - Dashboard Panels",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\nquery_type=\"Interactive Dashboard\"\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches by query_type,query,content_name, range_day,user_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sum(over_30s_runtime) as over_30s_runtime by query_type, user_name | where over_30s_runtime > 0\n| transpose row query_type column user_name\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel16603D71A4402B48",
+            "title": "Scope Hits More Than 10 Partitions, sort total scan. Tip: Add _index= or _sourcecategory= to these to scope to one or a few indexes.",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n//query_type=*dash*\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n\n\n| querytimerange() / (1000 * 60) as qrm \n| range_day * 1440 as range_minutes\n| qrm / searches as ran_every\n| range_minutes / ran_every as %\"range:schedule\"\n\n| where scans_many_partitions > 0 \n| fields -over_30s_runtime,scans_many_partitions,gt_7d_range,gt_30d_range,scan_gt_10tb,scan_gt_100tb,qrm\n| sort scan_tb \n| limit 50 ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelDE6FEE85BB872A43",
+            "title": "Top Searches With Greatest Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n//query_type=*dash*\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n\n\n| querytimerange() / (1000 * 60) as qrm \n| range_day * 1440 as range_minutes\n| qrm / searches as ran_every\n| range_minutes / ran_every as %\"range:schedule\"\n\n//| where scans_many_partitions > 0 \n| fields -over_30s_runtime,scans_many_partitions,gt_7d_range,gt_30d_range,scan_gt_10tb,scan_gt_100tb,qrm\n| sort scan_tb \n| limit 50 ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0974EC9484E7B943",
+            "title": "Dashboards With High Scan or Runtime Panels, sort max runtime",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\nquery_type=\"Interactive Dashboard\"\n// some_field=some_value\n{{custom_params}}\nquery_type=*dash*\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_runtime,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by content_name\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n//| where scans_many_partitions > 0 \n| where over_30s_runtime + scans_many_partitions + scan_gt_10tb + scan_gt_100tb >0\n| sort max_runtime",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6DBC43A4897E7A4D",
+            "title": "non-Interactive Content With Range more than 7x schedule interval, sorted total scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\nnot query_type=int*\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n\n\n| querytimerange() / (1000 * 60) as qrm \n| range_day * 1440 as range_minutes\n| qrm / searches as ran_every\n| range_minutes / ran_every as %\"range:schedule\"\n\n| where %\"range:schedule\" > 7 \n| fields -over_30s_runtime,scans_many_partitions,gt_7d_range,gt_30d_range,scan_gt_10tb,scan_gt_100tb,qrm\n| sort scan_tb \n| limit 50 ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8D0EAA758940BB45",
+            "title": "Dashboard - High Load Panels",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Check here to find dashboards with heavy load that:\n- have runtime > 30s\n- scan many partitions\n- scan > 10TB per search\n- scan 7, 30d (if not vs a view this can be very high load if run often)"
+        },
+        {
+            "id": null,
+            "key": "panelD9896AD5B8F3AA4B",
+            "title": "Highest Total Scan",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These searches scan the most data overall (in tb). Very high scan searches usually have:\n- poor scoping to one index\n- long time ranges when a view might be a better option"
+        },
+        {
+            "id": null,
+            "key": "panel5B1B0401B10C7A44",
+            "title": "Runtime Over 30s",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Searches that take >30s to run are often indicators of poorly scoped searches, or those that could be optimized most effectively with better search scoping, field extraction rules or using a scheduled view."
+        },
+        {
+            "id": null,
+            "key": "panel39E3E9A5B9841B4D",
+            "title": "Repeat scanning the same data in a schedule",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "A common antipattern for efficient search is creating overlapping search range in a schedule for example: -7d every 1h or -24h every 15m.\n\nIn a schedule search for example this creates very high scan volume. Best fixes are:\n- make schedule/range that does not repeat/overlap: -1d every 1d, -15m every 15m\n- look at using a scheduled view to cache the resuts for each minute interval and run the schedule vs the view instead."
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "minimum_gb_scan",
+            "displayName": "minimum_gb_scan",
+            "defaultValue": "10",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "10,50,100,1000"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "user_name",
+            "displayName": "user_name",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ""
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "custom_params",
+            "displayName": "custom_params",
+            "defaultValue": "// some_field=some_value",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "// other custom parameters,content_name=*something*,status_message=*fail*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
