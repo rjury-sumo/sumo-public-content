@@ -1,6 +1,14 @@
 ## Search Audit Apps
 
 Dashboards for search audit index.
+
+## Poor Search Performers
+A single dashboard to highlight and investigate poor search performers:
+- high scan
+- over 30s runtime
+- scan > 10 partitions
+- overlapped range:schedule
+  
 ## Audit: Sumo Search Scan Overview
 A high level overview of search scan volumes and activity in your sumo account.
 Will show who high scanners are and total breakdown of scan by query type and user.
