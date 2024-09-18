@@ -1,0 +1,28 @@
+// example to show how to parse kubernetes events and show 'not normal' ones: Warning, Error etc.
+
+cluster=*  _sourceCategory=*events 
+not "\"type\":\"Normal\""
+involvedObject
+
+// exclude any annoying messages here
+not "Nameserver limits were exceeded"
+not "Liveness probe failed"
+
+| json field=_raw "object.reason" as reason
+| json field=_raw "object.involvedObject.kind" as type
+| json field=_raw "object.involvedObject.name" as name
+| json field=_raw "object.type" as level
+| json field=_raw "object.message" as message
+| json field=_raw "object.metadata.namespace" as namespace
+
+| count by cluster,reason,type,level,namespace,name,message
+| sort _count
+
+/* example event
+{"object":{"involvedObject":{"kind":"Node","name":"ip-10-102-37-119.us-west-2.compute.internal","uid":"ip-10-102-37-119.us-west-2.compute.internal"},"count":1,"source":{"component":"kernel-monitor","host":"ip-10-102-37-119.us-west-2.compute.internal"},"reportingComponent":"","reason":"OOMKilling","eventTime":"","lastTimestamp":"2024-09-18T03:42:16Z","metadata":{"name":"ip-10-102-37-119.us-west-2.compute.internal.17f639b03546cee5","creationTimestamp":"2024-09-18T03:42:16Z","resourceVersion":"767542675","managedFields":[{"operation":"Update","manager":"node-problem-detector","fieldsV1":{"f:source":{"f:component":{},"f:host":{}},"f:count":{},"f:message":{},"f:reason":{},"f:type":{},"f:involvedObject":{},"f:lastTimestamp":{},"f:firstTimestamp":{}},"time":"2024-09-18T03:42:16Z","apiVersion":"v1","fieldsType":"FieldsV1"}],"uid":"03cbf0ef-3068-4b08-acd3-f443f0756de7","namespace":"default"},"message":"Memory cgroup out of memory: Killed process 963604 (ruby) total-vm:183664kB, anon-rss:101264kB, file-rss:7880kB, shmem-rss:0kB, UID:0 pgtables:384kB oom_score_adj:999","firstTimestamp":"2024-09-18T03:42:16Z","kind":"Event","apiVersion":"v1","type":"Warning","reportingInstance":""},"type":"ADDED","timestamp":1726630936000,"log":"Memory cgroup out of memory: Killed process 963604 (ruby) total-vm:183664kB, anon-rss:101264kB, file-rss:7880kB, shmem-rss:0kB, UID:0 pgtables:384kB oom_score_adj:999"}
+*/
+
+/* example output:
+#	cluster	reason	type	level	namespace	name	message	_count
+1	sedemostag	OOMKilling	Node	Warning	default	ip-10-102-16-162.us-west-2.compute.internal	Memory cgroup out of memory: Killed process 1569014 (ruby) total-vm:183620kB, anon-rss:101252kB, file-rss:8036kB, shmem-rss:0kB, UID:0 pgtables:384kB oom_score_adj:999
+*/

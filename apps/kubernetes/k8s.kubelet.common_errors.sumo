@@ -1,0 +1,41 @@
+// an event search that can be used as an example of how to parse kubelet logs for common errors like oomkilled
+
+_sourcecategory=*kubelet*  cluster=*
+(
+CrashLoopBackOff
+or
+OOMKilled
+or
+(Error syncing pod) 
+or (reason evicted) 
+or ("Failed to pull image") 
+or Failedattachvolume
+or FailedattachMount
+or FailedScheduling
+or "MountVolume.SetUp failed"
+or (configmap "not found") 
+or (secret "not found") 
+or NodeNotReady 
+or HostPortConflict 
+or "Failed to pull image"
+or ( (error failed) not "when try to find container")
+)
+| json field=_raw "_HOSTNAME" as hostname
+| json field=_raw "MESSAGE" | where message matches "E*" 
+// key indicators
+| parse regex field=message "(?i)(?<keyindicator>oomkilled|crashloopbackoff)" nodrop
+| parse regex field=message "^(?<level>[A-Z])+[0-9]+\s+[0-9:\.]+\s+(?<threadid>[0-9]+)\s+(?<file>[^\s:]+):(?<lineno>[0-9]+)\]\s(?<event>.+)" nodrop
+| parse regex field=event "(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)" nodrop 
+
+// strict
+| where !(isempty(type))
+
+// wider
+//| if(isempty(type),concat("others:",substring(event,0,50)),type) as type
+| parse field=event "\"StartContainer\" for \"*\" with" as container nodrop
+| trim(concat(type," ",keyindicator," ",container)) as type
+
+//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname 
+| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type
+| sort type asc
+//| sum(_count) by type
