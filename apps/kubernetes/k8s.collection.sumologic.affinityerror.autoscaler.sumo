@@ -1,0 +1,9 @@
+// example search to show if sumo collection pods are being rejected by node affinity
+
+/* example event
+I0918 03:32:26.931331       1 scale_up.go:300] Pod sedemo-collection-sumologic-fluentd-logs-6 can't be scheduled on abc-sedemo-general-subnet-12345678-2020111901162087090000000e, predicate checking error: node(s) didn't match Pod's node affinity/selector; predicateName=NodeAffinity; reasons: node(s) didn't match Pod's node affinity/selector; debugInfo=
+*/
+
+_sourceCategory=kubernetes*autoscaler "can't be scheduled" sumologic
+| parse "* *       * *] Pod * can't be scheduled on *, predicate checking error: *; predicateName=NodeAffinity; reasons: *; debugInfo=*" as a,dt,n,logger,pod,on,pred_error,reasons,debug
+| values(on) as on,count by logger,pod,pred_error,reasons
