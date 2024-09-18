@@ -1,0 +1,41 @@
+// https://github.com/open-telemetry/opentelemetry-collector/blob/main/exporter/exporterhelper/README.md
+
+(_sourceCategory=*otelcol* ) cluster=*
+// if you put your kubernetes events in infrequent now is a good time to move them to continuous tier!
+
+/* in particular 
+- watch out for any of these events they mean retry is failed
+Sender failed	... sending queue is full
+Dropping data because sending_queue is full. Try increasing queue_size.	
+Exporting failed. The error is not retryable. Dropping data.
+Status Code 500, Message=data refused due to high memory usage; data refused due to high memory usage
+
+- could have memory issues in pod
+Memory usage is above hard limit. Forcing a GC.
+
+- these will always happen in very small % - retries should be ok but watch for large volumes
+Exporting failed. Will retry the request after interval.
+failed to decode API response (status: 502 Bad Gateway)
+*/
+
+not (tinfo and !(err* or warn* or fail* or retr*)))
+
+| json field=_raw "log"
+| parse field=log "*\t*\t*\t*" as datetime,level,logger,event
+| parse regex field=event "(?<json_data>\{.+\})"
+| parse regex field=event "^(?<event_prefix>[^\r\n\{]+)" nodrop
+| json field=json_data "error" nodrop
+| json field=json_data "message" nodrop
+| json field=json_data "code" nodrop
+| json field=json_data "status" nodrop
+| json field=json_data "name" nodrop
+| json field=json_data "kind" nodrop
+
+| if(isempty(error),json_data,error) as error
+// show a count of all the types:
+| first(error) as example_error,count as events by event_prefix,level,logger,name,kind
+
+| sort event_prefix asc
+
+// this would graph events over time
+//| timeslice | count by _timeslice,event_prefix | transpose row _timeslice column event_prefix
