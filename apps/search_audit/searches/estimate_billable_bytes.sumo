@@ -1,0 +1,46 @@
+_view=sumologic_search_usage_per_query 
+
+// flex billable
+| json field =scanned_bytes_breakdown_by_metering_type "Flex" as  scan_fl nodrop // in a flex customer you will see this for billable scan
+| json field =scanned_bytes_breakdown_by_metering_type "Continuous" as  scan_con nodrop // value also turns up in flex orgs sometimes in small amounts
+| json field =scanned_bytes_breakdown_by_metering_type "Frequent" as  scan_fre nodrop
+| json field =scanned_bytes_breakdown_by_metering_type "Infrequent" as  scan_inf nodrop
+
+// not flex billable
+| json field =scanned_bytes_breakdown_by_metering_type "FlexSecurity" as  scan_cse nodrop // in a flex customer you will see this for CSE scanned logs (not flex billable)
+| json field =scanned_bytes_breakdown_by_metering_type "ContinuousSecurity" as  scan_cse nodrop // CSE scan in a legacy org
+| json field =scanned_bytes_breakdown_by_metering_type "Security" as  scan_sec nodrop // reflected sec_* indexes
+| json field =scanned_bytes_breakdown_by_metering_type "Tracing" as  scan_trc nodrop // scan of tracing indexes
+| json field =scanned_bytes_breakdown_by_metering_type "RCE" as  scan_RCE nodrop
+// {}   note it's also possible to see an empty array
+
+| if(isnull(scan_fl),0,scan_fl) as scan_fl
+| if(isnull(scan_con),0,scan_con) as scan_con
+| if(isnull(scan_fre),0,scan_fre) as scan_fre
+| if(isnull(scan_inf),0,scan_inf) as scan_inf
+| if(isnull(scan_cse),0,scan_cse) as scan_cse
+| if(isnull(scan_sec),0,scan_sec) as scan_sec
+| if(isnull(scan_trc),0,scan_trc) as scan_trc
+| if(isnull(scan_RCE),0,scan_RCE) as scan_rce
+
+| scan_fl + scan_con + scan_fre + scan_inf as scan_bytes_flex_billable
+//| cse as scan_bytes_cse
+| scan_sec + scan_trc + scan_rce as scan_bytes_not_flex_billable
+
+| (query_end_time - query_start_time)/ (1000 * 60 * 60 * 24) as range_days
+| execution_duration_ms /1000 as duration_s
+
+| scan_bytes_flex_billable/1T as t
+| if(t >= 1 and t <10 ,1,0) as tb1
+| if(t >= 10 and t <100,1,0) as tb10
+| if(t >= 100 and t < 1000,1,0) as tb100
+| if(t >= 1000,1,0) as tb1000
+
+| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count as searches, sum(scan_bytes_flex_billable) as flex_bytes,max(scan_cse) as cse_bytes,sum(scan_bytes_not_flex_billable) as other_bytes, sum(tb1) as tb1, sum(tb10) as tb10, sum(tb100) as tb100,sum(tb1000) as tb1000, max(range_days) as max_day_range by user_name,query_type
+
+| round(flex_bytes / 1T,1) as flex_tb
+| round(cse_bytes / 1T,1) as cse_tb
+| round(other_bytes / 1T,1) as other_tb
+
+| fields -flex_bytes,cse_bytes,other_bytes
+| sort flex_tb
