@@ -1,0 +1,726 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Flex Credits (V3)",
+    "description": "",
+    "title": "Flex Credits (V3)",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-4w2d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel5D15F38D805C1944",
+                "structure": "{\"height\":6,\"width\":3,\"x\":5,\"y\":11}"
+            },
+            {
+                "key": "panelD7184861B90F394A",
+                "structure": "{\"height\":6,\"width\":2,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panelPANE-41EAB6998EBDFB42",
+                "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":11}"
+            },
+            {
+                "key": "panel45E12622AD538A47",
+                "structure": "{\"height\":6,\"width\":3,\"x\":2,\"y\":11}"
+            },
+            {
+                "key": "panel292896AE82E4F94C",
+                "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":11}"
+            },
+            {
+                "key": "panel4A6E0534A49ADA47",
+                "structure": "{\"height\":6,\"width\":2,\"x\":0,\"y\":17}"
+            },
+            {
+                "key": "panelD59B9EEFA9A9CA45",
+                "structure": "{\"height\":6,\"width\":3,\"x\":2,\"y\":17}"
+            },
+            {
+                "key": "panelD1F501C4B8CFEB40",
+                "structure": "{\"height\":6,\"width\":3,\"x\":5,\"y\":17}"
+            },
+            {
+                "key": "panelB4A5E33CA1592B49",
+                "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":17}"
+            },
+            {
+                "key": "panel9A1C35A699A2BA44",
+                "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":17}"
+            },
+            {
+                "key": "panel77F1B19AAC361B4F",
+                "structure": "{\"height\":6,\"width\":2,\"x\":0,\"y\":23}"
+            },
+            {
+                "key": "panel1FE4DD3A90DF594C",
+                "structure": "{\"height\":6,\"width\":3,\"x\":2,\"y\":23}"
+            },
+            {
+                "key": "panel99DEAA3B93D98941",
+                "structure": "{\"height\":6,\"width\":3,\"x\":5,\"y\":23}"
+            },
+            {
+                "key": "panel4B34AADCB1BAEB40",
+                "structure": "{\"height\":6,\"width\":8,\"x\":8,\"y\":23}"
+            },
+            {
+                "key": "panel5EF8D4BD928F2A47",
+                "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":23}"
+            },
+            {
+                "key": "panel917F48639A76FB4F",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":9}"
+            },
+            {
+                "key": "panel6BB91FBB8171CB49",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel5A66A8389A15E84C",
+                "structure": "{\"height\":7,\"width\":4,\"x\":0,\"y\":2}"
+            },
+            {
+                "key": "panel3651165DB21D3A48",
+                "structure": "{\"height\":7,\"width\":4,\"x\":4,\"y\":2}"
+            },
+            {
+                "key": "panel1937A3EA8A664A4C",
+                "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":2}"
+            },
+            {
+                "key": "panel41833E9DA4841A44",
+                "structure": "{\"height\":7,\"width\":8,\"x\":16,\"y\":2}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel5D15F38D805C1944",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Max Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#933c03\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\{\\\"field\\\":\\\"(?<sourcecategory>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n// Discarding internal values\n| where !(sourcecategory matches \"*_volume\")\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice, tier\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per Gbyte per data tier\n| {{INGEST_CSE}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| max(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD7184861B90F394A",
+            "title": "CSE",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdownV2\",\"showTitle\":false,\"verticalAlignment\":\"center\",\"horizontalAlignment\":\"center\",\"backgroundColor\":\"#bf2121\",\"textColor\":\"#ffffff\",\"fontSize\":20},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "CSE"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-41EAB6998EBDFB42",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TIMELINE\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"CREDITS\",\"minimum\":0,\"maximum\":150}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":14,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false,\"maxWidth\":500},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"credits\"],\"queries\":[],\"properties\":{\"color\":\"#00a0d6\",\"markerType\":\"square\",\"markerSize\":3,\"name\":\"Credits Consumed\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"color\":\"#8ecc1b\",\"name\":\"Trending\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#8d79e8\",\"name\":\"Predicted\"}}],\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":120},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":130}},\"highlightViolations\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\{\\\"field\\\":\\\"(?<sourcecategory>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n// Discarding internal values\n| where !(sourcecategory matches \"*_volume\")\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice, tier\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per Gbyte per data tier\n| {{INGEST_CSE}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Average credit consumption trend\n| smooth credits as trend\n\n| fields _timeslice, credits, trend",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\{\\\"field\\\":\\\"(?<sourcecategory>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n// Discarding internal values\n| where !(sourcecategory matches \"*_volume\")\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice, tier\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per Gbyte per data tier\n| {{INGEST_CSE}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Prediction\n| predict credits by 1d forecast=30\n| credits_predicted as predicted\n\n\n| fields _timeslice, predicted",
+                    "queryType": "Logs",
+                    "queryKey": "B",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel45E12622AD538A47",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_and_tier_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\{\\\"field\\\":\\\"(?<sourcecategory>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n// Discarding internal values\n| where !(sourcecategory matches \"*_volume\")\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice, tier\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per Gbyte per data tier\n| {{INGEST_CSE}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel292896AE82E4F94C",
+            "title": "By {{INGEST_DIMENSION}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory={{INGEST_DIMENSION}}_and_tier_volume\n\n| parse regex \"\\{\\\"field\\\":\\\"(?<{{INGEST_DIMENSION}}>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n| sum(bytes) as bytes by {{INGEST_DIMENSION}}\n| bytes/1Gi as GBytes\n\n| {{INGEST_CSE}} as credit_cost\n\n| round(GBytes*credit_cost) as credits\n| round(GBytes,1) as GBytes\n\n| fields -bytes, credit_cost\n\n| order by credits desc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4A6E0534A49ADA47",
+            "title": "METRICS",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdownV2\",\"showTitle\":false,\"verticalAlignment\":\"center\",\"horizontalAlignment\":\"center\",\"backgroundColor\":\"#e058c0\",\"textColor\":\"#ffffff\",\"fontSize\":20},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "METRICS"
+        },
+        {
+            "id": null,
+            "key": "panelD59B9EEFA9A9CA45",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_metrics_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n// Aggregating per day - sum of DPM\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| datapoints / 24 / 60 / 1000 as DPM\n\n// Calculating credit cost per DPM\n| {{INGEST_METRICS}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (DPM*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD1F501C4B8CFEB40",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Max Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#933c03\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_metrics_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n// Aggregating per day - sum of DPM\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| datapoints / 24 / 60 / 1000 as DPM\n\n// Calculating credit cost per DPM\n| {{INGEST_METRICS}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (DPM*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| max(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB4A5E33CA1592B49",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TIMELINE\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"maximum\":150,\"minimum\":0,\"title\":\"CREDITS\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":14,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false,\"maxWidth\":500},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"credits\"],\"queries\":[],\"properties\":{\"color\":\"#00a0d6\",\"markerType\":\"square\",\"markerSize\":3,\"name\":\"Credits Consumed\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"color\":\"#8ecc1b\",\"name\":\"Trending\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#8d79e8\",\"name\":\"Predicted\"}}],\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":120},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":130}},\"highlightViolations\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_metrics_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n// Aggregating per day - sum of DPM\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| datapoints / 24 / 60 / 1000 as DPM\n\n// Calculating credit cost per DPM\n| {{INGEST_METRICS}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (DPM*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Average credit consumption trend\n| smooth credits as trend\n\n| fields _timeslice, credits, trend",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_metrics_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n// Aggregating per day - sum of DPM\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| datapoints / 24 / 60 / 1000 as DPM\n\n// Calculating credit cost per DPM\n| {{INGEST_METRICS}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (DPM*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Prediction\n| predict credits by 1d forecast=30\n| credits_predicted as predicted\n\n\n| fields _timeslice, predicted",
+                    "queryType": "Logs",
+                    "queryKey": "B",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel9A1C35A699A2BA44",
+            "title": "By {{INGEST_DIMENSION}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory={{INGEST_DIMENSION}}_metrics_volume\n\n\n| parse regex \"\\\"(?<{{INGEST_DIMENSION}}>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice, {{INGEST_DIMENSION}}\n| datapoints / 24 / 60 / 1000 as DPM\n\n| sum(DPM) as DPM by {{INGEST_DIMENSION}}\n\n| {{INGEST_METRICS}} as credit_cost\n\n| round(DPM*credit_cost) as credits\n| round(DPM,1) as DPM\n\n| fields -credit_cost\n\n| order by credits desc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel77F1B19AAC361B4F",
+            "title": "TRACING",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdownV2\",\"showTitle\":false,\"verticalAlignment\":\"center\",\"horizontalAlignment\":\"center\",\"backgroundColor\":\"#933c03\",\"textColor\":\"#ffffff\",\"fontSize\":20},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "TRACING"
+        },
+        {
+            "id": null,
+            "key": "panel1FE4DD3A90DF594C",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_tracing_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n// Aggregating per day - sum of bytes\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per bytes\n| {{INGEST_TRACING}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel99DEAA3B93D98941",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Max Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#933c03\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_tracing_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n// Aggregating per day - sum of bytes\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per bytes\n| {{INGEST_TRACING}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| max(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel4B34AADCB1BAEB40",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TIMELINE\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"maximum\":150,\"minimum\":0,\"title\":\"CREDITS\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":14,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false,\"maxWidth\":500},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"credits\"],\"queries\":[],\"properties\":{\"color\":\"#00a0d6\",\"markerType\":\"square\",\"markerSize\":3,\"name\":\"Credits Consumed\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"color\":\"#8ecc1b\",\"name\":\"Trending\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#8d79e8\",\"name\":\"Predicted\"}}],\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":120},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":130}},\"highlightViolations\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_tracing_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n// Aggregating per day - sum of bytes\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per bytes\n| {{INGEST_TRACING}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Average credit consumption trend\n| smooth credits as trend\n\n| fields _timeslice, credits, trend",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory=sourcecategory_tracing_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n// Aggregating per day - sum of bytes\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n\n| bytes/1Gi as GBytes\n\n// Calculating credit cost per bytes\n| {{INGEST_TRACING}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (GBytes*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Prediction\n| predict credits by 1d forecast=30\n| credits_predicted as predicted\n\n\n| fields _timeslice, predicted",
+                    "queryType": "Logs",
+                    "queryKey": "B",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5EF8D4BD928F2A47",
+            "title": "By {{INGEST_DIMENSION}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory={{INGEST_DIMENSION}}_tracing_volume\n\n// Parsing events \n| parse regex \"\\\"(?<{{INGEST_DIMENSION}}>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n| sum(bytes) as bytes by {{INGEST_DIMENSION}}\n| bytes/1Gi as GBytes\n\n| {{INGEST_TRACING}} as credit_cost\n\n| round(GBytes*credit_cost) as credits\n| round(GBytes,1) as GBytes\n\n| fields -credit_cost, bytes\n\n| order by credits desc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel917F48639A76FB4F",
+            "title": "DATA INGESTION CREDITS",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdownV2\",\"showTitle\":false,\"verticalAlignment\":\"center\",\"horizontalAlignment\":\"center\",\"backgroundColor\":\"#005982\",\"textColor\":\"#ffffff\",\"fontSize\":20},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "DATA INGESTION CREDITS"
+        },
+        {
+            "id": null,
+            "key": "panel6BB91FBB8171CB49",
+            "title": "SEARCH/SCAN CREDITS",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdownV2\",\"showTitle\":false,\"verticalAlignment\":\"center\",\"horizontalAlignment\":\"center\",\"backgroundColor\":\"#005982\",\"textColor\":\"#ffffff\",\"fontSize\":20},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "SEARCH/SCAN CREDITS"
+        },
+        {
+            "id": null,
+            "key": "panel5A66A8389A15E84C",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3651165DB21D3A48",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Max Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#933c03\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| max(credits) as credits\n| round(credits) as credits",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1937A3EA8A664A4C",
+            "title": " ",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TIMELINE\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"CREDITS\",\"minimum\":0,\"maximum\":150}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":14,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false,\"maxWidth\":500},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"credits\"],\"queries\":[],\"properties\":{\"color\":\"#00a0d6\",\"markerType\":\"square\",\"markerSize\":3,\"name\":\"Credits Consumed\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"color\":\"#8ecc1b\",\"name\":\"Trending\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#8d79e8\",\"name\":\"Predicted\"}}],\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":120},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":130}},\"highlightViolations\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Average credit consumption trend\n| smooth credits as trend\n\n| fields _timeslice, credits, trend",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                },
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Prediction\n| predict credits by 1d forecast=30\n| credits_predicted as predicted\n\n\n| fields _timeslice, predicted",
+                    "queryType": "Logs",
+                    "queryKey": "B",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel41833E9DA4841A44",
+            "title": "By Query Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n| sum(bytes) as bytes by {{SCAN_DIMENSION}}\n| bytes/1Ti as TBytes\n\n| {{SCAN}} as credit_cost\n\n| round(TBytes*credit_cost) as credits\n| round(TBytes,2) as TBytes\n\n| fields -bytes, credit_cost\n\n| order by credits desc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Manual",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "INGEST_CSE",
+            "displayName": "INGEST_CSE",
+            "defaultValue": "5.63",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5.63"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "INGEST_METRICS",
+            "displayName": "INGEST_METRICS",
+            "defaultValue": "0.68",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "0.68"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "INGEST_TRACING",
+            "displayName": "INGEST_TRACING",
+            "defaultValue": "3.85",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "3.85"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "INGEST_DIMENSION",
+            "displayName": "INGEST_DIMENSION",
+            "defaultValue": "sourcecategory",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "collector,source,sourcecategory,sourcehost,sourcename"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "SCAN",
+            "displayName": "SCAN",
+            "defaultValue": "2.70",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "2.70"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "SCAN_DIMENSION",
+            "displayName": "SCAN_DIMENSION",
+            "defaultValue": "query_type",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "content_name,query_type,query,scanned_partition_count,user_name"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": []
+}
