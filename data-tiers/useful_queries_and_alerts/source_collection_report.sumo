@@ -1,0 +1,26 @@
+// shows ingesting sources in say last 15m with comparision vs previous periods
+
+_index=sumologic_volume _sourceCategory = source_and_tier_volume
+| parse regex "(?<data>\{[^\{]+\})" multi
+| json field=data "field","dataTier","sizeInBytes","count" as item, dataTier, bytes, count
+| bytes/1Gi as gbytes 
+| parse field=_sourcecategory "*_and_tier_volume" as type
+| sum(count) as events,sum(gbytes) as gb by type,item,dataTier
+
+// compare with last 7d
+| compare with timeshift 1d 7 avg
+
+// this handles nulls for new or removed categories
+| if(isNull(gb), "3. GONE", "1. COLLECTING") as state 
+| if(isNull(gb), 0, gb) as gb 
+| if(isNull(events), 0, events) as events 
+
+| if(isNull(gb_7d_avg), "2. NEW", state) as state 
+| if(isNull(gb_7d_avg), 0, gb_7d_avg) as gb_7d_avg 
+| if(isNull(events_7d_avg), 0, events_7d_avg) as events_7d_avg 
+//
+//// what is the change delta as a percentage vs baseline
+| (gb - gb_7d_avg) as gb_change 
+| ( gb_change / gb) * 100 as pct_increase 
+
+| sort state, gb_change desc
