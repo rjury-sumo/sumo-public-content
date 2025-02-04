@@ -1,10 +1,8 @@
-
-
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Kubernetes Common Issues",
+    "name": "Kubernetes - Common Issues 4 Feb 2025",
     "description": "",
-    "title": "Kubernetes Common Issues",
+    "title": "Kubernetes - Common Issues 4 Feb 2025",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -23,11 +21,7 @@
         "layoutStructures": [
             {
                 "key": "panel6CEA1069B4B62942",
-                "structure": "{\"height\":10,\"width\":9,\"x\":7,\"y\":56}"
-            },
-            {
-                "key": "panel35B909458FCA1B46",
-                "structure": "{\"height\":10,\"width\":7,\"x\":0,\"y\":56}"
+                "structure": "{\"height\":10,\"width\":15,\"x\":0,\"y\":56}"
             },
             {
                 "key": "panelPANE-030D552E9E4E6B4B",
@@ -51,11 +45,11 @@
             },
             {
                 "key": "panel216AFAF6B7C3684A",
-                "structure": "{\"height\":2,\"width\":8,\"x\":16,\"y\":66}"
+                "structure": "{\"height\":2,\"width\":8,\"x\":16,\"y\":77}"
             },
             {
                 "key": "panelPANE-9B262A7889886B4D",
-                "structure": "{\"height\":9,\"width\":8,\"x\":16,\"y\":68}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":79}"
             },
             {
                 "key": "panelFE33DCA58A5BD849",
@@ -75,7 +69,7 @@
             },
             {
                 "key": "panelEDEFF98DAF6B484D",
-                "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":47}"
+                "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":40}"
             },
             {
                 "key": "panelA1A21D6F83C65848",
@@ -103,7 +97,7 @@
             },
             {
                 "key": "panel777D83509DF10944",
-                "structure": "{\"height\":2,\"width\":16,\"x\":0,\"y\":66}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":66}"
             },
             {
                 "key": "panel2E4F3D6682B30A4C",
@@ -151,7 +145,7 @@
             },
             {
                 "key": "panel33EF3BCAA1C31A4E",
-                "structure": "{\"height\":9,\"width\":8,\"x\":8,\"y\":68}"
+                "structure": "{\"height\":9,\"width\":16,\"x\":8,\"y\":68}"
             },
             {
                 "key": "panel274D0DC3B5C47848",
@@ -163,11 +157,11 @@
             },
             {
                 "key": "panel42E404A18A2CF949",
-                "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":40}"
+                "structure": "{\"height\":7,\"width\":8,\"x\":8,\"y\":47}"
             },
             {
                 "key": "panel5D52B6CBABF14943",
-                "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":56}"
+                "structure": "{\"height\":10,\"width\":9,\"x\":15,\"y\":56}"
             },
             {
                 "key": "panel8C4F14259C4C8B46",
@@ -198,7 +192,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "  cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing | quantize using max | filter _value > 0 | sum by cluster, namespace, container,reason",
+                    "queryString": "  cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing | quantize {{quantize_interval}} using max | filter _value > 0 | max by cluster, namespace, container,reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -212,40 +206,6 @@
             ],
             "description": "",
             "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel35B909458FCA1B46",
-            "title": "Container Waiting",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"reason\",\"value\":\"reason\"}],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": " cluster={{cluster}} metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing  | filter _value > 0 | sum by cluster, namespace, reason",
-                    "queryType": "Metrics",
-                    "queryKey": "A",
-                    "metricsQueryMode": "Advanced",
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": {
-                "type": "BeginBoundedTimeRange",
-                "from": {
-                    "type": "RelativeTimeRangeBoundary",
-                    "relativeTime": "-1h"
-                },
-                "to": null
-            },
             "coloringRules": null,
             "linkedDashboards": []
         },
@@ -271,13 +231,13 @@
             "id": null,
             "key": "panel115128DC97ECFA4A",
             "title": "DaemonSet Misscheduled",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"sum\",\"noDataMessage\":\"\"},\"series\":{}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_number_misscheduled job=kube-state-metrics | filter _value > 0 | sum by cluster",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_number_misscheduled job=kube-state-metrics | quantize {{quantize_interval}} using max| filter _value > 0 | sum by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -313,7 +273,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_desired_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_desired_number_scheduled job=kube-state-metrics | quantize {{quantize_interval}} using max",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -326,7 +286,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_current_number_scheduled job=kube-state-metrics | quantize to 5m using max",
+                    "queryString": " cluster={{cluster}}  metric=kube_daemonset_status_current_number_scheduled job=kube-state-metrics | quantize {{quantize_interval}} using max",
                     "queryType": "Metrics",
                     "queryKey": "B",
                     "metricsQueryMode": "Advanced",
@@ -339,7 +299,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "#A - #B along daemonset, cluster  | where _value > 0",
+                    "queryString": "#A - #B along daemonset, cluster | quantize {{quantize_interval}} | where _value > 0",
                     "queryType": "Metrics",
                     "queryKey": "C",
                     "metricsQueryMode": "Advanced",
@@ -382,7 +342,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=up job=apiserver  | quantize to 15m using max | sum by cluster,instance | avg by cluster",
+                    "queryString": " cluster={{cluster}}  metric=up job=apiserver  | quantize {{quantize_interval}} using max | sum by cluster,instance | avg by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -403,13 +363,13 @@
             "id": null,
             "key": "panelFE33DCA58A5BD849",
             "title": "kube-state-metrics Clusters With Nodes Not Ready",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize to 15m using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize {{quantize_interval}} using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -436,7 +396,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition  | quantize 5m using max | count by node,cluster | count by cluster",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition status=true  | quantize {{quantize_interval}} using max | sum by node,cluster | count by cluster",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -463,7 +423,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_terminated_reason not reason=completed | quantize to 15m using max | filter max > 0 | max by cluster,reason,pod | sum by reason",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_terminated_reason not reason=completed | quantize {{quantize_interval}} using max | filter max > 0 | max by cluster,reason,pod | sum by reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -493,13 +453,13 @@
             "id": null,
             "key": "panelEDEFF98DAF6B484D",
             "title": "Abnormal kube_pod_container_status_waiting_reason",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{reason}}\"}}]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"title\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{reason}}\"}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize to 15m using max | sum by reason",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize {{quantize_interval}} using max | sum by reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -526,7 +486,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize using max | filter _value >0 | max by container,reason ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason not reason=containercreating not reason=podinitializing | quantize {{quantize_interval}} using max | filter _value >0 | max by namespace,reason ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -616,7 +576,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| timeslice 1h | count by _timeslice,type | transpose row _timeslice column type",
+                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| timeslice {{quantize_interval}} | count by _timeslice,type | transpose row _timeslice column type",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -643,7 +603,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| hostname as node\n| timeslice 1h | count by _timeslice,cluster | transpose row _timeslice column cluster",
+                    "queryString": "_sourcecategory=*kubelet*  cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| hostname as node\n| timeslice {{quantize_interval}} | count by _timeslice,cluster | transpose row _timeslice column cluster",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -679,7 +639,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics | quantize to 15m using max | delta increasing   | sum by container  | topk(100,sum)",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics | quantize {{quantize_interval}} using max | delta increasing   | sum by container  | topk(100,sum)",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -706,7 +666,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  _sourceCategory=*events \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.involvedObject.kind\" as type\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n| json field=_raw \"object.message\" as message\n| json field=_raw \"object.metadata.namespace\" as namespace\n\n\n| count by cluster,reason,type,level,namespace,message //name\n| sort _count",
+                    "queryString": " cluster={{cluster}}  _sourceCategory=*events \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.involvedObject.kind\" as type\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n| json field=_raw \"object.message\" as message\n| json field=_raw \"object.metadata.namespace\" as namespace\n\n\n| values(cluster) as clusters,count by reason,type,level,message //name\n| sort _count",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -733,7 +693,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| concat(level,\"-\",reason) as event\n| timeslice | count by _timeslice,event | transpose row _timeslice column event",
+                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| concat(level,\"-\",reason) as event\n| timeslice {{quantize_interval}} \n| count by _timeslice,event | transpose row _timeslice column event",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -754,13 +714,13 @@
             "id": null,
             "key": "panel08B4F6BEB2A20843",
             "title": "Unscheduleable Pods",
-            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"cluster\",\"value\":\"cluster\"}],\"aggregationType\":\"sum\",\"noDataMessage\":\"\"},\"legend\":{\"showAsTable\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"series\":{}}",
+            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"cluster\",\"value\":\"cluster\"}],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"legend\":{\"showAsTable\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) cluster={{cluster}} | quantize using max | where _value > 0\n|  sum by cluster, pod",
+                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) cluster={{cluster}} | quantize {{quantize_interval}} using max | where _value > 0\n|  sum by cluster, pod",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -789,14 +749,14 @@
         {
             "id": null,
             "key": "panel5578C701B63F3B45",
-            "title": "Pod CPU Seconds Total Top 50",
-            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"s\",\"isCustom\":false}}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":900},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1000}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+            "title": "Pod CPU Seconds Top 50",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":true,\"title\":\" \",\"unit\":{\"value\":\"s\",\"isCustom\":false}}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":900},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1000}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cluster={{cluster}}  \nmetric=container_cpu_usage_seconds_total \n| rate | avg by container, pod //| sum by pod \n| topk(50, max) \n| sum by pod //| where _value > 800",
+                    "queryString": "cluster={{cluster}}  \nmetric=container_cpu_usage_seconds_total \n| quantize {{quantize_interval}} // using rate\n | rate counter | avg by container, pod \n| topk(50, sum) \n| avg by pod //| where _value > 800",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -823,7 +783,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=node_memory_MemTotal_bytes  cluster={{cluster}}  | avg by cluster, node",
+                    "queryString": "metric=node_memory_MemTotal_bytes  cluster={{cluster}} |quantize {{quantize_interval}}  | avg by cluster, node",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -836,7 +796,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "metric=container_memory_working_set_bytes cluster={{cluster}} node=* | sum by cluster, node | avg by cluster, node",
+                    "queryString": "metric=container_memory_working_set_bytes cluster={{cluster}} node=* |quantize {{quantize_interval}}| sum by cluster, node | avg by cluster, node",
                     "queryType": "Metrics",
                     "queryKey": "B",
                     "metricsQueryMode": "Advanced",
@@ -849,7 +809,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "((#B/#A) * 100) along cluster, node \n| topk({{top_n}},max)\n",
+                    "queryString": "((#B/#A) * 100) along cluster, node | quantize {{quantize_interval}}\n| topk({{top_n}},max)\n",
                     "queryType": "Metrics",
                     "queryKey": "C",
                     "metricsQueryMode": "Advanced",
@@ -876,7 +836,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}} _sourceCategory=*events  *node*\n// not \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\n//node scal*\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\nnot FailedAttachVolume\nnot *hassufficient*\nnot *NodeHasNo*\nnot \"Node is not ready\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.message\" as message\n| where reason matches /(?i)node|scal/  or message matches /(?i)node[ \\.]/\n| json field=_raw \"object.involvedObject.kind\" as type\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n\n| json field=_raw \"object.metadata.namespace\" as namespace\n\n| timeslice \n| count as events,min(_messagetime) as first, max(_messagetime) as last by cluster,reason,type,level,namespace,name,message\n| sort last | formatdate(tolong(last),\"yyyy-MM-dd HH:mm:ss\") as last| formatdate(tolong(first),\"yyyy-MM-dd HH:mm:ss\") as first",
+                    "queryString": " cluster={{cluster}} _sourceCategory=*events  *node*\n// not \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\n//node scal*\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\nnot FailedAttachVolume\nnot *hassufficient*\nnot *NodeHasNo*\nnot \"Node is not ready\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.message\" as message\n| where reason matches /(?i)node|scal/  or message matches /(?i)node[ \\.]/\n| json field=_raw \"object.involvedObject.kind\" as type\n| where !(type IN (\"pod\"))\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| timeslice {{quantize_interval}}\n| count as events,min(_messagetime) as first, max(_messagetime) as last by cluster,reason,type,level,name,message\n| sort last | formatdate(tolong(last),\"yyyy-MM-dd HH:mm:ss\") as last| formatdate(tolong(first),\"yyyy-MM-dd HH:mm:ss\") as first",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -896,14 +856,14 @@
         {
             "id": null,
             "key": "panelA8172990BC13DA40",
-            "title": "Top Total CPU Seconds Used By Pod",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"hiddenQueryKeys\":[\"D\",\"E\",\"B\"],\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+            "title": "Top 10 Total CPU Seconds By Pod/Container",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelWrap\":false,\"labelMaxWidth\":250},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"hiddenQueryKeys\":[\"D\",\"E\",\"B\"],\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}/{{container}}\"}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " metric=container_cpu_usage_seconds_total cluster={{cluster}} pod=* \n// quantize by max not avg \n//| quantize using  rate | topk(50,max) \n| delta counter | topk({{top_n}},sum) \n//| rate increasing over 1m | topk(50,max) \n| sum by pod //| avg by cluster, pod | where _value > 800",
+                    "queryString": " metric=container_cpu_usage_seconds_total cluster={{cluster}} pod=* \n// quantize by max not avg \n//| quantize using  rate | topk(50,max) \n| quantize {{quantize_interval}} //using rate\n | rate counter | avg by container, pod \n| topk(10,sum) \n| sum by container, pod ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -924,13 +884,13 @@
             "id": null,
             "key": "panel6C81DD2B86C42A4A",
             "title": "Memory Usage vs Limits - Top 50 Per container/pod/cluster/node",
-            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"%100\",\"isCustom\":false}}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"hiddenQueryKeys\":[\"D\",\"E\",\"A\",\"B\"],\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"{{container}}/{{pod}}/{{cluster}}/{{node}}\"}}]}",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"%100\",\"isCustom\":false},\"minimum\":0,\"maximum\":105}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"hiddenQueryKeys\":[\"D\",\"E\",\"A\",\"B\"],\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"{{container}}/{{pod}}/{{cluster}}/{{node}}\"}}]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_container_resource_limits resource=memory cluster=* pod=* node=*\n| quantize 5m using max \n | avg by cluster, node, pod , container",
+                    "queryString": "metric=kube_pod_container_resource_limits resource=memory cluster=* pod=* node=*\n| quantize {{quantize_interval}} using max \n | avg by cluster, node, pod , container",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -943,7 +903,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "metric=container_memory_working_set_bytes cluster=* pod=* node=*\n| quantize 5m using avg \n| max by cluster, node, pod ,container",
+                    "queryString": "metric=container_memory_working_set_bytes cluster=* pod=* node=*\n| quantize {{quantize_interval}} using avg \n| max by cluster, node, pod ,container",
                     "queryType": "Metrics",
                     "queryKey": "B",
                     "metricsQueryMode": "Advanced",
@@ -956,7 +916,7 @@
                 },
                 {
                     "transient": false,
-                    "queryString": "((#B/#A) * 100) along cluster, node, pod , container| quantize 5m | topk({{top_n}},max)",
+                    "queryString": "((#B/#A) * 100) along cluster, node, pod , container| quantize {{quantize_interval}} | topk({{top_n}},max)",
                     "queryType": "Metrics",
                     "queryKey": "C",
                     "metricsQueryMode": "Advanced",
@@ -983,7 +943,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=node_cpu_seconds_total cluster={{cluster}} not mode=idle \n| quantize using avg\n| delta counter\n| avg by cluster,node| eval 1 - _value | eval _value*100\n//| where max > 100\n| topk({{top_n}}, max) \n",
+                    "queryString": "metric=node_cpu_seconds_total cluster={{cluster}} \n// there is one metric series per cluster and per cpu core. core count can be variable 8, 16, 32 etc\n\n// delta method\n// not mode=idle \n//| quantize using avg\n//| delta counter\n//| avg by cluster,node| eval 1 - _value | eval _value*100\n\n// inverted rate method\n// if you have a custom metric scrape interval (>60s for example) you need to choose larger quantize intervals or rate results might be strange -e.g 30s vs a 60s data interval will have no data points 50% of intervals.\nmode=idle | quantize {{quantize_interval}} using avg| rate | avg by node,cluster | eval 1 - _value |  eval _value*100 \n| topk({{top_n}}, avg) \n",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1010,7 +970,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics \n| quantize to 5m using max | delta counter | sum by pod,container | filter max > 0\n| topk(20,sum)  ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics \n| quantize {{quantize_interval}} using max | filter max > 0 | delta counter | sum by pod,container \n| topk(20,sum)  ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1030,14 +990,14 @@
         {
             "id": null,
             "key": "panel274D0DC3B5C47848",
-            "title": "Node Status Condition: status=true",
+            "title": "Node Status Conditions Latest",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"latest\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition  status=true | quantize using max | filter Max > 0\n| count by condition,status,cluster,node, provider | sum by condition,status",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition  status=true | quantize {{quantize_interval}} using max drop last | filter Max > 0\n| sum by condition,status,cluster,node, provider | sum by condition",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1071,7 +1031,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition cluster=prod status=true (condition=*Pressure or condition=NetworkUnavilable )\n| filter max > 0 | quantize using max | sum by condition",
+                    "queryString": " cluster={{cluster}}  metric=kube_node_status_condition cluster=prod status=true (condition=*Pressure or condition=NetworkUnavilable )\n | quantize {{quantize_interval}} using max | filter max > 0| sum by condition",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1099,13 +1059,13 @@
             "id": null,
             "key": "panel42E404A18A2CF949",
             "title": "Unscheduleable Pods List",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"sum\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"latest\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) cluster={{cluster}} | quantize using max | where _value > 0\n|  sum by pod, phase",
+                    "queryString": "metric=kube_pod_status_phase (phase=pending or phase=unknown or phase=failed) cluster={{cluster}} | quantize {{quantize_interval}} using max | where _value > 0\n|  sum by pod, phase",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1126,13 +1086,13 @@
             "id": null,
             "key": "panel5D52B6CBABF14943",
             "title": "Container Status Reason Problems Over Time",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "  cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing | quantize using max | filter _value > 0 | sum by cluster, namespace, container,reason | sum by reason",
+                    "queryString": "  cluster={{cluster}}  metric=kube_pod_container_status_waiting_reason job=kube-state-metrics not reason=containercreating not reason=podinitializing | quantize {{quantize_interval}} using max | filter _value > 0 | max by cluster, namespace, container,reason | sum by reason",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1159,7 +1119,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase phase=Running | quantize 5m | sum by namespace",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase phase=Running | quantize {{quantize_interval}} | sum by namespace",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1186,7 +1146,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase !phase=Running | quantize 5m | sum by phase ",
+                    "queryString": " cluster={{cluster}}  metric=kube_pod_status_phase !phase=Running !phase=succeeded  | quantize {{quantize_interval}} | sum by phase ",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1216,13 +1176,13 @@
             "id": null,
             "key": "panel299F9AA09B53E844",
             "title": "Pods CrashLoopBackoff",
-            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"s\",\"isCustom\":false}}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":900},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1000}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"\",\"isCustom\":false}}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":900},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1000}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": " cluster={{cluster}} metric=kube_pod_container_status_waiting_reason reason=crashloopbackoff | filter max >0 | quantize 5m using max | sum by pod",
+                    "queryString": " cluster={{cluster}} metric=kube_pod_container_status_waiting_reason reason=crashloopbackoff | filter max >0 | quantize {{quantize_interval}} using max | sum by pod",
                     "queryType": "Metrics",
                     "queryKey": "A",
                     "metricsQueryMode": "Advanced",
@@ -1260,17 +1220,30 @@
             "id": null,
             "name": "top_n",
             "displayName": "top_n",
-            "defaultValue": "25",
+            "defaultValue": "50",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
-                "values": "10,25,50"
+                "values": "10,25,50,100"
             },
             "allowMultiSelect": false,
             "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "quantize_interval",
+            "displayName": "quantize_interval",
+            "defaultValue": "5m",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "30s,1m,5m,15m"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
             "hideFromUI": false,
             "valueType": "Any"
         }
     ],
     "coloringRules": []
 }
-
