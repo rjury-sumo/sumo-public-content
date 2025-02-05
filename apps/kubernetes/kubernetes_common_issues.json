@@ -93,11 +93,11 @@
             },
             {
                 "key": "panel901BD7A7BAFACA47",
-                "structure": "{\"height\":10,\"width\":16,\"x\":0,\"y\":84}"
+                "structure": "{\"height\":10,\"width\":14,\"x\":0,\"y\":84}"
             },
             {
                 "key": "panel3330AAC1ACBB394A",
-                "structure": "{\"height\":10,\"width\":8,\"x\":16,\"y\":84}"
+                "structure": "{\"height\":10,\"width\":5,\"x\":14,\"y\":84}"
             },
             {
                 "key": "panel08B4F6BEB2A20843",
@@ -162,6 +162,10 @@
             {
                 "key": "panel03EC7DF886D5C842",
                 "structure": "{\"height\":14,\"width\":8,\"x\":8,\"y\":33}"
+            },
+            {
+                "key": "panelCBA24A20A0F0794A",
+                "structure": "{\"height\":10,\"width\":5,\"x\":19,\"y\":84}"
             }
         ]
     },
@@ -607,14 +611,14 @@
         {
             "id": null,
             "key": "panel3330AAC1ACBB394A",
-            "title": "Kubernetes Events Not Normal State",
+            "title": "Kubernetes Warning Events",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| concat(level,\"-\",reason) as event\n| timeslice {{quantize_interval}} \n| count by _timeslice,event | transpose row _timeslice column event",
+                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\nwarning\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n| where level = \"Warning\"\n| timeslice {{quantize_interval}} \n| count by _timeslice,reason | transpose row _timeslice column reason",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -1104,6 +1108,33 @@
                 },
                 "to": null
             },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelCBA24A20A0F0794A",
+            "title": "Kubernetes Error Events",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_sourceCategory=*events  cluster={{cluster}} \nnot \"\\\"type\\\":\\\"Normal\\\"\"\nwarning\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n//| json field=_raw \"object.involvedObject.kind\" as type\n//| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n//| json field=_raw \"object.message\" as message\n//| json field=_raw \"object.metadata.namespace\" as namespace\n| where !(level = \"Warning\")\n| timeslice {{quantize_interval}} \n| count by _timeslice,reason | transpose row _timeslice column reason",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
             "coloringRules": null,
             "linkedDashboards": []
         }
