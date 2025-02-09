@@ -1,0 +1,19 @@
+// search for failed scrape jobs setup by otel targetallocator vs prometheus endpoints
+
+/*
+2025-02-09T20:32:18.133Z	warn	internal/transaction.go:128	Failed to scrape Prometheus endpoint	{"kind": "receiver", "name": "prometheus", "data_type": "metrics", "scrape_timestamp": 1739133138130, "target_labels": "{__name__=\"up\", endpoint=\"http-metrics\", instance=\"172.18.0.3:2381\", job=\"kube-etcd\", namespace=\"kube-system\", pod=\"etcd-sumo-control-plane\", service=\"sumologic-kube-prometheus-kube-etcd\"}"}
+*/
+
+
+(scrape job) 
+
+AND _sourceCategory=kubernetes/*/collector
+| json field=_raw "log"
+| json auto field=log
+| parse regex field=log "^(?<dt>[^\t]+)\t(?<level>[^\t]+)\t(?<logger>[^\t]+)\t(?<msg>[^\t]+)\t(?<json_data>\{.+\})"
+
+| json field=json_data "data_type"
+| json field=json_data "target_labels"
+| json field=json_data "name"
+| json field=json_data "kind"
+| count by level,cluster,service,pod,kind,name,data_type,msg,target_labels
