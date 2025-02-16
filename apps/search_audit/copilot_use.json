@@ -1,0 +1,307 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Copilot Use",
+    "description": "",
+    "title": "Copilot Use",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelF18A08E9A45C6A45",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":4}"
+            },
+            {
+                "key": "panelAE3E5CD0817F4A4A",
+                "structure": "{\"height\":4,\"width\":7,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel3CE7FD5985401B49",
+                "structure": "{\"height\":4,\"width\":7,\"x\":7,\"y\":0}"
+            },
+            {
+                "key": "panelA73FAAA4A2E56946",
+                "structure": "{\"height\":4,\"width\":5,\"x\":14,\"y\":0}"
+            },
+            {
+                "key": "panelBD0CD135B5020B4A",
+                "structure": "{\"height\":4,\"width\":5,\"x\":19,\"y\":0}"
+            },
+            {
+                "key": "panel261C71FC83CB7B4E",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":4}"
+            },
+            {
+                "key": "panel859A14B9AD111A41",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":13}"
+            },
+            {
+                "key": "panel26C36B52A4BBCA44",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":13,\"minHeight\":3,\"minWidth\":3}"
+            },
+            {
+                "key": "panelD9B6D33C8EFB4A44",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":13,\"minHeight\":3,\"minWidth\":3}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelF18A08E9A45C6A45",
+            "title": "Flex Billable Scan By User Type",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"unit\":{\"value\":\"TB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n// flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"Flex\" as  scan_fl nodrop // in a flex customer you will see this for billable scan\n| json field =scanned_bytes_breakdown_by_metering_type \"Continuous\" as  scan_con nodrop // value also turns up in flex orgs sometimes in small amounts\n| json field =scanned_bytes_breakdown_by_metering_type \"Frequent\" as  scan_fre nodrop\n| json field =scanned_bytes_breakdown_by_metering_type \"Infrequent\" as  scan_inf nodrop\n\n// not flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"FlexSecurity\" as  scan_cse nodrop // in a flex customer you will see this for CSE scanned logs (not flex billable)\n| json field =scanned_bytes_breakdown_by_metering_type \"ContinuousSecurity\" as  scan_cse nodrop // CSE scan in a legacy org\n| json field =scanned_bytes_breakdown_by_metering_type \"Security\" as  scan_sec nodrop // reflected sec_* indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"Tracing\" as  scan_trc nodrop // scan of tracing indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"RCE\" as  scan_RCE nodrop\n// {}   note it's also possible to see an empty array\n\n| if(isnull(scan_fl),0,scan_fl) as scan_fl\n| if(isnull(scan_con),0,scan_con) as scan_con\n| if(isnull(scan_fre),0,scan_fre) as scan_fre\n| if(isnull(scan_inf),0,scan_inf) as scan_inf\n| if(isnull(scan_cse),0,scan_cse) as scan_cse\n| if(isnull(scan_sec),0,scan_sec) as scan_sec\n| if(isnull(scan_trc),0,scan_trc) as scan_trc\n| if(isnull(scan_RCE),0,scan_RCE) as scan_rce\n\n| scan_fl + scan_con + scan_fre + scan_inf as scan_bytes_flex_billable\n//| cse as scan_bytes_cse\n| scan_sec + scan_trc + scan_rce as scan_bytes_not_flex_billable\n\n| (query_end_time - query_start_time)/ (1000 * 60 * 60 * 24) as range_days\n| execution_duration_ms /1000 as duration_s\n\n| scan_bytes_flex_billable/1T as t\n| where t > 0\n| timeslice 1d\n| sum(t) as flex_tb by user_name,_timeslice | transpose row _timeslice column user_name ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelAE3E5CD0817F4A4A",
+            "title": "Searches Run",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n// flex billable\n| count as searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3CE7FD5985401B49",
+            "title": "Distinct Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Users\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n// flex billable\n| count by user_name |  count as users",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA73FAAA4A2E56946",
+            "title": "Flex Billable Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"TB  Scanned\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n// flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"Flex\" as  scan_fl nodrop // in a flex customer you will see this for billable scan\n| json field =scanned_bytes_breakdown_by_metering_type \"Continuous\" as  scan_con nodrop // value also turns up in flex orgs sometimes in small amounts\n| json field =scanned_bytes_breakdown_by_metering_type \"Frequent\" as  scan_fre nodrop\n| json field =scanned_bytes_breakdown_by_metering_type \"Infrequent\" as  scan_inf nodrop\n\n// not flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"FlexSecurity\" as  scan_cse nodrop // in a flex customer you will see this for CSE scanned logs (not flex billable)\n| json field =scanned_bytes_breakdown_by_metering_type \"ContinuousSecurity\" as  scan_cse nodrop // CSE scan in a legacy org\n| json field =scanned_bytes_breakdown_by_metering_type \"Security\" as  scan_sec nodrop // reflected sec_* indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"Tracing\" as  scan_trc nodrop // scan of tracing indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"RCE\" as  scan_RCE nodrop\n// {}   note it's also possible to see an empty array\n\n| if(isnull(scan_fl),0,scan_fl) as scan_fl\n| if(isnull(scan_con),0,scan_con) as scan_con\n| if(isnull(scan_fre),0,scan_fre) as scan_fre\n| if(isnull(scan_inf),0,scan_inf) as scan_inf\n| if(isnull(scan_cse),0,scan_cse) as scan_cse\n| if(isnull(scan_sec),0,scan_sec) as scan_sec\n| if(isnull(scan_trc),0,scan_trc) as scan_trc\n| if(isnull(scan_RCE),0,scan_RCE) as scan_rce\n\n| scan_fl + scan_con + scan_fre + scan_inf as scan_bytes_flex_billable\n//| cse as scan_bytes_cse\n| scan_sec + scan_trc + scan_rce as scan_bytes_not_flex_billable\n\n| (query_end_time - query_start_time)/ (1000 * 60 * 60 * 24) as range_days\n| execution_duration_ms /1000 as duration_s\n\n| scan_bytes_flex_billable/1T as t\n| where t > 0\n//| timeslice 1d\n| sum(t) as flex_tb by query_type //,_timeslice | transpose row _timeslice column query_type ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBD0CD135B5020B4A",
+            "title": "Total Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"TB  Scanned\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n// flex billable\n| sum(data_scanned_bytes) as b | b / 1T as t | avg(t)",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel261C71FC83CB7B4E",
+            "title": "Searches By User",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"unit\":{\"value\":\"\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \n// search audit search term(s)\n\nquery_type=copilot\n| timeslice 1d\n| count by User_name,_timeslice | transpose row _timeslice column user_name",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel859A14B9AD111A41",
+            "title": "Searches By Top Billable Scan",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \nquery_type=copilot\n// flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"Flex\" as  scan_fl nodrop // in a flex customer you will see this for billable scan\n| json field =scanned_bytes_breakdown_by_metering_type \"Continuous\" as  scan_con nodrop // value also turns up in flex orgs sometimes in small amounts\n| json field =scanned_bytes_breakdown_by_metering_type \"Frequent\" as  scan_fre nodrop\n| json field =scanned_bytes_breakdown_by_metering_type \"Infrequent\" as  scan_inf nodrop\n\n// not flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"FlexSecurity\" as  scan_cse nodrop // in a flex customer you will see this for CSE scanned logs (not flex billable)\n| json field =scanned_bytes_breakdown_by_metering_type \"ContinuousSecurity\" as  scan_cse nodrop // CSE scan in a legacy org\n| json field =scanned_bytes_breakdown_by_metering_type \"Security\" as  scan_sec nodrop // reflected sec_* indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"Tracing\" as  scan_trc nodrop // scan of tracing indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"RCE\" as  scan_RCE nodrop\n// {}   note it's also possible to see an empty array\n\n| if(isnull(scan_fl),0,scan_fl) as scan_fl\n| if(isnull(scan_con),0,scan_con) as scan_con\n| if(isnull(scan_fre),0,scan_fre) as scan_fre\n| if(isnull(scan_inf),0,scan_inf) as scan_inf\n| if(isnull(scan_cse),0,scan_cse) as scan_cse\n| if(isnull(scan_sec),0,scan_sec) as scan_sec\n| if(isnull(scan_trc),0,scan_trc) as scan_trc\n| if(isnull(scan_RCE),0,scan_RCE) as scan_rce\n\n| scan_fl + scan_con + scan_fre + scan_inf as scan_bytes_flex_billable\n//| cse as scan_bytes_cse\n| scan_sec + scan_trc + scan_rce as scan_bytes_not_flex_billable\n\n| round((query_end_time - query_start_time)/ (1000 * 60 * 60 * 24),2) as range_days\n| execution_duration_ms /1000 as duration_s\n\n//| scan_bytes_flex_billable/1T as t\n//| if(t >= 1 and t <10 ,1,0) as tb1\n//| if(t >= 10 and t <100,1,0) as tb10\n//| if(t >= 100 and t < 1000,1,0) as tb100\n//| if(t >= 1000,1,0) as tb1000\n\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count as searches, sum(scan_bytes_flex_billable) as flex_bytes,max(scan_cse) as cse_bytes,sum(scan_bytes_not_flex_billable) as other_bytes, values(range_days) as range_days,values(user_name) as users by query_type,content_name,query\n\n| round(flex_bytes / 1T,1) as flex_tb\n| round(cse_bytes / 1T,1) as cse_tb\n| round(other_bytes / 1T,1) as other_tb\n| fields -flex_bytes,cse_bytes,other_bytes\n\n| sort flex_tb | limit 200 \n| replace (range_days,\"\\n\",\", \") as range_days\n\n\n| fields -content_name, query_type,unique_queries",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel26C36B52A4BBCA44",
+            "title": "Scopes Used",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \nquery_type=copilot\n// flex billable\n| max(scanned_partition_count) as p,count as searches, sum(data_scanned_bytes) as scan_bytes by query,user_name\n\n| round(scan_bytes / 1G,1) as scan_gb\n| parse regex field=query \"^(?<scope>[^\\|]*)\" \n| sum(searches) as searches, max(p) as max_partitions,sum(scan_gb) as scan_gb,avg(scan_gb) as avg_scan_gb, values(user_name) as users by scope | sort scope asc\n| round (scan_gb,2) as scan_gb | round(avg_scan_gb,2) as avg_scan_gb",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD9B6D33C8EFB4A44",
+            "title": "Operators Used",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query \nquery_type=copilot\n// flex billable\n| max(scanned_partition_count) as p,count as searches, sum(data_scanned_bytes) as scan_bytes by query,user_name\n\n| parse regex field=query \"(?i)\\b(?<op>avg|count|count_distinct|count_frequent|fillmissing|first|last|min|max|most_recent|least_recent|pct|stddev|sum|abs|acos|asin|atan|atan2|cbrt|ceil|cos|cosh|exp|expm1|floor|hypot|log|log10|log1p|max|min|round|sin|sinh|sqrt|tan|tanh|toDegrees|toRadians|csv|JSON|keyvalue|parse|parse regex|split|xml|accum|backshift|base64Decode|base64Encode|bin|CIDR|concat|contains|decToHex|diff|fields|filter|format|formatDate|geo lookup|haversine|hexToDec|if|in|ipv4ToNumber|isBlank|isEmpty|isNull|isNumeric|isPrivateIP|isPublicIP|isValidIP|join|length|limit|logcompare|logreduce|lookup|luhn|matches|median|merge|now|num|outlier|parseHex|predict|replace|rollingstd|save|sessionize|smooth|sort|substring|timeslice|toLowerCase|toUpperCase|top|total|trace|transaction|transactionize|transpose|urldecode|urlencode|where|nodrop|regex|matches|row|column|values|threatip|geoip|threatlookup|queryendtime|querystarttime)\" multi\n| count_distinct(user_name) as users, count as instances by op | sort op asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [],
+    "coloringRules": []
+}
