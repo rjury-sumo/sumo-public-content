@@ -47,13 +47,15 @@ For example AccessDenied could indicate a broken workload or a failed authentica
 In these exercises we will create some searches to drill into AWS API errors in AWS Cloudtrail logs and show how to turn JSON logs into insights.
 
 ## 1. Run a search and review Messages Tab
-At top of the Sumo Logic UI window click the blue + New button then choose Search. 
+- new UI: cmd + K or open Goto and select Log Search
+- old UI: At top of the Sumo Logic UI window click the blue + New button then choose Search.
 
 The search below includes a metadata value (sourcecategory) and some keywords to narrow down results to just valid Cloudtrail events with an errorCode string in them.
 
 **Tip**: It's a good search practice to include a **_sourcecategory** or **_index** in each search to scope for best performance.
 
 - Paste this into your new search window. This simple search has as scope sourcecategory, which is a good best practice, and two keywords to limit results returned.
+  
 ```
 _sourcecategory = Labs/AWS/CloudTrail* recipientaccountid errorcode
 ```
@@ -64,14 +66,22 @@ _sourcecategory = Labs/AWS/CloudTrail* recipientaccountid errorcode
 You will now see Messages returned in the **Messages Tab** in the right pane, and fields in the **Field Browser** in the left pane.
 ![](./images/search_result.png)
 
-- In the "message" column note how the [UI formats the logs as JSON events](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/view-search-results-json-logs/) to make them more readable. 
-- Underneath the Message you can see the key metadata values like host, category (_sourcecategory) and index (also known as _index or _view). If you click on the index value under the messge it will update your query with the new scope. This is a easy way to add metadata to the current query. 
+- In the "message" column note how the [UI formats the logs as JSON events](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/view-search-results-json-logs/) to make them more readable.
+- Underneath the Message you can see the key metadata values like host, category (_sourcecategory) and index (also known as _index or _view). If you click on the index value under the messge it will update your query with the new scope. This is a easy way to add metadata to the current query. For example after clicking on the sourcecategory and index values under the log message I might now have a new scope:
+```
+((_sourcecategory = Labs/AWS/CloudTrail* recipientaccountid errorcode
+)
+AND _sourceCategory="Labs/AWS/CloudTrail/APIGateway")
+AND _view=prod_cloudtrail
+```
+_view is the internal name of the 'index' field in the UI
+
 - You can right click on JSON key or values to bring up menu quick actions for working with the logs such as 'Copy Message' or 'Parse the selected key'
+![alt text](images/json.right.click.png)
 - You can click 'view as Raw' to see the raw JSON formatted message
 - There are other UI options to expand/collapse JSON
 
 Take a quick visit to the [Getting Started With Search docs page](https://help.sumologic.com/docs/search/get-started-with-search/). This is the key resource as a new user to learn more about how to use the search interface. 
-
 
 ## 2. Use Log Message Inspector To Drill Into Fields In An Event
 Hover over any message in the results and use the pop up menu on the right to open [Log Message Inspector](https://help.sumologic.com/docs/search/get-started-with-search/search-page/log-message-inspector/). 
@@ -95,7 +105,7 @@ There are several really useful features of the search histogram:
 ![](./images/histogram.png)
 
 ## 4. Use the Field Browser For Quick Insights
-On the left of the Messages tab you will see the [field browser](https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/). This shows all fields that exist in the current search scope, which could be a mix of metadata, pre-indexed fields and fields extracted at search time.
+On the left of the Messages tab you will see the [field browser](https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/). This shows all fields that exist in the current search scope, which could be a mix of metadata, fields pre-extracted by administrators at ingestion or fields extracted at search time.
 
 By default sumo extracts every JSON field from logs at search time using "Auto Parsing" search mode so every possible Cloudtrail JSON key value will appear in the current search.
 
@@ -113,22 +123,23 @@ Aggregate queries enable you to take the fields you have parsed in the search an
 
 In our current use case how can we answer the question: what are the top API errors by errorcode?
 
-- In the field brownser click the field name errorCode. At the bottom of the pop window click:  ```Top Values```. This will open a new search tab that adds to your base query in a new search window: 
+- In the field browser click the field name errorCode. At the bottom of the pop window click:  ```Top Values```. This will open a new search tab that adds to your base query in a new search window: 
 
 ```
 ( _sourcecategory = Labs/AWS/CloudTrail*  )
 | count errorcode | top 10 errorcode by _count
 ```
 
-- Run this new search above. This is now an aggregate search. You will now have **TWO** search tabs: **Messages and Aggregates**. In the aggregates tab you can have tabular or graphical results, export results, sort by clicking column headings or add your search to a dashboard.
+- Run this new search above. This is now an aggregate search. You will now have **TWO** search tabs: **Messages** and  **Aggregates**. In the aggregates tab you can have tabular or graphical results, export results, sort by clicking column headings or add your search to a dashboard.
 
+The aggregates tab is where the true power of Sumo Logic emerges!
 
 ## 6. Graphing Over Time To Understand Trends and Distribution
-A key use case for Sumo Logic is to understand trends in extracted fields over time. How can we tell what errors are occurring and what the pattern is over the last six hours? When did the problem start and is there any periodic nature to what we can observe?
+A key use case for Sumo Logic is to understand trends in extracted fields over time.  How can we tell what errors are occurring and what the pattern is over the last six hours? When did the problem start and is there any periodic nature to what we can observe?
 
-- Use time range picker to change the time range to another value by entering a relative time expression: ```-6h```
+- Use time range picker to change the time range to a [relative time expression](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/time-range-expressions/#relative-time-range-expressions) by entering n: ```-6h``` which means 'last 6 hours' in the time range box.
 
-- Run the search below which counts each value of eventname but in 5 minute time buckets (using timeslice) and outputs this in a format suitable for charting (using transpose):
+- Run the search below which counts each value of eventname but in 5 minute time buckets called timeslices and outputs this in a format suitable for charting (using transpose):
 
 ```
  _sourcecategory = Labs/AWS/CloudTrail*
@@ -140,14 +151,13 @@ A key use case for Sumo Logic is to understand trends in extracted fields over t
 
 Since this is an aggregate query we will have both Messages and Aggregates tabs. On the Aggregates tab:
 - change to the column chart type using the column chart icon
-- click the display tab just below "add to dashboard"
-- in the display type to 'Stacked'
+- click the display tab icon just below "add to dashboard" and in the display type to 'Stacked'
 The new stacked chart nicely shows the distribution of errors over time. Since this is a lab environment the errors are quite periodic.
 
 ![Alt text](images/ct.lab.new.sch.ui.display.tab.png)
 
 ## 6. Parsing Fields Manually
-By default JSON logs are auto parsed and all fields extracted. It's a good search practice as you get more advanced with Sumo Logic to parse out fields using parsing operators - since other types of logs might not have an auto parse mode.
+By default JSON logs are auto parsed and all fields extracted. It's a good search practice to parse out fields using parsing operators - explicit parsing fields is faster, and some logs might not support auto parse mode.
 
 Here you see an example search with parse operators - **json**, simple **parse** anchor, and **parse regex** which are some of the many parse operators available. Don't worry if the search syntax is overwhelming right now - the key things to note are:
 - parsing is a key skill to extract fields and generate insights from structured or semi-structured logs
@@ -183,10 +193,9 @@ If you have finished that lab and have time to spare checkout these resources.
 ### Search Cheat Sheet
 The [log operators cheat sheet](https://help.sumologic.com/docs/search/search-cheat-sheets/log-operators/) provides a list of available parsers, aggregators, search operators, and mathematical expressions with links to full details for each item.
 
-## Review the search basics microlesson
-This  [Introduction to search microlesson](https://www.youtube.com/watch?v=VbFsfpmP6LY) provides a great overview of the search pipeline. 
-
-
 ### Review Best Practices for Search
 Review the [search best practices](https://help.sumologic.com/docs/search/get-started-with-search/build-search/best-practices-search/) to understand how to write fast high performing searches. 
+
+## Review the search basics microlesson
+This  [Introduction to search microlesson](https://www.youtube.com/watch?v=VbFsfpmP6LY) provides a great overview of the search pipeline. 
 
