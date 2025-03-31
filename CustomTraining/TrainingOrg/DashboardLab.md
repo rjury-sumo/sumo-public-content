@@ -7,7 +7,18 @@ Log in as a training user as per usual method such as training+analyst###@sumolo
 
 You can find this month's training password by going to your Sumo instance, then use the Home, Certification tab to open the training portal.
 
+## New UI vs Old UI
+There are two Web UIs available the [new UI](https://help.sumologic.com/docs/get-started/sumo-logic-ui/) and legacy old UI. Some steps in lab might vary based on what UI you are using. 
+You can tell which UI your user account is using by checking these images. It's suggested to switch to new UI. In new UI the easiest way to start a new tab is:
+1. click 'goto' or use cmd + k to open the goto dialog
+2. start typing what you want to open e.g log for log search
+3. click the menu item to open it. New UI uses native browser tabs so you can cmd + click to open this page as new tab
 
+**new UI**
+![alt text](images/new-ui.png)
+
+**old UI**
+![alt text](images/old-ui.png)
 
 # In this Lab
 - How to create a new dashboard with basic properties like name and time range.
