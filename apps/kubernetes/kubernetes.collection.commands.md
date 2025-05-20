@@ -12,9 +12,11 @@ see the installation page diagram for your version e.g https://github.com/SumoLo
 
 
 ## helm version
-Version of Sumo Logic Kubernetes Collection Helm Chart, e.g.
+Version of Sumo Logic Kubernetes Collection Helm Chart use one of these examples:
 ```
 helm ls -A
+helm list -A
+helm list -A --namespace sumologic
 ```
 
 ## values minus acccessKey
@@ -54,7 +56,6 @@ sumologic-prometheus-node-exporter-49snr            1/1     Running   0         
 sumologic-prometheus-node-exporter-b5zhp            1/1     Running   1 (54m ago)   42h
 ```
 
-
 # otel configs are stored in configmaps
 
 to see the configmaps
@@ -82,6 +83,12 @@ sumo-otelcol-logs-2                                 1/1     Running   1 (54m ago
 ```
 
 ## get logs
+
+for service:
+```
+kubectl logs service/sumo-otelcol-events -n sumologic
+```
+
 ```
 kubectl logs sumo-otelcol-logs-0 -n sumologic
 ```
@@ -89,6 +96,9 @@ kubectl logs sumo-otelcol-logs-0 -n sumologic
 ## describe this service
 ```
 kubectl describe  service sumo-metadata-logs -n sumologic
+
+# to tail incoming use
+kubectl logs service/sumo-otelcol-events -n sumologic -f
 ```
 
 # "level 2" daemonsets
