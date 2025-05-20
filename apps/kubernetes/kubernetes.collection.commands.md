@@ -1,0 +1,123 @@
+# general commands
+
+Troubleshooting collection docs page:
+https://help.sumologic.com/docs/send-data/kubernetes/troubleshoot-collection/
+
+Customer support issues information required
+https://github.com/SumoLogic/sumologic-kubernetes-collection/blob/main/docs/support.md
+
+# collection architecture
+see the installation page diagram for your version e.g https://github.com/SumoLogic/sumologic-kubernetes-collection/blob/release-v4.11/docs/README.md
+![alt text](k8s.4x.diagram.png)
+
+
+## helm version
+Version of Sumo Logic Kubernetes Collection Helm Chart, e.g.
+```
+helm ls -A
+```
+
+## values minus acccessKey
+```
+helm get values sumologic -n sumologic | grep -v accessKey
+```
+
+## get sumologic pods
+```
+kubectl get pods -n sumologic
+```
+
+For a full setup with all options enabled on 3 node cluster this would look like this 
+```
+NAME                                                READY   STATUS    RESTARTS      AGE
+sumo-metrics-collector-0                            1/1     Running   9 (50m ago)   42h
+sumo-metrics-targetallocator-7c568f698f-s8b5z       1/1     Running   2 (53m ago)   42h
+sumo-otelcol-events-0                               1/1     Running   1 (54m ago)   42h
+sumo-otelcol-instrumentation-0                      1/1     Running   1 (54m ago)   42h
+sumo-otelcol-instrumentation-1                      1/1     Running   1 (54m ago)   42h
+sumo-otelcol-instrumentation-2                      1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-0                                 1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-1                                 1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-2                                 1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-collector-cbh5t                   1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-collector-kt5jn                   1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-collector-md795                   1/1     Running   0             42h
+sumo-otelcol-metrics-0                              1/1     Running   1 (54m ago)   42h
+sumo-otelcol-metrics-1                              1/1     Running   1 (54m ago)   42h
+sumo-otelcol-metrics-2                              1/1     Running   1 (54m ago)   42h
+sumo-traces-gateway-858dc9475d-28gjt                1/1     Running   1 (54m ago)   42h
+sumo-traces-sampler-6c5b84bc8c-bp9d7                1/1     Running   1 (54m ago)   42h
+sumologic-kube-state-metrics-58584b64db-q9gkg       1/1     Running   2 (54m ago)   42h
+sumologic-opentelemetry-operator-6bbbd45954-97h7j   2/2     Running   2 (54m ago)   42h
+sumologic-prometheus-node-exporter-25x6n            1/1     Running   1 (54m ago)   42h
+sumologic-prometheus-node-exporter-49snr            1/1     Running   0             42h
+sumologic-prometheus-node-exporter-b5zhp            1/1     Running   1 (54m ago)   42h
+```
+
+# otel configs are stored in configmaps
+
+to see the configmaps
+```
+kubectl get configmap -n sumologic
+```
+
+to see specific otel configs in place check relevant config map e.g
+```
+# log forwarding/enrichment container
+kubectl describe configmap sumo-otelcol-logs -n sumologic
+
+# per node collection container
+kubectl describe configmap sumo-otelcol-logs-collector -n sumologic
+```
+
+# "level 2" services for logs enrichment and forwarding service
+The second tier service pods that posts logs to Sumo Logic and does metadata enrichment
+
+## get logs
+```
+kubectl logs sumo-otelcol-logs-0 -n sumologic
+```
+
+## describe this service
+```
+kubectl describe  service sumo-metadata-logs -n sumologic
+```
+
+# "level 2" daemonsets
+Each node will have a daemonset container to collect say local metrics or logs
+
+```
+kubectl get daemonset -n sumologic
+```
+
+for example:
+```
+NAME                                 DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+sumo-otelcol-logs-collector          3         3         2       3            2           kubernetes.io/os=linux   42h
+sumologic-prometheus-node-exporter   3         3         2       3            2           kubernetes.io/os=linux   42h
+```
+
+To describe the daemonset for logs collection:
+```
+kubectl describe daemonset sumo-otelcol-logs-collector -n sumologic
+```
+
+To check logs for a specific pod, they have a unique code on end. 
+```
+kubectl logs sumo-otelcol-logs-collector-cbh5t -n sumologic
+```
+
+# Secrets that define the endpoints to post to sumo
+
+list values
+This script is used to list the base64 encoded values of the Sumo Logic secret in Kubernetes.
+```
+kubectl get secret sumologic -n sumologic -o jsonpath='{.data}' | jq 
+```
+
+The following commands can be used to decode the base64 values:
+```
+kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-logs}' | base64 --decode
+kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-logs-otlp}' | base64 --decode
+kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-metrics-node-exporter}' | base64 --decode
+```
