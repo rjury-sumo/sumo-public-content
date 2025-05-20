@@ -56,6 +56,12 @@ sumologic-prometheus-node-exporter-49snr            1/1     Running   0         
 sumologic-prometheus-node-exporter-b5zhp            1/1     Running   1 (54m ago)   42h
 ```
 
+## events
+Starting with events is a really good summary to start investigations for possible issues.
+```
+kubectl events -n sumologic
+```
+
 # otel configs are stored in configmaps
 
 to see the configmaps
@@ -72,7 +78,33 @@ kubectl describe configmap sumo-otelcol-logs -n sumologic
 kubectl describe configmap sumo-otelcol-logs-collector -n sumologic
 ```
 
-# "level 2" services for logs enrichment and forwarding service
+# crds
+In some cases manual changes might ned to be made to crd such as when upgrading 3x to 4x
+https://help.sumologic.com/docs/send-data/kubernetes/v4/important-changes/
+
+To see crds:
+```
+kubectl get crd -n sumologic
+
+```
+
+For example:
+```
+NAME                                        CREATED AT
+alertmanagerconfigs.monitoring.coreos.com   2025-05-19T03:24:01Z
+alertmanagers.monitoring.coreos.com         2025-05-19T03:24:01Z
+instrumentations.opentelemetry.io           2025-05-19T03:24:02Z
+opampbridges.opentelemetry.io               2025-05-19T03:24:02Z
+opentelemetrycollectors.opentelemetry.io    2025-05-19T03:24:02Z
+podmonitors.monitoring.coreos.com           2025-05-19T03:24:01Z
+probes.monitoring.coreos.com                2025-05-19T03:24:01Z
+prometheuses.monitoring.coreos.com          2025-05-19T03:24:01Z
+prometheusrules.monitoring.coreos.com       2025-05-19T03:24:01Z
+servicemonitors.monitoring.coreos.com       2025-05-19T03:24:01Z
+thanosrulers.monitoring.coreos.com          2025-05-19T03:24:02Z
+```
+
+# "level 2" services for logs enrichment and forwarding service: sumo-metadata-logs
 The second tier service pods that posts logs to Sumo Logic and does metadata enrichment
 
 These pods have a number on end e.g
@@ -87,6 +119,8 @@ sumo-otelcol-logs-2                                 1/1     Running   1 (54m ago
 for service:
 ```
 kubectl logs service/sumo-otelcol-events -n sumologic
+kubectl logs service/sumo-metadata-logs -n sumologic
+
 ```
 
 ```
@@ -101,7 +135,7 @@ kubectl describe  service sumo-metadata-logs -n sumologic
 kubectl logs service/sumo-otelcol-events -n sumologic -f
 ```
 
-# "level 2" daemonsets
+# "level 1" daemonsets
 Each node will have a daemonset container to collect say local metrics or logs
 
 These pods have a id string on the end and there is one per node, unless cluster has special configuration (eg taints to prevent them running on some nodes)
@@ -146,3 +180,4 @@ kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-logs}' | 
 kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-logs-otlp}' | base64 --decode
 kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-metrics-node-exporter}' | base64 --decode
 ```
+
