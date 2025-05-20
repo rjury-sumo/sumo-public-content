@@ -54,6 +54,7 @@ sumologic-prometheus-node-exporter-49snr            1/1     Running   0         
 sumologic-prometheus-node-exporter-b5zhp            1/1     Running   1 (54m ago)   42h
 ```
 
+
 # otel configs are stored in configmaps
 
 to see the configmaps
@@ -73,6 +74,13 @@ kubectl describe configmap sumo-otelcol-logs-collector -n sumologic
 # "level 2" services for logs enrichment and forwarding service
 The second tier service pods that posts logs to Sumo Logic and does metadata enrichment
 
+These pods have a number on end e.g
+```
+sumo-otelcol-logs-0                                 1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-1                                 1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-2                                 1/1     Running   1 (54m ago)   42h
+```
+
 ## get logs
 ```
 kubectl logs sumo-otelcol-logs-0 -n sumologic
@@ -85,6 +93,13 @@ kubectl describe  service sumo-metadata-logs -n sumologic
 
 # "level 2" daemonsets
 Each node will have a daemonset container to collect say local metrics or logs
+
+These pods have a id string on the end and there is one per node, unless cluster has special configuration (eg taints to prevent them running on some nodes)
+```
+sumo-otelcol-logs-collector-cbh5t                   1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-collector-kt5jn                   1/1     Running   1 (54m ago)   42h
+sumo-otelcol-logs-collector-md795                   1/1     Running   0             42h
+```
 
 ```
 kubectl get daemonset -n sumologic
