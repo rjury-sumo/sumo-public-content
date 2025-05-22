@@ -181,3 +181,20 @@ kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-logs-otlp
 kubectl get secret sumologic -n sumologic -o jsonpath='{.data.endpoint-metrics-node-exporter}' | base64 --decode
 ```
 
+# HPA 
+Below is the command to check HPA.
+```
+kubectl get hpa --all-namespaces
+```
+NAMESPACE   NAME                                             REFERENCE                                                    TARGETS                        MINPODS   MAXPODS   REPLICAS   AGE
+k8so        sumo-collection-sumolo-metrics-collector         OpenTelemetryCollector/sumo-collection-sumolo-metrics        1%/70%, 4%/70%   1         10        1          21m
+k8so        sumo-collection-sumolo-otelcol-instrumentation   StatefulSet/sumo-collection-sumolo-otelcol-instrumentation   1%/100%                 3         10        3          21m
+k8so        sumo-collection-sumolo-otelcol-logs              StatefulSet/sumo-collection-sumolo-otelcol-logs              1%/80%                  3         10        3          21m
+k8so        sumo-collection-sumolo-otelcol-metrics           StatefulSet/sumo-collection-sumolo-otelcol-metrics          1%/80%                  3         10        3          21m
+k8so        sumo-collection-sumolo-traces-gateway            Deployment/sumo-collection-sumolo-traces-gateway             1%/100%                 1         10        1          21m
+```
+
+If there is performance issue, even though HPA is configured correctly, we can increase minimum replicas with the command below. If we manually increase the pod itself, it will not work because of HPA. So we need to increase minimum replica.
+```
+kubectl -n k8so patch hpa/sumo-collection-sumolo-otelcol-logs  --patch '{"spec":{"minReplicas":5}}'
+```
