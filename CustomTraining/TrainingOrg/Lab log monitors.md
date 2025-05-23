@@ -10,8 +10,8 @@
   - [1.4 Trigger Types](#14-trigger-types)
   - [1.5 Alert Grouping](#15-alert-grouping)
   - [1.6 Formatting notification output with alert Variables](#16-formatting-notification-output-with-alert-variables)
-  - [1.7 Monitor Details](#17-monitor-details)
-  - [1.8 Playbooks](#18-playbooks)
+  - [1.7 Playbooks](#17-playbooks)
+  - [1.8 Monitor Details](#18-monitor-details)
   - [1.9 Other settings](#19-other-settings)
 - [2. ADVANCED LAB](#2-advanced-lab)
   - [2.1 Dynamic thresholds with Time compare alerting](#21-dynamic-thresholds-with-time-compare-alerting)
@@ -100,6 +100,8 @@ From the query elipsis menu select Create a [Monitor](https://help.sumologic.com
 You might find the docs page for [Create a Monitor](https://help.sumologic.com/docs/alerts/monitors/create-monitor/) helpful if you get stuck on any of the following sections.
 
 ## 1.3 Trigger Conditions
+Monitors only alert on a change of state. This is different to legacy scheduled search that alerts whenever the condition (such as number of results) is satisfied.
+
 Simple log alerts trigger where > 0 rows are returned or for aggreagate on the _count column. For this query type we would:
 - setup the query with filtering where clause(s) so it returns no results unless there is an error
 - setup a threshold in the alert in a monitor if the row count is >0
@@ -119,19 +121,15 @@ In the next section enable a critical notification on the critical tab and enter
 
 ![alt text](images/alert.threshold.png)
 
-- tick 'Critical' for the notification level. This will alert on critical only (not resolution)
-  ![alt text](images/critical.alert.png)
+Leave the 'advanced settings' as is:
+- Alert Name Use Monitor Name
 
 ## 1.5 Alert Grouping
-Monitors only alert on a change of state. This is different to legacy scheduled search that alerts whenever the condition (such as number of results) is satisfied.
-
 Two models are possible for monitors to track state for the monitor:
 1. one alert /state per monitor as a whole
-2. maintain separate states for each group (value of a field) or time series.
+2. maintain separate states for each group (value of a field) or time series - this is called [Alert Grouping](https://help.sumologic.com/docs/alerts/monitors/alert-grouping/)
 
-It's possible to make one monitor that tracks each alert grouped entity seperately and will generate an alert per entity. If the query was grouped by one or more things eg:
-
-Update the query as below and then change the "Alert Grouping" setting to "one alert per pod"
+Update the query as below and then change the "Alert Grouping" setting to "one alert per: pod"
 
 ```
 _sourcecategory=*kubernetes* stream  stderr
@@ -143,17 +141,22 @@ _loglevel=error
 Now our single monitor could track seperate statuses for each pod.
 ![alt text](images/alert.per.pod.png)
 
+*You might notice the graph of status over time no longer displays. That's normal it's not supported for alert grouping in logs yet.*
+
 ## 1.6 Formatting notification output with alert Variables
 It's nice to have descriptive alerts at 3am on your phone and there are many [alert variables](https://help.sumologic.com/docs/alerts/monitors/alert-variables/) available to customize the title and payload for the notification.
 
-One very useful field is ```{{ResultsJson.fieldName}}```. In our new alert grouped aggregate query ```{{ResultsJson.pod}}``` will put the pod name in the text in title or description or payload.
+ One very useful field is ```{{ResultsJson.fieldName}}```. In our new alert grouped aggregate query ```{{ResultsJson.pod}}``` will put the pod name in the text in title or description or payload.
 
-Customize the "alert name" box to have a custom alert name:  
+Go back to the "Alert Name" under advanced settings for trigger type.. Customize the "alert name" box to have a custom alert name:  
 ```High container errors for pod: {{ResultsJson.pod}}"```
 
-In the notifications section:
+- tick 'Critical' for the notification level. This will alert on critical only (not resolution)
+  ![alt text](images/critical.alert.png)
+
+In the notifications configuration:
 - For type choose 'Create New Email'.
-- enter any email address 
+- enter any email address (we aren't going to save this!!)
 - For subject choose: ```Monitor Alert: {{TriggerType}} on {{AlertName}}```
 
 The message can be any customizable payload here is a suggested payload. This includes the url for the Alert Response Page. Update the notifcation message payload:
@@ -171,14 +174,14 @@ Query {{Query}}
 ```
 ![Alt text](images/monitor_settings.png)
 
-## 1.7 Monitor Details
+## 1.7 Playbooks
+In the final playbook section this would enable admins to codify tribal knowledge for an on-call so they know what exactly to do when they receive an alert. Playbooks support markdown and are visible in the alert response page, or can be added to notifications via the ```{{Playbook}}``` variable.
+
+## 1.8 Monitor Details
 - Enter a monitor name such as "High error count for a Kubernetes Pod"
 - Location: you can create folders to organize monitors, for now leave as is
 - Tags: You can [tag monitors](https://help.sumologic.com/docs/alerts/monitors/settings/#tags). 
 - Lets add: ```service=foo owner=bar``` tags.
-
-## 1.8 Playbooks
-In the final playbook section this would enable admins to codify tribal knowledge for an on-call so they know what exactly to do when they receive an alert. Playbooks support markdown and are visible in the alert response page, or can be added to notifications via the ```{{Playbook}}``` variable.
 
 Automated playbooks are also possible via the Automation Service. For more info see: [automated playbooks](https://help.sumologic.com/docs/alerts/monitors/use-playbooks-with-monitors/)
 
