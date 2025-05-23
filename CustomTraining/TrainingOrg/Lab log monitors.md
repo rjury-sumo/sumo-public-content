@@ -177,16 +177,16 @@ Query {{Query}}
 ## 1.7 Playbooks
 In the final playbook section this would enable admins to codify tribal knowledge for an on-call so they know what exactly to do when they receive an alert. Playbooks support markdown and are visible in the alert response page, or can be added to notifications via the ```{{Playbook}}``` variable.
 
+Automated Playbooks allow you to link to the [Automation Service](https://help.sumologic.com/docs/platform-services/automation-service/) to run automated responses or more complex notification actions.
+
 ## 1.8 Monitor Details
 - Enter a monitor name such as "High error count for a Kubernetes Pod"
 - Location: you can create folders to organize monitors, for now leave as is
 - Tags: You can [tag monitors](https://help.sumologic.com/docs/alerts/monitors/settings/#tags). 
 - Lets add: ```service=foo owner=bar``` tags.
 
-Automated playbooks are also possible via the Automation Service. For more info see: [automated playbooks](https://help.sumologic.com/docs/alerts/monitors/use-playbooks-with-monitors/)
-
 ## 1.9 Other settings
-You can find more info on these here: https://help.sumologic.com/docs/alerts/monitors/create-monitor/
+You can find more info on all possible monitor settings here: https://help.sumologic.com/docs/alerts/monitors/create-monitor/
 
 **That is the end of the BASIC lab**. You can continue on to the advanced topics below if you have more time. **If you are finishing here just cancel out of the create monitor dilog without saving changes.**
 
