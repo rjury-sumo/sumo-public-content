@@ -228,7 +228,7 @@ _loglevel=error
 - Change this to a line graph layout to see trend over time. This will give you a good idea what 'normal' is and some benchmarks for possible static threshold levels.
 ![alt text](images/k8s.error.count.timesliced.png)
 
-- Use the elipsis to create a new monitor.
+- Use the elipsis button for the search to **create a new monitor.**
 
 ## 2.3 Timeslice For AI Anomaly
 Since the data is timesliced it would support the [AI Anomaly](https://www.youtube.com/watch?v=nMRoYb1YCfg) type, where each timeslice period data is streamed to the external data model. AI-driven alerting provides a simple easy to configure dynamic alerting experience:
@@ -256,7 +256,7 @@ _loglevel=error
 | count
 ```
 
-1. timesliced
+2. timesliced
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
@@ -264,19 +264,17 @@ _loglevel=error
 | timeslice 5m | count by _timeslice
 ```
 
-Does Query 1 vs 2 show different trend results in the graph that could impact evaluation?
-How does changing the 'within the last X' period to different values affect the graph?
-- 15m
-- 1 hour
+- Does Query 1 vs 2 show different trend results in the graph that could impact evaluation?
+- How does changing the 'within the last X' period to different values affect the graph such as 15m vs 1 hour?
 
 These experiments show that:
 - The version with no timeslice draws a smooth line very similar to the origional log search timesliced version. So the monitor operates as if the same query is *effectively timesliced* anyway.
 ![alt text](images/monitor.notimesliced.eval.png)
 
-- The 'Historical Trend' graph may render differently if you use a timeslice in the monitor query. 
+- The 'Historical Trend' graph may render differently if you use a timeslice in the monitor query than expected.
 ![alt text](images/monitor.timesliced.eval.png)
 
-- Timeslice within motitor query should be used with caution. The relationship between the timeslice vs the 'within > x' time value will impact evaluation, and it could be hard to predict outcome.
+- Timeslice within monitor query should be used with caution. The relationship between the timeslice vs the 'within > x' time value will impact evaluation, and it could be hard to predict outcome.
 
 - Lastly setting a larger 'within the last x' value will increase the threshold value required to trigger.
 
@@ -301,7 +299,7 @@ This screenshot shows that both the containers with errors would have over 15 bu
 
 ![Alt text](images/log_search_timeslice_transpose.png)
 
-However the monitor query version we would use for alert grouping instead should be as below without a timeslice. As we learned above the "effective timeslice" will be the "in the last X" value chosen:
+However as we have learned above the the correct version of this query to use in a monitor would be without a timeslice. As we learned above the "effective timeslice" will be the "in the last X" value chosen:
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
