@@ -15,11 +15,10 @@
   - [1.9 Other settings](#19-other-settings)
 - [2. ADVANCED LAB](#2-advanced-lab)
   - [2.1 Dynamic thresholds with Time compare alerting](#21-dynamic-thresholds-with-time-compare-alerting)
-  - [2.2  Creating a monitor for a timeslice log searches](#22--creating-a-monitor-for-a-timeslice-log-searches)
+  - [2.2 Creating a monitor for a timesliced log searches](#22-creating-a-monitor-for-a-timesliced-log-searches)
   - [2.3 Timeslice For AI Anomaly](#23-timeslice-for-ai-anomaly)
   - [2.4 Timesliced Data and Trigger Conditions](#24-timesliced-data-and-trigger-conditions)
-  - [2.5 Timeslice vs 'effective timeslice'](#25-timeslice-vs-effective-timeslice)
-  - [2.6 Modelling thresholds with alert grouping for logs with timeslice / transpose](#26-modelling-thresholds-with-alert-grouping-for-logs-with-timeslice--transpose)
+  - [2.5 Modelling thresholds with alert grouping for logs with timeslice / transpose](#25-modelling-thresholds-with-alert-grouping-for-logs-with-timeslice--transpose)
 
 This lab uses the Training Org that is used in Sumo Certjams but should work in any Sumo org ingesting container logs via the Kubernetes Collection Solution.
 
@@ -193,14 +192,16 @@ You can find more info on all possible monitor settings here: https://help.sumol
 --------
 # 2. ADVANCED LAB
 Advanced optional topics:
-- Using timeslice searches in monitors
-- Time compare log monitors
+- Dynamic thresholds with Time compare alerting 
+- Creating a monitor for a timesliced log searches
 - Formatting data for Anomaly monitors
+- Timesliced Data and Trigger Conditions
 - Modelling thresholds with alert grouping for logs with timeslice / transpose
 
 ## 2.1 Dynamic thresholds with Time compare alerting
+[Time compare](https://help.sumologic.com/docs/search/time-compare/) is a powerful log query technique to compare current vs previous baseline performance. It works very well to compare performance in alert situations vs a baseline of previous periods. Here is an example that would produce > 0 rows only where error counts are much higher than the same time last week, and could use 'alert grouping' one per path.
 
-[Time compare](https://help.sumologic.com/docs/search/time-compare/) is a standard log query technique to compare current vs previous baseline performance. It works very well to compare performance for the monitor or per group in alert situations vs a baseline of previous periods. Here is an example that would produce > 0 rows only where error counts are much higher than the same time last week, and could use 'alert grouping' one per path
+If this was a monitor with "in the last 15m" as the time range it would compare the current 15m vs the avg of 15m at the same time of day 7 and 14 days ago.
 ```
 _index=Apache_Access1
 status_code = 5*
@@ -213,8 +214,8 @@ status_code = 5*
 | where change > 5 and increase_pct > 50
 ```
 
-## 2.2  Creating a monitor for a timeslice log searches
-In some log monitor scenarios the starting query might contain a timeslice operator and that can impact final evaluation. you don't need to timeslice monitor searches and doing so can cause confusing evaluation results if the _timeslice and "in the last" settings are different.
+## 2.2 Creating a monitor for a timesliced log searches
+In some log monitor scenarios the starting query might contain a timeslice operator and that can impact final evaluation. Let's look at a timeslice query.
 
 Back in a new log search window execute this search using a time range of -6h
 ```
@@ -224,55 +225,62 @@ _loglevel=error
 | timeslice 5m | count by _timeslice
 ```
 
-- Change this to a line graph layout to see trend over time. This will give you a good idea what 'normal' is and some benchmarks for threshold levels.
+- Change this to a line graph layout to see trend over time. This will give you a good idea what 'normal' is and some benchmarks for possible static threshold levels.
 ![alt text](images/k8s.error.count.timesliced.png)
-The Aggregates tab shows tabular output of what will be passed to the monitor engine (since it's an aggregate query).
 
 - Use the elipsis to create a new monitor.
 
 ## 2.3 Timeslice For AI Anomaly
 Since the data is timesliced it would support the [AI Anomaly](https://www.youtube.com/watch?v=nMRoYb1YCfg) type, where each timeslice period data is streamed to the external data model. AI-driven alerting provides a simple easy to configure dynamic alerting experience:
-
 - Model-driven anomaly detection: AI-driven alerts use 60 days of historical data (when available) to train and test an ML model so that hourly, daily and weekly (especially, weekday/weekend) seasonality are factored into baselines.
 - AutoML: AI-driven alerts embed an AutoML framework where the analytics tune itself based on model performance on training datasets. Simply put, AutoML supports a “set it and forget it” experience with minimal user intervention.
-- Model contextual and dynamic thresholds: AI-driven alerts have a sensitivity setting (low sensitivity for signals that are expected to be noisy and high sensitivity for critical indicators). Additionally, the user can configure the incident detector based on context. For example, in the Cluster detector, the user can specify how many data points in a detection window of say 5m need to be unusual before triggering an alert.
+
+Change the monitor type to **Anomaly**. You can then select a sensitivity for dynamic thresholding for the alert.
+
+![alt text](images/anomly.monitor.png)
 
 ## 2.4 Timesliced Data and Trigger Conditions
-As before this is a logs, static monitor. Let's **stay with 'static' for this lab.**
+Switch the evaluation back to **Static** monitor type.
 
-For this monitor trigger settings:
+Try each of these monitor queries (press enter in search box after edit).
+Use the same trigger settings in both cases:
 - trigger alerts on _count
 - change the Trigger type to Critical, alert when > 250 for 5 minutes
 - change the historical trend graph time range to -6h
 
-The 'Historical Trend' graph may render differently if you use a timeslice in the monitor query, and will depend relationship between the timeslice vs the 'within > x' time value. 
-How does changing the 'within' period to different values affect the graph?
-- 15m
-- 1 hour
-
-## 2.5 Timeslice vs 'effective timeslice'
-Go back to the Query box in the monitor editor window and change it to a 'non timesliced' version below and press enter in the query box to run it. Now it has no time element to it.
-
+1. no timeslice
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
 | json "stream","log" | where stream="stderr"
-//| timeslice 5m 
-| count // by _timeslice
+| count
 ```
 
-**The monitor evaluation graph will still draw a history graph similar to if the data was timesliced**
-So the monitor version of the same query is *effectively timesliced* even though it's a count. This means that:
-- timeslice queries are useful for predicting what a monitor might do over a certain time range
-- BUT ! you don't need to timeslice log monitor queries.
+1. timesliced
+```
+_sourcecategory=*kubernetes* stream  stderr
+_loglevel=error
+| json "stream","log" | where stream="stderr"
+| timeslice 5m | count by _timeslice
+```
 
-The 'effective timeslice' value in a monitor used is the 'within X minutes' value. So if this was say 15m then the _count would be the total count in each 15m time range.
-- Try changing this within value to say 15m or 1h and review the changes to the 'Historical Trend' graph.
-- note how the trend line value will increase as you use larger time blocks and this could impact the threshold value.
+Does Query 1 vs 2 show different trend results in the graph that could impact evaluation?
+How does changing the 'within the last X' period to different values affect the graph?
+- 15m
+- 1 hour
 
-If you have larger 'within' values you would need larger thresholds values also. When creating a log monitor you can tune it by using less granular / larger window/threshold settings.
+These experiments show that:
+- The version with no timeslice draws a smooth line very similar to the origional log search timesliced version. So the monitor operates as if the same query is *effectively timesliced* anyway.
+![alt text](images/monitor.notimesliced.eval.png)
 
-## 2.6 Modelling thresholds with alert grouping for logs with timeslice / transpose
+- The 'Historical Trend' graph may render differently if you use a timeslice in the monitor query. 
+![alt text](images/monitor.timesliced.eval.png)
+
+- Timeslice within motitor query should be used with caution. The relationship between the timeslice vs the 'within > x' time value will impact evaluation, and it could be hard to predict outcome.
+
+- Lastly setting a larger 'within the last x' value will increase the threshold value required to trigger.
+
+## 2.5 Modelling thresholds with alert grouping for logs with timeslice / transpose
 'Historical Trend' graph on the monitors page doesn't yet support log alert group threshold prediction for logs. This means to model a good threshold for an alert grouped log query we would need to run a test query in a new log search window using timeslice and transpose.
 
 - cancel the monitor creation
@@ -280,7 +288,7 @@ If you have larger 'within' values you would need larger thresholds values also.
 - select -6h
 - paste and execute this query:
 
-The timeslice, count by timeslice, transpose syntax below is the standard method in Sumo Logic to graph multiple values of a field as seperate dynamic series over time.
+*The timeslice, count by timeslice, transpose syntax below is the standard pattern in Sumo Logic to graph multiple values of a field as seperate dynamic series over time.*
 
 ```
 _sourcecategory=*kubernetes* stream  stderr
@@ -293,7 +301,7 @@ This screenshot shows that both the containers with errors would have over 15 bu
 
 ![Alt text](images/log_search_timeslice_transpose.png)
 
-However the monitor query version we would use for alert grouping instead should be:
+However the monitor query version we would use for alert grouping instead should be as below without a timeslice. As we learned above the "effective timeslice" will be the "in the last X" value chosen:
 ```
 _sourcecategory=*kubernetes* stream  stderr
 _loglevel=error
