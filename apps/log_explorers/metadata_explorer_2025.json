@@ -1,0 +1,522 @@
+
+
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Metadata Explorer",
+    "description": "",
+    "title": "Metadata Explorer",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-15m"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel234252ED8E9F4B46",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":56}"
+            },
+            {
+                "key": "panelFF9381DF89C31944",
+                "structure": "{\"height\":9,\"width\":6,\"x\":18,\"y\":37}"
+            },
+            {
+                "key": "panel7FEEC01C8044F942",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":9}"
+            },
+            {
+                "key": "panelPANE-8BC0CCE6AE44E842",
+                "structure": "{\"height\":7,\"width\":11,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelF6BB756793771846",
+                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":46}"
+            },
+            {
+                "key": "panel720FAE7EB2F75A45",
+                "structure": "{\"height\":9,\"width\":7,\"x\":11,\"y\":37}"
+            },
+            {
+                "key": "panelBD95671EB5112B48",
+                "structure": "{\"height\":8,\"width\":13,\"x\":11,\"y\":46}"
+            },
+            {
+                "key": "panelEECF9F6B8C564A46",
+                "structure": "{\"height\":9,\"width\":11,\"x\":0,\"y\":37}"
+            },
+            {
+                "key": "panelA080A856A4B96943",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":29}"
+            },
+            {
+                "key": "panelF9B3A68DBC64FA40",
+                "structure": "{\"height\":7,\"width\":13,\"x\":11,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-022698599890F944",
+                "structure": "{\"height\":34,\"width\":24,\"x\":0,\"y\":89}"
+            },
+            {
+                "key": "panel7AE65684BB14B84D",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panel5FC651578A066946",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":18}"
+            },
+            {
+                "key": "panelC487ED60A3F1C946",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":67}"
+            },
+            {
+                "key": "panel8AF0D1BDAC0A8A49",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":78}"
+            },
+            {
+                "key": "panelA691B04794035841",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":54}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel234252ED8E9F4B46",
+            "title": "Metadata Values Per Sourcecategory",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(collector) as collectors, values(sourcename) as sourcenames, sum(events) as events by sourcecategory\n| sort sourcecategory asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelFF9381DF89C31944",
+            "title": "_collector",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n|  sum(events) as events by collector\n| sort collector asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7FEEC01C8044F942",
+            "title": "Search by index and sourcecategory",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events, first(collector) as collector, first(source) as source, first(sourcename) as sourcename by index,sourcecategory,%\"Search Scope\" \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\"\\n _index=\",index) as i\n| concat(\"\\n// _collector=\",collector) as c\n| concat(\"\\n// _source=\",source) as s\n| concat(\"\\n// _sourcename=\",sourcename) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search By Sourcecategory\"\n\n| fields -dp,sc,i,c,sn,s,the_search, collector,source,sourcename\n| sort index asc,sourcecategory asc | fields -percent\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-8BC0CCE6AE44E842",
+            "title": "About the Log Datamap",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard is helps to explore logs recently ingested into your Sumo Logic account and what metadata is associated with them. This makes is faster and easier to locate logs and run searches with the correct metadata scope.\n\nNote: this dashboard uses static lookup tables for source data:\n- lookup_datamap: lookup table for log metadata: {{lookup_datamap}}\n- lookup_partitions: lookup table for partition data: {{lookup_partitions}}\n\nFor search links to work the my_instance_name must be set to your instance of sumologic."
+        },
+        {
+            "id": null,
+            "key": "panelF6BB756793771846",
+            "title": "_source",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n|  sum(events) as events by source\n| sort source asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel720FAE7EB2F75A45",
+            "title": "_sourcecategory",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n|  sum(events) as events by sourcecategory | sort sourcecategory asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBD95671EB5112B48",
+            "title": "_sourcename",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n|  sum(events) as events by sourcename\n | sort sourcename asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEECF9F6B8C564A46",
+            "title": "Partitions (indexes) Ingesting Data Matching the  Metadata Scope",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n//| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index ) as %\"Index Search Scope\"\n| tolowercase(index) as %\"Partition Name\"\n| count by %\"Partition Name\",%\"Index Search Scope\" \n| sort %\"Partition Name\" asc | fields -_count\n| lookup datatier from {{lookup_partitions}} on index=%\"Partition Name\"\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA080A856A4B96943",
+            "title": "Metadata Found For Logs Matching the Filter Scope",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Logs have built in metadata fields assigned to them at ingestion time, set by administrators when collection is configured. For more info see [built in metadata](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/built-in-metadata/) These are: ```_sourcecategory,  _collector,  _source, _sourcename,  and _sourcehost```. It's a good practice to include one or more metadata fields and values in your search scope. Usually sourcecategory works very well for example: ```_sourcecategory=prod/*```\n\nLogs are ingested into **partitions** also called **indexes** based on routing configured by administrators.  [Partitions](https://help.sumologic.com/docs/manage/partitions/) are logical containers where your logs that are ingested are stored so scoping a search to one or a few partitions will improve performance and reduce scan. If no routing is specified the data is ingested into the ```sumologic_default ``` partition.\n\n**Searching by partition /index**\nEach partition has a 'datatier' type and may or may not be part of the default scope for search. You may need to include the index in the search scope to return data. For more info see (optimizing your search with partitions)[https://help.sumologic.com/docs/search/optimize-search-partitions/]\n- For legacy / enterprise customers continuous is the default partition type and searchable in the default scope. Other tiers such as Infrequent are not in default scope. For infrequent partitions you must include the index name in the search scope for example ```_index=my_infrequent_partition```\n- For Flex customers all partitions are in the default scope unless set to be 'excluded from default scope' by administrators. If partitions are not in the default scope you must add index to search them for example ```_index=my_non-default_partition```\n\nNote: Infrequent partitions and flex partitions have a pay per use search model. Each infrequent search incurs a small search charge based on volume of data scanned.\n"
+        },
+        {
+            "id": null,
+            "key": "panelF9B3A68DBC64FA40",
+            "title": "Using Filters On This Dashboard",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "- **any_meta_regex**: this a case insensitive regular expression evaluated vs all metadata strings. This is useful if you want to search all metadata dimensions for the same regular expression pattern.Current filter is:\n-  ```| concat(collector,index,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/```\n\nOther filters are 'matches' filters so must have a string and * e.g ```*my_app*```:\n- **collector**:  where collector matches \"{{collector}}\"\n- **index**: tolowercase(index) matches tolowercase(\"{{index}}\")\n- **sourcecategory** matches \"{{sourcecategory}}\"\n\n\n"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-022698599890F944",
+            "title": "How To Setup Datamap - *These steps are intended for users with full administrator access to sumo logic.*",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":20},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "## 1. Create lookup /shared/lookups/partitions\n\nRun this query to create the data map lookup for partitions for a 24h or 7d period. It's a good idea to make this is a daily or weekly scheduled search to keep the lookup up to date.\n\n```\n_index=sumologic_volume _sourceCategory = \"view_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| if(index=\"Default Index\",\"sumologic_default\",tolowercase(index)) as index\n| sum(count) as events,sum(gbytes) as gbytes by index,datatier | sort index asc\n| save /shared/lookups/partitions\n```\n\n## 2. Create the data map lookup table.\nThere are two options to set this up. \n1. Easy setup: use a v1 lookup. This can have a size of 8MB max. v1 lookups can only be updated/owned by one user account but are readable by all users if saved to /shared/path\n2. Advanced setup: use a v2 lookup. This can have a size up to 100MB. v2 lookups are library objects so can be shared to be managed by multiple users. All users of datamap must have read access to the lookup.\n\n### Easy setup\nRun this search manually to update the lookup table. It should target all data in your account. It's suggested to use only a short time frame of say -60m to capture sample data as the max size is 8MB for v1.\nIn very large accounts running this query for a longer time range is not possible due to scale issues.\n\nNote - Scheduled searches cannot access data outside continuous tier in Enterprise Suite customers. If this is scheduled it won't work on infrequent data but you could schedule it externally via the search job API - for example to run once a day for -60m time range to update the sample data set.\n```\n_sourceCategory=*\n// for a legacy enterprise suite customer account you will need this to include all tiers of data\n// for a flex customer you would need to specify all indexes including those outside default search scope.\n _datatier=all\n\n| count by _sourcecategory,_source,_collector,_view,_sourcename\n| _view as index\n| if(length(_sourcename)>75,concat(substring(_sourcename,0,75),\"*\"),_sourcename) as sourcename\n| if(isempty(index),\"sumologic_default\",index) as index | tolowercase(index) as index\n| tolowercase(_collector) as collector\n| tolowercase(_sourcecategory) as sourcecategory\n| tolowercase(_source) as source \n| sum(_count) as events by collector,index,sourcecategory,source,sourcename\n| 1 as n | accum n as rowid | fields -n   \n| num(rowid) as rowid | todouble(events) as events\n| fields rowid, collector,index,sourcecategory,source,sourcename, events\n| sort rowid asc\n// v1 path\n| save /shared/lookups/log_datamap\n\n```\n\n### Advanced Setup\nBefore you can save to a lookup you must create it in the required path: path://\"/Library/Admin Recommended/lookups/log_datamap\"\n\nYou must create the lookups via the Library folder, and provide all users View permission and Administrators Manage using content administrator mode.\nThen create a new lookup using a csv file as below to create the schema. All columns are default (string) type except:\n- rowid: double and set as key column\n- events: double\n\n```\n\"rowid\",\"collector\",\"index\",\"sourcecategory\",\"source\",\"sourcename\",\"events\"\n1,\"c\",\"i\",\"s/c\",\"s\",\"sn\",290.0\n```\n\nRun this search manually to update the lookup table. It should target all data in your account. It's suggested to use only a short time frame of say -60m to capture sample data, while v2 lookups can hold 100MB of data in very large accounts running this query for a longer time range is not possible due to scale issues.\n\nNote - Scheduled searches cannot access data outside continuous tier in Enterprise Suite customers. . if this is scheduled it won't work on infrequent data but you could schedule it externally via the search job API - for example to run once a day for -60m time range to update the sample data set.\n```\n_sourceCategory=*\n// for a legacy enterprise suite customer account you will need this to include all tiers of data\n// for a flex customer you would need to specify all indexes including those outside default search scope.\n _datatier=all\n\n| count by _sourcecategory,_source,_collector,_view,_sourcename\n| _view as index\n| if(length(_sourcename)>75,concat(substring(_sourcename,0,75),\"*\"),_sourcename) as sourcename\n| if(isempty(index),\"sumologic_default\",index) as index | tolowercase(index) as index\n| tolowercase(_collector) as collector\n| tolowercase(_sourcecategory) as sourcecategory\n| tolowercase(_source) as source \n| sum(_count) as events by collector,index,sourcecategory,source,sourcename\n| 1 as n | accum n as rowid | fields -n   \n| num(rowid) as rowid | todouble(events) as events\n| fields rowid, collector,index,sourcecategory,source,sourcename, events\n| sort rowid asc\n\n// v2 path\n| save path://\"/Library/Admin Recommended/lookups/log_datamap\"\n```"
+        },
+        {
+            "id": null,
+            "key": "panel7AE65684BB14B84D",
+            "title": "Open a New Search Window",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Use the clickable links to start a new search with the required log metadata scope pre-completed. *In the old ui for the links right click and select open in new sumo tab.*"
+        },
+        {
+            "id": null,
+            "key": "panel5FC651578A066946",
+            "title": "Open Specific Log File : Search scope includes all metadata",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\" _index=\",index) as i\n| concat(\"\\n _collector=\",collector) as c\n| concat(\"\\n _source=\",source) as s\n| concat(\"\\n _sourcename=\",sourcename) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search Log\"\n\n| fields -dp,sc,i,c,sn,s,the_search //, collector,source,sourcename\n| sort index asc,sourcecategory asc, collector asc, source asc, sourcename asc | fields -percent\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC487ED60A3F1C946",
+            "title": "Metadata Values Per Collector",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(sourcename) as sourcenames, sum(events) as events by collector\n| sort collector asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8AF0D1BDAC0A8A49",
+            "title": "Metadata Values Per Source",
+            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(collector) as collectors,values(sourcename) as sourcenames, sum(events) as events by source\n| sort source asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA691B04794035841",
+            "title": "What Metadata Values Occur Per Sourcecategory,  Collector or Source ",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels are useful to understand what values occur metadata for a specific Sourcecategory,  Collector or Source"
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "collector",
+            "displayName": "collector",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat path://\"/Library/Admin Recommended/lookups/log_datamap\" | count by collector",
+                "field": "collector"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "index",
+            "displayName": "index",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat /shared/lookups/partitions| count by index | tolowercase(index) as index | sort index asc",
+                "field": "index"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "sourcecategory",
+            "displayName": "sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "cat path://\"/Library/Admin Recommended/lookups/log_datamap\" | if(length(sourcecategory)>30,concat(substring(sourcecategory,0,30),\"*\"),sourcecategory) as sourcecategory | count by sourcecategory  | sort sourcecategory asc",
+                "field": "sourcecategory"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "any_meta_regex",
+            "displayName": "any_meta_regex",
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "lookup_partitions",
+            "displayName": "lookup_partitions",
+            "defaultValue": "/shared/lookups/partitions",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "/shared/lookups/partitions"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "lookup_datamap",
+            "displayName": "lookup_datamap",
+            "defaultValue": "path://\"/Library/Admin Recommended/lookups/log_datamap\"",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "my_instance_name",
+            "displayName": "my_instance_name",
+            "defaultValue": "rick.au",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
+
