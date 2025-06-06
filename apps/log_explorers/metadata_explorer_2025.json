@@ -1,5 +1,3 @@
-
-
 {
     "type": "DashboardV2SyncDefinition",
     "name": "Metadata Explorer",
@@ -22,16 +20,12 @@
         "layoutType": "Grid",
         "layoutStructures": [
             {
-                "key": "panel234252ED8E9F4B46",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":56}"
-            },
-            {
                 "key": "panelFF9381DF89C31944",
-                "structure": "{\"height\":9,\"width\":6,\"x\":18,\"y\":37}"
+                "structure": "{\"height\":9,\"width\":6,\"x\":18,\"y\":50}"
             },
             {
                 "key": "panel7FEEC01C8044F942",
-                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":9}"
+                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":9}"
             },
             {
                 "key": "panelPANE-8BC0CCE6AE44E842",
@@ -39,23 +33,23 @@
             },
             {
                 "key": "panelF6BB756793771846",
-                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":46}"
+                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":59}"
             },
             {
                 "key": "panel720FAE7EB2F75A45",
-                "structure": "{\"height\":9,\"width\":7,\"x\":11,\"y\":37}"
+                "structure": "{\"height\":9,\"width\":7,\"x\":11,\"y\":50}"
             },
             {
                 "key": "panelBD95671EB5112B48",
-                "structure": "{\"height\":8,\"width\":13,\"x\":11,\"y\":46}"
+                "structure": "{\"height\":8,\"width\":13,\"x\":11,\"y\":59}"
             },
             {
                 "key": "panelEECF9F6B8C564A46",
-                "structure": "{\"height\":9,\"width\":11,\"x\":0,\"y\":37}"
+                "structure": "{\"height\":9,\"width\":11,\"x\":0,\"y\":50}"
             },
             {
                 "key": "panelA080A856A4B96943",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":29}"
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":42}"
             },
             {
                 "key": "panelF9B3A68DBC64FA40",
@@ -71,50 +65,19 @@
             },
             {
                 "key": "panel5FC651578A066946",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":18}"
+                "structure": "{\"height\":15,\"width\":24,\"x\":0,\"y\":27}"
             },
             {
                 "key": "panelC487ED60A3F1C946",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":67}"
-            },
-            {
-                "key": "panel8AF0D1BDAC0A8A49",
-                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":78}"
+                "structure": "{\"height\":19,\"width\":24,\"x\":0,\"y\":70}"
             },
             {
                 "key": "panelA691B04794035841",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":54}"
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":67}"
             }
         ]
     },
     "panels": [
-        {
-            "id": null,
-            "key": "panel234252ED8E9F4B46",
-            "title": "Metadata Values Per Sourcecategory",
-            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(collector) as collectors, values(sourcename) as sourcenames, sum(events) as events by sourcecategory\n| sort sourcecategory asc\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
         {
             "id": null,
             "key": "panelFF9381DF89C31944",
@@ -152,7 +115,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events, first(collector) as collector, first(source) as source, first(sourcename) as sourcename by index,sourcecategory,%\"Search Scope\" \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\"\\n _index=\",index) as i\n| concat(\"\\n// _collector=\",collector) as c\n| concat(\"\\n// _source=\",source) as s\n| concat(\"\\n// _sourcename=\",sourcename) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search By Sourcecategory\"\n\n| fields -dp,sc,i,c,sn,s,the_search, collector,source,sourcename\n| sort index asc,sourcecategory asc | fields -percent\n",
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events, first(collector) as collector, first(source) as source, first(sourcename) as sourcename by index,sourcecategory,%\"Search Scope\" \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\"\\n _index=\",index) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcename=\",replace(sourcename,\" \",\"?\")) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search By Sourcecategory\"\n\n| fields -dp,sc,i,c,sn,s,the_search, collector,source,sourcename\n| sort index asc,sourcecategory asc | fields -percent\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -176,7 +139,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard is helps to explore logs recently ingested into your Sumo Logic account and what metadata is associated with them. This makes is faster and easier to locate logs and run searches with the correct metadata scope.\n\nNote: this dashboard uses static lookup tables for source data:\n- lookup_datamap: lookup table for log metadata: {{lookup_datamap}}\n- lookup_partitions: lookup table for partition data: {{lookup_partitions}}\n\nFor search links to work the my_instance_name must be set to your instance of sumologic."
+            "text": "This dashboard is helps to explore logs ingested into your Sumo Logic account and what metadata is associated with them. This makes is faster and easier to locate logs and run searches with the correct metadata scope.\n\n**This dashboard uses a one time sample of ingested data as the metadata source stored in these lookup tables:**\n- lookup_datamap: lookup table for log metadata: {{lookup_datamap}}\n- lookup_partitions: lookup table for partition data: {{lookup_partitions}}\n\nFor search links to work the my_instance_name must be set to your instance of sumologic."
         },
         {
             "id": null,
@@ -332,7 +295,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\" _index=\",index) as i\n| concat(\"\\n _collector=\",collector) as c\n| concat(\"\\n _source=\",source) as s\n| concat(\"\\n _sourcename=\",sourcename) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search Log\"\n\n| fields -dp,sc,i,c,sn,s,the_search //, collector,source,sourcename\n| sort index asc,sourcecategory asc, collector asc, source asc, sourcename asc | fields -percent\n",
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\"\\n _index=\",index) as i\n| concat(\"\\n _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n _sourcename=\",replace(sourcename,\" \",\"?\")) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search Log\"\n\n| fields -dp,sc,i,c,sn,s,the_search //, collector,source,sourcename\n| sort index asc,sourcecategory asc, collector asc, source asc, sourcename asc | fields -percent\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -352,41 +315,14 @@
         {
             "id": null,
             "key": "panelC487ED60A3F1C946",
-            "title": "Metadata Values Per Collector",
+            "title": "Metadata Values Per metadata_values_by: {{metadata_values_by}}",
             "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(sourcename) as sourcenames, sum(events) as events by collector\n| sort collector asc\n",
-                    "queryType": "Logs",
-                    "queryKey": "A",
-                    "metricsQueryMode": null,
-                    "metricsQueryData": null,
-                    "tracesQueryData": null,
-                    "spansQueryData": null,
-                    "parseMode": "Auto",
-                    "timeSource": "Message",
-                    "outputCardinalityLimit": 1000
-                }
-            ],
-            "description": "",
-            "timeRange": null,
-            "coloringRules": null,
-            "linkedDashboards": []
-        },
-        {
-            "id": null,
-            "key": "panel8AF0D1BDAC0A8A49",
-            "title": "Metadata Values Per Source",
-            "visualSettings": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
-            "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "SumoSearchPanel",
-            "queries": [
-                {
-                    "transient": false,
-                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(collector) as collectors,values(sourcename) as sourcenames, sum(events) as events by source\n| sort source asc\n",
+                    "queryString": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(collector) as collectors,values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(sourcename) as sourcenames, sum(events) as events by {{metadata_values_by}}\n| sort {{metadata_values_by}} asc\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -410,7 +346,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "These panels are useful to understand what values occur metadata for a specific Sourcecategory,  Collector or Source"
+            "text": "These panels are useful to understand what values occur metadata for a specific Dimension.\n\nUse the \"metadata values per\" parameter to select a dimension to group by."
         }
     ],
     "variables": [
@@ -491,7 +427,7 @@
             "id": null,
             "name": "lookup_datamap",
             "displayName": "lookup_datamap",
-            "defaultValue": "path://\"/Library/Admin Recommended/lookups/log_datamap\"",
+            "defaultValue": "/shared/lookups/log_datamap",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap"
@@ -505,7 +441,7 @@
             "id": null,
             "name": "my_instance_name",
             "displayName": "my_instance_name",
-            "defaultValue": "rick.au",
+            "defaultValue": "service.us2",
             "sourceDefinition": {
                 "variableSourceType": "CsvVariableSourceDefinition",
                 "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed"
@@ -514,9 +450,22 @@
             "includeAllOption": false,
             "hideFromUI": false,
             "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "metadata_values_by",
+            "displayName": "metadata_values_by",
+            "defaultValue": "sourcecategory",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "collector,source,sourcename,sourcecategory,index"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
         }
     ],
     "coloringRules": [],
     "schedules": null
 }
-
