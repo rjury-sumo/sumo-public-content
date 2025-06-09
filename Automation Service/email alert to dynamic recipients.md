@@ -113,10 +113,24 @@ Now you have the actual alert JSON with all the correct fields to proceed with s
 
 ## Adding Send Email Node
 You can now add and link a basic tools / Send Email node in your real playbook. In the email body you can also use other fields to nicely format output.
-Note: recommended to use the html output as per this example image. 
+Note: recommended to use the html output as per this example image.
 ![alt text](images/SendEmail.CustomEmailRecipient.png)
 
-You can create a custom HTML email body using fields in the input schema. This allows for nice custom formatting of the email alert using input fields in: customPlaceholderMap or resultsJsonParsed
+### Formatting Body Output
+If you add the ResultsJsonParsed field to the body you will get a "Json-ified" email output. For example: ```Parsed Output: Playbook.input.ResultsJsonParsed``` will generate this body in email:
+
+```
+Parsed output: {
+    "Count": 1,
+    "email": "rjury@sumologic.com",
+    "Category": "kubernetes/kube/system/kindnet",
+    "Collector": "sumo"
+}
+```
+
+You can create a custom HTML email body using fields in the input schema. This allows for nice custom formatting of the email alert using input fields in: customPlaceholderMap or resultsJsonParsed.
+
+If you have used a custom input field schema for the playbook you can directly access the field names as variables (similar to how ResultsJSON.fieldname works in monitor payload editing). For example: ```Playbook.input.ResultsJsonParsed[].email``` or any other field name. This enables advanced formatting options for the output email.
 ![alt text](images/SendEmail.CustomBodyWithFields.png)
 
 ## Creating a Monitor with a link to the Automation Playbook
@@ -129,5 +143,4 @@ Create your monitor. Most settings don't matter too much but some do.
 - Playbooks: leave static text area blank unless you want to put something in!
 - Automated Plabooks: This will target our playbook. If you have the final playbook ready (method A) you can make this this the final published playbook. If you are in sandbox stage (method B) this would be your sandbox playbook to capture input payload.
 - Monitor Details: Enter a monitor name, tags (optional) and description. These are all text that will appear in the payload but are static.
-
 
