@@ -4,7 +4,7 @@ It's possible to use automation service to respond to a monitor alert and email 
 
 There are two ways to do this:
 
-1. The simple way: in 'Basic tools' use 'Payload Regex' to extract an email address from any text field in input and then use the field output. You can then use Regex_result_string output in a subsequent node such as "send email" as input parameter. The problem here is when you get to the email body you can't use ResultsJSON.fieldname to format the event. Instead you are stuck with just ```Parsed Output: Playbook.input.ResultsJsonParsed``` that makes a 'jsonified' output formt which may not be desirable.
+1. The simple way: in 'Basic tools' use 'Payload Regex' to extract an email address from any text field in input and then use the field output. You can then use Regex_result_string output in a subsequent node such as "send email" as input parameter. The problem here is when you get to the email body you can't use ResultsJSON.fieldname to format the event. Instead you are stuck with just ```Parsed Output: Playbook.input.ResultsJsonParsed``` that makes a 'jsonified' output format which may not be desirable.
 2. The complicated but better result way: Create the playbook with a custom input JSON - which is the captured output of an alert trigger to a playbook (or a custom built version of a previous one.) This works because the alert has two fields that if the alert is aggregate have field names them that can be directly referenced for email or email formatting of the subject.
 
 **This document is about METHOD 2**. This is the most flexible method that gets the best final results since we can then access all fields in the email body section not just a 'JSON-fied' version. It does require more upfront work and needs the playbook to be crafted to a specific alert output.
@@ -19,11 +19,11 @@ _sourceCategory=* | limit 1
 ```
 
 ## Accessing fields in playbooks.
-This part is a bit catch-22. You need the output of an alert to define the input fields of the email.
-**The contents of these three JSON arrays will change to the aggregate columns output from your query:
-
+This part is a bit catch-22. You need the output of an alert to define the input fields of the email. but the contents of these these JSON arrays will change to the aggregate columns output from your query:
 - **ResultsJsonParsed**: Output fields one field per column. Element[0] only will be present - because you selected alert grouping one alert per earlier (right?!). The field names will change based on your actual query. So you must either capture a real output in automation service playbook UI, or fake the fields before importing it.
 - **customPlaceholderMap**: output fields one field per column plus some built in ones (_sourcecategory, _collector). Element[0] only will be present - because you selected alert grouping one alert per earlier (right?!). The field names will change based on your actual query. So you must either capture a real output in automation service playbook UI, or fake the fields before importing it.
+
+This output field has the same name but will be a variable JSON foramtted representation of your results:
 - **AggregateResultsJson**: element[0] will be the single row of results as JSON. We don't need to edit this since it's always just one element of JSON data.
 
 Full example of these fields payloads:
@@ -60,13 +60,13 @@ Full example of these fields payloads:
 
 
 
-There are two ways to proceed to get the input JSON for the Playbook:
+There are two ways to proceed to get this custom input JSON for the Playbook so we can create the required fields in the input schema of the Playbook:
 A) custom edit the example file in this repo to have your field names
 B) sandbox a real alert to capture the payload.
 
 ## Method A: Making the Playbook With Custom Input Fields
 ### A.1 Edit the example file to match your output field schema
-Make a fake version of this [alert.payload.json](examples/alert.payload.json) where the fields ResultsJsonParsed and customPlaceholderMap match the output columns of your alert query. You only need to edit the file where the output field schema is going to be different for your specific alert query.
+Make a new version of this [alert.payload.json](examples/alert.payload.json) where the fields ```ResultsJsonParsed``` and ```customPlaceholderMap``` match the output columns of your alert query. You only need to edit a few parts of this file where the output field schema is going to be different for your specific alert query.
 
 Say my query made different columns: a,b, sum email. Instead this would have to be edited to this before I use it as the input of a playbook:
 ```
@@ -80,13 +80,13 @@ Say my query made different columns: a,b, sum email. Instead this would have to 
   ],
 ```
 
-### A.2 Playbook creation using custom input JSON for input fields
+### A.2 Playbook creation using custom input JSON for input fields schema
 Start a new playbook.
 - Choose type General
 - Open edit mode and edit the "Start" node
 - For 'Add one or more params as a playbook input' select 'Parse from JSON'
 - Paste in your lovingly crafted version of [alert.payload.json](examples/alert.payload.json) that you prepared earlier with your output fields and click "Parse"
-- Make sure your fields appear in the RerulstsJsonParsed[] section similar to this: 
+- Make sure your fields appear in the ```ResultsJsonParsed[]``` section similar to this:
 ![alt text](images/Add.Parms.FromJSON.png)
 You are now good to go adding the email node and referencing the input fields in the email address. In the email body you can also use other fields to nicely format output. Proceed to step "Adding Send Email Node"
 
@@ -112,11 +112,10 @@ Now you can copy and paste the **actual payload with your correct fields** to us
 Now you have the actual alert JSON with all the correct fields to proceed with step B.2
 
 ## Adding Send Email Node
-You can now add and link a basic tools / Send Email node in your real playbook. In the email body you can also use other fields to nicely format output.
-Note: recommended to use the html output as per this example image.
+You can now add and link a "Basic tools / Send Email" action node in your playbook. If you have the correct custom field schema then in the email body you can also use other fields to nicely format output.
 ![alt text](images/SendEmail.CustomEmailRecipient.png)
 
-### Formatting Body Output
+### Formatting Body Output with ResultsJsonParsed
 If you add the ResultsJsonParsed field to the body you will get a "Json-ified" email output. For example: ```Parsed Output: Playbook.input.ResultsJsonParsed``` will generate this body in email:
 
 ```
@@ -128,9 +127,10 @@ Parsed output: {
 }
 ```
 
+### Formatting Body Output with custom schema fields
 You can create a custom HTML email body using fields in the input schema. This allows for nice custom formatting of the email alert using input fields in: customPlaceholderMap or resultsJsonParsed.
 
-If you have used a custom input field schema for the playbook you can directly access the field names as variables (similar to how ResultsJSON.fieldname works in monitor payload editing). For example: ```Playbook.input.ResultsJsonParsed[].email``` or any other field name. This enables advanced formatting options for the output email.
+If you have used a custom input field schema for the playbook you can directly access the field names as variables (similar to how ResultsJSON.fieldname works in monitor payload editing). For example: ```Playbook.input.ResultsJsonParsed[].email``` or any other field name that you have defined in the input phase. This enables advanced formatting options for the output email.
 ![alt text](images/SendEmail.CustomBodyWithFields.png)
 
 ## Creating a Monitor with a link to the Automation Playbook
@@ -143,4 +143,3 @@ Create your monitor. Most settings don't matter too much but some do.
 - Playbooks: leave static text area blank unless you want to put something in!
 - Automated Plabooks: This will target our playbook. If you have the final playbook ready (method A) you can make this this the final published playbook. If you are in sandbox stage (method B) this would be your sandbox playbook to capture input payload.
 - Monitor Details: Enter a monitor name, tags (optional) and description. These are all text that will appear in the payload but are static.
-
