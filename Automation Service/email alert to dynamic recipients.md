@@ -4,8 +4,8 @@ It's possible to use automation service to respond to a monitor alert and email 
 
 There are two ways to do this:
 
-1. in 'Basic tools' use 'Payload Regex' to extract an email address from any text field in input and then use the field output. You can then use Regex_result_string output in a subsequent node such as "send email" as input parameter. The problem here is when you get to the email body you can't use ResultsJSON.fieldname to format the event.
-2. Create the playbook with a custom input JSON - which is the captured output of an alert trigger to a playbook (or a custom built version of a previous one.) This works because the alert has two fields that if the alert is aggregate have field names them that can be directly referenced for email or email formatting of the subject.
+1. The simple way: in 'Basic tools' use 'Payload Regex' to extract an email address from any text field in input and then use the field output. You can then use Regex_result_string output in a subsequent node such as "send email" as input parameter. The problem here is when you get to the email body you can't use ResultsJSON.fieldname to format the event. Instead you are stuck with just ```Parsed Output: Playbook.input.ResultsJsonParsed``` that makes a 'jsonified' output formt which may not be desirable.
+2. The complicated but better result way: Create the playbook with a custom input JSON - which is the captured output of an alert trigger to a playbook (or a custom built version of a previous one.) This works because the alert has two fields that if the alert is aggregate have field names them that can be directly referenced for email or email formatting of the subject.
 
 **This document is about METHOD 2**. This is the most flexible method that gets the best final results since we can then access all fields in the email body section not just a 'JSON-fied' version. It does require more upfront work and needs the playbook to be crafted to a specific alert output.
 
