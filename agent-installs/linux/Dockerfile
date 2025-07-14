@@ -3,8 +3,8 @@
 # provides good container to test installer scripts
 # see https://github.com/SumoLogic/sumologic-collector-docker/blob/main/Dockerfile.arm64
 
-FROM ubuntu:20.04
-LABEL maintainer="Sumo Logic <docker@sumologic.com>"
+FROM ubuntu:24.04
+LABEL maintainer="Sumo Logic <rjury@sumologic.com>"
 
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update --quiet && \
@@ -16,6 +16,8 @@ RUN apt-get update --quiet && \
 #  rm /tmp/collector.deb && \
 # need curl for our installer
  #apt-get install -y curl
+
+ 
 RUN apt install -y curl
 # nice to look round
 RUN apt install -y vim
