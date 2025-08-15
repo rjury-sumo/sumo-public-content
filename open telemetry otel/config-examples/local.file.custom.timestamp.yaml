@@ -1,0 +1,70 @@
+  receivers:
+    filelog/5e8de99d-7314-47c7-9e0d-e9162d7772c0:
+      include_file_name: false
+      include_file_path: true
+      operators:
+        - type: move
+          from: attributes["log.file.path"]
+          to: resource["log.file.path"]
+        - type: copy
+          from: resource["log.file.path"]
+          to: resource["_sourceName"]
+        - type: regex_parser
+          regex: (?<timestamp_field>\d+ [A-Z][a-z]{2} \d{4} [A-Z]{1,4})
+          timestamp:
+            parse_from: attributes.timestamp_field
+            layout_type: strptime
+            layout: '%d %b %Y %H:%M:%S %Z'
+            location: Local
+        - type: remove
+          field: attributes.timestamp_field
+      include:
+          - /tmp/timestamp.log
+      start_at: end
+      encoding: utf-8
+      storage: file_storage
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 20
+    batch:
+      send_batch_size: 1_024
+      timeout: 1s
+    resourcedetection/system:
+      detectors: ["system"]
+      system:
+        hostname_sources: ["dns","os"]
+    resource/5e8de99d-7314-47c7-9e0d-e9162d7772c0:
+      attributes:
+      - key: _source
+        value: local file timestamp
+        action: insert
+      - key: _contentType
+        value: OpenTelemetry
+        action: insert
+      - key: sumo.datasource
+        value: localfile
+        action: insert
+      - key: _sourceCategory
+        value: otel/localfile
+        action: insert
+  exporters:
+    sumologic:
+      sending_queue:
+        enabled: true
+        storage: file_storage
+      retry_on_failure:
+        max_elapsed_time: 0
+  service:
+    pipelines:
+      logs/localfilesource/5e8de99d-7314-47c7-9e0d-e9162d7772c0:
+        receivers:
+          - filelog/5e8de99d-7314-47c7-9e0d-e9162d7772c0
+        processors:
+          - memory_limiter
+          - resourcedetection/system
+          - batch
+          - resource/5e8de99d-7314-47c7-9e0d-e9162d7772c0
+        exporters:
+          - sumologic

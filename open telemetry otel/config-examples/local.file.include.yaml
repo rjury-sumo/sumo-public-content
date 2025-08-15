@@ -1,0 +1,72 @@
+  receivers:
+    filelog/74bcd029-7039-408b-bae7-ad0f1cee748d:
+      include_file_name: false
+      include_file_path: true
+      operators:
+        - type: move
+          from: attributes["log.file.path"]
+          to: resource["log.file.path"]
+        - type: copy
+          from: resource["log.file.path"]
+          to: resource["_sourceName"]
+      include:
+          - /tmp/include.log
+      exclude:
+          - /tmp/exclude.log
+      start_at: end
+      encoding: utf-8
+      storage: file_storage
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 20
+    batch:
+      send_batch_size: 1_024
+      timeout: 1s
+    resourcedetection/system:
+      detectors: ["system"]
+      system:
+        hostname_sources: ["dns","os"]
+    resource/74bcd029-7039-408b-bae7-ad0f1cee748d:
+      attributes:
+      - key: _source
+        value: local file include
+        action: insert
+      - key: _contentType
+        value: OpenTelemetry
+        action: insert
+      - key: sumo.datasource
+        value: localfile
+        action: insert
+      - key: _sourceCategory
+        value: otel/localfile
+        action: insert
+      - key: example
+        value: include exclude processing
+        action: insert
+    filter/logs/74bcd029-7039-408b-bae7-ad0f1cee748d:
+      logs:
+        log_record:
+          - not(IsMatch(body, "\\d{4}-\\d{2}-\\d{2}"))
+          - IsMatch(body, "IGNORE ME")
+  exporters:
+    sumologic:
+      sending_queue:
+        enabled: true
+        storage: file_storage
+      retry_on_failure:
+        max_elapsed_time: 0
+  service:
+    pipelines:
+      logs/localfilesource/74bcd029-7039-408b-bae7-ad0f1cee748d:
+        receivers:
+          - filelog/74bcd029-7039-408b-bae7-ad0f1cee748d
+        processors:
+          - memory_limiter
+          - resourcedetection/system
+          - batch
+          - resource/74bcd029-7039-408b-bae7-ad0f1cee748d
+          - filter/logs/74bcd029-7039-408b-bae7-ad0f1cee748d
+        exporters:
+          - sumologic

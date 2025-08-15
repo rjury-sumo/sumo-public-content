@@ -1,0 +1,70 @@
+  receivers:
+    filelog/5d84633a-c661-4ad4-bd96-705c1040fbc6:
+      include_file_name: false
+      include_file_path: true
+      operators:
+        - type: move
+          from: attributes["log.file.path"]
+          to: resource["log.file.path"]
+        - type: copy
+          from: resource["log.file.path"]
+          to: resource["_sourceName"]
+      include:
+          - /tmp/mask_file.log
+      start_at: end
+      encoding: utf-8
+      storage: file_storage
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 20
+    batch:
+      send_batch_size: 1_024
+      timeout: 1s
+    resourcedetection/system:
+      detectors: ["system"]
+      system:
+        hostname_sources: ["dns","os"]
+    resource/5d84633a-c661-4ad4-bd96-705c1040fbc6:
+      attributes:
+      - key: _source
+        value: local file mask
+        action: insert
+      - key: _contentType
+        value: OpenTelemetry
+        action: insert
+      - key: sumo.datasource
+        value: localfile
+        action: insert
+      - key: _sourceCategory
+        value: otel/localfile/mask
+        action: insert
+      - key: example
+        value: masking
+        action: insert
+    transform/logs/5d84633a-c661-4ad4-bd96-705c1040fbc6:
+      log_statements:
+        - context: log
+          statements:
+            - replace_pattern(body, "abc:(9999)", "REDACTED")
+  exporters:
+    sumologic:
+      sending_queue:
+        enabled: true
+        storage: file_storage
+      retry_on_failure:
+        max_elapsed_time: 0
+  service:
+    pipelines:
+      logs/localfilesource/5d84633a-c661-4ad4-bd96-705c1040fbc6:
+        receivers:
+          - filelog/5d84633a-c661-4ad4-bd96-705c1040fbc6
+        processors:
+          - memory_limiter
+          - resourcedetection/system
+          - batch
+          - resource/5d84633a-c661-4ad4-bd96-705c1040fbc6
+          - transform/logs/5d84633a-c661-4ad4-bd96-705c1040fbc6
+        exporters:
+          - sumologic

@@ -1,0 +1,66 @@
+  receivers:
+    filelog/592bc1b3-2d43-4aee-9274-d95320072079:
+      include_file_name: false
+      include_file_path: true
+      operators:
+        - type: move
+          from: attributes["log.file.path"]
+          to: resource["log.file.path"]
+        - type: copy
+          from: resource["log.file.path"]
+          to: resource["_sourceName"]
+      include:
+          - /tmp/multiline.log
+      start_at: end
+      encoding: utf-8
+      storage: file_storage
+      multiline:
+        line_start_pattern: ^\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d{3}\].*
+  processors:
+    memory_limiter:
+      check_interval: 5s
+      limit_percentage: 75
+      spike_limit_percentage: 20
+    batch:
+      send_batch_size: 1_024
+      timeout: 1s
+    resourcedetection/system:
+      detectors: ["system"]
+      system:
+        hostname_sources: ["dns","os"]
+    resource/592bc1b3-2d43-4aee-9274-d95320072079:
+      attributes:
+      - key: _source
+        value: local file multiline
+        action: insert
+      - key: _contentType
+        value: OpenTelemetry
+        action: insert
+      - key: sumo.datasource
+        value: localfile
+        action: insert
+      - key: _sourceCategory
+        value: otel/localfile/multiline
+        action: insert
+      - key: example
+        value: multiline
+        action: insert
+  exporters:
+    sumologic:
+      sending_queue:
+        enabled: true
+        storage: file_storage
+      retry_on_failure:
+        max_elapsed_time: 0
+  service:
+    pipelines:
+      logs/localfilesource/592bc1b3-2d43-4aee-9274-d95320072079:
+        receivers:
+          - filelog/592bc1b3-2d43-4aee-9274-d95320072079
+        processors:
+          - memory_limiter
+          - resourcedetection/system
+          - batch
+          - resource/592bc1b3-2d43-4aee-9274-d95320072079
+        exporters:
+          - sumologic

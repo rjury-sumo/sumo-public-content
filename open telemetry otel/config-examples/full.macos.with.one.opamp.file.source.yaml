@@ -1,0 +1,141 @@
+exporters:
+    nop: null
+    sumologic:
+        retry_on_failure:
+            max_elapsed_time: 0
+        sending_queue:
+            enabled: true
+            storage: file_storage
+extensions:
+    file_storage:
+        compaction:
+            directory: /var/lib/otelcol-sumo/file_storage
+            on_rebound: true
+        directory: /var/lib/otelcol-sumo/file_storage
+    health_check:
+        endpoint: localhost:13133
+    sumologic:
+        collector_credentials_directory: /var/lib/otelcol-sumo/credentials
+        collector_fields:
+            deployment.environment: test
+            host.group: rick-test
+            sumo.disco.enabled: "true"
+        installation_token: null
+processors:
+    batch:
+        send_batch_size: 1024
+        timeout: 1s
+    filter/logs/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd:
+        logs:
+            log_record:
+                - IsMatch(body, "BLAH")
+    memory_limiter:
+        check_interval: 5s
+        limit_percentage: 75
+        spike_limit_percentage: 20
+    resource/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd:
+        attributes:
+            - action: insert
+              key: _source
+              value: 'Test file '
+            - action: insert
+              key: _contentType
+              value: OpenTelemetry
+            - action: insert
+              key: sumo.datasource
+              value: localfile
+            - action: insert
+              key: _sourceCategory
+              value: otel/localfile/test
+    resourcedetection/system:
+        detectors:
+            - system
+            - ec2
+            - gcp
+            - azure
+        system:
+            hostname_sources:
+                - dns
+                - os
+    sumologic: null
+receivers:
+    filelog/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd:
+        encoding: utf-8
+        include:
+            - /tmp/test.log
+        include_file_name: false
+        include_file_path: true
+        operators:
+            - from: attributes["log.file.path"]
+              to: resource["log.file.path"]
+              type: move
+            - from: resource["log.file.path"]
+              to: resource["_sourceName"]
+              type: copy
+            - regex: (?<timestamp_field>\d+ [A-Z][a-z]{2} \d{4} [A-Z]{1,4})
+              timestamp:
+                layout: '%d %b %Y %H:%M:%S %Z'
+                layout_type: strptime
+                location: Local
+                parse_from: attributes.timestamp_field
+              type: regex_parser
+            - field: attributes.timestamp_field
+              type: remove
+        start_at: end
+        storage: file_storage
+    nop: null
+    otlp:
+        protocols:
+            grpc:
+                endpoint: localhost:4317
+            http:
+                endpoint: localhost:4318
+service:
+    extensions:
+        - sumologic
+        - health_check
+        - file_storage
+    pipelines:
+        logs/default:
+            exporters:
+                - sumologic
+            processors:
+                - memory_limiter
+                - batch
+                - sumologic
+            receivers:
+                - otlp
+        logs/localfilesource/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd:
+            exporters:
+                - sumologic
+            processors:
+                - memory_limiter
+                - resourcedetection/system
+                - batch
+                - resource/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd
+                - filter/logs/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd
+            receivers:
+                - filelog/2c4a0190-b67d-4a0b-8a4d-2ff5d6c75abd
+        logs/nop:
+            exporters:
+                - nop
+            receivers:
+                - nop
+        metrics/default:
+            exporters:
+                - sumologic
+            processors:
+                - memory_limiter
+                - batch
+                - sumologic
+            receivers:
+                - otlp
+        traces/default:
+            exporters:
+                - sumologic
+            processors:
+                - memory_limiter
+                - batch
+                - sumologic
+            receivers:
+                - otlp
