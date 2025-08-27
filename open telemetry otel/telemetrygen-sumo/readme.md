@@ -70,14 +70,14 @@ format options for -f are: apache_common,apache_combined,apache_error,rfc3164,rf
 
 ```bash
 # Basic usage
-python3 ./flog-otlp/  flog_otlp.py                              # Default: 200 logs over 10 seconds
-python3 ./flog-otlp/  flog_otlp.py -n 100 -s 5s                 # 100 logs over 5 seconds  
-python3 ./flog-otlp/  flog_otlp.py -f apache_common -n 50       # 50 Apache common format logs
-python3 ./flog-otlp/  flog_otlp.py -f json -n 100 --no-loop     # 100 JSON logs, no infinite loop
-python3 ./flog-otlp/  flog_otlp.py --otlp-endpoint https://collector:4318/v1/logs  # Custom endpoint
-python3 ./flog-otlp/  flog_otlp.py --otlp-attributes environment=production --otlp-attributes region=us-east-1
-python3 ./flog-otl  flog_otlp.py --telemetry-attributes app=web-server --telemetry-attributes debug=true
-python3 ./flog-otlp/  flog_otlp.py --otlp-header "Authorization=Bearer token123" --otlp-header "X-Custom=value"
+python3 ./flog-otlp/flog_otlp.py                              # Default: 200 logs over 10 seconds
+python3 ./flog-otlp/flog_otlp.py -n 100 -s 5s                 # 100 logs over 5 seconds  
+python3 ./flog-otlp/flog_otlp.py -f apache_common -n 50       # 50 Apache common format logs
+python3 ./flog-otlp/flog_otlp.py -f json -n 100 --no-loop     # 100 JSON logs, no infinite loop
+python3 ./flog-otlp/flog_otlp.py --otlp-endpoint https://collector:4318/v1/logs  # Custom endpoint
+python3 ./flog-otlp/flog_otlp.py --otlp-attributes environment=production --otlp-attributes region=us-east-1
+python3 ./flog-otlp/flog_otlp.py --telemetry-attributes app=web-server --telemetry-attributes debug=true
+python3 ./flog-otlp/flog_otlp.py --otlp-header "Authorization=Bearer token123" --otlp-header "X-Custom=value"
 ```
 
 # Using otelgen
