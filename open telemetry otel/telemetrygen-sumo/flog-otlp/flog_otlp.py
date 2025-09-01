@@ -231,23 +231,81 @@ class OTLPLogSender:
             if process.returncode != 0:
                 stderr_output = process.stderr.read()
                 print(f"flog process failed: {stderr_output}")
-                return False
+                return False, line_count
             
-            print(f"\nCompleted processing {line_count} log lines")
-            return True
+            print(f"✓ Completed processing {line_count} log lines")
+            return True, line_count
             
         except FileNotFoundError:
             print("Error: 'flog' command not found. Please install flog first.")
             print("Installation: go install github.com/mingrammer/flog@latest")
-            return False
+            return False, 0
         except KeyboardInterrupt:
             print("\nInterrupted by user")
             if 'process' in locals():
                 process.terminate()
-            return False
+            return False, 0
         except Exception as e:
             print(f"Unexpected error: {e}")
-            return False
+            return False, 0
+    
+    def run_recurring_executions(self, flog_cmd, wait_time, max_executions):
+        """Run flog executions on a recurring schedule"""
+        execution_count = 0
+        total_logs_processed = 0
+        start_time = datetime.now(timezone.utc)
+        
+        print(f"Starting recurring flog executions:")
+        print(f"  Wait time between executions: {wait_time}s")
+        print(f"  Max executions: {'∞ (until stopped)' if max_executions == 0 else max_executions}")
+        print(f"  Started at: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print("=" * 60)
+        
+        try:
+            while max_executions == 0 or execution_count < max_executions:
+                execution_count += 1
+                execution_start = datetime.now(timezone.utc)
+                
+                print(f"\n🔄 Execution #{execution_count} started at {execution_start.strftime('%H:%M:%S UTC')}")
+                
+                # Process flog output
+                success, line_count = self.process_flog_output(flog_cmd)
+                total_logs_processed += line_count
+                
+                execution_end = datetime.now(timezone.utc)
+                execution_duration = (execution_end - execution_start).total_seconds()
+                
+                if success:
+                    print(f"✅ Execution #{execution_count} completed in {execution_duration:.1f}s ({line_count} logs)")
+                else:
+                    print(f"❌ Execution #{execution_count} failed after {execution_duration:.1f}s")
+                
+                # Check if we should continue
+                if max_executions > 0 and execution_count >= max_executions:
+                    break
+                
+                # Wait before next execution
+                if wait_time > 0:
+                    print(f"⏳ Waiting {wait_time}s before next execution...")
+                    time.sleep(wait_time)
+                
+        except KeyboardInterrupt:
+            print(f"\n\n🛑 Stopped by user after {execution_count} executions")
+        
+        # Summary
+        end_time = datetime.now(timezone.utc)
+        total_duration = (end_time - start_time).total_seconds()
+        
+        print("\n" + "=" * 60)
+        print("📊 EXECUTION SUMMARY:")
+        print(f"  Total executions: {execution_count}")
+        print(f"  Total logs processed: {total_logs_processed}")
+        print(f"  Total runtime: {total_duration:.1f}s")
+        print(f"  Average logs per execution: {total_logs_processed/execution_count if execution_count > 0 else 0:.1f}")
+        print(f"  Started: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        print(f"  Ended: {end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        
+        return execution_count > 0
 
 def parse_key_value_pairs(values_list):
     """Parse key=value pairs from command line arguments"""
@@ -295,11 +353,18 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-  %(prog)s                              # Default: 200 logs over 10 seconds
-  %(prog)s -n 100 -s 5s                 # 100 logs over 5 seconds  
-  %(prog)s -f apache_common -n 50       # 50 Apache common format logs
-  %(prog)s -f json -n 100 --no-loop     # 100 JSON logs, no infinite loop
-  %(prog)s --otlp-endpoint https://collector:4318/v1/logs  # Custom endpoint
+  %(prog)s                              # Default: 200 logs over 10 seconds (single execution)
+  %(prog)s -n 100 -s 5s                 # 100 logs over 5 seconds (single execution)
+  %(prog)s -f apache_common -n 50       # 50 Apache common format logs (single execution)
+  %(prog)s -f json -n 100 --no-loop     # 100 JSON logs, no infinite loop (single execution)
+  %(prog)s --otlp-endpoint https://collector:4318/v1/logs  # Custom endpoint (single execution)
+  
+  # Recurring executions:
+  %(prog)s --wait-time 30 --max-executions 10    # Run 10 times, 30s between executions
+  %(prog)s --wait-time 60 --max-executions 0     # Run forever, 60s between executions  
+  %(prog)s -n 50 -s 5s --wait-time 10 --max-executions 5  # 5 executions: 50 logs/5s, 10s wait
+  
+  # Custom attributes and headers:
   %(prog)s --otlp-attributes environment=production --otlp-attributes region=us-east-1
   %(prog)s --telemetry-attributes app=web-server --telemetry-attributes debug=true
   %(prog)s --otlp-header "Authorization=Bearer token123" --otlp-header "X-Custom=value"
@@ -345,6 +410,21 @@ Supported log formats:
         type=float,
         default=0.1,
         help='Delay between log sends in seconds (default: 0.1)'
+    )
+    
+    # Recurring execution options
+    parser.add_argument(
+        '--wait-time',
+        type=float,
+        default=0,
+        help='Wait time in seconds between flog executions (default: 0 - single execution)'
+    )
+    
+    parser.add_argument(
+        '--max-executions',
+        type=int,
+        default=1,
+        help='Number of flog executions (0 = run until manually stopped, default: 1)'
     )
     
     # flog options - main parameters
@@ -454,6 +534,8 @@ def main():
         print(f"  Log Format: {args.format}")
         print(f"  Log Count: {args.number}")
         print(f"  Duration: {args.sleep}")
+        print(f"  Wait Time: {args.wait_time}s")
+        print(f"  Max Executions: {'∞' if args.max_executions == 0 else args.max_executions}")
         if otlp_attributes:
             print(f"  OTLP Attributes: {otlp_attributes}")
         if telemetry_attributes:
@@ -475,8 +557,13 @@ def main():
         telemetry_attributes=telemetry_attributes
     )
     
-    # Process flog output
-    success = sender.process_flog_output(flog_cmd)
+    # Determine execution mode
+    if args.wait_time > 0 or args.max_executions != 1:
+        # Recurring execution mode
+        success = sender.run_recurring_executions(flog_cmd, args.wait_time, args.max_executions)
+    else:
+        # Single execution mode
+        success, _ = sender.process_flog_output(flog_cmd)
     
     if success:
         print("✓ All logs processed successfully")
