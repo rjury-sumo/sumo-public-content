@@ -1,0 +1,573 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Metric Discovery and Guided Search",
+    "description": "",
+    "title": "Metric Discovery and Guided Search",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel77F246BDBB666843",
+                "structure": "{\"height\":15,\"width\":9,\"x\":0,\"y\":39}"
+            },
+            {
+                "key": "panelB423F5369FC13845",
+                "structure": "{\"height\":17,\"width\":12,\"x\":0,\"y\":67}"
+            },
+            {
+                "key": "panel7D9425F9AFD07845",
+                "structure": "{\"height\":15,\"width\":7,\"x\":9,\"y\":39}"
+            },
+            {
+                "key": "panelPANE-16A90A8F9089284E",
+                "structure": "{\"height\":8,\"width\":11,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel07499DAAA660D848",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":54}"
+            },
+            {
+                "key": "panelAADB6100BFA90940",
+                "structure": "{\"height\":14,\"width\":14,\"x\":10,\"y\":24}"
+            },
+            {
+                "key": "panelF9E0F6F381DB5B49",
+                "structure": "{\"height\":14,\"width\":10,\"x\":0,\"y\":24}"
+            },
+            {
+                "key": "panel05FAFE669A170948",
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panelDC8558429717BB40",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":38}"
+            },
+            {
+                "key": "panelD42D15A2B5A80A47",
+                "structure": "{\"height\":15,\"width\":8,\"x\":16,\"y\":39}"
+            },
+            {
+                "key": "panel5C1F081794933A4B",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":66}"
+            },
+            {
+                "key": "panelDFA3741789080A4C",
+                "structure": "{\"height\":17,\"width\":12,\"x\":12,\"y\":67}"
+            },
+            {
+                "key": "panelB4DAEFC1B0E96B4B",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panelFBFE213ABA4BC840",
+                "structure": "{\"height\":8,\"width\":13,\"x\":11,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel77F246BDBB666843",
+            "title": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}",
+            "visualSettings": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#28aa55\"},{\"from\":85,\"to\":95,\"color\":\"#f6c851\"},{\"from\":95,\"to\":101,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}\n",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB423F5369FC13845",
+            "title": "Time Series - Line",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7D9425F9AFD07845",
+            "title": "Bar: metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-16A90A8F9089284E",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard shows various common panel types for metric queries.\n\nParameters:\n- metric_name: a metric name or metric pattern eg. kube_node*. Enter in lowercase!\n- _sourcecategory: filter metrics by sourcecategory\n- _collector: filter metrics by collector\n- tag_filter_name: custom name tag for filtering\n- tag_filter_value: custom value expression for: tag_filter_name\n- N: all panels use \"topk(<N>,<aggregate>)\"\n- quantize_to: quantize interval\n- quantize_aggregate: aggregate rollup to use for quantiazation\n- final_aggregate: the final aggreate to apply after quantization and and topk\n- group_by_x: two group by values to use. Tip you can hack group_by_2 to include any number of comma seperated dimensions.\n- apply_rate: choose either a | rate or | delta expression for rate / increasing counter type metrics, or choose `// no rate` to comment out the rate line\n"
+        },
+        {
+            "id": null,
+            "key": "panel07499DAAA660D848",
+            "title": "Categorical Table",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelAADB6100BFA90940",
+            "title": "Metric Audit Data: All Metric Dimension Values for: metric={{metric_name}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume _sourcecategory = byMetricDimensionValueDataPoints) \n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| split singleRecord delim=';' extract 1 as metric, 2 as tag, 3 as value, 4 as dp\n| where metric matches tolowercase(\"{{metric_name}}\")\n| sum(dp) as datapoints by tag,value | sort tag asc, value asc| limit 1440",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1h"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF9E0F6F381DB5B49",
+            "title": "Metric Audit Date: All Metric Cardinalities for: metric={{metric_name}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_volume _sourcecategory = \"byMetricDimensionCardinalities\" \n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| split singleRecord delim=';' extract 1 as metric, 2 as dimension, 3 as cardinality\n| where metric matches tolowercase(\"{{metric_name}}\")\n| where metric matches /.*/\n| max(cardinality) as max_cardinality group by metric,dimension\n| sort metric asc, dimension asc ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1h"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel05FAFE669A170948",
+            "title": "Metric Discovery - filtered by metric={{metric_name}}",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels show metric audit data about cardinality and data point volume in last hour. Note the detailed tag and value data set may be truncated if cardinality is extremely high."
+        },
+        {
+            "id": null,
+            "key": "panelDC8558429717BB40",
+            "title": "Honeycomb & Categorical Views",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panelD42D15A2B5A80A47",
+            "title": "Bar: metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5C1F081794933A4B",
+            "title": "Time Series Views",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panelDFA3741789080A4C",
+            "title": "Time Series - Stacked Bar",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1d"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB4DAEFC1B0E96B4B",
+            "title": "'Open in Metrics Search' on this panel for a headstart on metrics Search: metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n//| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+                    "queryType": "Metrics",
+                    "queryKey": "A",
+                    "metricsQueryMode": "Advanced",
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelFBFE213ABA4BC840",
+            "title": "Final Query",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "```\nmetric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to 5m using avg\n{{apply_rate}}\n| topk({{N}},latest) \n| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}\n```"
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "metric_name",
+            "displayName": "metric_name",
+            "defaultValue": "node_cpu_seconds_total",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "_sourcecategory={{_sourcecategory}} _collector={{_collector}}",
+                "key": "metric"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "_sourcecategory",
+            "displayName": "_sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "metric={{metric_name}} _collector={{_collector}}",
+                "key": "_sourcecategory"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "_collector",
+            "displayName": "_collector",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "MetadataVariableSourceDefinition",
+                "filter": "metric={{metric_name}} _sourcecategory={{_sourcecategory}}",
+                "key": "_collector"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "tag_filter_name",
+            "displayName": "tag_filter_name",
+            "defaultValue": "mode",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "<any_tag>,pod,namespace,container,etc"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "tag_filter_value",
+            "displayName": "tag_filter_value",
+            "defaultValue": "idle",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*prod*,foo*,*bar*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "N",
+            "displayName": "N",
+            "defaultValue": "20",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "10,20,25,30"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "quanitize_to",
+            "displayName": "quanitize_to",
+            "defaultValue": "5m",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "5m"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "quantize_aggregate",
+            "displayName": "quantize_aggregate",
+            "defaultValue": "avg",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "avg,sum,min,max,count"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "final_aggregate",
+            "displayName": "final_aggregate",
+            "defaultValue": "avg",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "avg,sum,min,max,count"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "group_by_1",
+            "displayName": "group_by_1",
+            "defaultValue": "cluster",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "cluster,pod,namespace,container,_sourcehost"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "group_by_2",
+            "displayName": "group_by_2",
+            "defaultValue": "node",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "pod,namespace,container,_sourcehost,node,service"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "apply_rate",
+            "displayName": "apply_rate",
+            "defaultValue": "| rate increasing",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "| rate increasing,// no rate,| delta,| rate"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
