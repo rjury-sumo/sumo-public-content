@@ -6,8 +6,25 @@ import requests
 import time
 import sys
 import argparse
+import logging
 from datetime import datetime, timezone
 import uuid
+
+def setup_logging(verbose=False):
+    """Configure logging for the application"""
+    log_level = logging.DEBUG if verbose else logging.INFO
+    
+    # Configure root logger
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S'
+    )
+    
+    # Disable urllib3 warnings for self-signed certificates
+    logging.getLogger('urllib3.connectionpool').setLevel(logging.WARNING)
+    
+    return logging.getLogger('otlp_log_sender')
 
 class OTLPLogSender:
     def __init__(self, endpoint="http://localhost:4318/v1/logs", service_name="flog-generator", delay=0.1, 
@@ -19,6 +36,7 @@ class OTLPLogSender:
         self.otlp_attributes = otlp_attributes or {}
         self.telemetry_attributes = telemetry_attributes or {}
         self.session = requests.Session()
+        self.logger = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
         
         # Note: OTLP HTTP/JSON typically uses HTTP on port 4318
         # Use HTTPS (port 4318) only if your collector is specifically configured for it
@@ -180,18 +198,17 @@ class OTLPLogSender:
             )
             
             if response.status_code == 200:
-                print(f"✓ Log sent successfully")
+                self.logger.debug("Log sent successfully")
             else:
-                print(f"✗ Failed to send log: {response.status_code} - {response.text}")
+                self.logger.error(f"Failed to send log: {response.status_code} - {response.text}")
                 
         except requests.exceptions.RequestException as e:
-            print(f"✗ Request failed: {e}")
+            self.logger.error(f"Request failed: {e}")
     
     def process_flog_output(self, flog_cmd):
         """Execute flog and process its output"""
-        print(f"Executing: {' '.join(flog_cmd)}")
-        print(f"Sending logs to: {self.endpoint}")
-        print("-" * 50)
+        self.logger.info(f"Executing: {' '.join(flog_cmd)}")
+        self.logger.info(f"Sending logs to: {self.endpoint}")
         
         try:
             # Start flog process
@@ -210,7 +227,8 @@ class OTLPLogSender:
             for line in iter(process.stdout.readline, ''):
                 if line.strip():  # Skip empty lines
                     line_count += 1
-                    print(f"Processing line {line_count}: {line.strip()[:100]}...")
+                    # Detailed log line processing at DEBUG level
+                    self.logger.debug(f"Processing line {line_count}: {line.strip()[:100]}...")
                     
                     # Parse the log line
                     log_entry = self.parse_flog_line(line)
@@ -230,23 +248,23 @@ class OTLPLogSender:
             
             if process.returncode != 0:
                 stderr_output = process.stderr.read()
-                print(f"flog process failed: {stderr_output}")
+                self.logger.error(f"flog process failed with return code {process.returncode}: {stderr_output}")
                 return False, line_count
             
-            print(f"✓ Completed processing {line_count} log lines")
+            self.logger.info(f"Completed processing {line_count} log lines")
             return True, line_count
             
         except FileNotFoundError:
-            print("Error: 'flog' command not found. Please install flog first.")
-            print("Installation: go install github.com/mingrammer/flog@latest")
+            self.logger.error("'flog' command not found. Please install flog first.")
+            self.logger.error("Installation: go install github.com/mingrammer/flog@latest")
             return False, 0
         except KeyboardInterrupt:
-            print("\nInterrupted by user")
+            self.logger.warning("Interrupted by user")
             if 'process' in locals():
                 process.terminate()
             return False, 0
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            self.logger.error(f"Unexpected error: {e}")
             return False, 0
     
     def run_recurring_executions(self, flog_cmd, wait_time, max_executions):
@@ -255,18 +273,17 @@ class OTLPLogSender:
         total_logs_processed = 0
         start_time = datetime.now(timezone.utc)
         
-        print(f"Starting recurring flog executions:")
-        print(f"  Wait time between executions: {wait_time}s")
-        print(f"  Max executions: {'∞ (until stopped)' if max_executions == 0 else max_executions}")
-        print(f"  Started at: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-        print("=" * 60)
+        self.logger.info("Starting recurring flog executions")
+        self.logger.info(f"Wait time between executions: {wait_time}s")
+        self.logger.info(f"Max executions: {'∞ (until stopped)' if max_executions == 0 else max_executions}")
+        self.logger.info(f"Started at: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         
         try:
             while max_executions == 0 or execution_count < max_executions:
                 execution_count += 1
                 execution_start = datetime.now(timezone.utc)
                 
-                print(f"\n🔄 Execution #{execution_count} started at {execution_start.strftime('%H:%M:%S UTC')}")
+                self.logger.info(f"Execution #{execution_count} started at {execution_start.strftime('%H:%M:%S UTC')}")
                 
                 # Process flog output
                 success, line_count = self.process_flog_output(flog_cmd)
@@ -276,9 +293,9 @@ class OTLPLogSender:
                 execution_duration = (execution_end - execution_start).total_seconds()
                 
                 if success:
-                    print(f"✅ Execution #{execution_count} completed in {execution_duration:.1f}s ({line_count} logs)")
+                    self.logger.info(f"Execution #{execution_count} completed in {execution_duration:.1f}s ({line_count} logs)")
                 else:
-                    print(f"❌ Execution #{execution_count} failed after {execution_duration:.1f}s")
+                    self.logger.warning(f"Execution #{execution_count} failed after {execution_duration:.1f}s")
                 
                 # Check if we should continue
                 if max_executions > 0 and execution_count >= max_executions:
@@ -286,36 +303,37 @@ class OTLPLogSender:
                 
                 # Wait before next execution
                 if wait_time > 0:
-                    print(f"⏳ Waiting {wait_time}s before next execution...")
+                    self.logger.info(f"Waiting {wait_time}s before next execution...")
                     time.sleep(wait_time)
                 
         except KeyboardInterrupt:
-            print(f"\n\n🛑 Stopped by user after {execution_count} executions")
+            self.logger.warning(f"Stopped by user after {execution_count} executions")
         
         # Summary
         end_time = datetime.now(timezone.utc)
         total_duration = (end_time - start_time).total_seconds()
         
-        print("\n" + "=" * 60)
-        print("📊 EXECUTION SUMMARY:")
-        print(f"  Total executions: {execution_count}")
-        print(f"  Total logs processed: {total_logs_processed}")
-        print(f"  Total runtime: {total_duration:.1f}s")
-        print(f"  Average logs per execution: {total_logs_processed/execution_count if execution_count > 0 else 0:.1f}")
-        print(f"  Started: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-        print(f"  Ended: {end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        self.logger.info("EXECUTION SUMMARY:")
+        self.logger.info(f"Total executions: {execution_count}")
+        self.logger.info(f"Total logs processed: {total_logs_processed}")
+        self.logger.info(f"Total runtime: {total_duration:.1f}s")
+        self.logger.info(f"Average logs per execution: {total_logs_processed/execution_count if execution_count > 0 else 0:.1f}")
+        self.logger.info(f"Started: {start_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+        self.logger.info(f"Ended: {end_time.strftime('%Y-%m-%d %H:%M:%S UTC')}")
         
         return execution_count > 0
 
 def parse_key_value_pairs(values_list):
     """Parse key=value pairs from command line arguments"""
     result = {}
+    logger = logging.getLogger('otlp_log_sender.parser')
+    
     if not values_list:
         return result
     
     for item in values_list:
         if '=' not in item:
-            print(f"Warning: Ignoring malformed attribute '{item}' (expected format: key=value)")
+            logger.warning(f"Ignoring malformed attribute '{item}' (expected format: key=value)")
             continue
             
         key, value = item.split('=', 1)
@@ -518,34 +536,37 @@ def main():
     # Parse command line arguments
     args = parse_args()
     
-    print("OTLP Log Sender for flog")
-    print("=" * 30)
+    # Setup logging based on verbose flag
+    logger = setup_logging(verbose=args.verbose)
+    
+    logger.info("OTLP Log Sender for flog")
     
     # Parse custom attributes and headers
     otlp_attributes = parse_key_value_pairs(args.otlp_attributes)
     telemetry_attributes = parse_key_value_pairs(args.telemetry_attributes) 
     otlp_headers = parse_key_value_pairs(args.otlp_header)
     
-    if args.verbose:
-        print(f"Configuration:")
-        print(f"  Endpoint: {args.otlp_endpoint}")
-        print(f"  Service Name: {args.service_name}")
-        print(f"  Send Delay: {args.delay}s")
-        print(f"  Log Format: {args.format}")
-        print(f"  Log Count: {args.number}")
-        print(f"  Duration: {args.sleep}")
-        print(f"  Wait Time: {args.wait_time}s")
-        print(f"  Max Executions: {'∞' if args.max_executions == 0 else args.max_executions}")
-        if otlp_attributes:
-            print(f"  OTLP Attributes: {otlp_attributes}")
-        if telemetry_attributes:
-            print(f"  Telemetry Attributes: {telemetry_attributes}")
-        if otlp_headers:
-            print(f"  Custom Headers: {otlp_headers}")
-        print()
+    # Log configuration details
+    logger.info(f"Configuration:")
+    logger.info(f"  Endpoint: {args.otlp_endpoint}")
+    logger.info(f"  Service Name: {args.service_name}")
+    logger.info(f"  Send Delay: {args.delay}s")
+    logger.info(f"  Log Format: {args.format}")
+    logger.info(f"  Log Count: {args.number}")
+    logger.info(f"  Duration: {args.sleep}")
+    logger.info(f"  Wait Time: {args.wait_time}s")
+    logger.info(f"  Max Executions: {'∞' if args.max_executions == 0 else args.max_executions}")
+    
+    if otlp_attributes:
+        logger.info(f"  OTLP Attributes: {otlp_attributes}")
+    if telemetry_attributes:
+        logger.info(f"  Telemetry Attributes: {telemetry_attributes}")
+    if otlp_headers:
+        logger.debug(f"  Custom Headers: {otlp_headers}")  # Headers may contain sensitive data
     
     # Build flog command
     flog_cmd = build_flog_command(args)
+    logger.debug(f"Built flog command: {' '.join(flog_cmd)}")
     
     # Create sender instance with custom parameters
     sender = OTLPLogSender(
@@ -560,15 +581,17 @@ def main():
     # Determine execution mode
     if args.wait_time > 0 or args.max_executions != 1:
         # Recurring execution mode
+        logger.info("Using recurring execution mode")
         success = sender.run_recurring_executions(flog_cmd, args.wait_time, args.max_executions)
     else:
         # Single execution mode
+        logger.info("Using single execution mode")
         success, _ = sender.process_flog_output(flog_cmd)
     
     if success:
-        print("✓ All logs processed successfully")
+        logger.info("All logs processed successfully")
     else:
-        print("✗ Log processing completed with errors")
+        logger.error("Log processing completed with errors")
         sys.exit(1)
 
 if __name__ == "__main__":
