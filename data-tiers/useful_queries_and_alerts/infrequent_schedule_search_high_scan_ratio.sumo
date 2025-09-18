@@ -2,13 +2,12 @@
 // you can make this say a daily or weekly scheduled alert so your admin team can keep a watch on high infrequent users.
 _view=sumologic_search_usage_per_query  
 analytics_tier=*infrequent*
-user_name=*
-query_type=sched*
+query_type="Scheduled Search"
 | json field =scanned_bytes_breakdown "Infrequent" as scan_inf  
 
 | ((query_end_time - query_start_time ) /1000 / 60 ) as range_minutes
 
-| count as queries,  sum(retrieved_message_count) as retrieved_events,avg(range_minutes) as range_minutes,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf by user_name,query //,session_id
+| count as queries,  sum(retrieved_message_count) as retrieved_events,avg(range_minutes) as range_minutes,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf by user_name,query,content_name,query_type //,session_id
 
 | (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes
 
@@ -17,4 +16,4 @@ query_type=sched*
 
 | (queryTimeRange() / ( 1000 * 60 ) ) / queries as frequency_minutes 
 | range_minutes / frequency_minutes as scan_ratio | sort scan_ratio,credits
-| where scan_ratio > 1.5
+//| where scan_ratio > 1.5 or credits > 300
