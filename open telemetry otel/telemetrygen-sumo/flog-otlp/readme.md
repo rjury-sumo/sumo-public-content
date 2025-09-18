@@ -1,7 +1,8 @@
 # flog_oltp.py as a flog wrapper
 
-** DISCLAIMER: My buddy Claude wrote most of this - mileage may vary! **
-He also wrote his [own readme file](readme.claudes.version.md) version as thought he could do better than me.
+** there is now a python module version with many more features **
+see: https://github.com/rjury-sumo/flog_otlp/tree/main
+
 
 flog_otlp is a python wrapper to take STDOUT from [flog](https://github.com/mingrammer/flog) which can generate log file samples for formats like apache and json, then encode these in a OTLP compliant wrapper and forward to an OTLP endpoint. You can also provide custom attributes. I created this for testing sending OTLP log data to Sumo Logic but it could be applicable to any OTLP compliant receiver.
 
