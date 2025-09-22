@@ -137,14 +137,14 @@ Note:
 - CSE customers can have both CSE and non-CSE data in the same partition
 - this shows ingestion to all partitions and views including scheduled views
 
-2. Use the partitions api. See [sample python script apis/scripts/partitions/list_partitions.py](apis/scripts/partitions/list_partitions.py). This enables advanced filters on whether the partition in included or excluded from Flex scope, or a specific tier type.
+2. Use the partitions api. See [sample python script apis/scripts/partitions/list_partitions.py](../../../apis/scripts/partitions/list_partitions.py). This enables advanced filters on whether the partition in included or excluded from Flex scope, or a specific tier type.
 
 #### Summarizing Flex non default Search Scope Logs
 
 It's possible to search non-defalt scope partitions by making an 'OR' scope expression to target them in a search. There are a few ways to get the list of non-default partitions:
 1. in partition page in UI (suitable for small orgs only)
 2. via partitions api
-Determine the names of all non default scope indexes - this can be done by a query to the partitions api. To obtain a list of the required partitions use the [sample python script apis/scripts/partitions/list_partitions.py](apis/scripts/partitions/list_partitions.py) - since this can filter on tier, default scope, name or routing scope, and output a list of matching partions to integrate in automation.
+Determine the names of all non default scope indexes - this can be done by a query to the partitions api. To obtain a list of the required partitions use the [sample python script apis/scripts/partitions/list_partitions.py](../../../apis/scripts/partitions/list_partitions.py) - since this can filter on tier, default scope, name or routing scope, and output a list of matching partions to integrate in automation.
 Create a SV or SSTV similar to above but for scope using an 'OR' vs each index required. You may need automation to update this scope from time to time as partitions are created or removed.
 
 ```
@@ -196,7 +196,7 @@ Here is an example of such a search below.
 
 There are two ways to get this data into a view in sumo:  
 
-1. query and post it back to a HTTPS source endpoint with a new sourcecategory, then setup a SV or SSTV to summarize that to a view. Here is an example python script that can poll data via SJA and HTTPS POST it back again: [./apis/scripts/search_job/execute_search_job.md](./apis/scripts/search_job/execute_search_job.md). After each schedule we have new "log events" posted to an HTTPS endpoint, that can be included in the scope of a scheduled view or "save to view" schedule.
+1. query and post it back to a HTTPS source endpoint with a new sourcecategory, then setup a SV or SSTV to summarize that to a view. Here is an example python script that can poll data via SJA and HTTPS POST it back again: [../../../apis/scripts/search_job/execute_search_job.md](./apis/scripts/search_job/execute_search_job.md). After each schedule we have new "log events" posted to an HTTPS endpoint, that can be included in the scope of a scheduled view or "save to view" schedule.
 
 ```
 python3 ./execute_search_job.py --access-id=$SUMO_ACCESS_ID --access-key=$SUMO_ACCESS_KEY --region au --yaml-config=infrequent_search_config.yaml --mode records --output='sumo-https' --sumo-https-url='https://collectors.au.sumologic.com/receiver/v1/http/<yourendpoint>'
