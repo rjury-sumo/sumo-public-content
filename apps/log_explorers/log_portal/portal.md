@@ -196,7 +196,7 @@ Here is an example of such a search below.
 
 There are two ways to get this data into a view in sumo:  
 
-1. query and post it back to a HTTPS source endpoint with a new sourcecategory, then setup a SV or SSTV to summarize that to a view. Here is an example python script that can poll data via SJA and HTTPS POST it back again: [../../../apis/scripts/search_job/execute_search_job.md](./apis/scripts/search_job/execute_search_job.md). After each schedule we have new "log events" posted to an HTTPS endpoint, that can be included in the scope of a scheduled view or "save to view" schedule.
+1. query and post it back to a HTTPS source endpoint with a new sourcecategory, then setup a SV or SSTV to summarize that to a view. Here is an example python script that can poll data via SJA and HTTPS POST it back again: [execute_search_job.md](../../../apis/scripts/search_job/execute_search_job.md). After each schedule we have new "log events" posted to an HTTPS endpoint, that can be included in the scope of a scheduled view or "save to view" schedule.
 
 ```
 python3 ./execute_search_job.py --access-id=$SUMO_ACCESS_ID --access-key=$SUMO_ACCESS_KEY --region au --yaml-config=infrequent_search_config.yaml --mode records --output='sumo-https' --sumo-https-url='https://collectors.au.sumologic.com/receiver/v1/http/<yourendpoint>'
