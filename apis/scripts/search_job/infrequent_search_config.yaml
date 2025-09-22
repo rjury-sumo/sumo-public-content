@@ -1,0 +1,40 @@
+# Infrequent search job configuration for execute_search_job.py
+# This configuration analyzes data usage patterns by key metadata fields in infrequent data tier.
+# It aggregates event counts and byte sizes over 15-minute intervals, grouped by collector, source category, source, and index.
+# from and to are offest to now to account for data latency in ingest to ensure complete data capture.
+# Output format could be set to sumo-https, which would trigger ingestion into a scheduled view, or directly via save view operator.
+
+query: |
+  // target infrequent data tier
+  _dataTier=infrequent 
+
+  // option scope by one or more indexes
+  // ( _index=sumologic_default or _index=cloudtrail_infreq)
+
+  | timeslice 15m
+  | count as events,sum(_size) as bytes  by _timeslice,_collector
+    ,_sourcecategory,_source,_view // ,_siemforward
+
+  | "infrequent" as tier
+  | _view as index | fields -_view
+  | if (isempty(index),"sumologic_default",index) as index
+  
+  // lowercase everything to simplify filtering and reduce cardinality
+  | tolowercase(_collector) as collector
+  | tolowercase(_source) as source
+  | tolowercase(_sourcecategory) as sourcecategory
+  
+  // final aggregation to view
+  | sum(events) as events,sum(bytes) as bytes  by _timeslice,collector,sourcecategory,source,index,tier
+
+# Required: Start time - using relative time for recent data analysis
+from: "-20m"
+
+# Required: End time
+to: "-5m"
+
+# Optional: Time zone for the search (defaults to UTC)
+timeZone: "UTC"
+
+# Optional: Whether to search by receipt time instead of message time (defaults to false)
+byReceiptTime: false

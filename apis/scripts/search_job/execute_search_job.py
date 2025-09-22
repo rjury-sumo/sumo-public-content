@@ -120,7 +120,9 @@ class SumoLogicClient:
         request.add_header('Accept', 'application/json')
 
         if data:
-            request.data = json.dumps(data).encode()
+            json_data = json.dumps(data, indent=2)
+            logger.debug(f"Request body: {json_data}")
+            request.data = json_data.encode()
 
         try:
             # Use the opener with cookie support for all requests
@@ -544,7 +546,7 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
     requires_raw_messages = args.mode == 'messages'
 
     # Create search job
-    logger.info(f"Creating search job with query: {query}")
+    logger.info(f"Creating search job with query: \n{query}")
     logger.debug(f"requiresRawMessages set to: {requires_raw_messages} (mode: {args.mode})")
     job_response = client.create_search_job(
         query=query,
@@ -617,6 +619,55 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args):
     logger.info(f"Batch processing completed. {total_intervals} intervals processed.")
 
 
+def post_to_sumo_https(records, sumo_url, add_timestamp=False):
+    """Post records to Sumo Logic HTTPS endpoint"""
+    from urllib.request import Request, urlopen
+    from urllib.error import HTTPError, URLError
+
+    total_records = len(records)
+    successful_posts = 0
+
+    logger.info(f"Posting {total_records} records to Sumo Logic HTTPS endpoint")
+    if add_timestamp:
+        logger.debug("Adding timestamp to each record")
+
+    for i, record in enumerate(records):
+        try:
+            # Extract the record data from the 'map' field
+            record_data = record.get('map', {}).copy()  # Make a copy to avoid modifying original
+
+            # Add timestamp if requested
+            if add_timestamp:
+                current_timestamp = int(time.time() * 1000)  # 13-digit epoch milliseconds
+                record_data['timestamp'] = current_timestamp
+                logger.debug(f"Added timestamp {current_timestamp} to record {i+1}")
+
+            # Convert to JSON string for posting
+            json_data = json.dumps(record_data)
+
+            # Create the request
+            request = Request(sumo_url, data=json_data.encode('utf-8'))
+            request.add_header('Content-Type', 'application/json')
+
+            # Post to Sumo Logic
+            with urlopen(request) as response:
+                if response.status == 200:
+                    successful_posts += 1
+                    logger.debug(f"Successfully posted record {i+1}/{total_records}")
+                else:
+                    logger.warning(f"Unexpected response code {response.status} for record {i+1}")
+
+        except HTTPError as e:
+            logger.error(f"HTTP error posting record {i+1}: {e.code} {e.reason}")
+        except URLError as e:
+            logger.error(f"URL error posting record {i+1}: {e.reason}")
+        except Exception as e:
+            logger.error(f"Unexpected error posting record {i+1}: {e}")
+
+    logger.info(f"Posted {successful_posts}/{total_records} records successfully")
+    return successful_posts
+
+
 def format_and_write_output(results, args):
     """Format and write output based on args configuration"""
     # Handle different output formats
@@ -646,6 +697,17 @@ def format_and_write_output(results, args):
         else:
             logger.warning("CSV format is only supported for records mode")
             write_output(json.dumps(results, indent=2), args.output_file, args.output_directory)
+    elif args.output == 'sumo-https':
+        if args.mode == 'records' and 'records' in results:
+            records = results.get('records', [])
+            if records:
+                add_timestamp = args.sumo_timestamp == 'add'
+                successful = post_to_sumo_https(records, args.sumo_https_url, add_timestamp)
+                logger.info(f"Sumo HTTPS posting completed: {successful}/{len(records)} records posted")
+            else:
+                logger.warning("No records found to post to Sumo Logic")
+        else:
+            logger.error("sumo-https output is only supported with records mode")
     else:  # json format
         write_output(json.dumps(results, indent=2), args.output_file, args.output_directory)
 
@@ -660,6 +722,13 @@ Execution Modes:
   create-only    : Create the search job and return job ID (requiresRawMessages=False)
   messages       : Create job, poll until complete, return messages (requiresRawMessages=True)
   records        : Create job, poll until complete, return records (requiresRawMessages=False)
+
+Output Formats:
+  json           : Standard JSON output
+  minimal        : Data only (no metadata)
+  table          : Formatted table (records mode only)
+  csv            : Comma-separated values (records mode only)
+  sumo-https     : POST each record to Sumo Logic HTTPS endpoint (records mode only)
 
 YAML Configuration Format:
   query: "_sourceCategory=prod/app | count by _sourceHost"
@@ -678,6 +747,7 @@ Examples:
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --yaml-config search.yaml --mode records --output table
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --yaml-config search.yaml --mode records --output csv --output-file results.csv
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --yaml-config search.yaml --mode messages --output json --output-file messages.json --output-directory /tmp/logs/
+  %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --yaml-config search.yaml --mode records --output sumo-https --sumo-https-url https://endpoint1.collection.us1.sumologic.com/receiver/v1/http/YOUR_SOURCE_TOKEN --sumo-timestamp add
 
 Batch Mode Examples:
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --yaml-config search.yaml --batch-mode --batch-start "-24h" --batch-end "now" --batch-interval "1h" --mode records --output csv --output-file hourly_data.csv
@@ -733,9 +803,9 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
     )
     parser.add_argument(
         '--output',
-        choices=['json', 'minimal', 'table', 'csv'],
+        choices=['json', 'minimal', 'table', 'csv', 'sumo-https'],
         default='json',
-        help='Output format (default: json). table/csv formats work best with records mode.'
+        help='Output format (default: json). table/csv formats work best with records mode. sumo-https posts records to Sumo Logic HTTPS endpoint.'
     )
     parser.add_argument(
         '--output-file',
@@ -770,6 +840,16 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
         default='INFO',
         help='Set the logging level (default: INFO)'
     )
+    parser.add_argument(
+        '--sumo-https-url',
+        help='Sumo Logic HTTPS collector endpoint URL (required when using --output sumo-https)'
+    )
+    parser.add_argument(
+        '--sumo-timestamp',
+        choices=['none', 'add'],
+        default='none',
+        help='Add timestamp to records when using sumo-https output. "add" adds current timestamp as 13-digit epoch milliseconds (default: none)'
+    )
 
     args = parser.parse_args()
 
@@ -790,6 +870,18 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
             sys.exit(1)
         if args.mode == 'create-only':
             logger.error("--batch-mode is not compatible with --mode create-only")
+            sys.exit(1)
+
+    # Validate sumo-https output mode
+    if args.output == 'sumo-https':
+        if args.mode != 'records':
+            logger.error("--output sumo-https is only supported with --mode records")
+            sys.exit(1)
+        if not args.sumo_https_url:
+            logger.error("--sumo-https-url is required when using --output sumo-https")
+            sys.exit(1)
+        if not args.sumo_https_url.startswith('https://'):
+            logger.error("--sumo-https-url must be a valid HTTPS URL")
             sys.exit(1)
 
     # Determine endpoint
