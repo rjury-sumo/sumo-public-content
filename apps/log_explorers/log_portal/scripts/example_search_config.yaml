@@ -1,0 +1,59 @@
+# Example search job configuration for execute_search_job.py
+# This is a sample configuration that demonstrates the required and optional fields
+
+# Required: The search query to execute
+query: "_sourceCategory=* | sum(_size) as bytes, count by _sourceHost,_sourcecategory | sort _count"
+
+# Required: Start time - supports multiple formats:
+# - Relative time: "-1h" (1 hour ago), "-30m" (30 minutes ago), "-2d" (2 days ago)
+# - ISO format: "2024-01-01T00:00:00Z"
+# - Epoch milliseconds: 1704067200000
+from: "-24h"
+
+# Required: End time - supports multiple formats:
+# - Relative time: "now", "-15m" (15 minutes ago)
+# - ISO format: "2024-01-01T01:00:00Z"
+# - Epoch milliseconds: 1704070800000
+to: "now"
+
+# Optional: Time zone for the search (defaults to UTC)
+timeZone: "UTC"
+
+# Optional: Whether to search by receipt time instead of message time (defaults to false)
+byReceiptTime: false
+
+# Additional examples for different query types and time formats:
+
+# Example 1: Simple log search with relative times
+# query: "_sourceCategory=webapp error"
+# from: "-2h"
+# to: "-1h"
+
+# Example 2: Recent data with relative times
+# query: "_sourceCategory=webapp | timeslice 1m | count by _timeslice"
+# from: "-30m"
+# to: "now"
+
+# Example 3: Using epoch milliseconds for time
+# query: "_sourceCategory=prod | count"
+# from: 1704067200000
+# to: 1704070800000
+
+# Example 4: Using ISO format with different time zone
+# query: "_sourceCategory=logs | count by _sourceHost"
+# from: "2024-01-01T08:00:00Z"
+# to: "2024-01-01T09:00:00Z"
+# timeZone: "America/New_York"
+
+# Example 5: Mix of relative and absolute times
+# query: "_sourceCategory=app | count"
+# from: "-1d"  # 1 day ago
+# to: "2024-01-01T12:00:00Z"
+
+# Relative time format examples:
+# "-1s"  = 1 second ago
+# "-15m" = 15 minutes ago
+# "-2h"  = 2 hours ago
+# "-1d"  = 1 day ago
+# "-1w"  = 1 week ago
+# "now"  = current time
