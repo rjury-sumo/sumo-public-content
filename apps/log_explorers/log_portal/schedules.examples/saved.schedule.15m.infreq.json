@@ -1,0 +1,49 @@
+{
+    "type": "SavedSearchWithScheduleSyncDefinition",
+    "name": "metadata_infrequent_v1 view",
+    "search": {
+        "queryText": "_datatier=infrequent\n| timeslice 15m\n| count as events,sum(_size) as bytes  by _timeslice,_collector,_sourcecategory,_source,_sourcehost,_view // ,_siemforward\n| \"infrequent\" as tier  // fixed attirbution\n//| if(_siemforward=\"true\",\"flex\",\"cse\") as tier // dynamic based on field\n| _view as index | fields -_view  \n| if (isempty(index),\"sumologic_default\",index) as index\n\n// lowercase everything to simplify filtering and reduce cardinality\n| tolowercase(_collector) as collector\n| tolowercase(_source) as source\n| tolowercase(_sourcecategory) as sourcecategory\n| tolowercase(_sourcehost) as sourcehost\n\n// final aggregation to view\n| sum(events) as events,sum(bytes) as bytes  by _timeslice,collector,sourcecategory,source,sourcehost,index,tier\n| save view metadata_infrequent_v1",
+        "byReceiptTime": false,
+        "viewName": "",
+        "viewStartTime": "1970-01-01T00:00:00Z",
+        "queryParameters": [],
+        "parsingMode": "Manual",
+        "defaultTimeRange": "-1h to -15m"
+    },
+    "searchSchedule": {
+        "cronExpression": "0 0/15 * * * ? *",
+        "displayableTimeRange": "-20m to -5m",
+        "parseableTimeRange": {
+            "type": "BeginBoundedTimeRange",
+            "from": {
+                "type": "RelativeTimeRangeBoundary",
+                "relativeTime": "-20m"
+            },
+            "to": {
+                "type": "RelativeTimeRangeBoundary",
+                "relativeTime": "-5m"
+            }
+        },
+        "timeZone": "Etc/UTC",
+        "threshold": {
+            "thresholdType": null,
+            "operator": "lt",
+            "count": 0
+        },
+        "notification": {
+            "taskType": "EmailSearchNotificationSyncDefinition",
+            "toList": [
+                "rjury@sumologic.com"
+            ],
+            "subjectTemplate": "Search Alert: {{TriggerCondition}} found for {{SearchName}}",
+            "includeQuery": true,
+            "includeResultSet": false,
+            "includeHistogram": false,
+            "includeCsvAttachment": false
+        },
+        "scheduleType": "15Minutes",
+        "muteErrorEmails": false,
+        "parameters": []
+    },
+    "description": "Save a 15m view of ingested metadata in infrequent tier scope"
+}

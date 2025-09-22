@@ -88,7 +88,7 @@ _sourcecategory=*
 // final aggregation to view
 | sum(events) as events,sum(bytes) as bytes  by _timeslice,collector,sourcecategory,source,sourcehost,index,tier
 // only run this part of query for live schedule or backfilling operations
-//| save view /metadata_default_v1
+//| save view metadata_default_v1
 ```
 
 ## Full Production Architecture Considerations
