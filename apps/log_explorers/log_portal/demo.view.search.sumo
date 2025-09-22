@@ -1,0 +1,16 @@
+_sourcecategory=*
+| timeslice 1m
+| count as events,sum(_size) as bytes  by _timeslice,_collector,_sourcecategory,_source,_sourcehost,_view // ,_siemforward
+| "flex_default" as tier  // fixed attirbution
+//| if(_siemforward="true","flex","cse") as tier // dynamic based on field
+| _view as index | fields -_view  
+| if (isempty(index),"sumologic_default",index) as index
+
+// lowercase everything to simplify filtering and reduce cardinality
+| tolowercase(_collector) as collector
+| tolowercase(_source) as source
+| tolowercase(_sourcecategory) as sourcecategory
+| tolowercase(_sourcehost) as sourcehost
+
+// final aggregation to view
+| sum(events) as events,sum(bytes) as bytes  by _timeslice,collector,sourcecategory,source,sourcehost,index,tier

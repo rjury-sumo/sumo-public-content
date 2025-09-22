@@ -1,0 +1,418 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Log Portal Demo",
+    "description": "A demo of a log discovery portal using a scheduled view to summarize ingested logs.",
+    "title": "Log Portal Demo",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel7FEEC01C8044F942",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panelPANE-8BC0CCE6AE44E842",
+                "structure": "{\"height\":5,\"width\":6,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelEECF9F6B8C564A46",
+                "structure": "{\"height\":8,\"width\":8,\"x\":7,\"y\":29}"
+            },
+            {
+                "key": "panelA080A856A4B96943",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":25}"
+            },
+            {
+                "key": "panelF9B3A68DBC64FA40",
+                "structure": "{\"height\":5,\"width\":18,\"x\":6,\"y\":0}"
+            },
+            {
+                "key": "panel7AE65684BB14B84D",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panel621BD3BB94839A4A",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel6412BB02B435BA4D",
+                "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":29}"
+            },
+            {
+                "key": "panel8AF857B8AE1E2B44",
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":37}"
+            },
+            {
+                "key": "panel3603339CAD23084A",
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":37}"
+            },
+            {
+                "key": "panelD2FA3F25BEFCF94A",
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":37}"
+            },
+            {
+                "key": "panelC097BB98B96B7844",
+                "structure": "{\"height\":8,\"width\":7,\"x\":0,\"y\":29}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel7FEEC01C8044F942",
+            "title": "Search by index and sourcecategory",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost,count_distinct(collector) as collectors, count_distinct(source) as sources, count_distinct(sourcehost) as hosts by index,sourcecategory,%\"Search Scope\"  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search, collector,source,bytes,sourcehost\n| sort index asc,sourcecategory asc | fields -percent\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-8BC0CCE6AE44E842",
+            "title": "Log Portal Demo",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Use this dashboard to discover logs to search in your sumo logic instance using a pre-aggregated summary view of ingested metadata."
+        },
+        {
+            "id": null,
+            "key": "panelEECF9F6B8C564A46",
+            "title": "Indexes (Partitions)",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by index | sort index asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA080A856A4B96943",
+            "title": "These panels show values found for each matching metadata for your search scope",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Logs have built in metadata fields assigned to them at ingestion time, set by administrators when collection is configured. For more info see [built in metadata](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/built-in-metadata/) These are: ```_sourcecategory,  _collector,  _source, _sourcename,  and _sourcehost```. \n\nLogs are ingested into **partitions** also called **indexes** based on routing configured by administrators.  [Partitions](https://help.sumologic.com/docs/manage/partitions/) are logical containers where your logs that are ingested are stored so scoping a search to one or a few partitions will improve performance and reduce scan. If no routing is specified the data is ingested into the ```sumologic_default ``` partition."
+        },
+        {
+            "id": null,
+            "key": "panelF9B3A68DBC64FA40",
+            "title": "Using Filters On This Dashboard",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "Metadata filters are applied to view as keyword expessions for example: collector = <collector>.  ``` collector = {{collector}}```\n\nIf the string contains spaces quote it: \"my category\" or replace space with single character wildcard: ? e.g. ```my?category```\n\nThe parameter global_regex_search is a case insensitive regular expression applied vs all metadata strings concatenated. Examples of regular expressions:\n|  regex  |  Examples |\n|---|---|\n| .*  |  Any string \"0 to many of any character.  . = any character |\n| foo  | matches: foo, foobar, xxfooxx, etc  | \n| ab*c  | matches: abc, abbbbbc or ac. * = 0 to many of prededing chr.  |\n| foo\\|ba. | any string containing foo or bar. |\n\n\nFull applied filter is below:\n```\n_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n```\n"
+        },
+        {
+            "id": null,
+            "key": "panel7AE65684BB14B84D",
+            "title": "Open a New Search Window - Use Clickable Links To Start a Log Search",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel621BD3BB94839A4A",
+            "title": "All Matching Metadata",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost by index,sourcecategory,collector,source,sourcehost  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search,bytes\n| sort index asc,sourcecategory asc, collector asc, source asc | fields -percent\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6412BB02B435BA4D",
+            "title": "Sourcecategory",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by sourcecategory | sort sourcecategory asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8AF857B8AE1E2B44",
+            "title": "Collector",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by collector | sort collector asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3603339CAD23084A",
+            "title": "Sourcehost",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by sourcehost | sort sourcehost asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelD2FA3F25BEFCF94A",
+            "title": "Source",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by source | sort source asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC097BB98B96B7844",
+            "title": "Ingest Timeline",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"events\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| timeslice 48 buckets\n| sum(events) as events by _timeslice",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "sourcecategory",
+            "displayName": "sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_view=metadata_default_v1 | count by sourcecategory\n| sort by sourcecategory asc ",
+                "field": "sourcecategory"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "collector",
+            "displayName": "collector",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_view=metadata_default_v1\n| count by collector\n| sort by collector asc",
+                "field": "collector"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "index",
+            "displayName": "index",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_view=metadata_default_v1 | count by index | sort index asc",
+                "field": "index"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "sourcehost",
+            "displayName": "sourcehost",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_view=metadata_default_v1 | count by sourcehost\n| sort by sourcehost desc ",
+                "field": "sourcehost"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "global_regex_search",
+            "displayName": "global_regex_search",
+            "defaultValue": ".*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "my_instance_name",
+            "displayName": "my_instance_name",
+            "defaultValue": "rick.au",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
