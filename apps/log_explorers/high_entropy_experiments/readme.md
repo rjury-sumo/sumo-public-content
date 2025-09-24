@@ -11,6 +11,9 @@ python3 entropy.py input.txt
 # Comparative mode (see original vs redacted)
 python3 entropy.py -c input.txt
 
+# Comparative mode with condensed asterisks
+python3 entropy.py -c test_strings.txt --condense-asterisks
+
 # Process stdin
 cat logfile.txt | python3 entropy.py
 
@@ -151,6 +154,14 @@ Redacted: uuid-********-****-****-****-************
 # Mixed content preserving common words
 Original: database-connection-string-server-production-guid-550e8400
 Redacted: database-connection-string-server-production-guid-********
+
+# With --condense-asterisks flag
+Original: user-session-abc123def456-another-xyz789abc123
+Redacted: user-session-*-another-*
+
+# Without --condense-asterisks flag (default)
+Original: user-session-abc123def456-another-xyz789abc123
+Redacted: user-session-************-another-************
 ```
 
 ## 🧪 Testing
