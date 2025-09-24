@@ -1,0 +1,85 @@
+// Schedule a version of this search to save to the lookup every 15m for -15m 
+// It will converge to a create a single view with the most recent status and key fields per insightid.
+
+(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated
+OR
+_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)
+
+| json field=_raw "insight.created" as created nodrop
+| json field=_raw "eventName" nodrop
+| json field=_raw "insightIdentity.id" as id
+| json field=_raw "insightIdentity.readableId" as insightid
+| json field=_raw "insight.status" as status nodrop
+| json field=_raw "insight.entityType" as entitytype nodrop
+| json field=_raw "insight.entityValue" as entityvalue nodrop
+| json field=_raw "insight.tags" as tags nodrop
+| json field=_raw "insight.severity" as severity nodrop
+| json field=_raw "insight.confidence" as confidence nodrop
+| json field=_raw "insight.signals" as signals nodrop
+| json field=_raw "insight.riskScore" as riskscore nodrop
+| json field=_raw "insight.severityName" as severityname nodrop
+
+// in closed events
+| json field=_raw "insight.assignee" as assignee nodrop
+| json field=_raw "insight.resolution" as resolution nodrop
+
+// may exist after an update
+| json field=_raw "insight.timeToResponse" as timeToResponse nodrop
+| json field=_raw "insight.timeToDetection" as timeToDetection nodrop
+| json field=_raw "insight.timeToRemediation" as timeToRemediation nodrop
+
+| if (isnull(timeToResponse),-1,timeToResponse) as timeToResponse
+| if (isnull(timeToDetection),-1,timeToDetection) as timeToDetection
+| if (isnull(timeToRemediation),-1,timeToRemediation) as timeToRemediation
+
+//  flag if there is a status change event, if so record status_change_time and is_assigned_time
+| if(status="new",9999999999999,_messagetime) as status_change_time
+| if(isempty(assignee),9999999999999,_messagetime) as is_assigned_time
+
+// aggregate per insight event, but each insight can have many events
+| count as events, min(_messagetime) as _messagetime by id,insightid,eventname,status,assignee,resolution,timeToResponse,timeToDetection,timeToRemediation,status_change_time,is_assigned_time,created,tags,severity,confidence,severityname, riskscore, entitytype, entityvalue
+
+// converge to the most recent result only per insightid
+| sort _messagetime 
+
+// for status_change_time and is_assigned_time the lowest value under 9999999999999 is the actual correct one to use. (I.e. the first one)
+| min(status_change_time) as status_change_time, min(is_assigned_time) as is_assigned_time, 
+   first(status) as status, first(resolution) as resolution,first(tags) as tags, first(severity) as severity,
+   first(confidence) as confidence, max(timetodetection) as timetodetection,max(timetoremediation) as timetoremediation,
+   first(severityname) as severityname, first(riskscore) as riskscore, first(entityvalue) as entityvalue,
+   max(timetoresponse) as old_ttr,first(assignee) as assignee by insightid,created
+
+// This code records the actual true TTRes since automations touching insight corrupt it
+// measure time from creation to the first status change we find after that.
+| parsedate(created,"yyyy-MM-dd'T'HH:mm:ss.SSSXXX") as createdtime
+
+// ignore where both times are not set yet as no response
+| floor(timetodetection) as timetodetection | ceil(timetoremediation) as timetoremediation
+| if(status_change_time < 9999999999999,status_change_time,is_assigned_time) as true_response_time
+| floor((true_response_time - createdtime) / (1000)) as timetoresponse
+
+// these have no response yet
+| if (status_change_time = 9999999999999 and is_assigned_time = 9999999999999,-1,timetoresponse) as timetoresponse
+
+// debug only
+| formatdate(tolong(createdtime),"yyyy-MM-dd HH:mm:sssZZZ","ETC/Utc") as created
+| formatdate(tolong(true_response_time),"yyyy-MM-dd HH:mm:sssZZZ","ETC/Utc") as responded
+
+//| fields -true_response_time,created, responded, olt_ttr
+
+| if(status_change_time = 9999999999999,-1,status_change_time) as timestatuschanged
+| if(is_assigned_time = 9999999999999,-1, is_assigned_time) as timeassigned
+
+| fields insightid,status,resolution,createdtime,timestatuschanged, timeassigned, 
+  timetodetection, timetoresponse, timetoremediation, assignee, 
+  riskscore, severity, severityname, entityvalue, confidence, tags
+
+| todouble(createdtime) as createdtime
+| tolong(timestatuschanged) as timestatuschanged
+| tolong(timetodetection) as timetodetection
+| tolong(timetoresponse) as timetoresponse
+| tolong(timetoremediation) as timetoremediation
+| toint(riskscore) as riskscore
+| toint(severity) as severity
+| if(isnull(confidence),-1,confidence) as confidence
+| todouble(confidence) as confidence
