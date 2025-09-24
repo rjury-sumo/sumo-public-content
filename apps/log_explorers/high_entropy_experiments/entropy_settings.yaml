@@ -1,0 +1,43 @@
+# Entropy threshold and redaction behavior configuration
+# This file controls the sensitivity and behavior of the entropy-based redaction system
+
+# Core entropy detection settings
+entropy_detection:
+  default_threshold: 2.5        # Base entropy threshold (higher = less sensitive)
+  word_pattern_bonus: 0.5       # Additional threshold for word-like patterns
+  min_length: 4                 # Minimum string length to consider for redaction
+  window_size: 6                # Sliding window size for pattern analysis
+
+# Output formatting options
+output_formatting:
+  # Note: condense_asterisks is now a command-line option only
+
+# Advanced pattern detection settings
+pattern_detection:
+  # Enable/disable specific pattern types
+  detect_timestamps: true       # Detect and redact datetime strings
+  detect_ip_addresses: true     # Detect and redact IP addresses (IPv4/IPv6)
+  detect_aws_hostnames: true    # Detect and redact AWS service hostnames
+  detect_uuids: true           # Detect and redact UUID patterns
+  detect_epoch_timestamps: true # Detect and redact epoch timestamps
+  detect_hex_sequences: true    # Detect and redact hexadecimal sequences
+
+  # Pattern-specific settings
+  uuid_min_segments: 3          # Minimum UUID segments to trigger redaction
+  epoch_timestamp_ranges:
+    min_10_digit: 1000000000    # Minimum valid 10-digit epoch (2001-09-09)
+    max_10_digit: 2147483647    # Maximum valid 10-digit epoch (2038-01-19)
+    min_13_digit: 1000000000000 # Minimum valid 13-digit epoch (2001-09-09)
+    max_13_digit: 2147483647000 # Maximum valid 13-digit epoch (2038-01-19)
+
+# Heuristic scoring adjustments
+heuristic_scoring:
+  mixed_case_bonus: 0.3         # Entropy bonus for mixed case patterns
+  digits_letters_bonus: 0.4     # Entropy bonus for mixed digits/letters
+  numeric_sequence_bonus: 0.2   # Entropy bonus for mostly numeric sequences
+
+# Performance and processing options
+processing:
+  enable_sliding_window: true   # Enable sliding window analysis within tokens
+  enable_multi_token_patterns: true # Enable cross-token pattern detection
+  max_token_length: 1000        # Maximum token length to process (safety limit)

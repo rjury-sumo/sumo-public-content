@@ -1,0 +1,150 @@
+# Redaction Patterns Configuration
+# This file defines regex patterns for detecting and redacting sensitive data
+#
+# YAML Scalar Formats Used:
+# - Literal scalars (|) preserve line breaks and don't require escaping
+# - Folded scalars (>) join lines with spaces
+# - Plain scalars require minimal escaping for most regex patterns
+
+# Datetime and timestamp patterns
+datetime_patterns:
+  human_readable_datetime: |
+    (Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\w+\s+\d{4}
+
+  # Date formats
+  date_yyyy_mm_dd: '\d{4}/\d{2}/\d{2}'
+  date_yyyy_dash_mm_dash_dd: '\d{4}-\d{2}-\d{2}'
+  date_mm_dd_yyyy: '\d{2}/\d{2}/\d{4}'
+  date_mm_dash_dd_dash_yyyy: '\d{2}-\d{2}-\d{4}'
+
+  # Time formats
+  time_hh_mm_ss: '\d{2}:\d{2}:\d{2}'
+  time_hh_mm_ss_ms: '\d{2}:\d{2}:\d{2}\.\d{3}'
+
+  # Combined datetime formats
+  datetime_yyyy_mm_dd_space_time: '\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2}'
+  datetime_yyyy_dash_mm_dash_dd_space_time: '\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}'
+
+  # ISO 8601 and similar formats
+  iso8601_compact_date_time_z: '\d{8}T\d{4}Z?'
+  iso8601_compact_datetime_z: '\d{8}T\d{6}Z?'
+  iso8601_full_datetime: '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+  datetime_dash_separated: '\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'
+  datetime_underscore_separated: '\d{8}_\d{4,6}'
+
+# IP address patterns
+ip_address_patterns:
+  # IPv4 addresses with validation for reasonable ranges
+  ipv4_address: |
+    (?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)
+
+  # IPv6 addresses (common formats)
+  ipv6_full: '(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}'
+  ipv6_compressed: '(?:[0-9a-fA-F]{1,4}:){1,7}:'
+  ipv6_leading_compressed: '::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}'
+
+# AWS EC2 hostname patterns - moved to selective patterns for partial redaction
+
+# Selective AWS service hostname patterns
+# These use capture groups for partial redaction
+aws_selective_patterns:
+  # RDS endpoints - redact cluster/instance identifier only
+  rds_cluster_endpoint:
+    pattern: '([\w-]+)\.(cluster-[0-9a-z]+)(\.[\w-]+\.rds\.amazonaws\.com)'
+    replacement: '*.*\3'
+
+  # ELB endpoints - redact load balancer name only
+  elb_endpoint:
+    pattern: '([\w-]+)(-[0-9a-f]+)(\.[\w-]+\.elb\.amazonaws\.com)'
+    replacement: '*\2\3'
+
+  # CloudFront distributions - redact distribution ID only
+  cloudfront_distribution:
+    pattern: '([0-9a-z]+)(\.cloudfront\.net)'
+    replacement: '*\2'
+
+  # API Gateway - redact API ID only
+  api_gateway:
+    pattern: '([0-9a-z]+)(\.execute-api\.[\w-]+\.amazonaws\.com)'
+    replacement: '*\2'
+
+  # Lambda function URLs - redact function ID only
+  lambda_function_url:
+    pattern: '([0-9a-z]+)(\.lambda-url\.[\w-]+\.on\.aws)'
+    replacement: '*\2'
+
+  # EC2 Public IPv4 DNS names - redact IP address only
+  ec2_public_ipv4_dns:
+    pattern: 'ec2-(\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3})(\..*\.amazonaws\.com)'
+    replacement: 'ec2-*\2'
+
+  # EC2 Private IPv4 DNS names - redact IP address only
+  ec2_private_ipv4_dns:
+    pattern: 'ip-(\d{1,3}-\d{1,3}-\d{1,3}-\d{1,3})(\..*\.internal)'
+    replacement: 'ip-*\2'
+
+  # EC2 Instance-based naming - redact instance ID only
+  ec2_instance_based:
+    pattern: 'i-([0-9a-f]{8,17})(\..*\.internal)'
+    replacement: 'i-*\2'
+
+  # EC2 Resource-based naming - redact random suffix only
+  ec2_resource_based:
+    pattern: '([\w-]+)-([0-9a-f]{8,17})(\..*\.amazonaws\.com)'
+    replacement: '\1-*\3'
+
+# Pattern groups for easy enable/disable
+pattern_groups:
+  enabled:
+    - datetime_patterns
+    - ip_address_patterns
+    - aws_selective_patterns
+
+  disabled: []
+
+# Exact matching patterns for token validation (used with ^ and $ anchors)
+exact_match_patterns:
+  # ISO 8601 and similar formats for exact token matching
+  iso8601_compact_date_time_z_exact: '^\d{8}T\d{4}Z?$'
+  iso8601_compact_datetime_z_exact: '^\d{8}T\d{6}Z?$'
+  iso8601_full_datetime_exact: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}'
+  datetime_dash_separated_exact: '^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}'
+  datetime_underscore_separated_exact: '^\d{8}_\d{4,6}$'
+
+  # Common date formats for exact token matching
+  date_yyyy_mm_dd_exact: '^\d{4}/\d{2}/\d{2}$'
+  date_yyyy_dash_mm_dash_dd_exact: '^\d{4}-\d{2}-\d{2}$'
+  date_mm_dd_yyyy_exact: '^\d{2}/\d{2}/\d{4}$'
+  date_mm_dash_dd_dash_yyyy_exact: '^\d{2}-\d{2}-\d{4}$'
+
+  # Time formats for exact token matching
+  time_hh_mm_ss_exact: '^\d{2}:\d{2}:\d{2}$'
+  time_hh_mm_ss_ms_exact: '^\d{2}:\d{2}:\d{2}\.\d{3}$'
+
+  # Combined date-time formats for exact token matching
+  datetime_yyyy_mm_dd_space_time_exact: '^\d{4}/\d{2}/\d{2}\s+\d{2}:\d{2}:\d{2}'
+  datetime_yyyy_dash_mm_dash_dd_space_time_exact: '^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}'
+
+# Human-readable datetime patterns with text
+human_readable_datetime_patterns:
+  # Day Month DD HH:MM:SS TZ YYYY format
+  weekday_month_datetime: '^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}\s+\d{2}:\d{2}:\d{2}\s+\w+\s+\d{4}$'
+
+  # Month DD, YYYY format
+  full_month_date: '^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4}$'
+
+  # DD Month YYYY format
+  day_full_month_year: '^\d{1,2}\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}$'
+
+# Custom user patterns
+# Add your own patterns here
+custom_patterns:
+  # Example: Credit card numbers (commented out for safety)
+  # credit_card_visa: '4[0-9]{12}(?:[0-9]{3})?'
+  # credit_card_mastercard: '5[1-5][0-9]{14}'
+
+  # Example: Social security numbers (commented out for safety)
+  # ssn_pattern: '\d{3}-\d{2}-\d{4}'
+
+  # Add your custom patterns here
+  # custom_identifier: 'your-regex-pattern-here'
