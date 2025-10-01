@@ -12,7 +12,7 @@
         "type": "BeginBoundedTimeRange",
         "from": {
             "type": "RelativeTimeRangeBoundary",
-            "relativeTime": "-1d"
+            "relativeTime": "-6h"
         },
         "to": null
     },
@@ -25,19 +25,19 @@
             },
             {
                 "key": "panelPANE-8BC0CCE6AE44E842",
-                "structure": "{\"height\":5,\"width\":6,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":5,\"width\":11,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panelEECF9F6B8C564A46",
-                "structure": "{\"height\":8,\"width\":8,\"x\":7,\"y\":29}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":7,\"y\":28}"
             },
             {
                 "key": "panelA080A856A4B96943",
-                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":25}"
+                "structure": "{\"height\":3,\"width\":24,\"x\":0,\"y\":25}"
             },
             {
                 "key": "panelF9B3A68DBC64FA40",
-                "structure": "{\"height\":5,\"width\":18,\"x\":6,\"y\":0}"
+                "structure": "{\"height\":5,\"width\":13,\"x\":11,\"y\":0}"
             },
             {
                 "key": "panel7AE65684BB14B84D",
@@ -49,23 +49,35 @@
             },
             {
                 "key": "panel6412BB02B435BA4D",
-                "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":29}"
+                "structure": "{\"height\":8,\"width\":9,\"x\":15,\"y\":28}"
             },
             {
                 "key": "panel8AF857B8AE1E2B44",
-                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":37}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":0,\"y\":36}"
             },
             {
                 "key": "panel3603339CAD23084A",
-                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":37}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":16,\"y\":36}"
             },
             {
                 "key": "panelD2FA3F25BEFCF94A",
-                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":37}"
+                "structure": "{\"height\":8,\"width\":8,\"x\":8,\"y\":36}"
             },
             {
                 "key": "panelC097BB98B96B7844",
-                "structure": "{\"height\":8,\"width\":7,\"x\":0,\"y\":29}"
+                "structure": "{\"height\":8,\"width\":7,\"x\":0,\"y\":28}"
+            },
+            {
+                "key": "panel115978B9AA15C843",
+                "structure": "{\"height\":4,\"width\":24,\"x\":0,\"y\":44}"
+            },
+            {
+                "key": "panel7A254DED876C7940",
+                "structure": "{\"height\":18,\"width\":24,\"x\":0,\"y\":53}"
+            },
+            {
+                "key": "panelBE6CB598997A5844",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":48}"
             }
         ]
     },
@@ -80,7 +92,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost,count_distinct(collector) as collectors, count_distinct(source) as sources, count_distinct(sourcehost) as hosts by index,sourcecategory,%\"Search Scope\",tier  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search, collector,source,bytes,sourcehost\n| sort index asc,sourcecategory asc | fields -percent\n",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost,count_distinct(collector) as collectors, count_distinct(source) as sources, count_distinct(sourcehost) as hosts by index,sourcecategory,%\"Search Scope\", tier  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search, collector,source,bytes,sourcehost\n| sort index asc,sourcecategory asc | fields -percent\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -116,7 +128,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by index,tier | sort index asc",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by index,tier | sort index asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -140,7 +152,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "Logs have built in metadata fields assigned to them at ingestion time, set by administrators when collection is configured. For more info see [built in metadata](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/built-in-metadata/) These are: ```_sourcecategory,  _collector,  _source, _sourcename,  and _sourcehost```. \n\nLogs are ingested into **partitions** also called **indexes** based on routing configured by administrators.  [Partitions](https://help.sumologic.com/docs/manage/partitions/) are logical containers where your logs that are ingested are stored so scoping a search to one or a few partitions will improve performance and reduce scan. If no routing is specified the data is ingested into the ```sumologic_default ``` partition."
+            "text": "Logs have built in metadata fields assigned to them at ingestion time, set by administrators when collection is configured. For more info see [built in metadata](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/built-in-metadata/) These are: ```Index (_view), _sourcecategory,  _collector,  _source, _sourcename,  and _sourcehost```. \n\nLogs are ingested into **partitions** also called **indexes** based on routing configured by administrators.  [Partitions](https://help.sumologic.com/docs/manage/partitions/) are logical containers where your logs that are ingested are stored so scoping a search to one or a few partitions will improve performance and reduce scan. If no routing is specified the data is ingested into the ```sumologic_default ``` partition."
         },
         {
             "id": null,
@@ -149,7 +161,7 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "Metadata filters are applied to view as keyword expessions for example: collector = <collector>.  ``` collector = {{collector}}```\n\nIf the string contains spaces quote it: \"my category\" or replace space with single character wildcard: ? e.g. ```my?category```\n\nThe parameter global_regex_search is a case insensitive regular expression applied vs all metadata strings concatenated. Examples of regular expressions:\n|  regex  |  Examples |\n|---|---|\n| .*  |  Any string \"0 to many of any character.  . = any character |\n| foo  | matches: foo, foobar, xxfooxx, etc  | \n| ab*c  | matches: abc, abbbbbc or ac. * = 0 to many of prededing chr.  |\n| foo\\|ba. | any string containing foo or bar. |\n\n\nFull applied filter is below:\n```\n_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n```\n"
+            "text": "Metadata filters are applied to view as [keyword expressions](https://help.sumologic.com/docs/search/get-started-with-search/build-search/keyword-search-expressions) for example: collector = <collector>.  ``` collector = {{collector}}```\n\nIf the string contains spaces quote it: ```\"my category\"``` or replace space with single character wildcard: ? e.g. ```my?category```\n\nThe parameter **global_regex_search** is a [case insensitive regular expression](https://help.sumologic.com/docs/search/search-query-language/search-operators/matches/#matching-with-regex-to-filter-results) applied vs all metadata string values. Examples of regular expressions:\n|  regex  |  Examples |\n|---|---|\n| .*  |  Any string \"0 to many of any character.  . = any character |\n| foo  | matches: foo, foobar, xxfooxx, etc  | \n| ab*c  | matches: abc, abbbbbc or ac. * = 0 to many of prededing chr.  |\n| foo\\|ba. | any string containing foo or bar. |\n\n\nThe filter parameters you have selected are applied to the custom view as below:\n```\n_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n```\n"
         },
         {
             "id": null,
@@ -170,7 +182,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost by index,sourcecategory,collector,source,sourcehost,tier  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search,bytes\n| sort index asc,sourcecategory asc, collector asc, source asc | fields -percent\n",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events by index,sourcecategory,collector,source,sourcehost,tier  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search,bytes\n| sort index asc,sourcecategory asc, collector asc, source asc | fields -percent\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -197,7 +209,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by sourcecategory | sort sourcecategory asc",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by sourcecategory | sort sourcecategory asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -224,7 +236,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by collector | sort collector asc",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by collector | sort collector asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -251,7 +263,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by sourcehost | sort sourcehost asc",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by sourcehost | sort sourcehost asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -278,7 +290,7 @@
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| count as events by source | sort source asc",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by source | sort source asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -299,13 +311,76 @@
             "id": null,
             "key": "panelC097BB98B96B7844",
             "title": "Ingest Timeline",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"events\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"events\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=metadata_default_v1\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/\n| timeslice 48 buckets\n| sum(events) as events by _timeslice",
+                    "queryString": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| timeslice 48 buckets\n| sum(events) as events by _timeslice",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel115978B9AA15C843",
+            "title": "Search Activity In Your Account",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels use [search audit](https://help.sumologic.com/docs/manage/security/audit-indexes/search-audit-index/) and show examples of searches likely to match the metadata scope variables you have selected.\n\n### Saved Content\n If the content is saved in library or is a monitor or SLO the saved content name is shown. "
+        },
+        {
+            "id": null,
+            "key": "panel7A254DED876C7940",
+            "title": "Example Searches Found",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nnot query_type=\"Scheduled Views\"\n| where (\"{{global_regex_search}}\" = \".*\") or (query matches /(?i){{global_regex_search}}/)\n\n// we have a real pickle here because users could provide \"foo\" foo?bar foo*bar foo* etc and not valid to match vs query which is a much larger string\n// reformat the supplied params into a single result\n//| concat(\"{{sourcecategory}}|{{collector}}|{{index}}|{{sourcehost}}\",\"\") as blob\n| \"{{sourcecategory}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{collector}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{index}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{sourcehost}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n\n//| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n//| ((query_end_time - query_start_time ) /1000 / 60 ) as range_minutes\n//| execution_duration_ms / 1000 as runtime\n| content_name as name | trim(query) as q\n| if(length(query)>500,concat(substring(query,0,500),\"...\"),query) as query\n//| first(q) as q,count as searches,avg(range_minutes) as %\"range(m)\",avg(scanned_partition_count) as partitions, sum(data_scanned_bytes) as scan_bytes,avg(runtime) as avg_runtime by query_type,name,query //,session_id\n| first(q) as q,count as searches by query_type,name,query //,session_id\n| sort name asc, query asc | limit 1000\n//| round(scan_bytes / 1G,1) as scan_gb | fields -scan_bytes\n//| round(avg_runtime,1) as %\"runtime(s)\"\n//| round(%\"range(m)\",1) as %\"range(m)\"\n| trim(concat(\"// \",query_type,\" \",name)) as qn \n| trim(query) as query\n| urlencode (concat(qn,\"\\n\",q)) as q\n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n| concat(\"[run search](\",dp,q,\")\") as %\"Run Search\"\n| fields -dp,q,qn",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelBE6CB598997A5844",
+            "title": "Matching Search Content Found",
+            "visualSettings": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nnot query_type=\"Scheduled Views\"\n| where (\"{{global_regex_search}}\" = \".*\") or (query matches /(?i){{global_regex_search}}/)\n\n// we have a real pickle here because users could provide \"foo\" foo?bar foo*bar foo* etc and not valid to match vs query which is a much larger string\n// reformat the supplied params into a single result\n//| concat(\"{{sourcecategory}}|{{collector}}|{{index}}|{{sourcehost}}\",\"\") as blob\n| \"{{sourcecategory}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{collector}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{index}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n| \"{{sourcehost}}\" as blob \n| if(substring(blob,0,1)=\"*\",blob,concat(\"*\",blob)) as blob \n| substring(blob,length(blob)-1,length(blob)) as end\n| if( end = \"*\",blob,concat(blob,\"*\")) as blob\n| where query matches blob\n\n//| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n//| ((query_end_time - query_start_time ) /1000 / 60 ) as range_minutes\n//| execution_duration_ms / 1000 as runtime\n| content_name as name | trim(query) as q\n| if(length(query)>500,concat(substring(query,0,500),\"...\"),query) as query\n//| first(q) as q,count as searches,avg(range_minutes) as %\"range(m)\",avg(scanned_partition_count) as partitions, sum(data_scanned_bytes) as scan_bytes,avg(runtime) as avg_runtime by query_type,name,query //,session_id\n| count by query_type | sort query_type asc",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
