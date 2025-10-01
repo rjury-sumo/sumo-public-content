@@ -1,5 +1,7 @@
 # High-Entropy String Redaction Tool
 
+** This project will be migration to a python module see: https://github.com/rjury-sumo/python-entrophier#**
+
 A configurable Python tool for detecting and redacting sensitive data in text using entropy analysis and pattern matching. Designed for processing log files, user input, and any text containing potentially sensitive information like timestamps, UUIDs, account IDs, IP addresses, and AWS hostnames.
 
 ## 🚀 Quick Start
