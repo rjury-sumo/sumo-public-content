@@ -537,12 +537,20 @@ def format_batch_filename(base_filename, batch_index, from_time_ms, to_time_ms):
     if not base_filename:
         return None
 
+    # Convert epoch milliseconds to formatted timestamp strings
+    from_dt = datetime.fromtimestamp(from_time_ms / 1000)
+    to_dt = datetime.fromtimestamp(to_time_ms / 1000)
+
+    # Format as YYYYMMddHHmmss.SSS
+    from_str = from_dt.strftime('%Y%m%d%H%M%S') + f".{from_time_ms % 1000:03d}"
+    to_str = to_dt.strftime('%Y%m%d%H%M%S') + f".{to_time_ms % 1000:03d}"
+
     # Extract file extension if present
     if '.' in base_filename:
         name, ext = base_filename.rsplit('.', 1)
-        return f"{name}_batch_{batch_index:03d}_{from_time_ms}_{to_time_ms}.{ext}"
+        return f"{name}_batch_{batch_index:03d}_{from_str}_{to_str}.{ext}"
     else:
-        return f"{base_filename}_batch_{batch_index:03d}_{from_time_ms}_{to_time_ms}"
+        return f"{base_filename}_batch_{batch_index:03d}_{from_str}_{to_str}"
 
 
 def execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args, query_name=None):
