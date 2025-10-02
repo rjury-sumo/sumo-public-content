@@ -334,11 +334,17 @@ def parse_time_value(time_value):
 
 def validate_config(config):
     """Validate required fields in configuration"""
-    required_fields = ['query', 'from', 'to']
+    required_fields = ['name', 'query', 'from', 'to']
     missing_fields = [field for field in required_fields if field not in config]
 
     if missing_fields:
         logger.error(f"Missing required fields in YAML config: {', '.join(missing_fields)}")
+        sys.exit(1)
+
+    # Validate name is a valid string for use in filenames
+    name = config['name']
+    if not isinstance(name, str) or not name.strip():
+        logger.error("Config 'name' must be a non-empty string")
         sys.exit(1)
 
 
@@ -539,14 +545,15 @@ def format_batch_filename(base_filename, batch_index, from_time_ms, to_time_ms):
         return f"{base_filename}_batch_{batch_index:03d}_{from_time_ms}_{to_time_ms}"
 
 
-def execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args):
+def execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args, query_name=None):
     """Execute a single search query"""
     # Set requiresRawMessages to True only when messages mode is used
     # This defaults to False for better performance with aggregate queries
     requires_raw_messages = args.mode == 'messages'
 
     # Create search job
-    logger.info(f"Creating search job with query: \n{query}")
+    query_label = f"[{query_name}] " if query_name else ""
+    logger.info(f"{query_label}Creating search job with query: \n{query}")
     logger.debug(f"requiresRawMessages set to: {requires_raw_messages} (mode: {args.mode})")
     job_response = client.create_search_job(
         query=query,
@@ -559,10 +566,10 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
     job_id = job_response.get('id')
     if not job_id:
-        logger.error("No job ID returned from search job creation")
+        logger.error(f"{query_label}No job ID returned from search job creation")
         sys.exit(1)
 
-    logger.info(f"Search job created with ID: {job_id}")
+    logger.info(f"{query_label}Search job created with ID: {job_id}")
 
     if args.mode == 'create-only':
         # Just return the job creation response
@@ -573,11 +580,11 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
     elif args.mode in ['messages', 'records']:
         # Poll until completion
-        logger.info(f"Polling job {job_id} for completion...")
+        logger.info(f"{query_label}Polling job {job_id} for completion...")
         final_status = client.poll_search_job(job_id, args.poll_interval, args.max_wait)
 
         if final_status.get('state') == 'DONE GATHERING RESULTS':
-            logger.info(f"Job {job_id} completed successfully")
+            logger.info(f"{query_label}Job {job_id} completed successfully")
 
             if args.mode == 'messages':
                 results = client.get_search_job_messages(job_id)
@@ -586,23 +593,24 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
             format_and_write_output(results, args)
         else:
-            logger.error(f"Job {job_id} did not complete successfully. Final state: {final_status.get('state')}")
+            logger.error(f"{query_label}Job {job_id} did not complete successfully. Final state: {final_status.get('state')}")
             if args.output == 'json':
                 write_output(json.dumps(final_status, indent=2), args.output_file, args.output_directory)
             sys.exit(1)
 
 
-def execute_batch(client, query, intervals, time_zone, by_receipt_time, args):
+def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, query_name=None):
     """Execute batch search queries"""
     total_intervals = len(intervals)
-    logger.info(f"Starting batch execution of {total_intervals} intervals")
+    query_label = f"[{query_name}] " if query_name else ""
+    logger.info(f"{query_label}Starting batch execution of {total_intervals} intervals")
 
     # Set default output file if not specified and not using sumo-https
     output_file = args.output_file
     output_directory = args.output_directory
 
     if not output_file and args.output != 'sumo-https':
-        # Generate default filename based on output format
+        # Generate default filename based on output format and query name
         extension_map = {
             'csv': 'csv',
             'json': 'json',
@@ -610,14 +618,16 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args):
             'table': 'txt'
         }
         extension = extension_map.get(args.output, 'txt')
-        output_file = f"batch_results.{extension}"
+        # Use query name in filename if available
+        base_name = query_name if query_name else "batch_results"
+        output_file = f"{base_name}.{extension}"
         # Ensure output directory is set to ./output/ for batch mode
         output_directory = './output/'
-        logger.info(f"No output file specified, using default: {output_file} in {output_directory}")
+        logger.info(f"{query_label}No output file specified, using default: {output_file} in {output_directory}")
 
     for batch_index, (from_time, to_time) in enumerate(intervals):
-        logger.info(f"=== Batch {batch_index + 1}/{total_intervals} ===")
-        logger.info(f"Time range: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
+        logger.info(f"{query_label}=== Batch {batch_index + 1}/{total_intervals} ===")
+        logger.info(f"{query_label}Time range: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
 
         # Generate batch-specific filename
         batch_output_file = format_batch_filename(output_file, batch_index, from_time, to_time)
@@ -629,8 +639,8 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args):
 
         try:
             # Execute the query for this time interval
-            execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, batch_args)
-            logger.info(f"Batch {batch_index + 1} completed successfully")
+            execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, batch_args, query_name)
+            logger.info(f"{query_label}Batch {batch_index + 1} completed successfully")
         except Exception as e:
             logger.error(f"Batch {batch_index + 1} failed: {e}")
             # Continue with next batch instead of stopping
@@ -912,6 +922,7 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
     try:
         # Extract search parameters from config
         query = config['query']
+        query_name = config['name']
         time_zone = config.get('timeZone', 'UTC')
         by_receipt_time = config.get('byReceiptTime', False)
 
@@ -929,7 +940,7 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
             logger.info(f"Generated {len(intervals)} batch intervals")
 
             # Execute batch processing
-            execute_batch(client, query, intervals, time_zone, by_receipt_time, args)
+            execute_batch(client, query, intervals, time_zone, by_receipt_time, args, query_name)
 
         else:
             # Single query mode
@@ -938,8 +949,22 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
 
             logger.info(f"Single query: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
 
+            # Set default output file if not specified and not using sumo-https or create-only
+            if not args.output_file and args.output != 'sumo-https' and args.mode != 'create-only':
+                # Generate default filename based on output format and query name
+                extension_map = {
+                    'csv': 'csv',
+                    'json': 'json',
+                    'minimal': 'jsonl',
+                    'table': 'txt'
+                }
+                extension = extension_map.get(args.output, 'txt')
+                args.output_file = f"{query_name}.{extension}"
+                args.output_directory = './output/'
+                logger.info(f"[{query_name}] No output file specified, using default: {args.output_file} in {args.output_directory}")
+
             # Execute single query
-            execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args)
+            execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args, query_name)
 
     except KeyboardInterrupt:
         logger.info("Operation cancelled by user")
