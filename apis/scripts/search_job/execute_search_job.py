@@ -581,7 +581,7 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
     if args.mode == 'create-only':
         # Just return the job creation response
-        if args.output == 'minimal':
+        if args.output == 'jsonl':
             write_output(job_id, args.output_file, args.output_directory)
         else:
             write_output(json.dumps(job_response, indent=2), args.output_file, args.output_directory)
@@ -622,13 +622,13 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, qu
         extension_map = {
             'csv': 'csv',
             'json': 'json',
-            'minimal': 'jsonl',
+            'jsonl': 'jsonl',
             'table': 'txt'
         }
-        extension = extension_map.get(args.output, 'txt')
-        # Use query name in filename if available
+        extension = extension_map.get(args.output, 'jsonl')  # Default to jsonl if not found
+        # Use query name and mode in filename if available
         base_name = query_name if query_name else "batch_results"
-        output_file = f"{base_name}.{extension}"
+        output_file = f"{base_name}_{args.mode}.{extension}"
         # Ensure output directory is set to ./output/ for batch mode
         output_directory = './output/'
         logger.info(f"{query_label}No output file specified, using default: {output_file} in {output_directory}")
@@ -708,8 +708,8 @@ def post_to_sumo_https(records, sumo_url, add_timestamp=False):
 def format_and_write_output(results, args):
     """Format and write output based on args configuration"""
     # Handle different output formats
-    if args.output == 'minimal':
-        # Just print the data portion
+    if args.output == 'jsonl':
+        # Output JSON Lines format - one JSON object per line
         output_lines = []
         if 'messages' in results:
             for message in results['messages']:
@@ -762,7 +762,7 @@ Execution Modes:
 
 Output Formats:
   json           : Standard JSON output
-  minimal        : Data only (no metadata)
+  jsonl          : JSON Lines format - one JSON object per line (no metadata)
   table          : Formatted table (records mode only)
   csv            : Comma-separated values (records mode only)
   sumo-https     : POST each record to Sumo Logic HTTPS endpoint (records mode only)
@@ -840,9 +840,9 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
     )
     parser.add_argument(
         '--output',
-        choices=['json', 'minimal', 'table', 'csv', 'sumo-https'],
-        default='json',
-        help='Output format (default: json). table/csv formats work best with records mode. sumo-https posts records to Sumo Logic HTTPS endpoint.'
+        choices=['json', 'jsonl', 'table', 'csv', 'sumo-https'],
+        default=None,
+        help='Output format. Default: jsonl for records mode, json for messages/create-only modes. jsonl outputs JSON Lines format. table/csv formats work best with records mode. sumo-https posts records to Sumo Logic HTTPS endpoint.'
     )
     parser.add_argument(
         '--output-file',
@@ -890,6 +890,13 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
 
     args = parser.parse_args()
 
+    # Set default output format based on mode
+    if args.output is None:
+        if args.mode == 'records':
+            args.output = 'jsonl'
+        else:
+            args.output = 'json'
+
     # Set up logging
     setup_logging(args.log_level)
 
@@ -907,6 +914,12 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
             sys.exit(1)
         if args.mode == 'create-only':
             logger.error("--batch-mode is not compatible with --mode create-only")
+            sys.exit(1)
+
+    # Validate messages mode output format
+    if args.mode == 'messages':
+        if args.output not in ['json', 'jsonl']:
+            logger.error("--mode messages only supports --output json or jsonl")
             sys.exit(1)
 
     # Validate sumo-https output mode
@@ -959,15 +972,15 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
 
             # Set default output file if not specified and not using sumo-https or create-only
             if not args.output_file and args.output != 'sumo-https' and args.mode != 'create-only':
-                # Generate default filename based on output format and query name
+                # Generate default filename based on output format, query name, and mode
                 extension_map = {
                     'csv': 'csv',
                     'json': 'json',
-                    'minimal': 'jsonl',
+                    'jsonl': 'jsonl',
                     'table': 'txt'
                 }
-                extension = extension_map.get(args.output, 'txt')
-                args.output_file = f"{query_name}.{extension}"
+                extension = extension_map.get(args.output, 'jsonl')  # Default to jsonl if not found
+                args.output_file = f"{query_name}_{args.mode}.{extension}"
                 args.output_directory = './output/'
                 logger.info(f"[{query_name}] No output file specified, using default: {args.output_file} in {args.output_directory}")
 
