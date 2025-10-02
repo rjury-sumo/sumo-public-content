@@ -14,16 +14,29 @@ This script provides a flexible interface to the Sumo Logic Search Job API, allo
 ## Installation
 
 ### Prerequisites
-- Python 3.6+
+- Python 3.8+
 - PyYAML library
 
-### Install Dependencies
+### Option 1: Using uv (Recommended)
+[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver.
+
 ```bash
-pip install PyYAML
+# Install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install dependencies
+uv sync
+
+# Run the script
+uv run python3 execute_search_job.py --region us1 --access-id ID --access-key KEY --yaml-config search.yaml
 ```
 
-### Make Script Executable
+### Option 2: Using pip
 ```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Make script executable
 chmod +x execute_search_job.py
 ```
 
@@ -367,6 +380,53 @@ Use `--log-level DEBUG` to see detailed execution information:
 ```bash
 ./execute_search_job.py --log-level DEBUG [other options]
 ```
+
+## Testing
+
+The project includes a comprehensive pytest test suite covering:
+- Time format parsing (relative times, ISO format, epoch milliseconds)
+- YAML configuration validation
+- Batch filename generation with timestamps
+- Interval parsing and batch generation
+- Output formatting (CSV, table, JSON Lines)
+- Integration tests validating actual output files
+
+### Running Tests
+
+**Using uv (recommended):**
+```bash
+# Install dev dependencies
+uv sync --all-extras
+
+# Run all tests
+uv run pytest test_execute_search_job.py -v
+
+# Run specific test class
+uv run pytest test_execute_search_job.py::TestTimeFormatParsing -v
+
+# Run with coverage
+uv run pytest test_execute_search_job.py --cov
+```
+
+**Using pip:**
+```bash
+# Install test dependencies
+pip install pytest
+
+# Run tests
+pytest test_execute_search_job.py -v
+```
+
+### Test Coverage
+The test suite includes 39 tests organized into these categories:
+- **Time Format Parsing** (9 tests)
+- **Config Validation** (5 tests)
+- **Batch Filename Generation** (4 tests)
+- **Interval Parsing** (6 tests)
+- **Output Formatting** (4 tests)
+- **YAML Config Loading** (3 tests)
+- **Existing Output Files Validation** (5 tests)
+- **Filename Pattern Validation** (3 tests)
 
 ## Integration Examples
 
