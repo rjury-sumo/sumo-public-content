@@ -597,16 +597,35 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args):
     total_intervals = len(intervals)
     logger.info(f"Starting batch execution of {total_intervals} intervals")
 
+    # Set default output file if not specified and not using sumo-https
+    output_file = args.output_file
+    output_directory = args.output_directory
+
+    if not output_file and args.output != 'sumo-https':
+        # Generate default filename based on output format
+        extension_map = {
+            'csv': 'csv',
+            'json': 'json',
+            'minimal': 'jsonl',
+            'table': 'txt'
+        }
+        extension = extension_map.get(args.output, 'txt')
+        output_file = f"batch_results.{extension}"
+        # Ensure output directory is set to ./output/ for batch mode
+        output_directory = './output/'
+        logger.info(f"No output file specified, using default: {output_file} in {output_directory}")
+
     for batch_index, (from_time, to_time) in enumerate(intervals):
         logger.info(f"=== Batch {batch_index + 1}/{total_intervals} ===")
         logger.info(f"Time range: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
 
         # Generate batch-specific filename
-        batch_output_file = format_batch_filename(args.output_file, batch_index, from_time, to_time)
+        batch_output_file = format_batch_filename(output_file, batch_index, from_time, to_time)
 
         # Create a copy of args with the batch-specific output file
         batch_args = argparse.Namespace(**vars(args))
         batch_args.output_file = batch_output_file
+        batch_args.output_directory = output_directory
 
         try:
             # Execute the query for this time interval
