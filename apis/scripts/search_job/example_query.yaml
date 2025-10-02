@@ -1,0 +1,16 @@
+# Example search job configuration for execute_search_job.py
+
+# Search query - using multiline scalar format with |
+query: |
+  _sourceCategory=prod/app
+  | where status_code >= 400
+  | count by _sourceHost, status_code
+  | sort by _count desc
+
+# Time range options
+from: "-1h"          # Relative time: -1h, -30m, -2d, -1w, or "now"
+to: "now"            # Can also use ISO format: "2024-01-01T00:00:00Z" or epoch ms: 1704067200000
+
+# Optional parameters
+timeZone: "UTC"      # Timezone for the search (default: UTC)
+byReceiptTime: false # Search by receipt time instead of message time (default: false)
