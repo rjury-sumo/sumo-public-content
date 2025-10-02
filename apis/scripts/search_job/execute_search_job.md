@@ -29,8 +29,23 @@ chmod +x execute_search_job.py
 
 ## Basic Usage
 
+### Simple Query Execution
 ```bash
 ./execute_search_job.py --region us1 --access-id YOUR_ACCESS_ID --access-key YOUR_ACCESS_KEY --yaml-config search.yaml
+```
+
+### Using Environment Variables and CSV Output
+```bash
+python3 ./execute_search_job.py --region au \
+  --access-id=$SUMO_ACCESS_ID --access-key=$SUMO_ACCESS_KEY \
+  --yaml-config=test_search_config.yaml --mode records --output=csv
+```
+
+### Retrieving Raw Messages
+```bash
+python3 ./execute_search_job.py --region au \
+  --access-id=$SUMO_ACCESS_ID --access-key=$SUMO_ACCESS_KEY \
+  --yaml-config=test_search_config.yaml --mode messages
 ```
 
 ## Configuration
@@ -45,6 +60,7 @@ Create a YAML file with your search parameters:
 
 ```yaml
 # Required fields
+name: "webapp_analysis"  # Unique name for this query (used in logging and output filenames)
 query: "_sourceCategory=webapp | count by _sourceHost"
 from: "-1h"  # 1 hour ago
 to: "now"    # current time
@@ -53,6 +69,12 @@ to: "now"    # current time
 timeZone: "UTC"
 byReceiptTime: false
 ```
+
+**Required Fields:**
+- `name`: Unique identifier for the query, used in logging output and default filenames
+- `query`: The Sumo Logic search query to execute
+- `from`: Start time for the search
+- `to`: End time for the search
 
 #### Time Format Options
 The script supports multiple time formats:
@@ -85,10 +107,11 @@ Creates the search job and returns the job ID only.
 Retrieves raw log messages from the search results.
 - **Performance**: `requiresRawMessages=True`
 - **Use Case**: Log analysis, debugging, raw data export
+- **Output Formats**: Only `json` and `jsonl` are supported
 
 ```bash
 ./execute_search_job.py --region us1 --access-id ID --access-key KEY \
-  --yaml-config search.yaml --mode messages
+  --yaml-config search.yaml --mode messages --output json
 ```
 
 ### 3. Records Mode (`--mode records`)
@@ -109,10 +132,10 @@ Standard JSON output with full metadata.
 --output json
 ```
 
-### Minimal (`--output minimal`)
-Data only, no metadata wrapper.
+### JSON Lines (`--output jsonl`)
+JSON Lines format - one JSON object per line, no metadata wrapper.
 ```bash
---output minimal
+--output jsonl
 ```
 
 ### Table (`--output table`)
@@ -142,11 +165,24 @@ Add timestamps to records when posting to Sumo Logic:
 
 ## File Output
 
+### Default File Naming
+When no `--output-file` is specified, the script automatically generates filenames using the query name and mode:
+
+**Single Query Mode:**
+- `{query_name}_{mode}.{extension}`
+- Example: `webapp_analysis_records.csv`
+
+**Batch Mode:**
+- `{query_name}_{mode}_batch_{index}_{from_time}_{to_time}.{extension}`
+- Example: `webapp_analysis_records_batch_000_20251003140000.000_20251003150000.000.csv`
+
 ### Output Directory
 By default, files are written to `./output/` directory:
 ```bash
 --output-file results.csv  # Creates ./output/results.csv
 ```
+
+If no output file is specified, defaults to `./output/` for non-STDOUT modes.
 
 ### Custom Output Directory
 ```bash
@@ -157,6 +193,7 @@ By default, files are written to `./output/` directory:
 - **Filename only**: Uses output directory
 - **Relative path**: Combines with output directory
 - **Absolute path**: Ignores output directory
+- **No filename specified**: Auto-generates name based on query name and mode
 
 ## Batch Processing
 
@@ -186,10 +223,21 @@ Process large time ranges by splitting them into smaller intervals and executing
   --batch-interval="6h" --mode records --output table
 ```
 
+#### Process Last 7 Days in Daily Intervals Using Environment Variables
+```bash
+python3 ./execute_search_job.py --region au \
+  --access-id=$SUMO_ACCESS_ID --access-key=$SUMO_ACCESS_KEY \
+  --yaml-config=example_search_config.yaml --batch-mode \
+  --batch-start="-7d" --batch-end="now" --batch-interval="1d" \
+  --mode records
+```
+
 ### Batch File Naming
-Files are automatically named with batch information:
-- `hourly_data_batch_000_1704067200000_1704070800000.csv`
-- `hourly_data_batch_001_1704070800000_1704074400000.csv`
+Files are automatically named with batch information using formatted timestamps:
+- `hourly_data_batch_000_20240101020000.000_20240101030000.000.csv`
+- `hourly_data_batch_001_20240101030000.000_20240101040000.000.csv`
+
+Timestamp format: `YYYYMMddHHmmss.SSS`
 
 ## Logging
 
@@ -214,11 +262,14 @@ Control log verbosity with `--log-level`:
 ### Log Output Example
 ```
 2025-09-22 14:16:48 - INFO - Single query: 2025-09-21 14:16:48 to 2025-09-22 14:16:48
-2025-09-22 14:16:48 - INFO - Creating search job with query: _sourceCategory=*
-2025-09-22 14:16:49 - INFO - Search job created with ID: ABC123
-2025-09-22 14:16:49 - INFO - Job ABC123 completed successfully
-2025-09-22 14:16:49 - INFO - Output written to: ./output/results.csv
+2025-09-22 14:16:48 - INFO - [webapp_analysis] No output file specified, using default: webapp_analysis_records.csv in ./output/
+2025-09-22 14:16:48 - INFO - [webapp_analysis] Creating search job with query: _sourceCategory=*
+2025-09-22 14:16:49 - INFO - [webapp_analysis] Search job created with ID: ABC123
+2025-09-22 14:16:49 - INFO - [webapp_analysis] Job ABC123 completed successfully
+2025-09-22 14:16:49 - INFO - Output written to: ./output/webapp_analysis_records.csv
 ```
+
+All log messages include the query name in brackets `[query_name]` for easy identification when running multiple queries.
 
 ## Advanced Examples
 
@@ -306,6 +357,10 @@ The script automatically optimizes the `requiresRawMessages` parameter:
    - Only works with `--mode records`
    - URL must start with `https://`
    - `--sumo-https-url` parameter is required
+
+5. **messages mode output format error**
+   - Messages mode only supports `--output json` or `--output jsonl`
+   - Table, CSV, and sumo-https outputs are not available for messages mode
 
 ### Debug Mode
 Use `--log-level DEBUG` to see detailed execution information:
