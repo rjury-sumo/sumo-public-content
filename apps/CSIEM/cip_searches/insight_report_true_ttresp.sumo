@@ -74,11 +74,12 @@ _index=sumologic_system_events _sourcecategory=cseinsight insightcreated)
   timetodetection, timetoresponse, timetoremediation, assignee, 
   riskscore, severity, severityname, entityvalue, confidence, tags
 
-| todouble(createdtime) as createdtime
+| tolong(createdtime) as createdtime
 | tolong(timestatuschanged) as timestatuschanged
 | tolong(timetodetection) as timetodetection
 | tolong(timetoresponse) as timetoresponse
 | tolong(timetoremediation) as timetoremediation
+| tolong(timeassigned) as timeassigned
 | toint(riskscore) as riskscore
 | toint(severity) as severity
 | if(isnull(confidence),-1,confidence) as confidence
