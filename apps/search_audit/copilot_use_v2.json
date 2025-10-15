@@ -1,0 +1,328 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Copilot or Mobot Usage",
+    "description": "Dashboard uses search audit data to show queries run by copilot or mobot.",
+    "title": "Copilot or Mobot Usage",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1w"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelD1F667969010194E",
+                "structure": "{\"height\":14,\"width\":24,\"ƒ\":0,\"y\":33}"
+            },
+            {
+                "key": "panelPANE-7BCCFD2BAF869B42",
+                "structure": "{\"height\":7,\"width\":9,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelA15D5BBF88E47B40",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":32}"
+            },
+            {
+                "key": "panel5AA9489D957F784F",
+                "structure": "{\"height\":12,\"width\":12,\"x\":0,\"y\":20}"
+            },
+            {
+                "key": "panel27EF02E38D55B941",
+                "structure": "{\"height\":12,\"width\":12,\"x\":12,\"y\":20}"
+            },
+            {
+                "key": "panel1D74476FBEEBBA46",
+                "structure": "{\"height\":7,\"width\":7,\"x\":9,\"y\":0}"
+            },
+            {
+                "key": "panel54518C05AB3D8A40",
+                "structure": "{\"height\":13,\"width\":16,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panelDD36D389BFDB4A4A",
+                "structure": "{\"height\":13,\"width\":8,\"x\":16,\"y\":7}"
+            },
+            {
+                "key": "panel5974A93EA7D61B49",
+                "structure": "{\"height\":7,\"width\":4,\"x\":16,\"y\":0}"
+            },
+            {
+                "key": "panel65E462718AB06A41",
+                "structure": "{\"height\":7,\"width\":4,\"x\":20,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelD1F667969010194E",
+            "title": "Query Details",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| time_range_m/60 as time_range_h\n| count as searches, sum(scan_gbytes) as scan_gb, sum(inf_scan_gbytes) as inf_scan_gb, sum(retrieved_message_count) as results, max(scanned_partition_count) as max_partitions, avg(time_range_h) as avg_range_h by user_name, query | sort query asc | limit 1000\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-7BCCFD2BAF869B42",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\",\"fontSize\":14}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard uses the Search Audit index to show searches run using the query assistant feature which can be called copilot or mobot.\n\nYou can filter by various filters. note:\n- using a query match pattern will speed up the search. This is a case sensitive match filter vs the query column\n- the regex query filter is very powerful but also slower\n- other filters are vs a column before the first | so must match the whole colum for example ```*value*``` but are case insensitive\n"
+        },
+        {
+            "id": null,
+            "key": "panelA15D5BBF88E47B40",
+            "title": "Detail Query Limit 1000",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel5AA9489D957F784F",
+            "title": "Total Stats",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n| count as searches, sum(data_scanned_bytes) as scan_bytes, avg(scanned_partition_count) as avg_partitions_scanned, sum(retrieved_message_count) as results by user_name \n| round((scan_bytes /1024/1024/1024) * 10 )/10 as scan_gb\n| fields -scan_bytes | sort searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel27EF02E38D55B941",
+            "title": "Scan By Metering Tier",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| parse regex field=scanned_bytes_breakdown_by_metering_type \"(?<tier>[^\\\",:]+)\\\" *: *(?<bytes>\\d+)\" multi\n| bytes /1G as gb\n| sum(gb) as gb by user_name , tier | transpose row user_name column tier",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel1D74476FBEEBBA46",
+            "title": "Effective Query Fiters Selected",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"series\":{},\"text\":{\"format\":\"markdown\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "```\n(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n```"
+        },
+        {
+            "id": null,
+            "key": "panel54518C05AB3D8A40",
+            "title": "Usage Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n| timeslice 24 buckets\n| count as searches, count_distinct(user_name) as users by _timeslice",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelDD36D389BFDB4A4A",
+            "title": "Top Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":20,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches by user_name | sort searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5974A93EA7D61B49",
+            "title": "Searches",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches // by user_name | sort searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel65E462718AB06A41",
+            "title": "Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Users\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches  by user_name | count as users",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "user_name",
+            "displayName": "user_name",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "jane.doe*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "query_regex",
+            "displayName": "query_regex",
+            "defaultValue": "^.",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".*,^.,a|b|c"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "query_pattern",
+            "displayName": "query_pattern",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*mycategory*,*_datatier*,*_index*,*ategory*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
