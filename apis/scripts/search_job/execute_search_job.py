@@ -561,7 +561,7 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
     # Create search job
     query_label = f"[{query_name}] " if query_name else ""
-    logger.info(f"{query_label}Creating search job with query: \n{query}")
+    logger.debug(f"{query_label}Creating search job with query: \n{query}")
     logger.debug(f"requiresRawMessages set to: {requires_raw_messages} (mode: {args.mode})")
     job_response = client.create_search_job(
         query=query,
@@ -577,7 +577,7 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
         logger.error(f"{query_label}No job ID returned from search job creation")
         sys.exit(1)
 
-    logger.info(f"{query_label}Search job created with ID: {job_id}")
+    logger.debug(f"{query_label}Search job created with ID: {job_id}")
 
     if args.mode == 'create-only':
         # Just return the job creation response
@@ -588,7 +588,7 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
 
     elif args.mode in ['messages', 'records']:
         # Poll until completion
-        logger.info(f"{query_label}Polling job {job_id} for completion...")
+        logger.debug(f"{query_label}Polling job {job_id} for completion...")
         final_status = client.poll_search_job(job_id, args.poll_interval, args.max_wait)
 
         if final_status.get('state') == 'DONE GATHERING RESULTS':
@@ -659,14 +659,9 @@ def print_progress_bar(current, total, start_time, bar_width=40):
     remaining_str = format_time_estimate(estimated_remaining)
 
     # Print progress bar to stderr (so it doesn't interfere with stdout output)
-    progress_msg = f"\r[{bar}] {percentage:.1f}% | Batch {current}/{total} | Elapsed: {elapsed_str} | ETA: {remaining_str} | Remaining: {total - current}"
+    progress_msg = f"[{bar}] {percentage:.1f}% | Batch {current}/{total} | Elapsed: {elapsed_str} | ETA: {remaining_str} | Remaining: {total - current}\n"
     sys.stderr.write(progress_msg)
     sys.stderr.flush()
-
-    # Print newline when complete
-    if current == total:
-        sys.stderr.write('\n')
-        sys.stderr.flush()
 
 
 def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, query_name=None):
@@ -695,11 +690,11 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, qu
         base_name = query_name if query_name else "batch_results"
         output_file = f"{base_name}_{args.mode}.{extension}"
         # Note: output_directory is already set (either by user or default './output/')
-        logger.info(f"{query_label}No output file specified, using default: {output_file} in {output_directory}")
+        logger.debug(f"{query_label}No output file specified, using default: {output_file} in {output_directory}")
 
     for batch_index, (from_time, to_time) in enumerate(intervals):
-        logger.info(f"{query_label}=== Batch {batch_index + 1}/{total_intervals} ===")
-        logger.info(f"{query_label}Time range: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
+        logger.debug(f"{query_label}=== Batch {batch_index + 1}/{total_intervals} ===")
+        logger.debug(f"{query_label}Time range: {datetime.fromtimestamp(from_time/1000)} to {datetime.fromtimestamp(to_time/1000)}")
 
         # Generate batch-specific filename
         batch_output_file = format_batch_filename(output_file, batch_index, from_time, to_time)
@@ -712,7 +707,7 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, qu
         try:
             # Execute the query for this time interval
             execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, batch_args, query_name)
-            logger.info(f"{query_label}Batch {batch_index + 1} completed successfully")
+            logger.debug(f"{query_label}Batch {batch_index + 1} completed successfully")
         except Exception as e:
             logger.error(f"Batch {batch_index + 1} failed: {e}")
             # Continue with next batch instead of stopping
@@ -1049,7 +1044,7 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
                 extension = extension_map.get(args.output, 'jsonl')  # Default to jsonl if not found
                 args.output_file = f"{query_name}_{args.mode}.{extension}"
                 # Note: args.output_directory is already set (either by user or default './output/')
-                logger.info(f"[{query_name}] No output file specified, using default: {args.output_file} in {args.output_directory}")
+                logger.debug(f"[{query_name}] No output file specified, using default: {args.output_file} in {args.output_directory}")
 
             # Execute single query
             execute_single_query(client, query, from_time, to_time, time_zone, by_receipt_time, args, query_name)
