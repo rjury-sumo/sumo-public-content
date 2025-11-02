@@ -369,7 +369,7 @@ to: "now"
 class TestExistingOutputFiles:
     """Test validation against existing output files"""
 
-    OUTPUT_DIR = '/Users/rjury/Documents/sumo2021/sumo-public-content/apis/scripts/search_job/output'
+    OUTPUT_DIR = './output'
 
     def test_jsonl_output_format(self):
         """Test JSONL output contains valid JSON per line"""
@@ -435,32 +435,28 @@ class TestExistingOutputFiles:
 class TestFilenamePatterns:
     """Test filename pattern generation"""
 
+    OUTPUT_DIR = './output'
+
     def test_query_name_in_filename(self):
         """Test query name is used in generated filenames"""
-        OUTPUT_DIR = '/Users/rjury/Documents/sumo2021/sumo-public-content/apis/scripts/search_job/output'
-
         # Check that filenames contain query names from config files
         expected_names = ['test_count_query', 'simple_test', 'data_volume_by_host']
 
         for name in expected_names:
-            matching_files = [f for f in os.listdir(OUTPUT_DIR) if f.startswith(name)]
+            matching_files = [f for f in os.listdir(self.OUTPUT_DIR) if f.startswith(name)]
             assert len(matching_files) > 0, f"No files found for query name: {name}"
 
     def test_mode_in_filename(self):
         """Test mode is included in generated filenames"""
-        OUTPUT_DIR = '/Users/rjury/Documents/sumo2021/sumo-public-content/apis/scripts/search_job/output'
-
         # Files should contain _records or _messages
-        files = os.listdir(OUTPUT_DIR)
+        files = os.listdir(self.OUTPUT_DIR)
         mode_files = [f for f in files if '_records' in f or '_messages' in f]
 
         assert len(mode_files) > 0, "No files with mode in filename found"
 
     def test_extension_matches_format(self):
         """Test file extensions match output format"""
-        OUTPUT_DIR = '/Users/rjury/Documents/sumo2021/sumo-public-content/apis/scripts/search_job/output'
-
-        files = os.listdir(OUTPUT_DIR)
+        files = os.listdir(self.OUTPUT_DIR)
 
         # JSON files
         json_files = [f for f in files if f.endswith('.json')]
@@ -475,6 +471,217 @@ class TestFilenamePatterns:
         # CSV files
         csv_files = [f for f in files if f.endswith('.csv')]
         assert len(csv_files) > 0, "Should have at least one CSV file"
+
+
+class TestIntegration:
+    """Integration tests requiring real Sumo Logic credentials"""
+
+    @pytest.mark.skipif(
+        not os.environ.get('SUMO_ACCESS_ID') or not os.environ.get('SUMO_ACCESS_KEY'),
+        reason="SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables required"
+    )
+    def test_single_search_job_24h(self):
+        """Test single search job run returning records for -24h range"""
+        import subprocess
+        import tempfile
+
+        # Create a temporary YAML config file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            f.write("""
+name: integration_test_single
+query: "_sourcecategory=* | limit 10000 | count by _sourcecategory,_collector"
+from: "-24h"
+to: "now"
+timeZone: "UTC"
+byReceiptTime: false
+""")
+            f.flush()
+            config_path = f.name
+
+        # Create temporary output directory
+        with tempfile.TemporaryDirectory() as output_dir:
+            try:
+                # Run the script
+                script_path = os.path.join(os.path.dirname(__file__), 'execute_search_job.py')
+                result = subprocess.run([
+                    'python3', script_path,
+                    '--region', 'au',
+                    '--access-id', os.environ['SUMO_ACCESS_ID'],
+                    '--access-key', os.environ['SUMO_ACCESS_KEY'],
+                    '--yaml-config', config_path,
+                    '--mode', 'records',
+                    '--output', 'jsonl',
+                    '--output-directory', output_dir,
+                    '--log-level', 'INFO'
+                ], capture_output=True, text=True, timeout=300)
+
+                # Check that the script completed successfully
+                assert result.returncode == 0, f"Script failed with stderr: {result.stderr}\nstdout: {result.stdout}"
+
+                # Check that output file was created
+                output_files = os.listdir(output_dir)
+                assert len(output_files) > 0, f"No output files created. stderr: {result.stderr}\nstdout: {result.stdout}"
+
+                # Verify the output file contains valid JSONL
+                output_file = os.path.join(output_dir, output_files[0])
+                with open(output_file, 'r') as f:
+                    lines = f.readlines()
+                    # Should have at least some records (or could be empty if no data)
+                    for line in lines:
+                        if line.strip():
+                            data = json.loads(line)
+                            assert isinstance(data, dict)
+                            # Should have 'map' field with record data
+                            assert 'map' in data
+
+            finally:
+                os.unlink(config_path)
+
+    @pytest.mark.skipif(
+        not os.environ.get('SUMO_ACCESS_ID') or not os.environ.get('SUMO_ACCESS_KEY'),
+        reason="SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables required"
+    )
+    def test_batch_mode_3d_1d_interval(self):
+        """Test batch mode with -3d range and 1d interval (3 batches) - quick test"""
+        import subprocess
+        import tempfile
+
+        # Create a temporary YAML config file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            f.write("""
+name: integration_test_batch_quick
+query: "_sourcecategory=* | limit 10000 | count by _sourcecategory,_collector"
+from: "-3d"
+to: "now"
+timeZone: "UTC"
+byReceiptTime: false
+""")
+            f.flush()
+            config_path = f.name
+
+        # Create temporary output directory
+        with tempfile.TemporaryDirectory() as output_dir:
+            try:
+                # Run the script in batch mode
+                script_path = os.path.join(os.path.dirname(__file__), 'execute_search_job.py')
+                result = subprocess.run([
+                    'python3', script_path,
+                    '--region', 'au',
+                    '--access-id', os.environ['SUMO_ACCESS_ID'],
+                    '--access-key', os.environ['SUMO_ACCESS_KEY'],
+                    '--yaml-config', config_path,
+                    '--batch-mode',
+                    '--batch-start=-3d',
+                    '--batch-end=now',
+                    '--batch-interval=1d',
+                    '--mode', 'records',
+                    '--output', 'jsonl',
+                    '--output-directory', output_dir,
+                    '--log-level', 'INFO'
+                ], capture_output=True, text=True, timeout=600)  # 10 min timeout for 3 batches
+
+                # Check that the script completed successfully
+                assert result.returncode == 0, f"Script failed with stderr: {result.stderr}\nstdout: {result.stdout}"
+
+                # Check that progress bar output appears in stderr
+                assert 'Batch' in result.stderr or '[' in result.stderr, "Expected batch progress output in stderr"
+
+                # Check that output files were created (should be 3 batch files)
+                output_files = [f for f in os.listdir(output_dir) if f.endswith('.jsonl')]
+                assert len(output_files) == 3, f"Expected 3 batch output files, got {len(output_files)}"
+
+                # Verify batch files are numbered sequentially
+                batch_files = sorted([f for f in output_files if '_batch_' in f])
+                for i in range(3):
+                    # Check that batch file with index exists
+                    matching = [f for f in batch_files if f'_batch_{i:03d}_' in f]
+                    assert len(matching) == 1, f"Expected 1 file for batch {i:03d}, got {len(matching)}"
+
+                # Verify at least one output file contains valid JSONL
+                if len(output_files) > 0:
+                    output_file = os.path.join(output_dir, output_files[0])
+                    with open(output_file, 'r') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            if line.strip():
+                                data = json.loads(line)
+                                assert isinstance(data, dict)
+
+            finally:
+                os.unlink(config_path)
+
+    @pytest.mark.skipif(
+        not os.environ.get('SUMO_ACCESS_ID') or not os.environ.get('SUMO_ACCESS_KEY'),
+        reason="SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables required"
+    )
+    def test_batch_mode_10d_1d_interval(self):
+        """Test batch mode with -10d range and 1d interval (10 batches)"""
+        import subprocess
+        import tempfile
+
+        # Create a temporary YAML config file
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+            f.write("""
+name: integration_test_batch
+query: "_sourcecategory=* | limit 10000 | count by _sourcecategory,_collector"
+from: "-1h"
+to: "now"
+timeZone: "UTC"
+byReceiptTime: false
+""")
+            f.flush()
+            config_path = f.name
+
+        # Create temporary output directory
+        with tempfile.TemporaryDirectory() as output_dir:
+            try:
+                # Run the script in batch mode
+                script_path = os.path.join(os.path.dirname(__file__), 'execute_search_job.py')
+                result = subprocess.run([
+                    'python3', script_path,
+                    '--region', 'au',
+                    '--access-id', os.environ['SUMO_ACCESS_ID'],
+                    '--access-key', os.environ['SUMO_ACCESS_KEY'],
+                    '--yaml-config', config_path,
+                    '--batch-mode',
+                    '--batch-start=-10d',
+                    '--batch-end=now',
+                    '--batch-interval=1d',
+                    '--mode', 'records',
+                    '--output', 'jsonl',
+                    '--output-directory', output_dir,
+                    '--log-level', 'INFO'
+                ], capture_output=True, text=True, timeout=1800)  # 30 min timeout for 30 batches
+
+                # Check that the script completed successfully
+                assert result.returncode == 0, f"Script failed with stderr: {result.stderr}\nstdout: {result.stdout}"
+
+                # Check that progress bar output appears in stderr
+                assert 'Batch' in result.stderr or '[' in result.stderr, "Expected batch progress output in stderr"
+
+                # Check that output files were created (should be 30 batch files)
+                output_files = [f for f in os.listdir(output_dir) if f.endswith('.jsonl')]
+                assert len(output_files) == 10, f"Expected 30 batch output files, got {len(output_files)}"
+
+                # Verify batch files are numbered sequentially
+                batch_files = sorted([f for f in output_files if '_batch_' in f])
+                for i in range(10):
+                    # Check that batch file with index exists
+                    matching = [f for f in batch_files if f'_batch_{i:03d}_' in f]
+                    assert len(matching) == 1, f"Expected 1 file for batch {i:03d}, got {len(matching)}"
+
+                # Verify at least one output file contains valid JSONL
+                if len(output_files) > 0:
+                    output_file = os.path.join(output_dir, output_files[0])
+                    with open(output_file, 'r') as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            if line.strip():
+                                data = json.loads(line)
+                                assert isinstance(data, dict)
+
+            finally:
+                os.unlink(config_path)
 
 
 if __name__ == '__main__':

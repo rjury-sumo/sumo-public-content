@@ -607,11 +607,76 @@ def execute_single_query(client, query, from_time, to_time, time_zone, by_receip
             sys.exit(1)
 
 
+def format_time_estimate(seconds):
+    """
+    Format time estimate in human-readable format
+
+    Args:
+        seconds (float): Time in seconds
+
+    Returns:
+        str: Formatted time string
+    """
+    if seconds < 60:
+        return f"{seconds:.0f}s"
+    elif seconds < 3600:
+        minutes = seconds / 60
+        return f"{minutes:.1f}m"
+    else:
+        hours = seconds / 3600
+        return f"{hours:.1f}h"
+
+
+def print_progress_bar(current, total, start_time, bar_width=40):
+    """
+    Print a progress bar with time estimation
+
+    Args:
+        current (int): Current batch number (1-based)
+        total (int): Total number of batches
+        start_time (float): Start time from time.time()
+        bar_width (int): Width of the progress bar in characters
+    """
+    # Calculate progress percentage
+    progress = current / total
+    filled_width = int(bar_width * progress)
+
+    # Create progress bar
+    bar = '█' * filled_width + '░' * (bar_width - filled_width)
+    percentage = progress * 100
+
+    # Calculate time estimates
+    elapsed_time = time.time() - start_time
+    if current > 0:
+        avg_time_per_batch = elapsed_time / current
+        remaining_batches = total - current
+        estimated_remaining = avg_time_per_batch * remaining_batches
+    else:
+        estimated_remaining = 0
+
+    # Format output
+    elapsed_str = format_time_estimate(elapsed_time)
+    remaining_str = format_time_estimate(estimated_remaining)
+
+    # Print progress bar to stderr (so it doesn't interfere with stdout output)
+    progress_msg = f"\r[{bar}] {percentage:.1f}% | Batch {current}/{total} | Elapsed: {elapsed_str} | ETA: {remaining_str} | Remaining: {total - current}"
+    sys.stderr.write(progress_msg)
+    sys.stderr.flush()
+
+    # Print newline when complete
+    if current == total:
+        sys.stderr.write('\n')
+        sys.stderr.flush()
+
+
 def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, query_name=None):
     """Execute batch search queries"""
     total_intervals = len(intervals)
     query_label = f"[{query_name}] " if query_name else ""
     logger.info(f"{query_label}Starting batch execution of {total_intervals} intervals")
+
+    # Track start time for progress estimation
+    batch_start_time = time.time()
 
     # Set default output file if not specified and not using sumo-https
     output_file = args.output_file
@@ -629,8 +694,7 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, qu
         # Use query name and mode in filename if available
         base_name = query_name if query_name else "batch_results"
         output_file = f"{base_name}_{args.mode}.{extension}"
-        # Ensure output directory is set to ./output/ for batch mode
-        output_directory = './output/'
+        # Note: output_directory is already set (either by user or default './output/')
         logger.info(f"{query_label}No output file specified, using default: {output_file} in {output_directory}")
 
     for batch_index, (from_time, to_time) in enumerate(intervals):
@@ -652,6 +716,9 @@ def execute_batch(client, query, intervals, time_zone, by_receipt_time, args, qu
         except Exception as e:
             logger.error(f"Batch {batch_index + 1} failed: {e}")
             # Continue with next batch instead of stopping
+
+        # Update progress bar after each batch
+        print_progress_bar(batch_index + 1, total_intervals, batch_start_time)
 
     logger.info(f"Batch processing completed. {total_intervals} intervals processed.")
 
@@ -981,7 +1048,7 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
                 }
                 extension = extension_map.get(args.output, 'jsonl')  # Default to jsonl if not found
                 args.output_file = f"{query_name}_{args.mode}.{extension}"
-                args.output_directory = './output/'
+                # Note: args.output_directory is already set (either by user or default './output/')
                 logger.info(f"[{query_name}] No output file specified, using default: {args.output_file} in {args.output_directory}")
 
             # Execute single query
