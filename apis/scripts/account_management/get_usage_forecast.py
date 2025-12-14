@@ -6,7 +6,7 @@ This script fetches usage forecast information from the Sumo Logic API.
 Retrieves projected data usage for the specified number of days.
 
 API Reference: https://api.us2.sumologic.com/docs/#operation/getUsageForecast
-Endpoint: GET /api/v1/account/usage/forecast
+Endpoint: GET /api/v1/account/usageForecast
 
 Query Parameters:
 - numberOfDays (required): Number of days for which to get the usage forecast (1-365)
@@ -112,7 +112,7 @@ class SumoLogicClient:
             raise ValueError("Number of days must be between 1 and 365")
 
         params = {'numberOfDays': number_of_days}
-        return self._make_request('/api/v1/account/usage/forecast', params=params)
+        return self._make_request('/api/v1/account/usageForecast', params=params)
 
 
 def format_table_output(data, number_of_days):
@@ -122,39 +122,68 @@ def format_table_output(data, number_of_days):
     lines.append(f"USAGE FORECAST - {number_of_days} DAY(S)")
     lines.append("=" * 60)
 
-    if 'data' in data:
-        forecast_data = data['data']
+    # Define order for common fields
+    field_order = [
+        'averageUsage', 'usagePercentage', 'forecastedUsage',
+        'forecastedUsagePercentage', 'remainingDays'
+    ]
 
-        # Display daily forecast data
-        if isinstance(forecast_data, list):
-            lines.append("\nDaily Forecast:")
-            lines.append("-" * 60)
-            for idx, day_data in enumerate(forecast_data, 1):
-                lines.append(f"\nDay {idx}:")
-                for key, value in day_data.items():
-                    # Format key from camelCase to Title Case
-                    formatted_key = ''.join([' ' + c if c.isupper() else c for c in key]).strip()
-                    formatted_key = formatted_key.title()
+    # Display fields in order
+    for field in field_order:
+        if field in data:
+            value = data[field]
+            # Format key from camelCase to Title Case
+            formatted_key = ''.join([' ' + c if c.isupper() else c for c in field]).strip()
+            formatted_key = formatted_key.title()
 
-                    # Format large numbers with commas
-                    if isinstance(value, (int, float)) and value > 1000:
-                        formatted_value = f"{value:,.2f}"
-                    else:
-                        formatted_value = value
-                    lines.append(f"  {formatted_key}: {formatted_value}")
-        else:
-            # Display summary data
-            for key, value in forecast_data.items():
-                formatted_key = ''.join([' ' + c if c.isupper() else c for c in key]).strip()
-                formatted_key = formatted_key.title()
+            # Format percentages
+            if 'percentage' in field.lower() or 'Percentage' in field:
+                formatted_value = f"{value * 100:.2f}%"
+            # Format large numbers with commas
+            elif isinstance(value, (int, float)) and abs(value) >= 1:
+                formatted_value = f"{value:,.4f}"
+            else:
+                formatted_value = f"{value:.6f}"
 
-                if isinstance(value, (int, float)) and value > 1000:
-                    formatted_value = f"{value:,.2f}"
-                else:
-                    formatted_value = value
-                lines.append(f"{formatted_key}: {formatted_value}")
+            lines.append(f"{formatted_key}: {formatted_value}")
+
+    # Display any remaining fields not in the predefined order
+    for key, value in data.items():
+        if key not in field_order:
+            formatted_key = ''.join([' ' + c if c.isupper() else c for c in key]).strip()
+            formatted_key = formatted_key.title()
+
+            if isinstance(value, (int, float)):
+                formatted_value = f"{value:,.4f}" if abs(value) >= 1 else f"{value:.6f}"
+            else:
+                formatted_value = value
+            lines.append(f"{formatted_key}: {formatted_value}")
 
     lines.append("=" * 60)
+    return '\n'.join(lines)
+
+
+def format_csv_output(data):
+    """Format usage forecast data as CSV"""
+    lines = []
+
+    # Get all keys
+    keys = list(data.keys())
+
+    # Write header
+    lines.append(','.join(keys))
+
+    # Write data row
+    row = []
+    for key in keys:
+        value = data.get(key, '')
+        # Quote values that might contain commas
+        if isinstance(value, str) and ',' in value:
+            row.append(f'"{value}"')
+        else:
+            row.append(str(value))
+    lines.append(','.join(row))
+
     return '\n'.join(lines)
 
 
@@ -205,7 +234,7 @@ API Reference: https://api.us2.sumologic.com/docs/#operation/getUsageForecast
     )
     parser.add_argument(
         '--output',
-        choices=['json', 'table'],
+        choices=['json', 'table', 'csv'],
         default='json',
         help='Output format (default: json)'
     )
@@ -235,6 +264,8 @@ API Reference: https://api.us2.sumologic.com/docs/#operation/getUsageForecast
             print(json.dumps(forecast, indent=2))
         elif args.output == 'table':
             print(format_table_output(forecast, args.days))
+        elif args.output == 'csv':
+            print(format_csv_output(forecast))
 
     except KeyboardInterrupt:
         print("\nOperation cancelled by user", file=sys.stderr)

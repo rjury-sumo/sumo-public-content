@@ -6,7 +6,7 @@ This script fetches child organization usage data from the Sumo Logic API.
 This endpoint is only available for parent organizations in a hierarchical contract model.
 
 API Reference: https://api.us2.sumologic.com/docs/#operation/getChildUsages
-Endpoint: GET /api/v1/account/usage/childUsages
+Endpoint: POST /api/v1/organizations/usages
 
 Returns usage data for all child organizations including:
 - Organization ID and name
@@ -73,7 +73,7 @@ class SumoLogicClient:
         encoded_credentials = base64.b64encode(credentials.encode()).decode()
         return f"Basic {encoded_credentials}"
 
-    def _make_request(self, path, method='GET', params=None):
+    def _make_request(self, path, method='GET', params=None, data=None):
         """Make HTTP request to Sumo Logic API"""
         url = urljoin(self.endpoint, path)
 
@@ -81,7 +81,12 @@ class SumoLogicClient:
             from urllib.parse import urlencode
             url += '?' + urlencode(params)
 
-        request = Request(url, method=method)
+        # Prepare request body for POST
+        request_data = None
+        if data is not None:
+            request_data = json.dumps(data).encode('utf-8')
+
+        request = Request(url, data=request_data, method=method)
         request.add_header('Authorization', self.auth_header)
         request.add_header('Content-Type', 'application/json')
         request.add_header('Accept', 'application/json')
@@ -116,7 +121,8 @@ class SumoLogicClient:
         Raises:
             HTTPError: 403 if account does not have child organizations
         """
-        return self._make_request('/api/v1/account/usage/childUsages')
+        # POST request with empty body
+        return self._make_request('/api/v1/organizations/usages', method='POST', data={})
 
 
 def format_table_output(data):

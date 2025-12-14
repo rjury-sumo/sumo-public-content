@@ -152,6 +152,30 @@ def format_table_output(data):
     return '\n'.join(lines)
 
 
+def format_csv_output(data):
+    """Format account status data as CSV"""
+    lines = []
+
+    # Get all keys
+    keys = list(data.keys())
+
+    # Write header
+    lines.append(','.join(keys))
+
+    # Write data row
+    row = []
+    for key in keys:
+        value = data.get(key, '')
+        # Quote values that might contain commas
+        if isinstance(value, str) and ',' in value:
+            row.append(f'"{value}"')
+        else:
+            row.append(str(value))
+    lines.append(','.join(row))
+
+    return '\n'.join(lines)
+
+
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(
@@ -193,7 +217,7 @@ API Reference: https://api.us2.sumologic.com/docs/#operation/getStatus
     )
     parser.add_argument(
         '--output',
-        choices=['json', 'table'],
+        choices=['json', 'table', 'csv'],
         default='json',
         help='Output format (default: json)'
     )
@@ -219,6 +243,8 @@ API Reference: https://api.us2.sumologic.com/docs/#operation/getStatus
             print(json.dumps(status, indent=2))
         elif args.output == 'table':
             print(format_table_output(status))
+        elif args.output == 'csv':
+            print(format_csv_output(status))
 
     except KeyboardInterrupt:
         print("\nOperation cancelled by user", file=sys.stderr)
