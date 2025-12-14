@@ -7,6 +7,7 @@ Python scripts for interacting with Sumo Logic Account Management APIs to retrie
 - **Account Status**: Get current account subscription, plan type, and usage information
 - **Usage Forecast**: Retrieve projected usage for a specified number of days
 - **Child Organization Usage**: Get usage data for all child organizations (parent orgs only)
+- **Export Usage Report**: Export detailed usage reports for a date range (async job with CSV download)
 
 ## Installation
 
@@ -61,6 +62,25 @@ uv run python get_child_usages.py --region us1 --output table
 uv run python get_child_usages.py --region us2 --output csv > child_usage.csv
 ```
 
+### Export Usage Report
+
+```bash
+# Export usage report for January 2024
+uv run python export_usage_report.py --region au --start-date 2024-01-01 --end-date 2024-01-31
+
+# Export with custom output file
+uv run python export_usage_report.py --region us2 --start-date 2024-01-01 --end-date 2024-01-31 --output jan_2024_usage.csv
+
+# Export with custom polling settings
+uv run python export_usage_report.py --region au --start-date 2024-01-01 --end-date 2024-01-31 --poll-interval 10 --timeout 600
+```
+
+**Note**: This script performs an async export operation:
+1. Starts an export job with POST request
+2. Polls job status every 5 seconds (configurable)
+3. Downloads CSV report from S3 presigned URL (valid for 10 minutes)
+4. Saves to local file (default: `usage_report.csv`)
+
 ## Available Regions
 
 - `us1` - https://api.sumologic.com
@@ -74,15 +94,16 @@ uv run python get_child_usages.py --region us2 --output csv > child_usage.csv
 
 ## Output Formats
 
-- **JSON**: Machine-readable format with complete data
-- **Table**: Human-readable formatted output
-- **CSV**: Comma-separated values (child usages only)
+- **JSON**: Machine-readable format with complete data (account status, usage forecast, child usages)
+- **Table**: Human-readable formatted output (account status, usage forecast, child usages)
+- **CSV**: Comma-separated values (all scripts support CSV output; export usage report only produces CSV)
 
 ## API References
 
 - [Account Status](https://api.us2.sumologic.com/docs/#operation/getStatus)
 - [Usage Forecast](https://api.us2.sumologic.com/docs/#operation/getUsageForecast)
 - [Child Usages](https://api.us2.sumologic.com/docs/#operation/getChildUsages)
+- [Export Usage Report](https://api.us2.sumologic.com/docs/#operation/exportUsageReport)
 
 ## Requirements
 
