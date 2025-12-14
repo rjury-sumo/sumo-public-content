@@ -8,6 +8,7 @@ Python scripts for interacting with Sumo Logic Account Management APIs to retrie
 - **Usage Forecast**: Retrieve projected usage for a specified number of days
 - **Child Organization Usage**: Get usage data for all child organizations (parent orgs only)
 - **Export Usage Report**: Export detailed usage reports for a date range (async job with CSV download)
+- **Generate Usage Report**: Comprehensive executive report combining account status, forecasts, and usage trends with charts
 
 ## Installation
 
@@ -81,6 +82,44 @@ uv run python export_usage_report.py --region au --start-date 2024-01-01 --end-d
 3. Downloads CSV report from S3 presigned URL (valid for 10 minutes)
 4. Saves to local file (default: `usage_report.csv`)
 
+### Generate Comprehensive Usage Report
+
+Generate an executive-level HTML report with charts, forecasts, and monthly breakdowns.
+
+![alt text](images/usage_report_1.png)
+
+the report includes predictions, charts of usage and a monthly usage table, with a link to download the usage report csv.
+
+![alt text](images/usage_report_2.png)
+![alt text](images/usage_report_3.png)
+
+
+```bash
+# Generate report using environment variables
+sumo-generate-report --region au
+
+# Generate report with custom output file
+sumo-generate-report --region us2 --output custom_report.html
+
+# Using uv run
+uv run python generate_usage_report.py --region au
+```
+
+**Features**:
+- Fetches account status (plan type, total credits, expiration)
+- Gets usage forecasts (7-day, 30-day, term-to-date)
+- Exports detailed daily usage data
+- Generates visualizations:
+  - Daily total credits with 7-day rolling average trend
+  - Stacked area chart showing credit breakdown by type
+- Monthly tabular breakdown with total credits and daily averages
+- Color-coded status indicators
+- Saves HTML report and CSV data to `reports/` directory
+
+**Output**:
+- `reports/usage_report_YYYYMMDD_HHMMSS.html` - Executive HTML report
+- `reports/usage_report_YYYYMMDD_HHMMSS.csv` - Detailed usage data
+
 ## Available Regions
 
 - `us1` - https://api.sumologic.com
@@ -108,4 +147,17 @@ uv run python export_usage_report.py --region au --start-date 2024-01-01 --end-d
 ## Requirements
 
 - Python >= 3.9
-- No external dependencies (uses stdlib only)
+- Dependencies:
+  - matplotlib >= 3.9.4 (for report generation)
+  - pandas >= 2.3.3 (for report generation)
+  - All other scripts use stdlib only
+
+## CLI Commands
+
+After installation with `uv sync`, the following commands are available:
+
+- `sumo-account-status` - Get account status
+- `sumo-usage-forecast` - Get usage forecasts
+- `sumo-child-usages` - Get child organization usage
+- `sumo-export-usage` - Export detailed usage report
+- `sumo-generate-report` - Generate comprehensive HTML report
