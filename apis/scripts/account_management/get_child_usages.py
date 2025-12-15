@@ -145,26 +145,56 @@ def format_table_output(data):
                 lines.append(f"Child Organization #{idx}")
                 lines.append("-" * 80)
 
-                # Display organization info
-                if 'organizationId' in child:
-                    lines.append(f"Organization ID: {child['organizationId']}")
-                if 'organizationName' in child:
-                    lines.append(f"Organization Name: {child['organizationName']}")
+                # Display organization info - check for both field name formats
+                org_id = child.get('organizationId') or child.get('orgId')
+                org_name = child.get('organizationName') or child.get('orgName')
 
-                # Display usage metrics
-                lines.append("\nUsage Metrics:")
-                for key, value in child.items():
-                    if key not in ['organizationId', 'organizationName']:
+                if org_id:
+                    lines.append(f"Organization ID: {org_id}")
+                if org_name:
+                    lines.append(f"Organization Name: {org_name}")
+                if 'status' in child:
+                    lines.append(f"Status: {child['status']}")
+                if 'allocatedCredits' in child:
+                    allocated = child['allocatedCredits']
+                    if isinstance(allocated, (int, float)) and allocated > 1000:
+                        formatted_allocated = f"{allocated:,.2f}"
+                    else:
+                        formatted_allocated = allocated
+                    lines.append(f"Allocated Credits: {formatted_allocated}")
+
+                # Handle nested usages object
+                if 'usages' in child and isinstance(child['usages'], dict):
+                    lines.append("\nUsage Metrics:")
+                    for key, value in child['usages'].items():
                         # Format key from camelCase to Title Case
                         formatted_key = ''.join([' ' + c if c.isupper() else c for c in key]).strip()
                         formatted_key = formatted_key.title()
 
-                        # Format large numbers with commas
-                        if isinstance(value, (int, float)) and value > 1000:
+                        # Format large numbers with commas, handle None values
+                        if value is None:
+                            formatted_value = "N/A"
+                        elif isinstance(value, (int, float)) and value > 1000:
                             formatted_value = f"{value:,.2f}"
                         else:
                             formatted_value = value
                         lines.append(f"  {formatted_key}: {formatted_value}")
+                else:
+                    # Fallback to flat structure for other metrics
+                    lines.append("\nUsage Metrics:")
+                    excluded_keys = ['organizationId', 'organizationName', 'orgId', 'orgName', 'status', 'allocatedCredits', 'usages']
+                    for key, value in child.items():
+                        if key not in excluded_keys:
+                            # Format key from camelCase to Title Case
+                            formatted_key = ''.join([' ' + c if c.isupper() else c for c in key]).strip()
+                            formatted_key = formatted_key.title()
+
+                            # Format large numbers with commas
+                            if isinstance(value, (int, float)) and value > 1000:
+                                formatted_value = f"{value:,.2f}"
+                            else:
+                                formatted_value = value
+                            lines.append(f"  {formatted_key}: {formatted_value}")
 
                 lines.append("")
     else:
@@ -175,33 +205,54 @@ def format_table_output(data):
 
 
 def format_csv_output(data):
-    """Format child usages data as CSV"""
+    """Format child usages data as CSV, flattening nested usages object"""
     lines = []
 
     if 'data' in data and isinstance(data['data'], list):
         child_orgs = data['data']
 
         if child_orgs:
-            # Get all unique keys from all child orgs
+            # Flatten the data structure to handle nested usages
+            flattened_data = []
             all_keys = set()
-            for child in child_orgs:
-                all_keys.update(child.keys())
 
-            # Sort keys with org info first
-            priority_keys = ['organizationId', 'organizationName']
-            other_keys = sorted([k for k in all_keys if k not in priority_keys])
-            headers = priority_keys + other_keys
+            for child in child_orgs:
+                flattened_row = {}
+
+                # Add top-level fields
+                for key, value in child.items():
+                    if key != 'usages':
+                        flattened_row[key] = value
+                        all_keys.add(key)
+
+                # Add nested usages fields with prefix
+                if 'usages' in child and isinstance(child['usages'], dict):
+                    for usage_key, usage_value in child['usages'].items():
+                        flattened_key = f"usage_{usage_key}"
+                        flattened_row[flattened_key] = usage_value
+                        all_keys.add(flattened_key)
+
+                flattened_data.append(flattened_row)
+
+            # Sort keys with org info first, usages last
+            org_keys = [k for k in ['organizationId', 'organizationName', 'orgId', 'orgName', 'status', 'allocatedCredits'] if k in all_keys]
+            usage_keys = sorted([k for k in all_keys if k.startswith('usage_')])
+            other_keys = sorted([k for k in all_keys if k not in org_keys and not k.startswith('usage_')])
+            headers = org_keys + other_keys + usage_keys
 
             # Write header
             lines.append(','.join(headers))
 
             # Write data rows
-            for child in child_orgs:
+            for row_data in flattened_data:
                 row = []
                 for key in headers:
-                    value = child.get(key, '')
+                    value = row_data.get(key, '')
+                    # Handle None values
+                    if value is None:
+                        row.append('N/A')
                     # Quote values that might contain commas
-                    if isinstance(value, str) and ',' in value:
+                    elif isinstance(value, str) and ',' in value:
                         row.append(f'"{value}"')
                     else:
                         row.append(str(value))
