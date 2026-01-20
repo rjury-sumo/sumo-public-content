@@ -1,0 +1,585 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Collection Overview - SIEM Flex",
+    "description": "Key collection stats",
+    "title": "Collection Overview - SIEM Flex",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panel7C40A16F9297DA49",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":8}"
+            },
+            {
+                "key": "panel8559BCA7B8D8EA48",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":18}"
+            },
+            {
+                "key": "panel8E7A5A1E94D1F844",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":27}"
+            },
+            {
+                "key": "panel0B33F0C29A9F3849",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":68}"
+            },
+            {
+                "key": "panel3540BA9AB3A1094E",
+                "structure": "{\"height\":10,\"width\":17,\"x\":0,\"y\":78}"
+            },
+            {
+                "key": "panel92597A67AA23EB4A",
+                "structure": "{\"height\":10,\"width\":7,\"x\":17,\"y\":78}"
+            },
+            {
+                "key": "panel6B35884A9D7D5B44",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":9}"
+            },
+            {
+                "key": "panelEDCA9070BCD3F943",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":9}"
+            },
+            {
+                "key": "panelC169BA0AB53BC845",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":88}"
+            },
+            {
+                "key": "panelC5B9F48483582B4E",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":95}"
+            },
+            {
+                "key": "panel5AC722758DD3BB48",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":37}"
+            },
+            {
+                "key": "panel2BCEF1B98E6A6942",
+                "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":38}"
+            },
+            {
+                "key": "panel580B163895248A4C",
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":38}"
+            },
+            {
+                "key": "panelE86F4B27BC60C944",
+                "structure": "{\"height\":10,\"width\":12,\"x\":0,\"y\":48}"
+            },
+            {
+                "key": "panel0009D813B5E5C842",
+                "structure": "{\"height\":10,\"width\":12,\"x\":12,\"y\":48}"
+            },
+            {
+                "key": "panelF3A687038039D943",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":58}"
+            },
+            {
+                "key": "panel96531E84A84C5A4A",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":69}"
+            },
+            {
+                "key": "panel529B7139898B2840",
+                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panel7C40A16F9297DA49",
+            "title": "Data Volume Log Ingestion - Sourcecategory",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel8559BCA7B8D8EA48",
+            "title": "Data Volume Ingestion Stats by {{data_volume_view}} and Tier",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n//| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"*\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by value,dataTier\n//| total gbytes as tgb \n//| total gbytes as tgbs by value,datatier\n//| tgbs / tgb as fraction\n//\n//// *** THIS LINE rolls up small sources into 'other' ***\n//| if(( fraction * 100 )> .01,value,\"other\" ) as value\n//| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n//| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n//| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n//| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories,  sum(events) as events,sum(gbytes) as gbytes by datatier,value\n| sort gbytes\n| round(categories) as categories | round(gbytes) as gbytes // | round(pct_GB,2) as pct_GB",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel8E7A5A1E94D1F844",
+            "title": "Ingested GB By {{data_volume_view}} Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"horizontalAlign\":\"right\",\"maxWidth\":678,\"maxHeight\":50,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"sum\",\"avg\",\"latest\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"*\")\n| where datatier matches \"*\"\n| timeslice {{timeslice}}\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"*\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,_timeslice,datatier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> .1,value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n\n\n| sum(gbytes) as gbytes by _timeslice,value \n| transpose row _timeslice column value\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w"
+                },
+                "to": null
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0B33F0C29A9F3849",
+            "title": "Collection Health Events",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel3540BA9AB3A1094E",
+            "title": "Collection Health Events",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\" unhealthy\n| json field=_raw \"status\"  | where status = \"UnHealthy\"\n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"severityLevel\" as severity\n| sort _messagetime | count as events, first(_messagetime) as latest by trackerid,name,error,severity\n| sort latest | formatdate(latest,\"yyyy/MM/dd HH:mm:ss ZZZ\") as latest\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel92597A67AA23EB4A",
+            "title": "Unhealthy Collection Events Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events \"Health-Change\" unhealthy\n\n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId\n \n| json field=_raw \"status\" \n| json field=_raw \"details.error\" as error\n//| json field=_raw \"details.trackerId\" as trackerid\n//| json field=_raw \"resourceIdentity.name\" as name\n//| concat(name,\" \",trackerid ) as key \n| 1 as failed\n| timeslice {{timeslice}} \n| count by _timeslice,error | transpose row _timeslice column error",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel6B35884A9D7D5B44",
+            "title": "Ingest spikes or new vs 3 week avg by {{data_volume_view}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by  value,_sourcecategory // datatier\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n//| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by value //,dataTier\n\n|  sum(gbytes) as gbytes by value //datatier\n// compare with previous 3 time periods at same time\n| compare timeshift 7d 3 avg\n\n// this handles nulls for new or removed categories\n| if(isNull(gbytes), \"GONE\", \"\") as state \n| if(isNull(gbytes), 0, gbytes) as gbytes \n\n| if(isNull(gbytes_21d_avg), 0, gbytes_21d_avg) as gbytes_21d_avg \n\n// what is the change delta as a percentage vs baseline\n| if(gbytes = 0,0,100 * (gbytes/gbytes_21d_avg)) as pct_change\n\n// this line is for your thresholds to get notified\n// consider tuning the  min size clause for your environment.\n| if (pct_change > 150,\"Ingest Spike\",state) as state\n| if(gbytes_21d_avg = 0, \"NEW\", state) as state \n| where ( state = \"NEW\" or state = \"Ingest Spike\") and ( gbytes > 1)\n\n| sort pct_change",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelEDCA9070BCD3F943",
+            "title": "Ingest drop or gone vs 3 week avg by {{data_volume_view}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by  value,_sourcecategory // datatier\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n//| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by value //,dataTier\n\n|  sum(gbytes) as gbytes by value //datatier\n// compare with previous 3 time periods at same time\n| compare timeshift 7d 3 avg\n\n// this handles nulls for new or removed categories\n| if(isNull(gbytes), \"GONE\", \"\") as state \n| if(isNull(gbytes), 0, gbytes) as gbytes \n\n| if(isNull(gbytes_21d_avg), 0, gbytes_21d_avg) as gbytes_21d_avg \n\n// what is the change delta as a percentage vs baseline\n| if(gbytes = 0,0,100 * (gbytes/gbytes_21d_avg)) as pct_change\n\n// this line is for your thresholds to get notified\n// consider tuning the  min size clause for your environment.\n| if (pct_change < 50,\"Ingest Drop\",state) as state\n| if(gbytes = 0, \"NO DATA\", state) as state \n| where ( state = \"NO DATA\" or state = \"Ingest Drop\") and ( gbytes > 1)\n\n| sort pct_change asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC169BA0AB53BC845",
+            "title": "Collection Changes (Audit Log)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName, EventTime, UserEmail, UserId, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\")\n| json field=CurrentValue \"ephemeral\", \"sourceSyncMode\", \"collectorType\" as UpdatedIsEphermal, UpdatedSourceSyncMode, UpdatedCollectorType nodrop\n| if(isNull(IsEphemeral), if(isNull(UpdatedIsEphermal), \"-\", UpdatedIsEphermal) , IsEphemeral) as IsEphemeral\n| if(isNull(SourceSyncMode), if(isNull(UpdatedSourceSyncMode), \"-\", UpdatedSourceSyncMode) , SourceSyncMode) as SourceSyncMode\n| if(isNull(CollectorType), if(isNull(UpdatedCollectorType), \"-\", UpdatedCollectorType) , CollectorType) as CollectorType\n| where EventName matches \"*\" and if(\"*\"=\"*\", true, UserIp matches \"*\") and UserEmail matches \"*\" and if(\"*\"=\"*\", true, CollectorType matches \"*\") and if(\"*\"=\"*\", true,Interface matches \"*\")\n|count by EventName, EventTime, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, Interface, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - UserId, _count\n| limit 10\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelC5B9F48483582B4E",
+            "title": "Source Changes (Audit Log)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceDetails, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\")\n| json field=SourceDetails \"sourceType\" as SourceTypeCreated nodrop\n| json field=CurrentValue \"sourceType\" as SourceTypeUpdated nodrop\n| if(isNull(SourceTypeCreated), if(isNull(SourceTypeUpdated),\"-\",SourceTypeUpdated),SourceTypeCreated) as SourceType\n| where EventName matches \"*\" and UserIp matches \"*\" and UserEmail matches \"*\"  and CollectorName matches \"*\"\n|count by EventName, EventTime, CollectorName, SourceName, SourceDetails, SourceType, UserEmail, userId, UserIp, CurrentValue, PreviousValue\n| sort by EventTime\n| fields -_count, PreviousValue, CurrentValue, userId, SourceDetails\n| limit 10",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5AC722758DD3BB48",
+            "title": "Cloud SIEM Ingestion Pipeline",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\"},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": ""
+        },
+        {
+            "id": null,
+            "key": "panel2BCEF1B98E6A6942",
+            "title": "Signal Generation By Product and Vendor",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| if(is_suppressed=1,0,severity) as severity\n| count_distinct(entityid) as enitities,sum(is_suppressed) as suppressed,sum(is_generated) as generated by product,vendor\n| sort product asc, vendor asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel580B163895248A4C",
+            "title": "Signal Generation By Product and Vendor - Last Week",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| if(is_suppressed=1,0,severity) as severity\n| count_distinct(entityid) as enitities,sum(is_suppressed) as suppressed,sum(is_generated) as generated by product,vendor\n| sort product asc, vendor asc\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w1d"
+                },
+                "to": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w"
+                }
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE86F4B27BC60C944",
+            "title": "Normalized Records Created By Product and Vendor",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(\n_view=sec_record_audit  OR _view=sec_record_authentication  OR _view=sec_record_email  OR _view=sec_record_endpoint  OR _view=sec_record_failure  OR _view=sec_record_network  OR _view=sec_record_notification \n)\n| count by metadata_vendor,metadata_product\n\n| sort metadata_vendor asc, metadata_product asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel0009D813B5E5C842",
+            "title": "Normalized Records Created By Product and Vendor (Last Week)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(\n_view=sec_record_audit  OR _view=sec_record_authentication  OR _view=sec_record_email  OR _view=sec_record_endpoint  OR _view=sec_record_failure  OR _view=sec_record_network  OR _view=sec_record_notification \n)\n| count by metadata_vendor,metadata_product\n\n| sort metadata_vendor asc, metadata_product asc",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": {
+                "type": "BeginBoundedTimeRange",
+                "from": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w1d"
+                },
+                "to": {
+                    "type": "RelativeTimeRangeBoundary",
+                    "relativeTime": "-1w"
+                }
+            },
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF3A687038039D943",
+            "title": "Record Parsing or Mapping Failures (sec_record_failure)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sec_record_failure*| metadata_orgId as org_id\n| count as failed by metadata_sourceCategory, %\"fields.reason\",metadata_parser,metadata_vendor,metadata_product,objectType\n| sort failed\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel96531E84A84C5A4A",
+            "title": "Triggered Monitor Alerts (matches: /(?i)ingest|collection|collector|source|throttling|flex/)",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n\n\n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n| parse regex field=path \"(?<folder>.+)\\/[^\\/]+\" \n| json field=_raw \"resourceIdentity.name\" as name\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| timeslice | where status !=\"Normal\"\n| count by folder,name | sort _count \n| where name matches /(?i)ingest|collection|collector|source|throttling|flex/\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel529B7139898B2840",
+            "title": "About",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":14},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "This dashboard shows key collection information:\n\n**Data Volume Ingest**\n- the first section shows large spikes, drops and ingestion information using data volume audit logs.\n\nFor this section use the parameters to customize output:\n- data_volume_view - there is one of these for each metadata dimension: sourcecategory, collector etc\n- value_max_chr: this is useful if you have many long values for metadata containing unique strings\n- timeslice: choose a timeslice for time charts e.g: ```6h, 1d, 1h, 100 buckets```\n\n**Cloud SIEM Ingestion Pipeline**\nThis section summarizes signals, records and mapping failures for CSE forwarded logs.\n\n**Collection Health Events**\nAlerts, collection health state alerts, and audit trail of collection changes."
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "data_volume_view",
+            "displayName": "data_volume_view",
+            "defaultValue": "sourcecategory",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "sourcecategory,collector,view"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "value_max_chr",
+            "displayName": "value_max_chr",
+            "defaultValue": "50",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "35,50,70,250"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "6h",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "15m,1h,6h,1d,100 buckets"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
