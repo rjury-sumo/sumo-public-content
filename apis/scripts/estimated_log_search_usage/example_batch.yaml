@@ -1,0 +1,35 @@
+# Example batch configuration for Sumo Logic estimated usage queries
+#
+# This file defines multiple queries to run in batch mode
+#
+# Usage:
+#   python3 get_estimated_usage.py --batch-file example_batch.yaml --output webview --output-file report.html
+
+queries:
+  - name: "Audit Index - Last 24h"
+    query: "_index=sumologic_audit"
+    from: "-24h"
+    to: "now"
+    timezone: "UTC"
+    byView: true
+
+  - name: "Production Application Logs"
+    query: "_sourceCategory=prod/app"
+    from: "-7d"
+    to: "now"
+    timezone: "UTC"
+    byView: false
+
+  - name: "All Source Categories - Last Hour"
+    query: "_sourceCategory=*"
+    from: "-1h"
+    to: "now"
+    timezone: "UTC"
+    byView: true
+
+  - name: "Security Events"
+    query: "_sourceCategory=security/*"
+    from: "-30d"
+    to: "now"
+    timezone: "America/Los_Angeles"
+    byView: true

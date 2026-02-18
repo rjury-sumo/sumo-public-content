@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sumo Logic Estimated Usage Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header .meta {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-title {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .card-value.large {
+            color: #667eea;
+        }
+
+        .query-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .query-card h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .query-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .query-text {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .query-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            padding: 10px 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .meta-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .meta-item .value {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .breakdown-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .breakdown-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .breakdown-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            padding: 20px;
+            opacity: 0.9;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .tier-continuous {
+            background: #10b981;
+            color: white;
+        }
+
+        .tier-frequent {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .tier-infrequent {
+            background: #6366f1;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Sumo Logic Estimated Usage Report</h1>
+            <div class="meta">Generated on 2026-02-18 16:06:22</div>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card">
+                <div class="card-title">Total Queries</div>
+                <div class="card-value">2</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Total Estimated Scan</div>
+                <div class="card-value large">7.49 KB</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Average Per Query</div>
+                <div class="card-value">3.74 KB</div>
+            </div>
+        </div>
+        <div class="query-card">
+            <h2>
+                Audit Index - Last Hour
+                <span class="query-badge">With Breakdown</span>
+            </h2>
+
+            <div class="query-text">_index=sumologic_audit</div>
+
+            <div class="query-meta">
+                <div class="meta-item">
+                    <div class="label">Time Range</div>
+                    <div class="value">2026-02-18 15:06:21.792000 to 2026-02-18 16:06:21.792000</div>
+                </div>
+                <div class="meta-item">
+                    <div class="label">Timezone</div>
+                    <div class="value">UTC</div>
+                </div>
+                <div class="meta-item">
+                    <div class="label">Estimated Data Scan</div>
+                    <div class="value">7.49 KB</div>
+                </div>
+            </div>
+
+            
+            <table class="breakdown-table">
+                <thead>
+                    <tr>
+                        <th>View/Partition</th>
+                        <th>Tier</th>
+                        <th>Metering Type</th>
+                        <th>Data Scanned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>sumologic_audit</strong></td>
+                        <td><span class="tier-badge tier-continuous">Continuous</span></td>
+                        <td>Continuous</td>
+                        <td><strong>7.49 KB</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="query-card">
+            <h2>
+                All Categories - Last Hour
+                <span class="query-badge">Standard</span>
+            </h2>
+
+            <div class="query-text">_sourceCategory=*</div>
+
+            <div class="query-meta">
+                <div class="meta-item">
+                    <div class="label">Time Range</div>
+                    <div class="value">2026-02-18 15:06:22.426000 to 2026-02-18 16:06:22.426000</div>
+                </div>
+                <div class="meta-item">
+                    <div class="label">Timezone</div>
+                    <div class="value">UTC</div>
+                </div>
+                <div class="meta-item">
+                    <div class="label">Estimated Data Scan</div>
+                    <div class="value">0.00 B</div>
+                </div>
+            </div>
+
+            
+        </div>
+        <div class="footer">
+            <p>Generated with Sumo Logic Estimated Usage Tool</p>
+            <p style="font-size: 12px; margin-top: 10px;">🤖 Powered by Claude Code</p>
+        </div>
+    </div>
+</body>
+</html>
