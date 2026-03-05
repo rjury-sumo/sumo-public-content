@@ -1,0 +1,1911 @@
+openapi: 3.0.0
+info:
+  description: |
+    Welcome to the Sumo Logic's API Reference for Organizations Management. You can use these APIs to interact with the Sumo Logic platform to manage accounts and subscription. Refer to [API Authentication](https://help.sumologic.com/APIs/General-API-Information/API-Authentication) for more information about authentication. You can also look at [other APIs](https://help.sumologic.com/APIs) for more information about some other API endpoints.
+  title: Sumo Logic Organizations Management API
+  version: 1.0.0
+  x-logo:
+    url: ./sumologic_logo.png
+servers:
+- description: All deployments API server
+  url: https://organizations.sumologic.com/api/
+security:
+- basicAuth: []
+tags:
+- description: Organizations Management API.
+  name: organizationsManagement
+  x-displayName: Organizations Management
+paths:
+  /v1/deployments:
+    get:
+      description: Get deployment details where organization can be created.
+      operationId: getDeployments
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Deployment'
+                type: array
+          description: List of deployments available for organization creation.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: List available deployments.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations:
+    get:
+      description: Get a list of all organizations in this account. The response is
+        paginated with a default limit of 100 organizations per page.
+      operationId: listOrganizations
+      parameters:
+      - description: Limit the number of organizations returned in the response. The
+          number of organizations returned may be less than the `limit`.
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          format: int32
+          maximum: 1000
+          minimum: 1
+          type: integer
+      - description: Continuation token to get the next page of results. A page object
+          with the next continuation token is returned in the response body. Subsequent
+          GET requests should specify the continuation token to get the next page
+          of results. `token` is set to null when no more pages are left.
+        in: query
+        name: token
+        required: false
+        schema:
+          type: string
+      - description: Status of an organization, based on its subscription. Valid values
+          are 'Active', 'Inactive', and 'All'. By default, only active organizations
+          are listed.
+        in: query
+        name: status
+        required: false
+        schema:
+          default: Active
+          example: Active
+          type: string
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListOrganizationResponse'
+          description: A paginated list of organizations in the account.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get a list of organizations.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    post:
+      description: Create a new child organization.
+      operationId: createOrganization
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationWithSubscriptionDetails'
+        description: Details about the organization to create.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOrganizationResponse'
+          description: The organization was successfully created.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Create a new organization.
+      tags:
+      - organizationsManagement
+  /v1/organizations/delink:
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    put:
+      description: Delink a child Org from Parent Org if it is deactivated already.
+      operationId: delinkOrg
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DelinkChildOrgsRequest'
+        description: Identifier of organizations to delink.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessMessage'
+          description: A list of organization ids delinked.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Delink a child Org.
+      tags:
+      - organizationsManagement
+      x-visibility: private
+  /v1/organizations/{orgId}:
+    delete:
+      description: Deactivate an organization with the given identifier, deleting
+        all its data and its subscription.
+      operationId: deleteOrg
+      parameters:
+      - description: Identifier of the organization to deactivate.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOrganizationResponse'
+          description: Organization was deactivated successfully.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Deactivate an organization.
+      tags:
+      - organizationsManagement
+    get:
+      description: Get details of an existing organization based on an organization
+        identifier.
+      operationId: getOrganization
+      parameters:
+      - description: Identifier of the organization for which the details are required.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOrganizationResponse'
+          description: Details of the organization that was requested.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get an organization's details.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    put:
+      description: Update an existing organization's subscription based on its identifier.
+      operationId: updateSubscription
+      parameters:
+      - description: Identifier of the organization to update.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Baselines'
+        description: The utilization baselines for the organization and the updated
+          credits allocation. For organizations on Trial/Free plans, reallocating
+          credits will upgrade their plan type to your plan. The plan change cannot
+          be rolled back.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadOrganizationResponse'
+          description: The organization was updated successfully.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Update an organization.
+      tags:
+      - organizationsManagement
+  /v1/organizations/{orgId}/accessKey:
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    post:
+      description: Get an access ID and key pair for an existing organization based
+        on the organization identifier.
+      operationId: createAccessKey
+      parameters:
+      - description: Identifier of the organization for which the access ID and key
+          pair is required.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessKeyCreateRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessKey'
+          description: Access key created successfully.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Create access key for organization.
+      tags:
+      - organizationsManagement
+  /v1/organizations/usages:
+    get:
+      description: Get the credits usage and allocation details of the current organization.
+      operationId: getParentOrgDetails
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentUsage'
+          description: Credits usage details of the current org.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get usage details.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    post:
+      description: Get the credits usage details of all the given organizations. The
+        response is paginated with a default limit of 100 organizations per page.
+      operationId: getUsages
+      parameters:
+      - description: Limit the number of results returned in the response. The number
+          of results returned may be less than the `limit`.
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 100
+          format: int32
+          maximum: 1000
+          minimum: 1
+          type: integer
+      - description: Continuation token to get the next page of results. A page object
+          with the next continuation token is returned in the response body. Subsequent
+          GET requests should specify the continuation token to get the next page
+          of results. `token` is set to null when no more pages are left.
+        in: query
+        name: token
+        required: false
+        schema:
+          type: string
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/ChildOrgId'
+              maxItems: 1000
+              minItems: 1
+              type: array
+        description: List of the organizations for which usage needs to be fetched.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsagesResponse'
+          description: Usage details of the requested organizations.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get credits usages for a list of organizations.
+      tags:
+      - organizationsManagement
+  /v1/organizations/allocatedCredits:
+    get:
+      description: Returns the total allocated credits of all non free and trial child
+        orgs.
+      operationId: getAllocatedCredits
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllocatedCredits'
+          description: Allocated Credits of the current org.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get allocated credits.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations/usages/{orgId}:
+    get:
+      description: Get the detailed usage breakdown of an existing organization based
+        on the organization identifier.
+      operationId: getOrgUsage
+      parameters:
+      - description: Identifier of the organization for which the details are required.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedUsage'
+          description: Usage details of the requested organization.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get detailed usage of an organization.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations/{orgId}/subdomainLoginUrl:
+    get:
+      description: Get the login URL for the subdomain configured organization based
+        on the organization identifier.
+      operationId: getSubdomainLoginUrl
+      parameters:
+      - description: Identifier of the child organization for which the loginUrl is
+          required.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subdomain'
+          description: Subdomain login URL for the requested organization.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get an organization's subdomain login URL.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations/{orgId}/parentsso:
+    delete:
+      description: Deletes the SAML configuration for login to the organization using
+        parent org.
+      operationId: deleteParentOrgSamlConfig
+      parameters:
+      - description: Identifier of the child organization to disable SSO.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: The SAML configuration was successfully created.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Delete SAML configuration with parent org
+      tags:
+      - organizationsManagement
+      x-visibility: private
+    get:
+      description: Get the SSO status for a child org which can be used to login to
+        the organization using parent org.
+      operationId: getChildOrgSSOStatus
+      parameters:
+      - description: Identifier of the child organization to enable SSO.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Returns the SSO status for the child org.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get parent SSO status for a child org.
+      tags:
+      - organizationsManagement
+      x-visibility: private
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    post:
+      description: Creates a new SAML configuration which can be used to login to
+        the organization using parent org.
+      operationId: setupParentOrgSamlConfig
+      parameters:
+      - description: Identifier of the child organization to enable SSO.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: The SAML configuration was successfully created.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Setup SAML configuration with parent org
+      tags:
+      - organizationsManagement
+      x-visibility: private
+  /v1/organizations/parentOrg:
+    get:
+      description: Get information about parent organization.
+      operationId: getParentOrgInfo
+      parameters:
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParentOrgInfo'
+          description: Parent org information
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get parent organization information.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations/provisioning/{orgId}:
+    get:
+      description: Get provisioning status for a child organization..
+      operationId: getProvisioning
+      parameters:
+      - description: Identifier of the organization for which the details are required.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provisioning'
+          description: Provisoning details of the requested organization.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get provisioning status for a child organization.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+  /v1/organizations/{orgId}/permissions:
+    get:
+      description: Get permissions for an organization.
+      operationId: getPermissionsForChildOrg
+      parameters:
+      - description: Identifier of the child organization to get permissions.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildOrgPermissions'
+          description: The permissions for the child organization.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get permissions for an organization.
+      tags:
+      - organizationsManagement
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    put:
+      description: Set permissions for an organization.
+      operationId: setPermissionsForChildOrg
+      parameters:
+      - description: Identifier of the child organization to set permissions.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChildOrgPermissions'
+        description: Permissions to be set for the organization.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChildOrgPermissions'
+          description: The permissions for the organization was updated successfully.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Set permissions for an organization.
+      tags:
+      - organizationsManagement
+  /v1/organizations/{orgId}/userRoleMappings:
+    delete:
+      description: Delete user role mappings for an organization.
+      operationId: deleteUserRoleMappingsForChildOrg
+      parameters:
+      - description: Identifier of the child organization to delete user role mappings
+          from.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleMappingDeleteRequest'
+        description: User role mappings to be deleted from the organization.
+        required: true
+      responses:
+        "204":
+          description: User role mapping deleted successfully
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Delete user role mappings for an organization.
+      tags:
+      - organizationsManagement
+      x-visibility: private
+    get:
+      description: Get user role mappings for an organization.
+      operationId: getUserRoleMappingsForChildOrg
+      parameters:
+      - description: Identifier of the child organization to get user role mappings.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleMappings'
+          description: The user role mappings for the child organization.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Get user role mappings for an organization.
+      tags:
+      - organizationsManagement
+      x-visibility: private
+    parameters:
+    - description: Deployment on which the calling organization resides.
+      in: header
+      name: parentDeploymentId
+      required: true
+      schema:
+        example: us2
+        type: string
+    put:
+      description: Update user role mappings for an organization.
+      operationId: setUserRoleMappingsForChildOrg
+      parameters:
+      - description: Identifier of the child organization to update user role mappings.
+        in: path
+        name: orgId
+        required: true
+        schema:
+          $ref: '#/components/schemas/ChildOrgId'
+      - description: Deployment on which the calling organization resides.
+        in: header
+        name: parentDeploymentId
+        required: true
+        schema:
+          example: us2
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRoleMappings'
+        description: User role mappings to be updated for the organization.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRoleMappings'
+          description: The user role mappings for the organization were updated successfully.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Operation failed with an error.
+      summary: Update user role mappings for an organization.
+      tags:
+      - organizationsManagement
+      x-visibility: private
+components:
+  schemas:
+    TrialPlan:
+      allOf:
+      - $ref: '#/components/schemas/Plan'
+      - $ref: '#/components/schemas/TrialPlan_allOf'
+    FreePlan:
+      allOf:
+      - $ref: '#/components/schemas/Plan'
+      - type: object
+    EnterprisePlan:
+      allOf:
+      - $ref: '#/components/schemas/Plan'
+      - type: object
+    ProfessionalPlan:
+      allOf:
+      - $ref: '#/components/schemas/Plan'
+      - type: object
+    EnterpriseSuitePlan:
+      allOf:
+      - $ref: '#/components/schemas/Plan'
+      - type: object
+    Deployment:
+      example:
+        apiUrl: https://api.us2.sumologic.com
+        deploymentId: us2
+        serviceUrl: https://service.us2.sumologic.com
+      properties:
+        deploymentId:
+          description: Identifier of the deployment.
+          example: us2
+          type: string
+        serviceUrl:
+          description: The URL to interact with the Sumo Logic service on the corresponding
+            deployment.
+          example: https://service.us2.sumologic.com
+          type: string
+        apiUrl:
+          description: URL to interact with Sumo Logic APIs on the corresponding deployment.
+          example: https://api.us2.sumologic.com
+          type: string
+      required:
+      - apiURL
+      - deploymentId
+      - serviceURL
+      type: object
+    ErrorResponse:
+      properties:
+        id:
+          description: An identifier for the error; this is unique to the specific
+            API request.
+          example: IUUQI-DGH5I-TJ045
+          type: string
+        errors:
+          description: A list of one or more causes of the error.
+          example:
+          - code: auth:password_too_short
+            message: Your password was too short.
+          - code: auth:password_character_classes
+            message: Your password did not contain any non-alphanumeric characters
+          items:
+            $ref: '#/components/schemas/ErrorDescription'
+          type: array
+      required:
+      - errors
+      - id
+      type: object
+    ErrorDescription:
+      properties:
+        code:
+          description: An error code describing the type of error.
+          example: auth:password_too_short
+          type: string
+        message:
+          description: A short English-language description of the error.
+          example: Your password was too short.
+          type: string
+        detail:
+          description: An optional fuller English-language description of the error.
+          example: Your password was 5 characters long, the minimum length is 12 characters.
+            See http://example.com/password for more information.
+          type: string
+        meta:
+          description: An optional list of metadata about the error.
+          example:
+            minLength: 12
+            actualLength: 5
+          type: object
+      required:
+      - code
+      - message
+      type: object
+    ListOrganizationResponse:
+      example:
+        next: GDCiRv4vebF3UWFJQ1kySXBOR3Bzh69GR0RyWm9vCtc
+        data:
+        - null
+        - null
+      properties:
+        data:
+          description: List of organizations with subscription details.
+          items:
+            $ref: '#/components/schemas/ReadOrganizationResponse'
+          type: array
+        next:
+          description: Next continuation token.
+          example: GDCiRv4vebF3UWFJQ1kySXBOR3Bzh69GR0RyWm9vCtc
+          type: string
+      required:
+      - data
+      type: object
+    ReadOrganizationResponse:
+      allOf:
+      - $ref: '#/components/schemas/OrganizationDetails'
+      - $ref: '#/components/schemas/ReadOrganizationResponse_allOf'
+    OrganizationDetails:
+      properties:
+        email:
+          description: Email address of the account owner.
+          example: sumo@example.com
+          format: email
+          maxLength: 255
+          type: string
+        organizationName:
+          description: Name of the organization.
+          example: SumoLogic
+          maxLength: 100
+          minLength: 1
+          pattern: ^([a-zA-Z0-9 +%\-@.,_()]+)$
+          type: string
+        firstName:
+          description: First name of the account owner.
+          example: Jane
+          maxLength: 128
+          minLength: 1
+          type: string
+        lastName:
+          description: Last name of the account owner.
+          example: Doe
+          maxLength: 128
+          minLength: 1
+          type: string
+      required:
+      - email
+      - firstName
+      - organizationName
+      type: object
+    CreditsSubscription:
+      properties:
+        startDate:
+          description: Start date of the contract.
+          example: 2020-03-16
+          format: DateTime<'Y-m-d'>
+          type: string
+        endDate:
+          description: End date of the contract.
+          example: 2020-03-16
+          format: DateTime<'Y-m-d'>
+          type: string
+        status:
+          description: Status of the subscription.
+          example: Active
+          pattern: ^(Draft|Active|Canceled|Error)$
+          type: string
+          x-pattern-message: Valid values are `Draft`, `Active`, `Canceled`, and `Error`.
+        plan:
+          $ref: '#/components/schemas/Plan'
+        credits:
+          description: The total number of credits allocated to the organization.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 40000
+          type: integer
+        deploymentChargeCredits:
+          description: The number of credits allocated to the organization in form
+            of deployment charge.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 40000
+          type: integer
+        allocatedCredits:
+          description: The number of credits allocated to the organization excluding
+            deployment charge.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 40000
+          type: integer
+        baselines:
+          $ref: '#/components/schemas/Baselines'
+      required:
+      - baselines
+      - credits
+      - endDate
+      - plan
+      - startDate
+      - status
+      type: object
+    Plan:
+      discriminator:
+        mapping:
+          Trial: '#/components/schemas/TrialPlan'
+          Free: '#/components/schemas/FreePlan'
+          Enterprise: '#/components/schemas/EnterprisePlan'
+          Professional: '#/components/schemas/ProfessionalPlan'
+          EnterpriseSuite: '#/components/schemas/EnterpriseSuitePlan'
+        propertyName: planName
+      properties:
+        planName:
+          description: Name of the subscription plan.
+          example: Professional
+          type: string
+      required:
+      - planName
+      type: object
+    Baselines:
+      description: Details of consumable and its quantity.
+      example:
+        flexScanRatio: 500
+        flexStorage: 30
+        totalCreditsAllocated: 2000
+        frequentIngest: 50000
+        infrequentIngest: 50000
+        flexIngest: 5
+        cseIngest: 50000
+        metrics: 50000
+        tracingIngest: 50000
+        featureActivation:
+          cse: true
+          AIInvestigation: true
+        continuousIngest: 50000
+        aiInvestigation: 5
+      properties:
+        continuousIngest:
+          default: 0
+          description: The average daily amount of continuous logs this child org
+            is expected to ingest, in GB.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+        frequentIngest:
+          default: 0
+          description: The average daily amount of frequent logs this child org is
+            expected to ingest, in GB.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+        infrequentIngest:
+          default: 0
+          description: The average daily amount of infrequent logs this child org
+            is expected to ingest, in GB.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+        metrics:
+          default: 0
+          description: The average daily amount of metrics this child org is expected
+            to ingest, in DPMs(Data points per minute).
+          example: 50000
+          format: int64
+          maximum: 5000000
+          minimum: 0
+          type: integer
+        tracingIngest:
+          default: 0
+          description: The average daily amount of tracing data this child org is
+            expected to ingest, in GB. This is currently not available for all customers.
+            It will be enabled only if available for your organization. Please contact
+            your Sumo Logic account team to learn more.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+        cseIngest:
+          default: 0
+          description: The average daily amount of cse data this child org is expected
+            to ingest, in GB.  This is currently not available for all customers.
+            It will be enabled only if available for your organization. Please contact
+            your Sumo Logic account team to learn more.
+          example: 50000
+          format: int64
+          maximum: 1000000
+          minimum: 0
+          type: integer
+        featureActivation:
+          $ref: '#/components/schemas/FeatureActivation'
+        totalCreditsAllocated:
+          description: Total number of credits to be allocated to the child organization.
+            This field is applicable only in CREATE a new organization and UPDATE
+            an organization requests.
+          example: 2000
+          format: int64
+          type: integer
+          x-field-extra-annotation: '@com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)'
+        flexIngest:
+          default: 0
+          description: The amount of flex logs ingest to allocate to the organization,
+            in GBs.
+          example: 5
+          format: int64
+          minimum: 0
+          type: integer
+        flexStorage:
+          default: 0
+          description: Number of days of flex logs storage to allocate to the organization,
+            in Days.
+          example: 30
+          format: int64
+          minimum: 0
+          type: integer
+        flexScanRatio:
+          default: 0
+          description: The amount of flex logs ingest scan ratio.
+          example: 500
+          format: int64
+          minimum: 0
+          type: integer
+        aiInvestigation:
+          default: 0
+          description: The amount of AI Investigations needed to allocate to the organization.
+          example: 5
+          format: int64
+          minimum: 0
+          type: integer
+      type: object
+    FeatureActivation:
+      description: Describes whether the features are enabled or not. This is applicable
+        for features which may not be enabled by default
+      example:
+        cse: true
+        AIInvestigation: true
+      properties:
+        cse:
+          description: Cloud SIEM Enterprise feature activation
+          type: boolean
+        AIInvestigation:
+          description: AI Investigation feature activation
+          type: boolean
+      type: object
+    ChildOrgId:
+      description: The unique identifier of an organization. It consists of the deployment
+        ID and the hexadecimal account ID separated by a dash `-` character.
+      example: us2-00000000FF42A0C3
+      maxLength: 23
+      minLength: 19
+      type: string
+    OrganizationWithSubscriptionDetails:
+      allOf:
+      - $ref: '#/components/schemas/OrganizationDetails'
+      - $ref: '#/components/schemas/OrganizationWithSubscriptionDetails_allOf'
+    DelinkChildOrgsRequest:
+      example:
+        orgIds:
+        - us2-00000000FF42A0C3
+        - us2-00000000FF42A0C3
+      properties:
+        orgIds:
+          description: A list of identifiers for the child organizations.
+          items:
+            $ref: '#/components/schemas/ChildOrgId'
+          type: array
+      required:
+      - orgIds
+      type: object
+    SuccessMessage:
+      description: Success message on the successful delinking.
+      example: Successfully Delinked Requested Orgs.
+      maxLength: 255
+      type: string
+    AccessKeyCreateRequest:
+      example:
+        corsHeaders:
+        - https://my-app.com
+        - https://mail.my-app.com
+        label: automation access key
+        scopes:
+        - manageUsersAndRoles
+        - viewCollectors
+      properties:
+        label:
+          description: A name for the access key to be created.
+          example: automation access key
+          maxLength: 128
+          type: string
+        corsHeaders:
+          description: |-
+            An array of domains for which the access key is valid. Whether Sumo Logic accepts or rejects an API request
+            depends on whether it contains an ORIGIN header and the entries in the allowlist.
+            Sumo Logic will reject:
+              1. Requests with an ORIGIN header but the allowlist is empty.
+              2. Requests with an ORIGIN header that don't match any entry in the allowlist.
+          example:
+          - https://my-app.com
+          - https://mail.my-app.com
+          items:
+            type: string
+          maxItems: 20
+          type: array
+        scopes:
+          description: "Scopes assigned to the key.\n### Alerting\n  - adminMonitorsV2\n\
+            \  - viewMonitorsV2\n  - manageMonitorsV2\n\n### Data Management\n  -\
+            \ manageApps\n  - viewCollectors\n  - manageCollectors\n  - viewConnections\n\
+            \  - manageConnections\n  - contentAdmin\n  - viewFieldExtractionRules\n\
+            \  - manageFieldExtractionRules            \n  - viewFields\n  - manageFields\n\
+            \  - manageBudgets\n  - viewLibrary\n  - manageLibrary\n  - viewPartitions\n\
+            \  - managePartitions\n  - manageS3DataForwarding\n  - viewScheduledViews\n\
+            \  - manageScheduledViews\n  - manageTokens\n\n### Logs\n  - runLogSearch\n\
+            \n### Metrics\n  - runMetricsQuery \n\n### Reliability Management\n  -\
+            \ viewSlos\n  - manageSlos\n\n### Security\n  - manageAccessKeys\n  -\
+            \ viewPersonalAccessKeys\n  - managePersonalAccessKeys\n\n### UserManagement\n\
+            \  - viewUsersAndRoles\n  - manageUsersAndRoles"
+          example:
+          - manageUsersAndRoles
+          - viewCollectors
+          items:
+            type: string
+          type: array
+      required:
+      - label
+      type: object
+    AccessKey:
+      allOf:
+      - $ref: '#/components/schemas/AccessKeyPublic'
+      - $ref: '#/components/schemas/AccessKey_allOf'
+    AccessKeyPublic:
+      properties:
+        id:
+          description: Identifier of the access key.
+          example: su0w3Q37CBzHUM
+          type: string
+        label:
+          description: The name of the access key.
+          example: collector access key
+          type: string
+        corsHeaders:
+          description: |-
+            An array of domains for which the access key is valid. Whether Sumo Logic accepts or rejects an API request depends on whether it contains an ORIGIN header and the entries in the allowlist. Sumo Logic will reject:
+              1. Requests with an ORIGIN header but the allowlist is empty.
+              2. Requests with an ORIGIN header that don't match any entry in the allowlist.
+          example:
+          - https://my-app.com
+          - https://mail.my-app.com
+          items:
+            type: string
+          type: array
+        disabled:
+          description: Indicates whether the access key is disabled or not.
+          example: false
+          type: boolean
+        createdAt:
+          description: Creation timestamp in UTC in [RFC3339](https://tools.ietf.org/html/rfc3339)
+            format.
+          format: date-time
+          type: string
+        createdBy:
+          description: Identifier of the user who created the access key.
+          example: 0000000006743FDD
+          type: string
+        modifiedAt:
+          description: Last modification timestamp in UTC.
+          format: date-time
+          type: string
+        modifiedBy:
+          description: Identifier of the user who modified the access key.
+          example: 0000000006743FDD
+          type: string
+        serviceAccountId:
+          description: Identifier of the service account who owns the access key.
+          example: 0000000006743FDA
+          type: string
+        lastUsed:
+          description: Last used timestamp in UTC.  <br> **Note:** Property not in
+            use, it is part of an upcoming feature.
+          format: date-time
+          type: string
+        scopes:
+          description: "Scopes assigned to the key.\n### Alerting\n  - adminMonitorsV2\n\
+            \  - viewMonitorsV2\n  - manageMonitorsV2\n\n### Data Management\n  -\
+            \ manageApps\n  - viewCollectors\n  - manageCollectors\n  - viewConnections\n\
+            \  - manageConnections\n  - contentAdmin\n  - viewFieldExtractionRules\n\
+            \  - manageFieldExtractionRules            \n  - viewFields\n  - manageFields\n\
+            \  - manageBudgets\n  - viewLibrary\n  - manageLibrary\n  - viewPartitions\n\
+            \  - managePartitions \n  - manageS3DataForwarding\n  - viewScheduledViews\n\
+            \  - manageScheduledViews\n  - manageTokens\n\n### Logs\n  - runLogSearch\n\
+            \n### Metrics\n  - runMetricsQuery \n\n### Reliability Management\n  -\
+            \ viewSlos\n  - manageSlos\n\n### Security\n  - manageAccessKeys\n  -\
+            \ viewPersonalAccessKeys\n  - managePersonalAccessKeys\n\n### UserManagement\n\
+            \  - viewUsersAndRoles\n  - manageUsersAndRoles"
+          example:
+          - manageUsersAndRoles
+          - viewCollectors
+          items:
+            type: string
+          type: array
+        effectiveScopes:
+          description: Effective scopes based on the intersection of the user's RBAC
+            capabilities and the assigned scopes.
+          example:
+          - manageUsersAndRoles
+          - viewCollectors
+          items:
+            type: string
+          type: array
+        expiresOn:
+          description: Expiration timestamp in UTC before the access key must be rotated.
+          format: date-time
+          type: string
+          x-visibility: private
+      required:
+      - createdAt
+      - createdBy
+      - disabled
+      - id
+      - label
+      - modifiedAt
+      - modifiedBy
+      type: object
+    ParentUsage:
+      allOf:
+      - $ref: '#/components/schemas/Usage'
+      - $ref: '#/components/schemas/ParentUsage_allOf'
+    Usage:
+      properties:
+        totalCapacity:
+          description: Denotes the total number of credits provisioned for the child
+            organization to use.
+          example: 10000.0
+          format: double
+          type: number
+        totalCreditsUsed:
+          description: Denotes the total number of credits that have been utilized.
+          example: 1000.0
+          format: double
+          type: number
+      required:
+      - totalCapacity
+      - totalCreditsUsed
+      type: object
+    ListUsagesResponse:
+      example:
+        next: GDCiRv4vebF3UWFJQ1kySXBOR3Bzh69GR0RyWm9vCtc
+        data:
+        - null
+        - null
+      properties:
+        data:
+          description: Usage details of the requested organizations.
+          items:
+            $ref: '#/components/schemas/BasicUsage'
+          type: array
+        next:
+          description: Next continuation token.
+          example: GDCiRv4vebF3UWFJQ1kySXBOR3Bzh69GR0RyWm9vCtc
+          type: string
+      required:
+      - data
+      type: object
+    BasicUsage:
+      allOf:
+      - $ref: '#/components/schemas/Usage'
+      - $ref: '#/components/schemas/CreditsUsedBreakdown'
+      - $ref: '#/components/schemas/BasicUsage_allOf'
+    CreditsUsedBreakdown:
+      properties:
+        deploymentChargeCreditsUsed:
+          description: The amount of credits used by the organization in form of deployment
+            charge.
+          example: 2000.0
+          format: double
+          type: number
+        allocatedCreditsUsed:
+          description: The amount of credits used by the organization excluding deployment
+            charge.
+          example: 2000.0
+          format: double
+          type: number
+      required:
+      - allocatedCreditsUsed
+      - deploymentChargeCreditsUsed
+      type: object
+    AllocatedCredits:
+      example:
+        creditsAllocated: 2000.0
+      properties:
+        creditsAllocated:
+          description: Denotes the total number of credits that have been allocated
+            to the child organizations.
+          example: 2000.0
+          format: double
+          type: number
+      required:
+      - creditsAllocated
+      type: object
+    DetailedUsage:
+      allOf:
+      - $ref: '#/components/schemas/Usage'
+      - $ref: '#/components/schemas/CreditsUsedBreakdown'
+      - $ref: '#/components/schemas/DetailedUsage_allOf'
+    UsagePerProductVariable:
+      properties:
+        productVariable:
+          description: A Product Variable is a unique service performance feature
+            that is tracked through credit utilization. Valid values are 'continuousIngest',
+            'frequentIngest', 'storage', 'metrics', 'infrequentScan', 'infrequentIngest',
+            'inFrequentStorage', 'cseIngest', 'cseStorage'.
+          example: continuousIngest
+          type: string
+        creditsUsed:
+          description: Denotes the total number of actual credits that have been used.
+          example: 100.0
+          format: double
+          type: number
+        deploymentChargeCredits:
+          description: Denotes the total number of credits that have been used in
+            form of deployment charges.
+          example: 100.0
+          format: double
+          type: number
+        creditsDeducted:
+          description: Denotes the total number of credits that have been used including
+            deployment charges.
+          example: 100.0
+          format: double
+          type: number
+        utilization:
+          description: The native utilization of the product variable.
+          format: double
+          type: number
+        unit:
+          description: The unit in which the native utilization is measured.
+          pattern: ^(GB|DPM)$
+          type: string
+          x-pattern-message: Valid values are 'GB' and 'DPM'
+      required:
+      - creditsDeducted
+      - creditsUsed
+      - deploymentChargeCredits
+      - productVariable
+      - unit
+      - utilization
+      type: object
+    Subdomain:
+      example:
+        subdomainLoginUrl: https://test-redirect-2.stag.sumologic.net
+      properties:
+        subdomainLoginUrl:
+          description: Subdomain login URL of the organization.
+          example: https://test-redirect-2.stag.sumologic.net
+          type: string
+      required:
+      - subdomainLoginUrl
+      type: object
+    ParentOrgInfo:
+      example:
+        isEligibleForTrialOrgs: true
+        deploymentCharges:
+        - deploymentId: us2
+          deploymentCharge: 16.5
+        - deploymentId: us2
+          deploymentCharge: 16.5
+        planName: Sumo Logic Continuous Intelligence Service - Enterprise Suite
+        isEligibleForDeploymentCharge: true
+      properties:
+        isEligibleForTrialOrgs:
+          description: Tells whether the parent org can set up trial child orgs subscriptions.
+          type: boolean
+        isEligibleForDeploymentCharge:
+          description: Tells whether the org is subject to deployment charges.
+          type: boolean
+        deploymentCharges:
+          description: List of deployment charges for the customer for setting up
+            child org in each deployment.
+          items:
+            $ref: '#/components/schemas/DeploymentCharge'
+          type: array
+        planName:
+          description: Plan name of the account.
+          example: Sumo Logic Continuous Intelligence Service - Enterprise Suite
+          type: String
+      type: object
+    DeploymentCharge:
+      example:
+        deploymentId: us2
+        deploymentCharge: 16.5
+      properties:
+        deploymentId:
+          description: Identifier of the deployment for the child org for which deployment
+            charge is applied.
+          example: us2
+          type: string
+        deploymentCharge:
+          description: Deployment charge is a charge that applies to child orgs deployed
+            in different regions. This number is a percentage applied to the total
+            credits being allocated to the child org.
+          example: 16.5
+          format: double
+          maximum: 100.0
+          minimum: 0.0
+          type: number
+      type: object
+    Provisioning:
+      example:
+        cse:
+          isProvisioningToggleAllowed: false
+          isProvisioned: false
+        AIInvestigation:
+          isProvisioningToggleAllowed: false
+          isProvisioned: false
+      properties:
+        cse:
+          $ref: '#/components/schemas/ProvisioningStateForGroup'
+        AIInvestigation:
+          $ref: '#/components/schemas/ProvisioningStateForGroup'
+      type: object
+    ProvisioningStateForGroup:
+      example:
+        isProvisioningToggleAllowed: false
+        isProvisioned: false
+      properties:
+        isProvisioned:
+          default: false
+          description: Is the product group enabled for the child organization.
+          type: boolean
+        isProvisioningToggleAllowed:
+          default: false
+          description: Whether updating the provisioning state of the child organization
+            is allowed or not.
+          type: boolean
+      type: object
+    ChildOrgPermissions:
+      example:
+        permissionType: AllUsers
+        ids:
+        - 00000000FF42A0C3
+        - 00000000FF42A0C4
+      properties:
+        permissionType:
+          description: |-
+            Type of permissions to set. Allowed values are:
+            - `AllUsers`: All users in the parent organization with viewOrganization capability can access the child organization.
+            - `SelectedUsers`: Only selected users in the parent organization can access the organization. Users must have viewOrganization capability in order to access the organization.
+          example: AllUsers
+          pattern: ^(AllUsers|SelectedUsers)$
+          type: string
+          x-pattern-message: Valid values are `AllUsers` and `SelectedUsers`
+        ids:
+          description: A list of ids for the corresponding permissionType entries.  For
+            `SelectedUsers`, this is a list of user ids. For `AllUsers`, this will
+            be an empty list.
+          example:
+          - 00000000FF42A0C3
+          - 00000000FF42A0C4
+          items:
+            type: string
+          type: array
+      required:
+      - permissionType
+      type: object
+    UserRoleMappings:
+      items:
+        $ref: '#/components/schemas/UserRoleMapping'
+      minItems: 1
+      type: array
+    UserRoleMapping:
+      example:
+        targetId: 00000000FF42A0C3
+        targetType: USER
+        roleNames:
+        - Admin
+        - analyst
+      properties:
+        targetType:
+          description: |-
+            Type of target for the role mapping. Allowed values are:
+            - `ORG`: Role mapping applies to the entire organization
+            - `USER`: Role mapping applies to a specific user
+          example: USER
+          pattern: ^(ORG|USER)$
+          type: string
+          x-pattern-message: Valid values are `ORG` and `USER`
+        targetId:
+          description: Identifier for the target. For `USER` type, this is a user
+            ID. For `ORG` type, this is the parent organization ID.
+          example: 00000000FF42A0C3
+          type: string
+        roleNames:
+          description: List of role names to assign to the target
+          example:
+          - Admin
+          - analyst
+          items:
+            type: string
+          minItems: 1
+          type: array
+      required:
+      - roleNames
+      - targetId
+      - targetType
+      type: object
+    UserRoleMappingDeleteRequest:
+      example:
+        targetId: 00000000FF42A0C3
+        targetType: USER
+      properties:
+        targetType:
+          description: |-
+            Type of target for the role mapping. Allowed values are:
+            - `ORG`: Role mapping applies to the entire organization
+            - `USER`: Role mapping applies to a specific user
+          example: USER
+          pattern: ^(ORG|USER)$
+          type: string
+          x-pattern-message: Valid values are `ORG` and `USER`
+        targetId:
+          description: Identifier for the target. For `USER` type, this is a user
+            ID. For `ORG` type, this is the parent organization ID.
+          example: 00000000FF42A0C3
+          type: string
+      required:
+      - targetId
+      - targetType
+      type: object
+    TrialPlan_allOf:
+      properties:
+        daysLeft:
+          description: The number of days left before the Trial period expires. Post
+            expiry, the Trial plan will default to Free.
+          format: int32
+          maximum: 60
+          minimum: 0
+          type: integer
+      required:
+      - daysLeft
+    ReadOrganizationResponse_allOf:
+      properties:
+        subscription:
+          $ref: '#/components/schemas/CreditsSubscription'
+        orgId:
+          description: The unique identifier of an organization. It consists of the
+            deployment ID and the hexadecimal account ID separated by a dash `-` character.
+          example: us2-00000000FF42A0C3
+          maxLength: 23
+          minLength: 19
+          type: string
+        deploymentId:
+          description: Identifier of the deployment in which the organization is present.
+          example: us2
+          type: string
+        isSSOSetup:
+          default: false
+          description: Indicates whether SSO with parent org is setup for the organization.
+          example: false
+          type: boolean
+      required:
+      - orgId
+      - subscription
+    OrganizationWithSubscriptionDetails_allOf:
+      properties:
+        deploymentId:
+          description: Identifier of the deployment in which the organization should
+            be created.
+          example: us2
+          type: string
+        trialPlanPeriod:
+          description: Specify the duration of the Trial plan. If not specified, your
+            subscription plan will be used for the created organization.
+          example: 22
+          type: integer
+        baselines:
+          $ref: '#/components/schemas/Baselines'
+      required:
+      - deploymentId
+    AccessKey_allOf:
+      properties:
+        key:
+          description: The key for the created access key. This field will have values
+            only in the response for an access key create request. The value will
+            be an empty string while listing all keys.
+          example: F9GZvb4fISxUZHM7pqHCsGXGWf4OArgmt9Tz8ewZ
+          type: string
+      required:
+      - key
+    ParentUsage_allOf:
+      properties:
+        creditsAllocated:
+          description: Denotes the total number of credits that have been allocated
+            to the child organizations.
+          example: 2000.0
+          format: double
+          type: number
+      required:
+      - creditsAllocated
+    BasicUsage_allOf:
+      properties:
+        orgId:
+          description: The unique identifier of an organization. It consists of the
+            deployment ID and the hexadecimal account ID separated by a dash `-` character.
+          example: us2-00000000FF42A0C3
+          maxLength: 23
+          minLength: 19
+          type: string
+      required:
+      - orgId
+    DetailedUsage_allOf:
+      properties:
+        usages:
+          description: Contains details of the credits used per product variable.
+          items:
+            $ref: '#/components/schemas/UsagePerProductVariable'
+          type: array
+      required:
+      - usages
+  securitySchemes:
+    basicAuth:
+      scheme: basic
+      type: http
