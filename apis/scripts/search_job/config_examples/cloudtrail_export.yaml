@@ -1,0 +1,41 @@
+# CloudTrail Export Configuration
+# This configuration is designed for bulk export of CloudTrail logs using batched messages export mode
+#
+# Usage with default 100k event threshold:
+#   ./execute_search_job.py --region us1 \
+#     --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+#     --yaml-config config_examples/cloudtrail_export.yaml \
+#     --batch-messages-export \
+#     --batch-start="-7d" --batch-end="now" \
+#     --batch-interval="1d" \
+#     --confirm-export \
+#     --output jsonl
+#
+# For high-volume logs or large message payloads, use a smaller threshold (e.g., 50k):
+#   ./execute_search_job.py --region us1 \
+#     --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+#     --yaml-config config_examples/cloudtrail_export.yaml \
+#     --batch-messages-export \
+#     --batch-start="-7d" --batch-end="now" \
+#     --batch-interval="1d" \
+#     --max-events-per-bucket=50000 \
+#     --confirm-export \
+#     --output jsonl
+#
+# This will:
+# 1. Analyze the last 7 days to determine event distribution
+# 2. Automatically subdivide time buckets that exceed the threshold (default: 100k, customizable)
+# 3. Show you a preview of planned time ranges and ask for confirmation
+# 4. Export each bucket to separate JSONL files in ./output/
+# 5. Display a summary report at the end
+
+name: cloudtrail_export
+query: "_sourcecategory=*cloudtrail*"
+
+# Note: from/to are overridden by --batch-start and --batch-end in batched export mode
+from: "-1h"
+to: "now"
+
+# Optional settings
+timeZone: "UTC"
+byReceiptTime: false

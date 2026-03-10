@@ -83,6 +83,14 @@ timeZone: "UTC"
 byReceiptTime: false
 ```
 
+**Configuration Examples**
+
+The [`config_examples/`](config_examples/) directory contains ready-to-use configuration files:
+- [`cloudtrail_export.yaml`](config_examples/cloudtrail_export.yaml) - CloudTrail bulk export with batched messages export
+- [`example_search_config.yaml`](config_examples/example_search_config.yaml) - Comprehensive example with all options
+- [`infrequent_search_config.yaml`](config_examples/infrequent_search_config.yaml) - Infrequent tier query example
+- [`simple_test_config.yaml`](config_examples/simple_test_config.yaml) - Minimal configuration for testing
+
 **Required Fields:**
 - `name`: Unique identifier for the query, used in logging output and default filenames
 - `query`: The Sumo Logic search query to execute
@@ -218,7 +226,192 @@ Process large time ranges by splitting them into smaller intervals and executing
 - `--batch-end`: End time for batch (overrides YAML `to`)
 - `--batch-interval`: Time interval for each batch (default: `1h`)
 
-### Batch Examples
+## Batched Messages Export
+
+**NEW FEATURE**: Adaptive batched messages export mode for bulk raw log export that exceeds API limits.
+
+### Overview
+
+The batched messages export feature solves the API limitation of 100,000 raw messages per search job by:
+1. **Analyzing** the time range to determine event volume distribution
+2. **Automatically subdividing** time buckets that exceed 100k events
+3. **Paginating** through messages within each bucket (10k per page, max 100MB)
+4. **Sequentially processing** buckets to avoid API concurrency limits
+5. **Exporting** each bucket to separate files with detailed progress tracking
+
+### When to Use
+
+Use `--batch-messages-export` when you need to:
+- Export raw log messages exceeding 100k events
+- Export logs over extended time ranges (days/weeks)
+- Maintain complete message fidelity (not aggregated data)
+- Work around the Search Job API's 100k message limit
+
+### Batched Messages Export Parameters
+
+- `--batch-messages-export`: Enable adaptive batched messages export mode
+- `--batch-start`: Start time for export (required)
+- `--batch-end`: End time for export (required)
+- `--batch-interval`: Initial bucket size (default: `1h`). Buckets are automatically subdivided if they exceed event limits
+- `--max-events-per-bucket`: Maximum events per bucket before subdivision (default: `100000`)
+- `--confirm-export`: Prompt for confirmation before starting, showing planned time ranges
+- `--output`: Output format (`json` or `jsonl` only)
+- `--output-file`: Base filename for exported batches
+- `--output-directory`: Directory for export files (default: `./output/`)
+
+### How It Works
+
+1. **Analysis Phase**: Runs a `| timeslice | count by _timeslice` query to measure event distribution
+2. **Adaptive Bucketing**: Recursively subdivides time ranges exceeding `--max-events-per-bucket`
+3. **Confirmation** (optional): Shows planned time ranges and prompts for approval
+4. **Export Phase**: For each bucket:
+   - Creates a search job with `requiresRawMessages=True`
+   - Paginates through messages (10k per page)
+   - Exports to batch-specific file
+5. **Summary Report**: Displays total messages exported, execution time, and output directory
+
+### Batched Messages Export Examples
+
+#### Basic CloudTrail Export (7 Days)
+Export CloudTrail logs from the last 7 days with adaptive bucketing:
+
+```bash
+./execute_search_job.py --region us1 \
+  --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+  --yaml-config config_examples/cloudtrail_export.yaml \
+  --batch-messages-export \
+  --batch-start="-7d" --batch-end="now" \
+  --batch-interval="1d" \
+  --max-events-per-bucket=100000 \
+  --output jsonl
+```
+
+YAML config file: [`config_examples/cloudtrail_export.yaml`](config_examples/cloudtrail_export.yaml)
+```yaml
+name: cloudtrail_export
+query: "_sourcecategory=*cloudtrail*"
+from: "-1h"  # Overridden by --batch-start
+to: "now"    # Overridden by --batch-end
+timeZone: "UTC"
+byReceiptTime: false
+```
+
+**What happens:**
+1. Analyzes the last 7 days using 1-day initial buckets
+2. Automatically subdivides any day with >100k events
+3. Exports raw messages to separate JSONL files per bucket
+4. Files saved to `./output/cloudtrail_export_messages_batch_*.jsonl`
+
+#### Export with Confirmation Prompt
+Review planned time buckets before starting the export:
+```bash
+./execute_search_job.py --region us1 \
+  --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+  --yaml-config config_examples/cloudtrail_export.yaml \
+  --batch-messages-export \
+  --batch-start="-7d" --batch-end="now" \
+  --batch-interval="1d" \
+  --max-events-per-bucket=100000 \
+  --confirm-export \
+  --output jsonl
+```
+
+Output:
+```
+=== Planned Export Time Ranges ===
+Total buckets: 7
+Estimated total messages: 487,234
+
+  Bucket   0: 2024-03-04 00:00:00 to 2024-03-05 00:00:00 (1440.0m) - ~95,000 messages
+  Bucket   1: 2024-03-05 00:00:00 to 2024-03-06 00:00:00 (1440.0m) - ~72,500 messages
+  Bucket   2: 2024-03-06 00:00:00 to 2024-03-07 00:00:00 ( 720.0m) - ~48,000 messages
+  Bucket   3: 2024-03-06 12:00:00 to 2024-03-07 00:00:00 ( 720.0m) - ~51,234 messages
+  ...
+
+Total time range: 2024-03-04 00:00:00 to 2024-03-11 00:00:00
+Total buckets: 7
+Estimated total messages: 487,234
+
+Proceed with export? (yes/no):
+```
+
+The confirmation prompt now shows:
+- **Estimated total messages** across all buckets
+- **Per-bucket message counts** to help you understand data distribution
+- Buckets marked as **"no data (gap)"** for time ranges with no events
+
+#### High-Volume Export with Custom Event Threshold
+For high-volume logs or large message payloads (approaching 100MB per page), use a lower event threshold:
+```bash
+./execute_search_job.py --region us1 \
+  --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+  --yaml-config config_examples/cloudtrail_export.yaml \
+  --batch-messages-export \
+  --batch-start="2024-01-01T00:00:00Z" \
+  --batch-end="2024-01-02T00:00:00Z" \
+  --batch-interval="1h" \
+  --max-events-per-bucket=50000 \
+  --output jsonl \
+  --output-directory ./exports/
+```
+
+**Why customize the threshold?**
+- **Default (100k)**: Works well for most log types (CloudTrail, application logs, etc.)
+- **Lower (50k-80k)**: Better for logs with very large individual messages (e.g., verbose JSON payloads)
+- **Note**: The 10k/page limit also has a 100MB size cap, so fewer events may be safer for large messages
+
+#### Export with JSON Format
+Export each bucket as a separate JSON file with metadata:
+```bash
+./execute_search_job.py --region us1 --access-id ID --access-key KEY \
+  --yaml-config security_logs.yaml \
+  --batch-messages-export \
+  --batch-start="-30d" --batch-end="now" \
+  --batch-interval="1d" \
+  --output json
+```
+
+### Output File Naming
+
+Batched messages export creates separate files for each time bucket:
+
+**Pattern**: `{query_name}_messages_batch_{index}_{from_timestamp}_{to_timestamp}.{ext}`
+
+**Example files**:
+```
+./output/cloudtrail_export_messages_batch_000_20240304000000.000_20240305000000.000.jsonl
+./output/cloudtrail_export_messages_batch_001_20240305000000.000_20240306000000.000.jsonl
+./output/cloudtrail_export_messages_batch_002_20240306000000.000_20240307000000.000.jsonl
+```
+
+Timestamp format: `YYYYMMddHHmmss.SSS` (epoch milliseconds precision)
+
+### Summary Report
+
+At the end of each export, a summary is displayed:
+
+```
+============================================================
+BATCHED MESSAGES EXPORT SUMMARY
+============================================================
+Total time buckets processed: 10
+Total messages exported: 487,234
+Total execution time: 12.4m
+Average messages per bucket: 48,723
+Output directory: ./output/
+Average time per bucket: 1.2m
+============================================================
+```
+
+### Progress Tracking
+
+Real-time progress is shown during export:
+
+```
+[████████████████████░░░░░░░░░░░░░░░░░░░░] 50.0% | Batch 5/10 | Elapsed: 6.2m | ETA: 6.2m | Remaining: 5
+```
+
+### Standard Batch Mode Examples
 
 #### Process Last 24 Hours in 1-Hour Intervals
 ```bash
@@ -334,11 +527,59 @@ The script provides comprehensive error handling:
 - **Network errors**: Timeout and connection issue handling
 - **File errors**: Directory creation and write permission issues
 
+## API Limits and Constraints
+
+### Search Job API Limits
+
+The Sumo Logic Search Job API has the following limits (as per [official documentation](https://www.sumologic.com/help/docs/api/search-job/)):
+
+1. **Raw Messages**: Maximum 100,000 messages per search job
+2. **Aggregate Records**: Maximum 10,000 records per search job
+3. **Messages Pagination**: Up to 10,000 messages per page OR 100MB total message size
+4. **Concurrent Jobs**: Limited by account/organization settings
+
+### Batched Messages Export Solution
+
+The `--batch-messages-export` feature was specifically designed to overcome these limits for raw message export:
+
+**Problem**: Need to export 5 million CloudTrail events from last 7 days
+- Single search job limit: 100,000 messages ❌
+- Standard batch mode: Requires manual time range calculation ❌
+
+**Solution**: Adaptive batched messages export
+```bash
+./execute_search_job.py --region us1 \
+  --access-id $SUMO_ACCESS_ID --access-key $SUMO_ACCESS_KEY \
+  --yaml-config config_examples/cloudtrail_export.yaml \
+  --batch-messages-export \
+  --batch-start="-7d" --batch-end="now" \
+  --batch-interval="1d" \
+  --max-events-per-bucket=100000 \
+  --output jsonl
+```
+
+**Result**:
+- Automatically analyzes time range to find event distribution
+- Subdivides busy periods into smaller buckets (< 100k events each)
+- Paginates through each bucket (10k/page)
+- Exports 50+ separate files with complete data ✅
+- Sequential processing avoids concurrency limits ✅
+
+### Best Practices
+
+1. **Start with larger bucket sizes** (`--batch-interval="1d"`) and let adaptive bucketing subdivide as needed
+2. **Use `--confirm-export`** for large exports to review the plan before execution
+3. **Set `--max-events-per-bucket` conservatively** (e.g., 50000-80000) if dealing with very large message payloads
+4. **Monitor the analysis phase** - if it takes too long, reduce the initial bucket size
+5. **Use JSONL format** for efficient line-by-line processing of large exports
+6. **Run exports during off-peak hours** to avoid API throttling
+
 ## Performance Considerations
 
 ### requiresRawMessages Optimization
 The script automatically optimizes the `requiresRawMessages` parameter:
 - **Messages mode**: `true` (raw messages needed)
+- **Batched messages export**: `true` (required for message pagination)
 - **Records mode**: `false` (better performance for aggregates)
 - **Create-only mode**: `false` (not retrieving results)
 

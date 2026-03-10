@@ -24,7 +24,11 @@ from execute_search_job import (
     generate_batch_intervals,
     format_records_table,
     format_records_csv,
-    load_yaml_config
+    load_yaml_config,
+    SumoLogicClient,
+    analyze_time_buckets,
+    generate_export_summary,
+    prompt_export_confirmation
 )
 
 
@@ -682,6 +686,367 @@ byReceiptTime: false
 
             finally:
                 os.unlink(config_path)
+
+
+class TestBatchedMessagesExport:
+    """Test batched messages export functionality"""
+
+    def test_client_get_all_messages_paginated(self):
+        """Test paginated messages retrieval"""
+        # Create mock client
+        client = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        # Mock the get_search_job_messages method
+        with patch.object(client, 'get_search_job_messages') as mock_get_messages:
+            # Simulate two pages of results
+            mock_get_messages.side_effect = [
+                {
+                    'messages': [
+                        {'map': {'field1': 'value1'}},
+                        {'map': {'field1': 'value2'}}
+                    ],
+                    'totalCount': 3
+                },
+                {
+                    'messages': [
+                        {'map': {'field1': 'value3'}}
+                    ],
+                    'totalCount': 3
+                },
+                {
+                    'messages': [],
+                    'totalCount': 3
+                }
+            ]
+
+            # Collect all messages
+            messages = list(client.get_all_messages_paginated('test_job_id', page_size=2))
+
+            assert len(messages) == 3
+            assert messages[0]['map']['field1'] == 'value1'
+            assert messages[1]['map']['field1'] == 'value2'
+            assert messages[2]['map']['field1'] == 'value3'
+
+            # Verify pagination calls
+            assert mock_get_messages.call_count == 2
+            mock_get_messages.assert_any_call('test_job_id', offset=0, limit=2)
+            mock_get_messages.assert_any_call('test_job_id', offset=2, limit=2)
+
+    def test_analyze_time_buckets_all_within_limit(self):
+        """Test analyze_time_buckets when all buckets are within event limit"""
+        # Create mock client
+        client = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        start_time = 1704067200000  # 2024-01-01 00:00:00
+        end_time = 1704070800000    # 2024-01-01 01:00:00
+        bucket_size = 1200000       # 20 minutes
+
+        # Mock the search job creation and polling
+        with patch.object(client, 'create_search_job') as mock_create, \
+             patch.object(client, 'poll_search_job') as mock_poll, \
+             patch.object(client, 'get_search_job_records') as mock_get_records:
+
+            mock_create.return_value = {'id': 'test_job_id'}
+            mock_poll.return_value = {'state': 'DONE GATHERING RESULTS'}
+
+            # Simulate 3 buckets with counts under limit
+            mock_get_records.return_value = {
+                'records': [
+                    {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '50000'}},
+                    {'map': {'_timeslice': '2024-01-01T00:20:00Z', '_count': '60000'}},
+                    {'map': {'_timeslice': '2024-01-01T00:40:00Z', '_count': '55000'}}
+                ]
+            }
+
+            buckets = analyze_time_buckets(
+                client, '_sourceCategory=test', start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=100000
+            )
+
+            # Should return 3 buckets as-is, plus potentially gap-filling buckets
+            assert len(buckets) >= 3
+            # Verify all buckets are contiguous
+            for i in range(len(buckets) - 1):
+                assert buckets[i][1] == buckets[i+1][0]
+            # Verify coverage
+            assert buckets[0][0] <= start_time
+            assert buckets[-1][1] >= end_time
+            # Verify counts are present for non-gap buckets
+            counts_present = [b[2] for b in buckets if b[2] is not None]
+            assert len(counts_present) >= 3  # At least 3 buckets should have counts
+
+    def test_analyze_time_buckets_with_subdivision(self):
+        """Test analyze_time_buckets when buckets need subdivision"""
+        client = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        start_time = 1704067200000
+        end_time = 1704070800000
+        bucket_size = 3600000  # 1 hour
+
+        # Track recursive calls
+        call_count = [0]
+
+        def mock_create_job(query, from_time, to_time, **kwargs):
+            call_count[0] += 1
+            return {'id': f'job_{call_count[0]}'}
+
+        def mock_poll_job(job_id, **kwargs):
+            return {'state': 'DONE GATHERING RESULTS'}
+
+        def mock_get_records(job_id):
+            # First call: one bucket with too many events
+            if job_id == 'job_1':
+                return {
+                    'records': [
+                        {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '150000'}}
+                    ]
+                }
+            # Second call (subdivision): two buckets within limit
+            elif job_id == 'job_2':
+                return {
+                    'records': [
+                        {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '70000'}},
+                        {'map': {'_timeslice': '2024-01-01T00:30:00Z', '_count': '80000'}}
+                    ]
+                }
+            return {'records': []}
+
+        with patch.object(client, 'create_search_job', side_effect=mock_create_job), \
+             patch.object(client, 'poll_search_job', side_effect=mock_poll_job), \
+             patch.object(client, 'get_search_job_records', side_effect=mock_get_records):
+
+            buckets = analyze_time_buckets(
+                client, '_sourceCategory=test', start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=100000
+            )
+
+            # Should have subdivided the large bucket
+            assert len(buckets) >= 2
+            assert call_count[0] == 2  # Two query jobs created
+
+    def test_generate_export_summary(self):
+        """Test export summary report generation"""
+        import time
+        start_time = time.time() - 3600  # 1 hour ago
+
+        summary = generate_export_summary(
+            total_intervals=10,
+            total_messages=25000,
+            start_time=start_time,
+            output_directory='./output/'
+        )
+
+        assert 'BATCHED MESSAGES EXPORT SUMMARY' in summary
+        assert '10' in summary  # total intervals
+        assert '25,000' in summary or '25000' in summary  # total messages
+        assert './output/' in summary
+        assert '2,500' in summary or '2500' in summary  # average messages per bucket
+
+    def test_prompt_export_confirmation_few_intervals(self):
+        """Test export confirmation prompt with few intervals"""
+        intervals = [
+            (1704067200000, 1704070800000, 50000),
+            (1704070800000, 1704074400000, 75000),
+            (1704074400000, 1704078000000, 60000)
+        ]
+
+        # Mock user input to say 'yes'
+        with patch('builtins.input', return_value='yes'):
+            result = prompt_export_confirmation(intervals, 'test_query')
+            assert result is True
+
+        # Mock user input to say 'no'
+        with patch('builtins.input', return_value='no'):
+            result = prompt_export_confirmation(intervals, 'test_query')
+            assert result is False
+
+    def test_prompt_export_confirmation_many_intervals(self):
+        """Test export confirmation prompt with many intervals (should show first 10, last 10)"""
+        # Create 50 intervals
+        start = 1704067200000
+        interval_size = 3600000  # 1 hour
+        intervals = [
+            (start + i * interval_size, start + (i + 1) * interval_size, 50000 + i * 1000)
+            for i in range(50)
+        ]
+
+        with patch('builtins.input', return_value='yes'):
+            result = prompt_export_confirmation(intervals, 'test_query')
+            assert result is True
+
+    def test_analyze_time_buckets_no_data(self):
+        """Test analyze_time_buckets when no data is found"""
+        client = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        start_time = 1704067200000
+        end_time = 1704070800000
+        bucket_size = 3600000
+
+        with patch.object(client, 'create_search_job') as mock_create, \
+             patch.object(client, 'poll_search_job') as mock_poll, \
+             patch.object(client, 'get_search_job_records') as mock_get_records:
+
+            mock_create.return_value = {'id': 'test_job_id'}
+            mock_poll.return_value = {'state': 'DONE GATHERING RESULTS'}
+            mock_get_records.return_value = {'records': []}  # No data
+
+            buckets = analyze_time_buckets(
+                client, '_sourceCategory=nonexistent', start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=100000
+            )
+
+            # Should return single bucket covering entire range with None count
+            assert len(buckets) == 1
+            assert buckets[0][0] == start_time
+            assert buckets[0][1] == end_time
+            assert buckets[0][2] is None  # No data, so count is None
+
+    def test_analyze_time_buckets_custom_threshold_50k(self):
+        """Test analyze_time_buckets with custom 50k threshold vs default 100k"""
+        client = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        start_time = 1704067200000
+        end_time = 1704070800000
+        bucket_size = 3600000  # 1 hour
+
+        # Track calls for both thresholds
+        call_count = {'50k': [0], '100k': [0]}
+
+        def mock_create_job_50k(query, from_time, to_time, **kwargs):
+            call_count['50k'][0] += 1
+            return {'id': f'job_50k_{call_count["50k"][0]}'}
+
+        def mock_create_job_100k(query, from_time, to_time, **kwargs):
+            call_count['100k'][0] += 1
+            return {'id': f'job_100k_{call_count["100k"][0]}'}
+
+        def mock_poll_job(job_id, **kwargs):
+            return {'state': 'DONE GATHERING RESULTS'}
+
+        # Simulate a bucket with 75k events
+        def mock_get_records_75k(job_id):
+            if 'job_50k_1' in job_id:
+                # 75k exceeds 50k threshold - needs subdivision
+                return {
+                    'records': [
+                        {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '75000'}}
+                    ]
+                }
+            elif 'job_50k_2' in job_id:
+                # Subdivision of 75k bucket into two 30-minute buckets
+                return {
+                    'records': [
+                        {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '35000'}},
+                        {'map': {'_timeslice': '2024-01-01T00:30:00Z', '_count': '40000'}}
+                    ]
+                }
+            elif 'job_100k_1' in job_id:
+                # 75k is under 100k threshold - no subdivision needed
+                return {
+                    'records': [
+                        {'map': {'_timeslice': '2024-01-01T00:00:00Z', '_count': '75000'}}
+                    ]
+                }
+            return {'records': []}
+
+        # Test with 50k threshold - should subdivide
+        with patch.object(client, 'create_search_job', side_effect=mock_create_job_50k), \
+             patch.object(client, 'poll_search_job', side_effect=mock_poll_job), \
+             patch.object(client, 'get_search_job_records', side_effect=mock_get_records_75k):
+
+            buckets_50k = analyze_time_buckets(
+                client, '_sourceCategory=test', start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=50000
+            )
+
+        # Reset client for second test
+        client_100k = SumoLogicClient('us1', 'test_id', 'test_key')
+
+        # Test with 100k threshold (default) - should NOT subdivide
+        with patch.object(client_100k, 'create_search_job', side_effect=mock_create_job_100k), \
+             patch.object(client_100k, 'poll_search_job', side_effect=mock_poll_job), \
+             patch.object(client_100k, 'get_search_job_records', side_effect=mock_get_records_75k):
+
+            buckets_100k = analyze_time_buckets(
+                client_100k, '_sourceCategory=test', start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=100000
+            )
+
+        # Verify 50k threshold triggered subdivision
+        assert len(buckets_50k) >= 2, "50k threshold should subdivide 75k bucket"
+        assert call_count['50k'][0] == 2, "50k threshold should make 2 query calls (initial + subdivision)"
+
+        # Verify 100k threshold did NOT trigger subdivision
+        assert len(buckets_100k) >= 1, "100k threshold should return at least 1 bucket"
+        assert call_count['100k'][0] == 1, "100k threshold should make only 1 query call (no subdivision needed)"
+
+        # Verify both cover the same time range
+        assert buckets_50k[0][0] <= start_time
+        assert buckets_50k[-1][1] >= end_time
+        assert buckets_100k[0][0] <= start_time
+        assert buckets_100k[-1][1] >= end_time
+
+
+class TestBatchedMessagesExportIntegration:
+    """Integration tests for batched messages export"""
+
+    @pytest.mark.skipif(
+        not os.getenv('SUMO_ACCESS_ID') or not os.getenv('SUMO_ACCESS_KEY'),
+        reason="Integration test requires SUMO_ACCESS_ID and SUMO_ACCESS_KEY environment variables"
+    )
+    def test_batched_export_cloudtrail_integration(self):
+        """Integration test: Export CloudTrail logs over 7 days using adaptive bucketing"""
+        import time
+
+        # Get credentials from environment
+        access_id = os.getenv('SUMO_ACCESS_ID')
+        access_key = os.getenv('SUMO_ACCESS_KEY')
+        region = os.getenv('SUMO_REGION', 'us1')
+
+        # Create client
+        client = SumoLogicClient(region, access_id, access_key)
+
+        # Set time range: last 7 days
+        end_time = int(time.time() * 1000)
+        start_time = end_time - (7 * 24 * 60 * 60 * 1000)
+
+        # Query scope
+        query = '_sourcecategory=*cloudtrail*'
+
+        # Initial bucket size: 1 day
+        bucket_size = 24 * 60 * 60 * 1000
+
+        try:
+            # Analyze and generate optimal buckets
+            buckets = analyze_time_buckets(
+                client, query, start_time, end_time,
+                'UTC', False, bucket_size, max_events_per_bucket=100000
+            )
+
+            # Verify we got some buckets
+            assert len(buckets) > 0
+            assert len(buckets) <= 7  # Shouldn't exceed initial estimate by much
+
+            # Verify bucket coverage
+            assert buckets[0][0] <= start_time
+            assert buckets[-1][1] >= end_time
+
+            # Verify buckets are contiguous (no gaps)
+            for i in range(len(buckets) - 1):
+                assert buckets[i][1] == buckets[i+1][0], f"Gap found between bucket {i} and {i+1}"
+
+            # Verify counts are present where expected
+            total_count = sum(b[2] if b[2] else 0 for b in buckets)
+            assert total_count > 0, "Should have at least some estimated counts"
+
+            print(f"\nIntegration test results:")
+            print(f"  Total buckets generated: {len(buckets)}")
+            print(f"  Estimated total messages: {total_count:,}")
+            print(f"  Time range: {datetime.fromtimestamp(start_time/1000)} to {datetime.fromtimestamp(end_time/1000)}")
+            print(f"  Query: {query}")
+
+        except Exception as e:
+            pytest.fail(f"Integration test failed: {e}")
 
 
 if __name__ == '__main__':
