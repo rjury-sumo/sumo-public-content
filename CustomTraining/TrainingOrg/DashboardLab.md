@@ -13,17 +13,17 @@ In this lab you will build a working dashboard using Amazon CloudFront log data.
 ## Prerequisites
 
 - You can navigate the Sumo Logic UI and run a basic log search
-- You understand the basic query pipeline: scope → parse → aggregate
+- You understand the basic of log search: creating searches and using the search UI.
 - You are logged in to the Training Org
 
 ---
 
 ## What You Will Learn
 
-- Create a dashboard and set its default time range
-- Add a template variable filter and use it to scope panel queries
+- Create a dashboard and set its default time range using typical query patterns such as scope → parse → aggregate
+- Add a template variable filter and use it to scope panel queries to maximise dashboard flexibilty
 - Build Categorical, Time Series, Honeycomb, and Map panels
-- Use `timeslice`, `transpose`, and `compare with timeshift` for richer visualisations
+- Use `timeslice`, `transpose`, and `compare with timeshift` techniques for richer visualisations
 - Understand why all dashboard panels require aggregation
 - See how scheduled views dramatically accelerate dashboard query performance
 
@@ -55,15 +55,13 @@ The dashboard you are building is an example of a **Investigation / Workflow das
 
 ---
 
-## Exercise 1: Create the Dashboard
+## Exercise 1: Create the Dashboard and Setup Default Time Range
 
-1. Create a new dashboard using one of the following:
-a) If using the new UI open the **Go To** dialog and type 'new' or 'das' and select **New Dashboard**
-b) Click theold UI click the **+ New** button at the top of the Sumo UI and select **Dashboard**.
+1. Create a new dashboard using one of the following: **new UI** open the **Go To** dialog and type 'new' or 'das' and select **New Dashboard**; **old UI** click the **+ New** button at the top of the Sumo UI and select **Dashboard**.
 2. A new tab opens with a blank dashboard.
 3. Click the **time range selector** in the top right corner.
 4. Select **Last 60 Minutes** from the relative list.
-5. Click the **down arrow** in the time selector and choose **Set as default time range**.
+5. Click the **down arrow** in the time selector and choose **Set as default** to set this as the dashboard default time range.
 
 > **Why this matters:** Setting a sensible default time range means new users who open your dashboard will see a useful window of data immediately. Individual panels can override the dashboard time range if needed, but most panels will inherit this setting.
 
@@ -83,7 +81,7 @@ My Demo CloudFront Dashboard - RJ
 
 ## Exercise 3: Add a Template Variable Filter
 
-[Filter template variables](https://help.sumologic.com/docs/dashboards-new/filter-template-variables/) let users change a value at the top of the dashboard to filter all panels simultaneously. This makes a single dashboard usable across many investigation scenarios.
+[Filter template variables](https://help.sumologic.com/docs/dashboards-new/filter-template-variables/) let users change a value at the top of the dashboard to filter all panels simultaneously. This makes a single dashboard usable across many investigation scenarios. It's a good practice to create these at the start of building panels so you can copy the filtering to each panel as it's created.
 
 1. Click **Create new variable +** in the top-left of the dashboard. (If you cannot see this, click the filter icon in the top right.)
 2. Set **Variable Name** to `keywords`
@@ -299,28 +297,28 @@ Run the following query in a **new Log Search tab** over the **last 30 days**. W
 | fields -latitude,longitude,country_name,state
 ```
 
-**What this query does — step by step:**
+**What this query does - step by step:**
 
 | Step | Operator | What it does |
 | --- | --- | --- |
-| 1 | `_sourcecategory = "Labs/AWS/WAF"` | **Scope** — restricts the scan to AWS WAF log data only |
-| 2 | `json field=_raw "httpRequest.clientIp"` | **Parse** — extracts the client IP from the JSON log structure |
-| 3 | `where ispublicip(src_ip)` | **Filter** — discards private/RFC-1918 IPs that cannot be geo-resolved or threat-checked |
-| 4 | `json field=_raw "action"` | **Parse** — extracts whether WAF allowed or blocked the request |
-| 5 | `threatip src_ip` | **Enrich** — looks up each IP against Sumo Logic's threat intelligence feed; adds `malicious_confidence`, `actor`, and threat metadata |
-| 6 | `where !(isempty(malicious_confidence))` | **Filter** — keeps only IPs with a positive threat match |
-| 7 | `count by ...` | **Aggregate** — counts matched threat events grouped by source, IP, action, and threat attributes |
-| 8 | `lookup ... from asn://default` | **Enrich** — resolves each IP to its ASN and organisation name |
-| 9 | `geoip src_ip` | **Enrich** — resolves each IP to country, region, city, latitude, and longitude |
-| 10 | `fields -latitude,...` | **Format** — drops geo-coordinate fields not needed in the output |
+| 1 | `_sourcecategory = "Labs/AWS/WAF"` | **Scope** - restricts the scan to AWS WAF log data only |
+| 2 | `json field=_raw "httpRequest.clientIp"` | **Parse** - extracts the client IP from the JSON log structure |
+| 3 | `where ispublicip(src_ip)` | **Filter** - discards private/RFC-1918 IPs that cannot be geo-resolved or threat-checked |
+| 4 | `json field=_raw "action"` | **Parse** - extracts whether WAF allowed or blocked the request |
+| 5 | `threatip src_ip` | **Enrich** - looks up each IP against Sumo Logic's threat intelligence feed; adds `malicious_confidence`, `actor`, and threat metadata |
+| 6 | `where !(isempty(malicious_confidence))` | **Filter** - keeps only IPs with a positive threat match |
+| 7 | `count by ...` | **Aggregate** - counts matched threat events grouped by source, IP, action, and threat attributes |
+| 8 | `lookup ... from asn://default` | **Enrich** - resolves each IP to its ASN and organisation name |
+| 9 | `geoip src_ip` | **Enrich** - resolves each IP to country, region, city, latitude, and longitude |
+| 10 | `fields -latitude,...` | **Format** - drops geo-coordinate fields not needed in the output |
 
 > **Why this query is expensive over large time ranges:**
 >
 > This query performs three costly operations on **every matching raw log event** at search time:
 >
-> - **`threatip`** — each IP is checked against a threat intelligence feed. On high-traffic WAF data this can mean millions of lookups per query run.
-> - **`geoip`** — similarly resolves every IP to a location, adding compute overhead proportional to event volume.
-> - **JSON parsing** — extracting nested fields from raw JSON is more expensive than querying pre-indexed fields.
+> - **`threatip`** - each IP is checked against a threat intelligence feed. On high-traffic WAF data this can mean millions of lookups per query run.
+> - **`geoip`** - similarly resolves every IP to a location, adding compute overhead proportional to event volume.
+> - **JSON parsing** - extracting nested fields from raw JSON is more expensive than querying pre-indexed fields.
 >
 > Over 30 days of busy WAF traffic, all three operations compound to make this query slow and data-intensive. A scheduled view could cache this work running **once per minute at ingest time** and storing only IOC matches with enrichment already applied - so dashboard queries skip all of this work entirely.
 
@@ -358,20 +356,23 @@ Record your results:
 ### Part C: Compare and Reflect
 
 > How did the runtimes and scan volume compare for the raw vs the view version of the query?
-> **Views in dashboards** - We can easily add a query like this to the dashboard we are building using **Add to Dashboard** button in the Aggregates tab 
+> 
+> **Views in dashboards** - We can easily add a query like this to the dashboard we are building using **Add to Dashboard** button in the Aggregates tab.
+> 
 > **Key takeaway:** Views are most valuable for dashboard panels covering days or weeks of data, queries that run repeatedly (dashboards auto-refresh, scheduled reports), and queries involving expensive operations like `geoip` or complex regex parsing - the view computes these once at ingest time and caches the result. Views are **not** suitable when you need raw message-level detail, or for one-off ad-hoc queries.
 
+## Exercise 12: Optional - Build a custom clickalble drilldown link
 
-## Exercise 12: Optional - Add a clickalble drilldown link
+Dashboards can be part of a workflow where a clickable link in a query result table opens another web url, sumo dashboard with filters provided as query params, or [start a pre-built search in a new query tab](https://www.sumologic.com/help/docs/search/get-started-with-search/build-search/use-url-to-run-search/).
 
-1. Go back to the tab with your dashboard or open it by finding in Recent menu or the library search in your Personal folder.
-2. Add a new panel with this query using the categorical  table output
+1. Go back to the browser tab with your dashboard or open it by finding in Recent menu or the library search in your Personal folder. In new UI you can use 'back' in browser history too.
+2. Add a new categorical panel with the query below and select table output type:
 
-```
+```text
 // use the pre-aggregated view instead
 _view=threat_geo_asn_aws_waf_v1
 
-| min(_timeslice) as f,max(_timeslice) as l,count by src_ip,_sourcecategory,_source,threat,country_code,organization
+| min(_timeslice) as f,max(_timeslice) as l, sum(_count) as matches by src_ip,_sourcecategory,_source,threat,country_code,organization
 | "service.sumologic.com" as dp
 | num(l - ( 1000 * 60 * 60 * 3)) as f
 // suppress scientific notation must be epoch
@@ -383,11 +384,25 @@ _view=threat_geo_asn_aws_waf_v1
 
 ```
 
+**What this query does - step by step:**
+
+| Step | Operator | What it does |
+| --- | --- | --- |
+| 1 | `_view=threat_geo_asn_aws_waf_v1` | **Scope** - queries the pre-aggregated scheduled view instead of raw logs; very fast even over long time ranges |
+| 2 | `min(_timeslice) as f, max(_timeslice) as l` | **Aggregate** - finds the earliest and latest event timestamps per IP, used to set the time range of the drilldown link |
+| 3 | `sum ... by src_ip, ..., organization` | **Aggregate** - counts threat events grouped by IP, source, threat type, country, and ASN organisation |
+| 4 | `"service.sumologic.com" as dp` | **Assign** - stores the Sumo Logic domain as a variable for URL construction |
+| 5 | `num(l - (1000 * 60 * 60 * 3)) as f` | **Calculate** - shifts the start timestamp back 3 hours to give the drilldown search a wider window around the first match |
+| 6 | `format("%.0f", f/l)` | **Format** - suppresses scientific notation so epoch millisecond values are safe to embed in a URL |
+| 7 | `concat("_sourcecategory = ", ..., src_ip) as q` | **Build query string** - constructs a Sumo Logic log search query scoped to the specific source and IP address |
+| 8 | `tourl(concat("https://", dp, "/ui/#/search/@", ...), q)` | **Build URL** - assembles the full deep-link URL that opens a new Sumo Logic search tab pre-loaded with the query and time range; `urlencode(q)` makes the query string URL-safe |
+| 9 | `fields -dp, f, l, q` | **Format** - removes the intermediate working columns from the output, leaving only the display fields and the clickable link |
+
+> **How the drilldown link works:** The `tourl()` operator creates a clickable hyperlink in the table panel. The link encodes the source category, source name, and matched IP directly into a Sumo Logic search URL - including a pre-set time range spanning the matched events. Clicking the link opens a new search tab showing the **raw log events** behind that threat match, giving analysts a one-click path from the summary dashboard panel to the underlying evidence.
+
 3. Name the panel **AWS WAF IOC Matched With Clickable Drilldown** and add the panel.
 
-> When the panel loads scroll to the query column. You can see we created a sumologic query on the fly with a clickable link to open a new log search window supplying a custom time range. This query will drilldown to the actual raw log events that had the matching IOC for that specific sourcecategory and source.
 ---
-
 
 ## Bonus: Explore More Options
 
