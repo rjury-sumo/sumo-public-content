@@ -270,7 +270,7 @@ A Map panel plots event data geographically. It is a common pattern for web acce
 
 ---
 
-## Exercise 11: Scheduled Views - Query Performance
+## Exercise 11: Optional - Scheduled Views - Query Performance
 
 So far every panel has queried **raw log data** directly. As dashboards cover longer time ranges (days or weeks), raw queries scan large volumes of data and can become slow or time out.
 
@@ -361,7 +361,7 @@ Record your results:
 > 
 > **Key takeaway:** Views are most valuable for dashboard panels covering days or weeks of data, queries that run repeatedly (dashboards auto-refresh, scheduled reports), and queries involving expensive operations like `geoip` or complex regex parsing - the view computes these once at ingest time and caches the result. Views are **not** suitable when you need raw message-level detail, or for one-off ad-hoc queries.
 
-## Exercise 12: Optional - Build a custom clickalble drilldown link
+## Exercise 12: Optional - Build a custom drilldown link
 
 Dashboards can be part of a workflow where a clickable link in a query result table opens another web url, sumo dashboard with filters provided as query params, or [start a pre-built search in a new query tab](https://www.sumologic.com/help/docs/search/get-started-with-search/build-search/use-url-to-run-search/).
 
