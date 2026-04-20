@@ -34,7 +34,7 @@ sumo-oauth store-creds --region <REGION> --access-id <YOUR_ACCESS_ID>
 
 Replace `<REGION>` with your deployment (e.g. `au`, `us1`, `us2`, `eu`). You will be prompted for:
 
-```
+```text
 Configuring profile 'default' – press Enter to keep the current value.
 
   region or endpoint URL [current: not set]: au        ← pre-filled from --region
@@ -68,7 +68,7 @@ sumo-oauth service-accounts
 
 Example output:
 
-```
+```text
 ID                   | Name              | Email                        | Active | Created
 ---------------------+-------------------+------------------------------+--------+----------
 0000000000A123456    | mcp-service-acct  | mcp-svc@example.com          | True   | 2026-01-15
@@ -147,7 +147,7 @@ The `--save-creds` flag automatically saves the returned `clientId` to your prof
 
 Example output:
 
-```
+```text
 OAuth client created.
   clientId                : ICIEWKrJok-7H6ctnIlKCGtcrzy_cBEjeJPFnGkiAiM
   name                    : Sumo Logic MCP Client
@@ -181,7 +181,7 @@ This exchanges the client credentials for a Bearer token (valid 30 minutes) and 
 sumo-oauth token --raw
 ```
 
-This prints the full `Bearer <token>` string. Copy the token value (without the `Bearer ` prefix) for use in your MCP client configuration.
+This prints the full `Bearer <token>` string. Copy the token value (without the `Bearer` prefix) for use in your MCP client configuration.
 
 To automate token retrieval in scripts:
 
@@ -199,18 +199,48 @@ Tokens expire after 30 minutes. Re-run `sumo-oauth login` to refresh, or `sumo-o
 
 ## Next: Configure your MCP client
 
-With your `clientId`, `clientSecret`, and access token in hand, continue with the IDE configuration steps in the official docs:
+Continue with the IDE configuration steps in the official docs:
 
 **[https://www.sumologic.com/help/docs/api/mcp-server/](https://www.sumologic.com/help/docs/api/mcp-server/)**
 
-The key values you will need:
+### Setting the required environment variables
+
+The official docs require these environment variables to be set before registering the MCP server. Use the `export-env` command to print them all at once — it retrieves the `client_secret` from the OS keychain and auto-refreshes the access token:
+
+```bash
+# Print all required exports (copy/paste or eval)
+sumo-oauth export-env
+
+# Or load them directly into your current shell session
+eval $(sumo-oauth export-env)
+```
+
+Example output:
+
+```bash
+export SUMOLOGIC_MCP_URL="https://mcp.sumologic.com/mcp"
+export SUMOLOGIC_OAUTH_CLIENT_ID="ICIEWKrJok-7H6ctnIlKCGtcrzy_cBEjeJPFnGkiAiM"
+export SUMOLOGIC_OAUTH_CLIENT_SECRET="<secret from keychain>"
+export SUMOLOGIC_OAUTH_TOKEN_URL="https://service.au.sumologic.com/oauth2/token"
+export SUMOLOGIC_OAUTH_ACCESS_TOKEN="eyJ..."
+```
+
+For fish shell:
+
+```bash
+eval (sumo-oauth export-env --shell fish)
+```
+
+### Reference: individual values
+
+If you need to retrieve values individually:
 
 | Value | How to get it |
 | --- | --- |
-| `SUMOLOGIC_OAUTH_CLIENT_ID` | From `sumo-oauth status` → `client_id` field |
-| `SUMOLOGIC_OAUTH_CLIENT_SECRET` | Shown at creation time; stored in keychain |
+| `SUMOLOGIC_OAUTH_CLIENT_ID` | `sumo-oauth status` → `client_id` field |
+| `SUMOLOGIC_OAUTH_CLIENT_SECRET` | `sumo-oauth export-env` (reads from OS keychain) |
 | `SUMOLOGIC_OAUTH_ACCESS_TOKEN` | `sumo-oauth token --raw \| sed 's/Bearer //'` |
-| `SUMOLOGIC_OAUTH_TOKEN_URL` | `https://service.<region>.sumologic.com/oauth2/token` |
+| `SUMOLOGIC_OAUTH_TOKEN_URL` | `sumo-oauth export-env` (derived from profile region) |
 | `SUMOLOGIC_MCP_URL` | `https://mcp.sumologic.com/mcp` |
 
 The token URL for common regions:

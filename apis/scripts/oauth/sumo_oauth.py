@@ -1046,6 +1046,57 @@ def cmd_logout(args: argparse.Namespace, session: Session) -> None:
           "or 'clear-creds' to remove keychain secrets.")
 
 
+def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
+    """Print shell export statements for MCP environment variables."""
+    profile      = args.profile
+    profile_data = session.get(profile)
+    p            = profile_data
+
+    client_id     = p.get("client_id") or ""
+    client_secret = _keychain_get(_client_secret_key(profile)) or ""
+    endpoint      = p.get("endpoint", "")
+
+    # Derive token URL from known endpoint mapping, fallback to env or default
+    token_url = (
+        p.get("token_url")
+        or _API_TO_TOKEN_URL.get(endpoint.rstrip("/"))
+        or os.environ.get("SUMOLOGIC_OAUTH_TOKEN_URL", "")
+    )
+
+    # Get (or refresh) the access token
+    access_token = ""
+    if client_id and client_secret:
+        bearer = session.require_token(profile)
+        access_token = bearer.removeprefix("Bearer ")
+
+    if not client_secret:
+        logger.warning(
+            "client_secret not found in keychain for profile '%s'. "
+            "Run 'store-creds' or 'create-oauth-client --save-creds' first.",
+            profile,
+        )
+
+    lines = [
+        f'export SUMOLOGIC_MCP_URL="https://mcp.sumologic.com/mcp"',
+        f'export SUMOLOGIC_OAUTH_CLIENT_ID="{client_id}"',
+        f'export SUMOLOGIC_OAUTH_CLIENT_SECRET="{client_secret}"',
+        f'export SUMOLOGIC_OAUTH_TOKEN_URL="{token_url}"',
+        f'export SUMOLOGIC_OAUTH_ACCESS_TOKEN="{access_token}"',
+    ]
+
+    if args.shell == "fish":
+        lines = [
+            f'set -x SUMOLOGIC_MCP_URL "https://mcp.sumologic.com/mcp"',
+            f'set -x SUMOLOGIC_OAUTH_CLIENT_ID "{client_id}"',
+            f'set -x SUMOLOGIC_OAUTH_CLIENT_SECRET "{client_secret}"',
+            f'set -x SUMOLOGIC_OAUTH_TOKEN_URL "{token_url}"',
+            f'set -x SUMOLOGIC_OAUTH_ACCESS_TOKEN "{access_token}"',
+        ]
+
+    for line in lines:
+        print(line)
+
+
 def cmd_token(args: argparse.Namespace, session: Session) -> None:
     profile = args.profile
     auth    = session.require_token(profile)
@@ -1439,6 +1490,28 @@ Environment variables:
     p_lo = sub.add_parser("logout", help="Clear the OAuth token for a profile")
     _add_profile_arg(p_lo)
 
+    # -- export-env ----------------------------------------------------------
+    p_ee = sub.add_parser(
+        "export-env",
+        help="Print shell export statements for MCP environment variables",
+        description=(
+            "Prints export statements for all environment variables required by the "
+            "Sumo Logic MCP server, including SUMOLOGIC_OAUTH_CLIENT_SECRET from the "
+            "OS keychain and a refreshed access token.\n\n"
+            "Usage:\n"
+            "  eval $(sumo-oauth export-env)\n"
+            "  sumo-oauth export-env >> ~/.zshrc"
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    _add_profile_arg(p_ee)
+    p_ee.add_argument(
+        "--shell",
+        choices=["bash", "fish"],
+        default="bash",
+        help="Shell syntax to use for export statements (default: bash)",
+    )
+
     # -- token ---------------------------------------------------------------
     p_token = sub.add_parser("token", help="Show or refresh the access token for a profile")
     _add_profile_arg(p_token)
@@ -1570,6 +1643,7 @@ COMMAND_MAP = {
     "clear-creds":      cmd_clear_creds,
     "list-profiles":    cmd_list_profiles,
     "delete-profile":   cmd_delete_profile,
+    "export-env":       cmd_export_env,
     "login":            cmd_login,
     "logout":           cmd_logout,
     "token":            cmd_token,
