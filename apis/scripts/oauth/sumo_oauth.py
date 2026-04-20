@@ -237,6 +237,46 @@ def _api_get(url: str, auth_header: str, params: dict | None = None) -> dict:
     return resp.json()
 
 
+def _api_post(url: str, auth_header: str, payload: dict) -> dict:
+    logger.debug("POST %s  body=%s", url, payload)
+    with _SumoSession() as session:
+        resp = session.post(
+            url,
+            json=payload,
+            headers={"Authorization": auth_header,
+                     "Content-Type": "application/json",
+                     "Accept": "application/json"},
+        )
+    if resp.history:
+        for r in resp.history:
+            logger.debug("Redirect: %s %s → %s", r.status_code, r.url, r.headers.get("Location"))
+        logger.debug("Final URL after redirects: %s", resp.url)
+    if not resp.ok:
+        logger.error("HTTP %s %s", resp.status_code, resp.reason)
+        logger.error("URL: %s", resp.url)
+        logger.error("Response: %s", resp.text[:500])
+        sys.exit(1)
+    return resp.json()
+
+
+def _api_delete(url: str, auth_header: str) -> None:
+    logger.debug("DELETE %s", url)
+    with _SumoSession() as session:
+        resp = session.delete(
+            url,
+            headers={"Authorization": auth_header, "Accept": "application/json"},
+        )
+    if resp.history:
+        for r in resp.history:
+            logger.debug("Redirect: %s %s → %s", r.status_code, r.url, r.headers.get("Location"))
+        logger.debug("Final URL after redirects: %s", resp.url)
+    if not resp.ok:
+        logger.error("HTTP %s %s", resp.status_code, resp.reason)
+        logger.error("URL: %s", resp.url)
+        logger.error("Response: %s", resp.text[:500])
+        sys.exit(1)
+
+
 def _fetch_oauth_token(endpoint: str, client_id: str, client_secret: str) -> dict:
     """POST {endpoint}/oauth/v2/token with client_credentials grant."""
     token_url = f"{endpoint}/oauth/v2/token"
@@ -448,6 +488,21 @@ def list_service_accounts(endpoint: str, auth_header: str, limit: int = 100) -> 
     return accounts
 
 
+def get_oauth_client(endpoint: str, auth_header: str, client_id: str) -> dict:
+    """GET /api/v1/oauth/clients/{clientId}"""
+    return _api_get(f"{endpoint}/api/v1/oauth/clients/{client_id}", auth_header)
+
+
+def create_oauth_client(endpoint: str, auth_header: str, payload: dict) -> dict:
+    """POST /api/v1/oauth/clients"""
+    return _api_post(f"{endpoint}/api/v1/oauth/clients", auth_header, payload)
+
+
+def delete_oauth_client(endpoint: str, auth_header: str, client_id: str) -> None:
+    """DELETE /api/v1/oauth/clients/{clientId}"""
+    _api_delete(f"{endpoint}/api/v1/oauth/clients/{client_id}", auth_header)
+
+
 def list_oauth_scopes(endpoint: str, auth_header: str) -> list[dict]:
     """GET /api/v1/oauth/scopes – returns all available OAuth scopes (no pagination)."""
     resp = _api_get(f"{endpoint}/api/v1/oauth/scopes", auth_header)
@@ -532,6 +587,16 @@ def print_oauth_scopes(scopes: list[dict], fmt: str) -> None:
         ("Description", "description"),
     ])
     print(f"\nTotal: {len(scopes)}")
+
+
+def print_oauth_client(client: dict, fmt: str) -> None:
+    if fmt == "json":
+        print(json.dumps(client, indent=2))
+        return
+    for key, val in client.items():
+        if isinstance(val, list):
+            val = ", ".join(str(v) for v in val)
+        print(f"  {key:<24}: {val}")
 
 
 def print_oauth_clients(clients: list[dict], fmt: str) -> None:
@@ -960,6 +1025,49 @@ def cmd_oauth_scopes(args: argparse.Namespace, session: Session) -> None:
     print_oauth_scopes(scopes, args.output)
 
 
+def cmd_delete_oauth_client(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+    logger.info("Deleting OAuth client '%s' [profile=%s, endpoint=%s] …",
+                args.id, profile, endpoint)
+    delete_oauth_client(endpoint, _basic_auth_header(aid, akey), args.id)
+    print(f"OAuth client '{args.id}' deleted.")
+
+
+def cmd_get_oauth_client(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+    logger.info("Fetching OAuth client '%s' [profile=%s, endpoint=%s] …",
+                args.id, profile, endpoint)
+    client = get_oauth_client(endpoint, _basic_auth_header(aid, akey), args.id)
+    print_oauth_client(client, args.output)
+
+
+def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+
+    payload: dict = {"name": args.name}
+    if args.description:
+        payload["description"] = args.description
+    # redirectUris: comma-separated string → list
+    payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
+    # scopes: comma-separated scope IDs → list
+    payload["scopes"] = [s.strip() for s in args.scopes.split(",") if s.strip()]
+
+    logger.info("Creating OAuth client '%s' [profile=%s, endpoint=%s] …",
+                args.name, profile, endpoint)
+    client = create_oauth_client(endpoint, _basic_auth_header(aid, akey), payload)
+    print(f"OAuth client created.")
+    print_oauth_client(client, args.output)
+
+
 def cmd_oauth_clients(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
@@ -1171,6 +1279,38 @@ Environment variables:
         help="Which field to apply --filter regex against (default: both)",
     )
 
+    # -- delete-oauth-client -------------------------------------------------
+    p_doc = sub.add_parser("delete-oauth-client", help="Delete an OAuth client by ID [Basic auth]")
+    _add_profile_arg(p_doc)
+    _add_endpoint_args(p_doc)
+    _add_basic_auth_args(p_doc)
+    p_doc.add_argument("--id", required=True, metavar="CLIENT_ID",
+                       help="ID of the OAuth client to delete")
+
+    # -- get-oauth-client ----------------------------------------------------
+    p_goc = sub.add_parser("get-oauth-client", help="Get an OAuth client by ID [Basic auth]")
+    _add_profile_arg(p_goc)
+    _add_endpoint_args(p_goc)
+    _add_basic_auth_args(p_goc)
+    _add_output_arg(p_goc)
+    p_goc.add_argument("--id", required=True, metavar="CLIENT_ID",
+                       help="ID of the OAuth client to retrieve")
+
+    # -- create-oauth-client -------------------------------------------------
+    p_coc = sub.add_parser("create-oauth-client", help="Create a new OAuth client [Basic auth]")
+    _add_profile_arg(p_coc)
+    _add_endpoint_args(p_coc)
+    _add_basic_auth_args(p_coc)
+    _add_output_arg(p_coc)
+    p_coc.add_argument("--name", required=True,
+                       help="Display name for the OAuth client")
+    p_coc.add_argument("--description", default="",
+                       help="Optional description")
+    p_coc.add_argument("--redirect-uris", required=True, metavar="URI[,URI…]",
+                       help="Comma-separated list of allowed redirect URIs")
+    p_coc.add_argument("--scopes", required=True, metavar="SCOPE[,SCOPE…]",
+                       help="Comma-separated list of OAuth scope IDs to grant")
+
     # -- oauth-clients -------------------------------------------------------
     p_oc = sub.add_parser("oauth-clients", help="List OAuth clients [Basic auth]")
     _add_profile_arg(p_oc)
@@ -1199,7 +1339,10 @@ COMMAND_MAP = {
     "users":            cmd_users,
     "service-accounts": cmd_service_accounts,
     "oauth-scopes":     cmd_oauth_scopes,
-    "oauth-clients":    cmd_oauth_clients,
+    "delete-oauth-client": cmd_delete_oauth_client,
+    "get-oauth-client":    cmd_get_oauth_client,
+    "create-oauth-client": cmd_create_oauth_client,
+    "oauth-clients":       cmd_oauth_clients,
 }
 
 
