@@ -102,6 +102,21 @@ REGIONS = {
     "in":  "https://api.in.sumologic.com",
 }
 
+# OAuth2 token endpoints (service.* host, /oauth2/token path — different from the API host)
+TOKEN_URLS = {
+    "us1": "https://service.sumologic.com/oauth2/token",
+    "us2": "https://service.us2.sumologic.com/oauth2/token",
+    "eu":  "https://service.eu.sumologic.com/oauth2/token",
+    "au":  "https://service.au.sumologic.com/oauth2/token",
+    "de":  "https://service.de.sumologic.com/oauth2/token",
+    "jp":  "https://service.jp.sumologic.com/oauth2/token",
+    "ca":  "https://service.ca.sumologic.com/oauth2/token",
+    "in":  "https://service.in.sumologic.com/oauth2/token",
+}
+
+# Reverse map: api endpoint → token URL (for auto-derivation)
+_API_TO_TOKEN_URL = {v: TOKEN_URLS[k] for k, v in REGIONS.items()}
+
 DEFAULT_SESSION_FILE = Path.home() / ".sumo_oauth_session.json"
 DEFAULT_PROFILE      = "default"
 TOKEN_REFRESH_BUFFER_SECS = 60
@@ -259,6 +274,28 @@ def _api_post(url: str, auth_header: str, payload: dict) -> dict:
     return resp.json()
 
 
+def _api_put(url: str, auth_header: str, payload: dict) -> dict:
+    logger.debug("PUT %s  body=%s", url, payload)
+    with _SumoSession() as session:
+        resp = session.put(
+            url,
+            json=payload,
+            headers={"Authorization": auth_header,
+                     "Content-Type": "application/json",
+                     "Accept": "application/json"},
+        )
+    if resp.history:
+        for r in resp.history:
+            logger.debug("Redirect: %s %s → %s", r.status_code, r.url, r.headers.get("Location"))
+        logger.debug("Final URL after redirects: %s", resp.url)
+    if not resp.ok:
+        logger.error("HTTP %s %s", resp.status_code, resp.reason)
+        logger.error("URL: %s", resp.url)
+        logger.error("Response: %s", resp.text[:500])
+        sys.exit(1)
+    return resp.json()
+
+
 def _api_delete(url: str, auth_header: str) -> None:
     logger.debug("DELETE %s", url)
     with _SumoSession() as session:
@@ -277,18 +314,30 @@ def _api_delete(url: str, auth_header: str) -> None:
         sys.exit(1)
 
 
-def _fetch_oauth_token(endpoint: str, client_id: str, client_secret: str) -> dict:
-    """POST {endpoint}/oauth/v2/token with client_credentials grant."""
-    token_url = f"{endpoint}/oauth/v2/token"
+def _fetch_oauth_token(endpoint: str, client_id: str, client_secret: str,
+                       scopes: list[str] | None = None,
+                       token_url: str | None = None) -> dict:
+    """POST to the token endpoint with client_credentials grant.
+
+    Credentials are sent via HTTP Basic auth (Authorization header) as per
+    RFC 6749 §2.3.1, matching the curl -u <id>:<secret> pattern.
+    The default token URL is {endpoint}/oauth/v2/token; pass token_url to override.
+    """
+    url = token_url or _API_TO_TOKEN_URL.get(endpoint.rstrip("/")) or f"{endpoint}/oauth/v2/token"
+    logger.debug("Token request: POST %s  scopes=%s", url, scopes)
+    creds = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+    data: dict = {"grant_type": "client_credentials"}
+    if scopes:
+        data["scope"] = " ".join(scopes)
     with _SumoSession() as session:
         resp = session.post(
-            token_url,
-            data={
-                "grant_type":    "client_credentials",
-                "client_id":     client_id,
-                "client_secret": client_secret,
+            url,
+            data=data,
+            headers={
+                "Authorization": f"Basic {creds}",
+                "Content-Type":  "application/x-www-form-urlencoded",
+                "Accept":        "application/json",
             },
-            headers={"Accept": "application/json"},
         )
     if not resp.ok:
         logger.error("Token request failed – HTTP %s: %s", resp.status_code, resp.text[:500])
@@ -375,7 +424,9 @@ class Session:
         )
 
     def store_token(self, profile: str, endpoint: str, client_id: str,
-                    client_secret: str, token_response: dict) -> None:
+                    client_secret: str, token_response: dict,
+                    scopes: list[str] | None = None,
+                    token_url: str | None = None) -> None:
         """
         Persist token metadata to the session file.
         Stores client_secret in keychain – never in the file.
@@ -399,6 +450,10 @@ class Session:
             "expires_at":   time.time() + expires_in,
             "expires_in":   expires_in,
         })
+        if scopes:
+            p["scopes"] = scopes
+        if token_url:
+            p["token_url"] = token_url
         self.set(profile, p)
         logger.info("Profile '%s' saved to %s (expires in %ds)", profile, self.path, expires_in)
 
@@ -426,8 +481,12 @@ class Session:
                     profile, profile, p["client_id"],
                 )
                 sys.exit(1)
-            token_resp = _fetch_oauth_token(p["endpoint"], p["client_id"], client_secret)
-            self.store_token(profile, p["endpoint"], p["client_id"], client_secret, token_resp)
+            token_resp = _fetch_oauth_token(
+                p["endpoint"], p["client_id"], client_secret,
+                scopes=p.get("scopes"), token_url=p.get("token_url"),
+            )
+            self.store_token(profile, p["endpoint"], p["client_id"], client_secret, token_resp,
+                             scopes=p.get("scopes"), token_url=p.get("token_url"))
             p = self.get(profile)
 
         return f"Bearer {p['access_token']}"
@@ -438,19 +497,25 @@ class Session:
             return {"profile": profile, "status": "not configured"}
         expires_at = float(p.get("expires_at", 0))
         remaining  = max(0, expires_at - time.time())
+        remaining_i = int(remaining)
+        remaining_hms = "{:02d}:{:02d}:{:02d}".format(
+            remaining_i // 3600, (remaining_i % 3600) // 60, remaining_i % 60
+        )
         return {
-            "profile":             profile,
-            "status":              "valid" if self._is_valid(profile) else
-                                   ("expired" if p.get("access_token") else "no token"),
-            "endpoint":            p.get("endpoint"),
-            "client_id":           p.get("client_id"),
-            "access_id":           p.get("access_id"),
-            "expires_at":          time.strftime("%Y-%m-%dT%H:%M:%SZ",
-                                                 time.gmtime(expires_at)) if expires_at else None,
-            "remaining_s":         int(remaining),
+            "profile":              profile,
+            "status":               "valid" if self._is_valid(profile) else
+                                    ("expired" if p.get("access_token") else "no token"),
+            "endpoint":             p.get("endpoint"),
+            "client_id":            p.get("client_id"),
+            "access_id":            p.get("access_id"),
+            "expires_at_utc":       time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                                  time.gmtime(expires_at)) if expires_at else None,
+            "expires_at_local":     time.strftime("%Y-%m-%dT%H:%M:%S %Z",
+                                                  time.localtime(expires_at)) if expires_at else None,
+            "remaining":            remaining_hms,
             "client_secret_stored": bool(_keychain_get(_client_secret_key(profile))),
             "access_key_stored":    bool(_keychain_get(_access_key_key(profile))),
-            "keychain_available":  _keychain_available(),
+            "keychain_available":   _keychain_available(),
         }
 
 
@@ -498,9 +563,30 @@ def create_oauth_client(endpoint: str, auth_header: str, payload: dict) -> dict:
     return _api_post(f"{endpoint}/api/v1/oauth/clients", auth_header, payload)
 
 
+def update_oauth_client(endpoint: str, auth_header: str, client_id: str, payload: dict) -> dict:
+    """PUT /api/v1/oauth/clients/{clientId}"""
+    return _api_put(f"{endpoint}/api/v1/oauth/clients/{client_id}", auth_header, payload)
+
+
 def delete_oauth_client(endpoint: str, auth_header: str, client_id: str) -> None:
     """DELETE /api/v1/oauth/clients/{clientId}"""
     _api_delete(f"{endpoint}/api/v1/oauth/clients/{client_id}", auth_header)
+
+
+def list_oauth_consents(endpoint: str, auth_header: str, limit: int = 100) -> list[dict]:
+    """GET /api/v1/oauth/consents – paginated list of OAuth consents."""
+    consents: list[dict] = []
+    token = None
+    while True:
+        params: dict = {"limit": limit}
+        if token:
+            params["token"] = token
+        resp = _api_get(f"{endpoint}/api/v1/oauth/consents", auth_header, params)
+        consents.extend(resp.get("data", []))
+        token = resp.get("next")
+        if not token:
+            break
+    return consents
 
 
 def list_oauth_scopes(endpoint: str, auth_header: str) -> list[dict]:
@@ -575,6 +661,21 @@ def print_service_accounts(accounts: list[dict], fmt: str) -> None:
         ("Created", "createdAt"),
     ])
     print(f"\nTotal: {len(accounts)}")
+
+
+def print_oauth_consents(consents: list[dict], fmt: str) -> None:
+    if fmt == "json":
+        print(json.dumps(consents, indent=2))
+        return
+    _print_table(consents, [
+        ("Consent ID",  "id"),
+        ("Client ID",   "clientId"),
+        ("User ID",     "userId"),
+        ("Scopes",      "scopes"),
+        ("Created",     "createdAt"),
+        ("Expires",     "expiresAt"),
+    ])
+    print(f"\nTotal: {len(consents)}")
 
 
 def print_oauth_scopes(scopes: list[dict], fmt: str) -> None:
@@ -909,16 +1010,25 @@ def cmd_login(args: argparse.Namespace, session: Session) -> None:
     endpoint     = _resolve_endpoint(args, profile_data)
     client_id, client_secret = _require_oauth_creds(args, profile, profile_data)
 
+    scopes    = [s.strip() for s in args.scopes.split()] if getattr(args, "scopes", None) else None
+    token_url = getattr(args, "token_url", None) or None
+
     logger.info("Requesting access token for profile '%s' from %s …", profile, endpoint)
-    token_resp = _fetch_oauth_token(endpoint, client_id, client_secret)
-    session.store_token(profile, endpoint, client_id, client_secret, token_resp)
+    token_resp = _fetch_oauth_token(endpoint, client_id, client_secret,
+                                    scopes=scopes, token_url=token_url)
+    session.store_token(profile, endpoint, client_id, client_secret, token_resp,
+                        scopes=scopes, token_url=token_url)
 
     s = session.profile_status(profile)
     print(f"Login successful (profile: {profile}).")
     print(f"  Endpoint           : {s['endpoint']}")
     print(f"  Client ID          : {s['client_id']}")
-    print(f"  Expires at         : {s['expires_at']} ({s['remaining_s']}s remaining)")
+    print(f"  Expires at (UTC)   : {s['expires_at_utc']}  ({s['remaining']} remaining)")
     print(f"  Secret in keychain : {s['client_secret_stored']}")
+    if scopes:
+        print(f"  Scopes             : {' '.join(scopes)}")
+    if token_url:
+        print(f"  Token URL          : {token_url}")
 
 
 def cmd_logout(args: argparse.Namespace, session: Session) -> None:
@@ -947,7 +1057,7 @@ def cmd_token(args: argparse.Namespace, session: Session) -> None:
     print(f"Status             : {s['status']}")
     print(f"Endpoint           : {s['endpoint']}")
     print(f"Client ID          : {s['client_id']}")
-    print(f"Expires at         : {s['expires_at']} ({s['remaining_s']}s remaining)")
+    print(f"Expires at (UTC)   : {s['expires_at_utc']}  ({s['remaining']} remaining)")
     print(f"Secret in keychain : {s['client_secret_stored']}")
     print(f"Token              : {auth[:50]}…")
 
@@ -1011,6 +1121,19 @@ def cmd_service_accounts(args: argparse.Namespace, session: Session) -> None:
     print_service_accounts(accounts, args.output)
 
 
+def cmd_oauth_consents(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+    logger.info("Fetching OAuth consents [profile=%s, endpoint=%s] …", profile, endpoint)
+    consents = _apply_regex_filter(
+        list_oauth_consents(endpoint, _basic_auth_header(aid, akey), args.limit),
+        args.filter, ["clientId", "userId"],
+    )
+    print_oauth_consents(consents, args.output)
+
+
 def cmd_oauth_scopes(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
@@ -1023,6 +1146,39 @@ def cmd_oauth_scopes(args: argparse.Namespace, session: Session) -> None:
         args.filter, filter_fields,
     )
     print_oauth_scopes(scopes, args.output)
+
+
+def cmd_update_oauth_client(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+
+    if args.from_file:
+        try:
+            payload = json.loads(Path(args.from_file).read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.error("Cannot read --from-file '%s': %s", args.from_file, exc)
+            sys.exit(1)
+        logger.info("Updating OAuth client '%s' from file '%s' [profile=%s, endpoint=%s] …",
+                    args.id, args.from_file, profile, endpoint)
+    else:
+        if not args.name:
+            logger.error("--name is required when not using --from-file")
+            sys.exit(1)
+        payload = {"name": args.name}
+        if args.description:
+            payload["description"] = args.description
+        if args.redirect_uris:
+            payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
+        if args.scopes:
+            payload["scopes"] = [s.strip() for s in args.scopes.split(",") if s.strip()]
+        logger.info("Updating OAuth client '%s' [profile=%s, endpoint=%s] …",
+                    args.id, profile, endpoint)
+
+    client = update_oauth_client(endpoint, _basic_auth_header(aid, akey), args.id, payload)
+    print(f"OAuth client '{args.id}' updated.")
+    print_oauth_client(client, args.output)
 
 
 def cmd_delete_oauth_client(args: argparse.Namespace, session: Session) -> None:
@@ -1053,19 +1209,58 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
     endpoint     = _resolve_endpoint(args, profile_data)
     aid, akey    = _require_basic_auth(args, profile, profile_data)
 
-    payload: dict = {"name": args.name}
-    if args.description:
-        payload["description"] = args.description
-    # redirectUris: comma-separated string → list
-    payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
-    # scopes: comma-separated scope IDs → list
-    payload["scopes"] = [s.strip() for s in args.scopes.split(",") if s.strip()]
+    if args.from_file:
+        try:
+            payload = json.loads(Path(args.from_file).read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.error("Cannot read --from-file '%s': %s", args.from_file, exc)
+            sys.exit(1)
+        logger.info("Creating OAuth client from file '%s' [profile=%s, endpoint=%s] …",
+                    args.from_file, profile, endpoint)
+    else:
+        if not args.name:
+            logger.error("--name is required when not using --from-file")
+            sys.exit(1)
+        if not args.redirect_uris and not args.scopes:
+            logger.error("--redirect-uris and --scopes are required when not using --from-file")
+            sys.exit(1)
+        payload = {"name": args.name}
+        if args.description:
+            payload["description"] = args.description
+        if args.redirect_uris:
+            payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
+        if args.scopes:
+            payload["scopes"] = [s.strip() for s in args.scopes.split(",") if s.strip()]
+        logger.info("Creating OAuth client '%s' [profile=%s, endpoint=%s] …",
+                    args.name, profile, endpoint)
 
-    logger.info("Creating OAuth client '%s' [profile=%s, endpoint=%s] …",
-                args.name, profile, endpoint)
     client = create_oauth_client(endpoint, _basic_auth_header(aid, akey), payload)
-    print(f"OAuth client created.")
+    print("OAuth client created.")
     print_oauth_client(client, args.output)
+
+    if args.save_creds:
+        returned_id     = client.get("clientId")
+        returned_secret = client.get("clientSecret")
+        if not returned_id or not returned_secret:
+            logger.warning(
+                "--save-creds requested but API response did not include clientId/clientSecret. "
+                "Profile credentials unchanged."
+            )
+        else:
+            p = session.get(profile)
+            p["client_id"] = returned_id
+            session.set(profile, p)
+            if _keychain_available() and _keychain_set(_client_secret_key(profile), returned_secret):
+                print(f"\nCredentials saved to profile '{profile}':")
+                print(f"  client_id     : {returned_id}")
+                print(f"  client_secret : stored in OS keychain")
+                print("Run 'sumo-oauth login' to obtain a token with the new client.")
+            else:
+                logger.warning(
+                    "client_id saved to profile '%s' but client_secret could not be stored "
+                    "in keychain. Store it manually with 'store-creds --profile %s'.",
+                    profile, profile,
+                )
 
 
 def cmd_oauth_clients(args: argparse.Namespace, session: Session) -> None:
@@ -1230,6 +1425,15 @@ Environment variables:
                          help="OAuth client ID override. Env: SUMO_CLIENT_ID")
     p_login.add_argument("--client-secret", metavar="SECRET",
                          help="OAuth client secret override. Prefer keychain.")
+    p_login.add_argument("--scopes", metavar="SCOPE [SCOPE…]",
+                         help="Space-separated list of scopes to request "
+                              "(e.g. 'runLogSearch viewCollectors'). "
+                              "Stored in profile and reused on auto-refresh.")
+    p_login.add_argument("--token-url", metavar="URL",
+                         help="Override the token endpoint URL "
+                              "(default: {endpoint}/oauth/v2/token). "
+                              "Use if your account uses a different token host "
+                              "(e.g. https://service.sumologic.com/oauth2/token).")
 
     # -- logout --------------------------------------------------------------
     p_lo = sub.add_parser("logout", help="Clear the OAuth token for a profile")
@@ -1265,6 +1469,15 @@ Environment variables:
     _add_limit_arg(p_sa)
     _add_filter_arg(p_sa, "Filter by email (case-insensitive regex)")
 
+    # -- oauth-consents ------------------------------------------------------
+    p_oco = sub.add_parser("oauth-consents", help="List OAuth consents [Basic auth]")
+    _add_profile_arg(p_oco)
+    _add_endpoint_args(p_oco)
+    _add_basic_auth_args(p_oco)
+    _add_output_arg(p_oco)
+    _add_limit_arg(p_oco)
+    _add_filter_arg(p_oco, "Filter by clientId or userId (case-insensitive regex)")
+
     # -- oauth-scopes --------------------------------------------------------
     p_os = sub.add_parser("oauth-scopes", help="List available OAuth scopes [Basic auth]")
     _add_profile_arg(p_os)
@@ -1287,6 +1500,25 @@ Environment variables:
     p_doc.add_argument("--id", required=True, metavar="CLIENT_ID",
                        help="ID of the OAuth client to delete")
 
+    # -- update-oauth-client -------------------------------------------------
+    p_uoc = sub.add_parser("update-oauth-client", help="Update an OAuth client by ID [Basic auth]")
+    _add_profile_arg(p_uoc)
+    _add_endpoint_args(p_uoc)
+    _add_basic_auth_args(p_uoc)
+    _add_output_arg(p_uoc)
+    p_uoc.add_argument("--id", required=True, metavar="CLIENT_ID",
+                       help="ID of the OAuth client to update")
+    p_uoc.add_argument("--from-file", metavar="FILE",
+                       help="Path to a JSON file containing the full update payload (posted as-is)")
+    p_uoc.add_argument("--name", default=None,
+                       help="New display name (required without --from-file)")
+    p_uoc.add_argument("--description", default="",
+                       help="New description")
+    p_uoc.add_argument("--redirect-uris", default=None, metavar="URI[,URI…]",
+                       help="Comma-separated list of allowed redirect URIs")
+    p_uoc.add_argument("--scopes", default=None, metavar="SCOPE[,SCOPE…]",
+                       help="Comma-separated list of OAuth scope IDs")
+
     # -- get-oauth-client ----------------------------------------------------
     p_goc = sub.add_parser("get-oauth-client", help="Get an OAuth client by ID [Basic auth]")
     _add_profile_arg(p_goc)
@@ -1302,13 +1534,19 @@ Environment variables:
     _add_endpoint_args(p_coc)
     _add_basic_auth_args(p_coc)
     _add_output_arg(p_coc)
-    p_coc.add_argument("--name", required=True,
-                       help="Display name for the OAuth client")
+    p_coc.add_argument("--save-creds", action="store_true",
+                       help="Save the returned clientId to the profile and store "
+                            "clientSecret in the OS keychain (enables immediate 'login')")
+    p_coc.add_argument("--from-file", metavar="FILE",
+                       help="Path to a JSON file containing the full client payload "
+                            "(posted as-is; overrides all other field flags)")
+    p_coc.add_argument("--name", default=None,
+                       help="Display name for the OAuth client (required without --from-file)")
     p_coc.add_argument("--description", default="",
                        help="Optional description")
-    p_coc.add_argument("--redirect-uris", required=True, metavar="URI[,URI…]",
+    p_coc.add_argument("--redirect-uris", default=None, metavar="URI[,URI…]",
                        help="Comma-separated list of allowed redirect URIs")
-    p_coc.add_argument("--scopes", required=True, metavar="SCOPE[,SCOPE…]",
+    p_coc.add_argument("--scopes", default=None, metavar="SCOPE[,SCOPE…]",
                        help="Comma-separated list of OAuth scope IDs to grant")
 
     # -- oauth-clients -------------------------------------------------------
@@ -1338,8 +1576,10 @@ COMMAND_MAP = {
     "status":           cmd_status,
     "users":            cmd_users,
     "service-accounts": cmd_service_accounts,
+    "oauth-consents":   cmd_oauth_consents,
     "oauth-scopes":     cmd_oauth_scopes,
     "delete-oauth-client": cmd_delete_oauth_client,
+    "update-oauth-client": cmd_update_oauth_client,
     "get-oauth-client":    cmd_get_oauth_client,
     "create-oauth-client": cmd_create_oauth_client,
     "oauth-clients":       cmd_oauth_clients,
