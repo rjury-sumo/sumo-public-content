@@ -197,6 +197,10 @@ sumo-oauth users [--profile NAME] [--filter REGEX] [--output {table,json}] [--li
 # Filter by email (case-insensitive regex)
 sumo-oauth users --filter "@example.com"
 
+# Resolve role IDs to names (fetches /api/v2/roles and maps IDs in the Role IDs column)
+sumo-oauth users --resolve-roles
+sumo-oauth users --resolve-roles --filter "@example.com"
+
 # List service accounts
 sumo-oauth service-accounts [--profile NAME] [--filter REGEX] [--output {table,json}] [--limit N]
 ```
@@ -275,6 +279,22 @@ sumo-oauth oauth-scopes --filter "^runLog" --filter-field id
 ```
 
 Table columns: `id`, `label`, `type`, `group`.
+
+### Roles
+
+```bash
+# List all roles (v2 API)
+sumo-oauth roles [--profile NAME] [--output {table,json}] [--limit N]
+
+# Filter by name or ID (default: both)
+sumo-oauth roles --filter "admin"
+sumo-oauth roles --filter "0000000000001234" --filter-field id
+sumo-oauth roles --filter "analyst" --filter-field name
+```
+
+Table columns: `id`, `name`, `description`, `systemDefined`, `capabilities`.
+Capabilities show `(all)` when empty; large lists are shown as a preview with overflow count.
+Use `--output json` to see full `capabilities`, `users`, and filter predicate fields.
 
 ### OAuth consents
 
