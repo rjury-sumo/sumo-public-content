@@ -635,15 +635,19 @@ def _print_table(rows: list[dict], columns: list[tuple[str, str]]) -> None:
         print("(no results)")
         return
     widths = [len(label) for label, _ in columns]
+    def _cell(row, key):
+        v = row.get(key)
+        return "-" if v is None else str(v)
+
     for row in rows:
         for i, (_, key) in enumerate(columns):
-            widths[i] = max(widths[i], len(str(row.get(key, ""))))
+            widths[i] = max(widths[i], len(_cell(row, key)))
     sep = "-+-".join("-" * w for w in widths)
     print(" | ".join(f"{label:<{widths[i]}}" for i, (label, _) in enumerate(columns)))
     print(sep)
     for row in rows:
         print(" | ".join(
-            f"{str(row.get(key, '')):<{widths[i]}}"
+            f"{_cell(row, key):<{widths[i]}}"
             for i, (_, key) in enumerate(columns)
         ))
 
@@ -733,10 +737,16 @@ def print_oauth_scopes(scopes: list[dict], fmt: str) -> None:
     if fmt == "json":
         print(json.dumps(scopes, indent=2))
         return
-    _print_table(scopes, [
-        ("ID",          "id"),
-        ("Label",       "label"),
-        ("Description", "description"),
+    rows = []
+    for s in scopes:
+        row = dict(s)
+        row["_group"] = (s.get("group") or {}).get("label", "-")
+        rows.append(row)
+    _print_table(rows, [
+        ("ID",    "id"),
+        ("Label", "label"),
+        ("Type",  "type"),
+        ("Group", "_group"),
     ])
     print(f"\nTotal: {len(scopes)}")
 
@@ -755,11 +765,21 @@ def print_oauth_clients(clients: list[dict], fmt: str) -> None:
     if fmt == "json":
         print(json.dumps(clients, indent=2))
         return
-    _print_table(clients, [
-        ("Client ID",   "clientId"),
-        ("Name",        "name"),
-        ("Description", "description"),
-        ("Created",     "createdAt"),
+    rows = []
+    for c in clients:
+        row = dict(c)
+        row["_scopes"]          = _fmt_scopes(c.get("scopes", []))
+        row["_effectiveScopes"] = _fmt_scopes(c.get("effectiveScopes", []))
+        row["_runAsId"]         = (c.get("runAs") or {}).get("runAsId", "-")
+        rows.append(row)
+    _print_table(rows, [
+        ("Client ID",        "clientId"),
+        ("Name",             "name"),
+        ("Type",             "type"),
+        ("Disabled",         "disabled"),
+        ("Run As ID",        "_runAsId"),
+        ("Scopes",           "_scopes"),
+        ("Created",          "createdAt"),
     ])
     print(f"\nTotal: {len(clients)}")
 
