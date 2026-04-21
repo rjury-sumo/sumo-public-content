@@ -523,6 +523,22 @@ class Session:
 # API calls (all use Basic auth)
 # ---------------------------------------------------------------------------
 
+def list_access_keys(endpoint: str, auth_header: str, limit: int = 100) -> list[dict]:
+    """GET /api/v1/accessKeys – paginated list of access keys for the org."""
+    keys: list[dict] = []
+    token = None
+    while True:
+        params: dict = {"limit": limit}
+        if token:
+            params["token"] = token
+        resp = _api_get(f"{endpoint}/api/v1/accessKeys", auth_header, params)
+        keys.extend(resp.get("data", []))
+        token = resp.get("next")
+        if not token:
+            break
+    return keys
+
+
 def list_users(endpoint: str, auth_header: str, limit: int = 100) -> list[dict]:
     users: list[dict] = []
     token = None
@@ -630,6 +646,41 @@ def _print_table(rows: list[dict], columns: list[tuple[str, str]]) -> None:
             f"{str(row.get(key, '')):<{widths[i]}}"
             for i, (_, key) in enumerate(columns)
         ))
+
+
+def _fmt_scopes(val: list) -> str:
+    """Format a scopes array: [] means all scopes; otherwise show count + first few."""
+    if not val:
+        return "(all)"
+    preview = ", ".join(val[:3])
+    return f"{preview}, +{len(val) - 3} more" if len(val) > 3 else preview
+
+
+def print_access_keys(keys: list[dict], fmt: str) -> None:
+    if fmt == "json":
+        print(json.dumps(keys, indent=2))
+        return
+    # Flatten scopes for table display before passing to _print_table
+    rows = []
+    for k in keys:
+        row = dict(k)
+        row["_scopes"]          = _fmt_scopes(k.get("scopes", []))
+        row["_effectiveScopes"] = _fmt_scopes(k.get("effectiveScopes", []))
+        row["_disabled"]        = str(k.get("disabled", ""))
+        row["_corsHeaders"]     = ", ".join(k.get("corsHeaders", [])) or "(none)"
+        rows.append(row)
+    _print_table(rows, [
+        ("ID",               "id"),
+        ("Label",            "label"),
+        ("Disabled",         "_disabled"),
+        ("Service Acct ID",  "serviceAccountId"),
+        ("Created At",       "createdAt"),
+        ("Last Used",        "lastUsed"),
+        ("Expires On",       "expiresOn"),
+        ("Scopes",           "_scopes"),
+        ("Effective Scopes", "_effectiveScopes"),
+    ])
+    print(f"\nTotal: {len(keys)}")
 
 
 def print_users(users: list[dict], fmt: str) -> None:
@@ -1146,6 +1197,21 @@ def _apply_regex_filter(items: list[dict], pattern: str | None,
     return matched
 
 
+def cmd_access_keys(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+    logger.info("Fetching access keys [profile=%s, endpoint=%s] …", profile, endpoint)
+    all_fields = ["id", "label", "createdBy", "serviceAccountId"]
+    filter_fields = all_fields if args.filter_field == "all" else [args.filter_field]
+    keys = _apply_regex_filter(
+        list_access_keys(endpoint, _basic_auth_header(aid, akey), args.limit),
+        args.filter, filter_fields,
+    )
+    print_access_keys(keys, args.output)
+
+
 def cmd_users(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
@@ -1524,6 +1590,21 @@ Environment variables:
     p_status.add_argument("--all", dest="profile", action="store_const", const="__all__",
                            help="Show status of all profiles")
 
+    # -- access-keys ---------------------------------------------------------
+    p_ak = sub.add_parser("access-keys", help="List access keys [Basic auth]")
+    _add_profile_arg(p_ak)
+    _add_endpoint_args(p_ak)
+    _add_basic_auth_args(p_ak)
+    _add_output_arg(p_ak)
+    _add_limit_arg(p_ak)
+    _add_filter_arg(p_ak, "Filter using a case-insensitive regex (see --filter-field)")
+    p_ak.add_argument(
+        "--filter-field",
+        choices=["id", "label", "createdBy", "serviceAccountId", "all"],
+        default="all",
+        help="Which field to apply --filter against (default: all)",
+    )
+
     # -- users ---------------------------------------------------------------
     p_users = sub.add_parser("users", help="List users [Basic auth]")
     _add_profile_arg(p_users)
@@ -1648,6 +1729,7 @@ COMMAND_MAP = {
     "logout":           cmd_logout,
     "token":            cmd_token,
     "status":           cmd_status,
+    "access-keys":      cmd_access_keys,
     "users":            cmd_users,
     "service-accounts": cmd_service_accounts,
     "oauth-consents":   cmd_oauth_consents,

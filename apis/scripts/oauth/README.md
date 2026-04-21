@@ -166,6 +166,25 @@ sumo-oauth users --filter "@example.com"
 sumo-oauth service-accounts [--profile NAME] [--filter REGEX] [--output {table,json}] [--limit N]
 ```
 
+### Access keys
+
+```bash
+# List all access keys
+sumo-oauth access-keys [--profile NAME] [--output {table,json}] [--limit N]
+
+# Filter across all fields (id, label, createdBy, serviceAccountId) — default
+sumo-oauth access-keys --filter "mcp"
+
+# Filter by a specific field
+sumo-oauth access-keys --filter "0000000000C49221" --filter-field serviceAccountId
+sumo-oauth access-keys --filter "0000000000C40E60" --filter-field createdBy
+sumo-oauth access-keys --filter "prod" --filter-field label
+```
+
+Table columns: `id`, `label`, `disabled`, `serviceAccountId`, `createdAt`, `lastUsed`, `expiresOn`, `scopes`, `effectiveScopes`.
+Scopes are displayed as `(all)` when the array is empty (meaning no scope restriction), or as a preview with a count for large lists.
+Use `--output json` to see the full `scopes`, `effectiveScopes`, and `corsHeaders` arrays.
+
 ### OAuth clients
 
 ```bash
