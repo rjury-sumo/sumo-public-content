@@ -135,6 +135,7 @@ def fetch_all(profile: str, output_dir: Path) -> None:
         ("access_keys",      "/api/v1/accessKeys"),
         ("oauth_clients",    "/api/v1/oauth/clients"),
         ("oauth_consents",   "/api/v1/oauth/consents"),
+        ("roles_v2",         "/api/v2/roles"),
     ]
 
     for name, path in endpoints_basic:

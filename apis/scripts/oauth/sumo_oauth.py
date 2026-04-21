@@ -626,6 +626,22 @@ def list_oauth_clients(endpoint: str, auth_header: str, limit: int = 100) -> lis
     return clients
 
 
+def list_roles_v2(endpoint: str, auth_header: str, limit: int = 100) -> list[dict]:
+    """GET /api/v2/roles – paginated list of roles."""
+    roles: list[dict] = []
+    token = None
+    while True:
+        params: dict = {"limit": limit}
+        if token:
+            params["token"] = token
+        resp = _api_get(f"{endpoint}/api/v2/roles", auth_header, params)
+        roles.extend(resp.get("data", []))
+        token = resp.get("next")
+        if not token:
+            break
+    return roles
+
+
 # ---------------------------------------------------------------------------
 # Output formatting
 # ---------------------------------------------------------------------------
@@ -759,6 +775,26 @@ def print_oauth_client(client: dict, fmt: str) -> None:
         if isinstance(val, list):
             val = ", ".join(str(v) for v in val)
         print(f"  {key:<24}: {val}")
+
+
+def print_roles(roles: list[dict], fmt: str) -> None:
+    if fmt == "json":
+        print(json.dumps(roles, indent=2))
+        return
+    rows = []
+    for r in roles:
+        row = dict(r)
+        row["_capabilities"] = _fmt_scopes(r.get("capabilities", []))
+        row["_systemDefined"] = str(r.get("systemDefined", ""))
+        rows.append(row)
+    _print_table(rows, [
+        ("ID",             "id"),
+        ("Name",           "name"),
+        ("Description",    "description"),
+        ("System Defined", "_systemDefined"),
+        ("Capabilities",   "_capabilities"),
+    ])
+    print(f"\nTotal: {len(roles)}")
 
 
 def print_oauth_clients(clients: list[dict], fmt: str) -> None:
@@ -1400,6 +1436,20 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
                 )
 
 
+def cmd_roles(args: argparse.Namespace, session: Session) -> None:
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+    aid, akey    = _require_basic_auth(args, profile, profile_data)
+    logger.info("Fetching roles [profile=%s, endpoint=%s] …", profile, endpoint)
+    filter_fields = [args.filter_field] if args.filter_field != "both" else ["id", "name"]
+    roles = _apply_regex_filter(
+        list_roles_v2(endpoint, _basic_auth_header(aid, akey), args.limit),
+        args.filter, filter_fields,
+    )
+    print_roles(roles, args.output)
+
+
 def cmd_oauth_clients(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
@@ -1732,6 +1782,21 @@ Environment variables:
     _add_limit_arg(p_oc)
     _add_filter_arg(p_oc, "Filter by name or clientId (case-insensitive regex)")
 
+    # -- roles ---------------------------------------------------------------
+    p_roles = sub.add_parser("roles", help="List roles v2 [Basic auth]")
+    _add_profile_arg(p_roles)
+    _add_endpoint_args(p_roles)
+    _add_basic_auth_args(p_roles)
+    _add_output_arg(p_roles)
+    _add_limit_arg(p_roles)
+    _add_filter_arg(p_roles, "Filter by id or name (case-insensitive regex, see --filter-field)")
+    p_roles.add_argument(
+        "--filter-field",
+        choices=["id", "name", "both"],
+        default="both",
+        help="Which field to apply --filter against (default: both)",
+    )
+
     return parser
 
 
@@ -1759,6 +1824,7 @@ COMMAND_MAP = {
     "get-oauth-client":    cmd_get_oauth_client,
     "create-oauth-client": cmd_create_oauth_client,
     "oauth-clients":       cmd_oauth_clients,
+    "roles":               cmd_roles,
 }
 
 

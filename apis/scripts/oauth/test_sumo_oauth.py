@@ -560,6 +560,26 @@ class TestListFunctions(unittest.TestCase):
             f"{self.ENDPOINT}/api/v1/oauth/clients/cid1", self.AUTH, payload
         )
 
+    @patch("sumo_oauth._api_get")
+    def test_list_roles_v2_returns_data(self, mock_get):
+        mock_get.return_value = {"data": [{"id": "R001", "name": "Admin"}], "next": None}
+        result = so.list_roles_v2(self.ENDPOINT, self.AUTH)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["name"], "Admin")
+        mock_get.assert_called_once_with(
+            f"{self.ENDPOINT}/api/v2/roles", self.AUTH, {"limit": 100}
+        )
+
+    @patch("sumo_oauth._api_get")
+    def test_list_roles_v2_paginates(self, mock_get):
+        mock_get.side_effect = [
+            {"data": [{"id": "R001", "name": "Admin"}],   "next": "tok2"},
+            {"data": [{"id": "R002", "name": "Analyst"}], "next": None},
+        ]
+        result = so.list_roles_v2(self.ENDPOINT, self.AUTH)
+        self.assertEqual(len(result), 2)
+        self.assertEqual(mock_get.call_count, 2)
+
 
 # ===========================================================================
 # Output formatting (capture stdout)
@@ -627,6 +647,20 @@ class TestPrintFunctions(unittest.TestCase):
         "scopes": ["runLogSearch"],
         "createdAt": "2026-04-20T00:00:00Z",
         "expiresAt": "2026-07-20T00:00:00Z",
+    }
+
+    ROLE = {
+        "id": "0000000000000020",
+        "name": "Analyst",
+        "description": "Read-only analyst role",
+        "filterPredicate": "",
+        "users": ["0000000000000001"],
+        "capabilities": ["viewCollectors", "runLogSearch", "viewFields"],
+        "systemDefined": False,
+        "createdAt": "2026-01-01T00:00:00Z",
+        "createdBy": "0000000000000001",
+        "modifiedAt": "2026-01-01T00:00:00Z",
+        "modifiedBy": "0000000000000001",
     }
 
     def _capture(self, fn, *args):
@@ -730,6 +764,40 @@ class TestPrintFunctions(unittest.TestCase):
         self.assertIn("Consent ID", output)
         self.assertIn("Client ID", output)
 
+    # -- roles ---------------------------------------------------------------
+
+    def test_print_roles_json(self):
+        output = self._capture(so.print_roles, [self.ROLE], "json")
+        parsed = json.loads(output)
+        self.assertIsInstance(parsed, list)
+        self.assertEqual(parsed[0]["name"], "Analyst")
+
+    def test_print_roles_table_headers(self):
+        output = self._capture(so.print_roles, [self.ROLE], "table")
+        self.assertIn("ID", output)
+        self.assertIn("Name", output)
+        self.assertIn("System Defined", output)
+        self.assertIn("Capabilities", output)
+
+    def test_print_roles_table_content(self):
+        output = self._capture(so.print_roles, [self.ROLE], "table")
+        self.assertIn("Analyst", output)
+        self.assertIn("viewCollectors", output)
+
+    def test_print_roles_empty_capabilities_shown_as_all(self):
+        role_no_caps = dict(self.ROLE, capabilities=[])
+        output = self._capture(so.print_roles, [role_no_caps], "table")
+        self.assertIn("(all)", output)
+
+    def test_print_roles_no_results(self):
+        output = self._capture(so.print_roles, [], "table")
+        self.assertIn("(no results)", output)
+
+    def test_print_roles_many_capabilities_overflow(self):
+        role_many = dict(self.ROLE, capabilities=[f"cap{i}" for i in range(10)])
+        output = self._capture(so.print_roles, [role_many], "table")
+        self.assertIn("+7 more", output)
+
     # -- single oauth client -------------------------------------------------
 
     def test_print_oauth_client_json(self):
@@ -801,6 +869,16 @@ class TestMockData(unittest.TestCase):
         self.assertIn("access_token", data)
         # Should be masked, not a real JWT
         self.assertEqual(data["access_token"], "TEST_ACCESS_TOKEN")
+
+    def test_roles_v2_shape(self):
+        data = self._skip_if_missing("roles_v2")
+        for field in ("id", "name", "capabilities", "systemDefined"):
+            self.assertIn(field, data, f"Missing field: {field}")
+
+    def test_roles_v2_id_sanitized(self):
+        data = self._skip_if_missing("roles_v2")
+        # Sanitized IDs are 16-char hex
+        self.assertRegex(data["id"], r"^[0-9A-Fa-f]{16}$")
 
     def test_access_key_table_columns_match_response(self):
         """Verify the table column field names exist in the actual API response."""
