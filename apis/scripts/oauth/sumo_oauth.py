@@ -1273,11 +1273,18 @@ def cmd_users(args: argparse.Namespace, session: Session) -> None:
     profile_data = session.get(profile)
     endpoint     = _resolve_endpoint(args, profile_data)
     aid, akey    = _require_basic_auth(args, profile, profile_data)
+    auth         = _basic_auth_header(aid, akey)
     logger.info("Fetching users [profile=%s, endpoint=%s] …", profile, endpoint)
     users = _apply_regex_filter(
-        list_users(endpoint, _basic_auth_header(aid, akey), args.limit),
+        list_users(endpoint, auth, args.limit),
         args.filter, ["email"],
     )
+    if getattr(args, "resolve_roles", False):
+        logger.info("Resolving role IDs to names …")
+        role_map = {r["id"]: r.get("name", r["id"])
+                    for r in list_roles_v2(endpoint, auth)}
+        for u in users:
+            u["roleIds"] = [role_map.get(rid, rid) for rid in u.get("roleIds", [])]
     print_users(users, args.output)
 
 
@@ -1683,6 +1690,10 @@ Environment variables:
     _add_output_arg(p_users)
     _add_limit_arg(p_users)
     _add_filter_arg(p_users, "Filter by email (case-insensitive regex)")
+    p_users.add_argument(
+        "--resolve-roles", action="store_true",
+        help="Fetch role names from /api/v2/roles and display them instead of role IDs",
+    )
 
     # -- service-accounts ----------------------------------------------------
     p_sa = sub.add_parser("service-accounts", help="List service accounts [Basic auth]")

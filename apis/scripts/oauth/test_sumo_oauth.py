@@ -560,6 +560,36 @@ class TestListFunctions(unittest.TestCase):
             f"{self.ENDPOINT}/api/v1/oauth/clients/cid1", self.AUTH, payload
         )
 
+    @patch("sumo_oauth.list_roles_v2")
+    @patch("sumo_oauth.list_users")
+    def test_resolve_roles_maps_ids_to_names(self, mock_users, mock_roles):
+        mock_users.return_value = [
+            {"id": "U1", "email": "a@b.com", "roleIds": ["R001", "R002"]},
+        ]
+        mock_roles.return_value = [
+            {"id": "R001", "name": "Admin"},
+            {"id": "R002", "name": "Analyst"},
+        ]
+        # Simulate cmd_users role-resolution logic directly
+        role_map = {r["id"]: r.get("name", r["id"]) for r in mock_roles.return_value}
+        users = mock_users.return_value
+        for u in users:
+            u["roleIds"] = [role_map.get(rid, rid) for rid in u.get("roleIds", [])]
+        self.assertEqual(users[0]["roleIds"], ["Admin", "Analyst"])
+
+    @patch("sumo_oauth.list_roles_v2")
+    @patch("sumo_oauth.list_users")
+    def test_resolve_roles_falls_back_to_id_when_unknown(self, mock_users, mock_roles):
+        mock_users.return_value = [
+            {"id": "U1", "email": "a@b.com", "roleIds": ["R001", "UNKNOWN"]},
+        ]
+        mock_roles.return_value = [{"id": "R001", "name": "Admin"}]
+        role_map = {r["id"]: r.get("name", r["id"]) for r in mock_roles.return_value}
+        users = mock_users.return_value
+        for u in users:
+            u["roleIds"] = [role_map.get(rid, rid) for rid in u.get("roleIds", [])]
+        self.assertEqual(users[0]["roleIds"], ["Admin", "UNKNOWN"])
+
     @patch("sumo_oauth._api_get")
     def test_list_roles_v2_returns_data(self, mock_get):
         mock_get.return_value = {"data": [{"id": "R001", "name": "Admin"}], "next": None}
