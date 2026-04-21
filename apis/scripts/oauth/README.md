@@ -4,6 +4,8 @@ A command-line utility for managing Sumo Logic OAuth clients, users, and service
 
 Supports multiple named profiles so different Sumo Logic instances (regions, accounts) can be managed from one tool. Secrets are stored in the OS keychain — never on disk.
 
+> For a step-by-step walkthrough of setting up OAuth for the Sumo Logic MCP server, see [mcp-setup.md](mcp-setup.md).
+
 ## Requirements
 
 - Python 3.9+
@@ -69,6 +71,7 @@ Any values passed as CLI flags (`--region`, `--client-id`, `--access-id`) are pr
 ```bash
 sumo-oauth login
 # Logs in using the 'default' profile; token is stored in ~/.sumo_oauth_session.json
+# Token endpoint: service.<region>.sumologic.com/oauth2/token (not api.*)
 ```
 
 ### 3. List resources
@@ -126,7 +129,7 @@ sumo-oauth store-creds --profile prod --region us1 --client-id <CID> --access-id
 # List all configured profiles
 sumo-oauth list-profiles [--output {table,json}]
 
-# Show status for a profile (token validity, expiry, keychain state)
+# Show status for a profile (token validity, expiry HH:mm:ss remaining, local and UTC times)
 sumo-oauth status [--profile NAME]
 sumo-oauth status --all
 
@@ -139,9 +142,17 @@ sumo-oauth delete-profile --profile NAME
 
 ### OAuth token commands
 
+Token exchange uses HTTP Basic auth against the regional `service.*` host, not `api.*`.
+
 ```bash
 # Exchange client credentials for a Bearer token (stored in session file)
 sumo-oauth login [--profile NAME]
+
+# Request specific OAuth scopes (space- or comma-separated)
+sumo-oauth login --scopes "runLogSearch viewCollectors"
+
+# Override the token endpoint URL (advanced; normally derived from region automatically)
+sumo-oauth login --token-url https://service.au.sumologic.com/oauth2/token
 
 # Show the current token (auto-refreshes if expired)
 sumo-oauth token [--profile NAME]
@@ -151,6 +162,30 @@ sumo-oauth token --raw
 
 # Clear the stored token (profile config kept)
 sumo-oauth logout [--profile NAME]
+```
+
+### Export environment variables (MCP setup)
+
+Prints shell `export` statements for all variables required by the Sumo Logic MCP server. Retrieves the `client_secret` from the OS keychain and auto-refreshes the token if needed.
+
+```bash
+sumo-oauth export-env [--profile NAME]
+```
+
+Output:
+
+```bash
+export SUMOLOGIC_MCP_URL="https://mcp.sumologic.com/mcp"
+export SUMOLOGIC_OAUTH_CLIENT_ID="<client_id>"
+export SUMOLOGIC_OAUTH_CLIENT_SECRET="<client_secret>"
+export SUMOLOGIC_OAUTH_TOKEN_URL="https://service.sumologic.com/oauth2/token"
+export SUMOLOGIC_OAUTH_ACCESS_TOKEN="<access_token>"
+```
+
+Pipe directly to your shell to apply:
+
+```bash
+eval "$(sumo-oauth export-env)"
 ```
 
 ### Users and service accounts
@@ -190,7 +225,12 @@ Use `--output json` to see the full `scopes`, `effectiveScopes`, and `corsHeader
 ```bash
 # List all OAuth clients
 sumo-oauth oauth-clients [--profile NAME] [--filter REGEX] [--output {table,json}] [--limit N]
+```
 
+Table columns: `clientId`, `name`, `type`, `disabled`, `scopes`, `runAsId`, `createdAt`.
+Scopes show `(all)` when empty; large scope lists are shown as a preview with overflow count.
+
+```bash
 # Get a specific OAuth client by ID
 sumo-oauth get-oauth-client --id <CLIENT_ID> [--profile NAME] [--output {table,json}]
 
@@ -231,8 +271,19 @@ sumo-oauth oauth-scopes [--profile NAME] [--filter REGEX] [--filter-field {id,la
 
 # Find scopes related to search
 sumo-oauth oauth-scopes --filter search
-sumo-oauth oauth-scopes --filter "^search:" --filter-field id
+sumo-oauth oauth-scopes --filter "^runLog" --filter-field id
 ```
+
+Table columns: `id`, `label`, `type`, `group`.
+
+### OAuth consents
+
+```bash
+# List all OAuth consents (granted authorizations)
+sumo-oauth oauth-consents [--profile NAME] [--output {table,json}] [--limit N]
+```
+
+Table columns: `id`, `clientId`, `userId`, `scopes`, `createdAt`, `expiresAt`.
 
 ## Multiple profiles
 
@@ -300,6 +351,14 @@ sumo-oauth users --output json | jq '.[] | select(.isActive == true) | .email'
 # Install with dev dependencies
 uv sync --extra dev
 
+# Fetch sanitized mock API responses for unit tests (requires a configured profile)
+uv run fetch_mock_data.py [--profile NAME] [--output-dir mock_data/]
+
 # Run tests
 uv run pytest
+
+# Run tests with verbose output
+uv run pytest -v
 ```
+
+`fetch_mock_data.py` fetches one example response item per endpoint, replaces real IDs, emails, and secrets with deterministic dummy values, and writes the results to `mock_data/` as JSON files. The test suite (`test_sumo_oauth.py`) validates all core functions including table formatting, sanitization, session management, and API helpers.
