@@ -9,6 +9,7 @@ Allows specifying the API endpoint region and authentication credentials.
 import argparse
 import base64
 import json
+import os
 import re
 import sys
 from urllib.parse import urljoin, urlencode
@@ -94,7 +95,7 @@ class SumoLogicClient:
 
         Args:
             analytics_tier_filter (str): Regex pattern for analyticsTier filtering
-            index_type_filter (str): Filter by indexType
+            index_type_filter (str): Filter by indexType, or '*' to include all types
             is_active_filter (bool): Filter by isActive status
             is_included_in_default_search_filter (bool, optional): Filter by isIncludedInDefaultSearch status
             name_filter (str): Regex pattern for name filtering
@@ -133,8 +134,8 @@ class SumoLogicClient:
             if not analytics_tier_regex.match(analytics_tier):
                 continue
 
-            # Filter by indexType
-            if partition.get('indexType') != index_type_filter:
+            # Filter by indexType ('*' means no filtering)
+            if index_type_filter != '*' and partition.get('indexType') != index_type_filter:
                 continue
 
             # Filter by isActive
@@ -175,6 +176,7 @@ Examples:
   %(prog)s --endpoint https://api.sumologic.com --access-id YOUR_ID --access-key YOUR_KEY
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --analytics-tier-filter "Infrequent|Continuous"
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --index-type-filter "View" --is-active-filter false
+  %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --index-type-filter "*"
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --name-filter "prod.*" --is-included-in-default-search-filter true
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --routing-expression-filter ".*error.*"
   %(prog)s --region us1 --access-id YOUR_ID --access-key YOUR_KEY --output table --output-properties name isActive analyticsTier
@@ -198,13 +200,13 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
 
     parser.add_argument(
         '--access-id',
-        required=True,
-        help='Sumo Logic access ID'
+        default=os.environ.get('SUMO_ACCESS_ID'),
+        help='Sumo Logic access ID (default: $SUMO_ACCESS_ID)'
     )
     parser.add_argument(
         '--access-key',
-        required=True,
-        help='Sumo Logic access key'
+        default=os.environ.get('SUMO_ACCESS_KEY'),
+        help='Sumo Logic access key (default: $SUMO_ACCESS_KEY)'
     )
     parser.add_argument(
         '--output',
@@ -225,7 +227,7 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
     parser.add_argument(
         '--index-type-filter',
         default='Partition',
-        help='Filter partitions by indexType (default: Partition)'
+        help='Filter partitions by indexType (default: Partition). Use * to include all index types.'
     )
     parser.add_argument(
         '--is-active-filter',
@@ -251,6 +253,11 @@ Available regions: us1, us2, eu, au, de, jp, ca, in
     )
 
     args = parser.parse_args()
+
+    if not args.access_id:
+        parser.error('--access-id is required (or set $SUMO_ACCESS_ID)')
+    if not args.access_key:
+        parser.error('--access-key is required (or set $SUMO_ACCESS_KEY)')
 
     # Determine endpoint
     endpoint = args.region if args.region else args.endpoint
