@@ -95,7 +95,7 @@ Raw message results might be what you are looking for but powerful users of Sumo
 ### 2.1 Gain Instant Insights From Parsed Fields Using the Field Browser
 Key to transforming log events into valuable insights are fields. On the left of the Messages tab you will see the [field browser](https://help.sumologic.com/docs/search/get-started-with-search/search-page/field-browser/). This shows all fields that exist in the current search scope, which could be a mix of metadata, fields pre-extracted by administrators at ingestion or fields extracted at search time. 
 
-By default "Auto Parsing" search mode parses every JSON field, so every possible Cloudtrail JSON key value will appear in field browser for this search scope. Administrators of Sumo Logic can also pre-parse fields and store them along with the data to make the logs easier to use and faster to query. In this screenshot there is an "arn" field that was pre-parsed by and admin as well as auto parsed fields created by JSON auto parse mode such as %"useridentity.arn"
+By default "Auto Parsing" search mode parses every JSON field, so every possible Cloudtrail JSON key value will appear in field browser for this search scope. Administrators of Sumo Logic can also pre-parse fields and store them along with the data to make the logs easier to use and faster to query. In this screenshot there is an "arn" field that was pre-parsed by an admin as well as auto parsed fields created by JSON auto parse mode such as %"useridentity.arn"
 
 ![](./images/field_browser_seearch.png)
 
