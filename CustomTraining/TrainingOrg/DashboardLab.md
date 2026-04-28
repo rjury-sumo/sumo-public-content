@@ -6,7 +6,7 @@
 
 In this lab you will build a working dashboard using Amazon CloudFront log data. You will practise creating several panel types, use a template variable filter, and learn how to apply time compare for trend analysis. The lab also introduces scheduled views as a performance optimisation technique.
 
-**Lab environment:** Training Org (used in Sumo Certjams). Log in as `training+analyst###@sumologic.com` where `###` is a number from 001–999. Find this month's password via **Home > Certification** tab in the training portal.
+**Lab environment:** Training Org (used in Sumo Certjams). Log in as `training+analyst###@sumologic.com` where `###` is a number from 001-999. Find this month's password via **Home > Certification** tab in the training portal.
 
 ---
 
