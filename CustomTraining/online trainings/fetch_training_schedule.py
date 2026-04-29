@@ -568,9 +568,10 @@ function applyFilters() {{
   if (summaryEl) {{
     const entries = Object.entries(courseCounts)
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    summaryEl.innerHTML = entries.map(([name, cnt]) =>
-      `<span class="sum-badge" onclick="filterByCourse(${{JSON.stringify(name)}})">${{name}}<span class="cnt">${{cnt}}</span></span>`
-    ).join('');
+    summaryEl.innerHTML = entries.map(([name, cnt]) => {{
+      const safe = name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      return `<span class="sum-badge" data-course="${{safe}}" onclick="filterByCourse(this.dataset.course)">${{name}}<span class="cnt">${{cnt}}</span></span>`;
+    }}).join('');
   }}
 }}
 

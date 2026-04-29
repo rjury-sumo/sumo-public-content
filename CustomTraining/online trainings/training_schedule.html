@@ -118,7 +118,7 @@
   <div>
     <h1>Sumo Logic — Virtual Training Schedule</h1>
     <div class="subtitle">
-      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 30 Apr 2026 10:11
+      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 30 Apr 2026 10:19
       &nbsp;·&nbsp;
       <a class="source-link" href="https://www.sumologic.com/learn/training" target="_blank">
         sumologic.com/learn/training ↗
@@ -903,9 +903,10 @@ function applyFilters() {
   if (summaryEl) {
     const entries = Object.entries(courseCounts)
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    summaryEl.innerHTML = entries.map(([name, cnt]) =>
-      `<span class="sum-badge" onclick="filterByCourse(${JSON.stringify(name)})">${name}<span class="cnt">${cnt}</span></span>`
-    ).join('');
+    summaryEl.innerHTML = entries.map(([name, cnt]) => {
+      const safe = name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      return `<span class="sum-badge" data-course="${safe}" onclick="filterByCourse(this.dataset.course)">${name}<span class="cnt">${cnt}</span></span>`;
+    }).join('');
   }
 }
 
@@ -1042,7 +1043,7 @@ function exportToClipboard() {
 </table>
 <p style="font-size:11px;color:#64748b;margin-top:6px;">
   Source: <a href="https://www.sumologic.com/learn/training">sumologic.com/learn/training</a>
-  &nbsp;·&nbsp; Generated 30 Apr 2026 10:11
+  &nbsp;·&nbsp; Generated 30 Apr 2026 10:19
 </p>`;
 
   // ---- Write both to clipboard ----
