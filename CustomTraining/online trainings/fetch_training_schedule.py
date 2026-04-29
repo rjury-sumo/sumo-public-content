@@ -472,6 +472,9 @@ HTML_TEMPLATE = """\
     <input type="checkbox" id="showPast" onchange="applyFilters()"/>
     Show past sessions
   </label>
+  <button class="export-btn" id="clearBtn" onclick="clearFilters()">
+    Clear
+  </button>
   <span class="count" id="countLabel"></span>
   <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">
     Copy for email
@@ -556,7 +559,10 @@ function applyFilters() {{
     }}
     if (show) {{
       visible++;
-      courseCounts[dispTitle] = (courseCounts[dispTitle] || 0) + 1;
+      // Group case-insensitively; keep the first-seen casing as display name
+      const key = dispTitle.toLowerCase();
+      if (!courseCounts[key]) courseCounts[key] = {{ display: dispTitle, count: 0 }};
+      courseCounts[key].count++;
     }}
     total++;
   }});
@@ -566,17 +572,24 @@ function applyFilters() {{
   // Rebuild course summary badges (sorted by count desc, then alpha)
   const summaryEl = document.getElementById('summaryContent');
   if (summaryEl) {{
-    const entries = Object.entries(courseCounts)
-      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    summaryEl.innerHTML = entries.map(([name, cnt]) => {{
-      const safe = name.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-      return `<span class="sum-badge" data-course="${{safe}}" onclick="filterByCourse(this.dataset.course)">${{name}}<span class="cnt">${{cnt}}</span></span>`;
+    const entries = Object.values(courseCounts)
+      .sort((a, b) => b.count - a.count || a.display.localeCompare(b.display));
+    summaryEl.innerHTML = entries.map(obj => {{
+      const safe = obj.display.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+      return `<span class="sum-badge" data-course="${{safe}}" onclick="filterByCourse(this.dataset.course)">${{obj.display}}<span class="cnt">${{obj.count}}</span></span>`;
     }}).join('');
   }}
 }}
 
 function filterByCourse(name) {{
   document.getElementById('searchBox').value = name;
+  applyFilters();
+}}
+
+function clearFilters() {{
+  document.getElementById('searchBox').value = '';
+  document.getElementById('monthFilter').value = '';
+  document.getElementById('showPast').checked = false;
   applyFilters();
 }}
 
