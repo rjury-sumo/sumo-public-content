@@ -104,7 +104,7 @@
   <div>
     <h1>Sumo Logic — Virtual Training Schedule</h1>
     <div class="subtitle">
-      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 29 Apr 2026 15:19
+      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 29 Apr 2026 15:43
       &nbsp;·&nbsp;
       <a class="source-link" href="https://www.sumologic.com/learn/training" target="_blank">
         sumologic.com/learn/training ↗
@@ -891,11 +891,23 @@ function sortTable(col) {
   sortCol = col;
   document.querySelectorAll('th').forEach((th, i) => {
     th.classList.toggle('sorted', i === col);
-    th.querySelector('.si').textContent = i === col ? (sortAsc ? '↑' : '↓') : '⇅';
+    const si = th.querySelector('.si');
+    if (si) si.textContent = i === col ? (sortAsc ? '↑' : '↓') : '⇅';
   });
   rows.sort((a, b) => {
-    const av = a.querySelectorAll('td')[col]?.textContent.trim() || '';
-    const bv = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    // Column 0: use data-title (clean name without the ▶ expand arrow)
+    // Date columns: use data-iso on the row for chronological accuracy
+    let av, bv;
+    if (col === 0) {
+      av = a.dataset.title || '';
+      bv = b.dataset.title || '';
+    } else if (col >= 1 && col <= 4) {
+      av = a.dataset.iso || a.querySelectorAll('td')[col]?.textContent.trim() || '';
+      bv = b.dataset.iso || b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    } else {
+      av = a.querySelectorAll('td')[col]?.textContent.trim() || '';
+      bv = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    }
     return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
   });
   rows.forEach(row => {
@@ -991,7 +1003,7 @@ function exportToClipboard() {
 </table>
 <p style="font-size:11px;color:#64748b;margin-top:6px;">
   Source: <a href="https://www.sumologic.com/learn/training">sumologic.com/learn/training</a>
-  &nbsp;·&nbsp; Generated 29 Apr 2026 15:19
+  &nbsp;·&nbsp; Generated 29 Apr 2026 15:43
 </p>`;
 
   // ---- Write both to clipboard ----

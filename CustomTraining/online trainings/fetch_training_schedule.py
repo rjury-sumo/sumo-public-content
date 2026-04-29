@@ -481,11 +481,23 @@ function sortTable(col) {{
   sortCol = col;
   document.querySelectorAll('th').forEach((th, i) => {{
     th.classList.toggle('sorted', i === col);
-    th.querySelector('.si').textContent = i === col ? (sortAsc ? '↑' : '↓') : '⇅';
+    const si = th.querySelector('.si');
+    if (si) si.textContent = i === col ? (sortAsc ? '↑' : '↓') : '⇅';
   }});
   rows.sort((a, b) => {{
-    const av = a.querySelectorAll('td')[col]?.textContent.trim() || '';
-    const bv = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    // Column 0: use data-title (clean name without the ▶ expand arrow)
+    // Date columns: use data-iso on the row for chronological accuracy
+    let av, bv;
+    if (col === 0) {{
+      av = a.dataset.title || '';
+      bv = b.dataset.title || '';
+    }} else if (col >= 1 && col <= 4) {{
+      av = a.dataset.iso || a.querySelectorAll('td')[col]?.textContent.trim() || '';
+      bv = b.dataset.iso || b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    }} else {{
+      av = a.querySelectorAll('td')[col]?.textContent.trim() || '';
+      bv = b.querySelectorAll('td')[col]?.textContent.trim() || '';
+    }}
     return sortAsc ? av.localeCompare(bv) : bv.localeCompare(av);
   }});
   rows.forEach(row => {{
