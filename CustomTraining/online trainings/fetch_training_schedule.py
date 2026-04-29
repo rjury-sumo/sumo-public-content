@@ -63,41 +63,104 @@ def fetch_all_pages(url: str) -> list[str]:
             )
         )
         page.goto(url, wait_until="load", timeout=90_000)
-        page.wait_for_timeout(3000)
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        page.wait_for_timeout(1500)
 
-        # Discover total page count from facetwp-pager
-        pager_html = page.inner_html(".facetwp-pager") if page.query_selector(".facetwp-pager") else ""
-        soup_pager = BeautifulSoup(pager_html, "html.parser")
-        page_links = [a for a in soup_pager.find_all("a", class_="facetwp-page")
-                      if a.get("data-page", "").isdigit()]
-        page_nums = sorted({int(a["data-page"]) for a in page_links})
-        # page 1 is already loaded; add it
-        if not page_nums:
-            page_nums = [1]
-        max_page = max(page_nums)
-        print(f"  Detected {max_page} page(s) via facetwp-pager.")
+        # Wait for FacetWP to complete its initial AJAX population.
+        # networkidle gives us 500 ms of no network activity, which covers the
+        # FacetWP AJAX call that fires after DOMContentLoaded.
+        try:
+            page.wait_for_load_state("networkidle", timeout=20_000)
+        except Exception:
+            pass  # non-fatal; we'll rely on the item-count check below
+
+        # Ensure at least some cards are in the DOM before we read the pager
+        try:
+            page.wait_for_selector(".blog-item", state="attached", timeout=15_000)
+        except Exception:
+            print("  WARNING: No .blog-item cards found after waiting.")
+
+        # Scroll to trigger any lazy-load / infinite-scroll then let it settle
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        try:
+            page.wait_for_load_state("networkidle", timeout=10_000)
+        except Exception:
+            page.wait_for_timeout(2000)
+
+        def _max_page_from_pager() -> int:
+            """
+            Parse the facetwp-pager and return the highest page number visible.
+            FacetWP pagers often only render a window of links (e.g. 1 2 3 … 8),
+            so we also check for a 'last' page link that carries a higher data-page.
+            """
+            if not page.query_selector(".facetwp-pager"):
+                return 1
+            pager_html = page.inner_html(".facetwp-pager")
+            soup_p = BeautifulSoup(pager_html, "html.parser")
+            nums = set()
+            for a in soup_p.find_all("a", class_="facetwp-page"):
+                dp = a.get("data-page", "")
+                if dp.isdigit():
+                    nums.add(int(dp))
+            # Also check span/div elements that FacetWP uses for the current/last page
+            for el in soup_p.find_all(True):
+                dp = el.get("data-page", "")
+                if dp.isdigit():
+                    nums.add(int(dp))
+            return max(nums) if nums else 1
+
+        max_page = _max_page_from_pager()
+        item_count_p1 = page.evaluate("document.querySelectorAll('.blog-item').length")
+        print(f"  Detected {max_page} page(s) via facetwp-pager. "
+              f"Page 1 initial load: {item_count_p1} .blog-item cards.")
+
+        # Workaround: sumologic.com has a site-side pagination bug where the first load
+        # of page 1 renders an incomplete set of cards. Navigating to page 2 then back
+        # forces FacetWP to re-render page 1 with the correct full list.
+        if max_page > 1:
+            print("  Applying page-1 refresh workaround (site pagination bug)...")
+            page.click(".facetwp-pager a.facetwp-page[data-page='2']")
+            try:
+                page.wait_for_load_state("networkidle", timeout=15_000)
+            except Exception:
+                page.wait_for_timeout(2000)
+            page.click(".facetwp-pager a.facetwp-page[data-page='1']")
+            try:
+                page.wait_for_load_state("networkidle", timeout=15_000)
+            except Exception:
+                page.wait_for_timeout(2000)
+            item_count_p1 = page.evaluate("document.querySelectorAll('.blog-item').length")
+            print(f"  After workaround: page 1 has {item_count_p1} .blog-item cards.")
 
         # Collect page 1
         pages_html.append(page.content())
 
         # Click through pages 2..N
-        for pg in range(2, max_page + 1):
+        pg = 2
+        while pg <= max_page:
             print(f"  Loading page {pg}/{max_page} ...")
-            # Click the numbered page link
             selector = f".facetwp-pager a.facetwp-page[data-page='{pg}']"
+            # Snapshot item count before click so we can detect content replacement
+            prev_count = page.evaluate("document.querySelectorAll('.blog-item').length")
             page.click(selector)
-            # Wait for the grid to refresh (FacetWP replaces .facetwp-template content)
-            page.wait_for_function(
-                """() => {
-                    const items = document.querySelectorAll('.blog-item');
-                    return items.length > 0;
-                }""",
-                timeout=20_000,
-            )
-            page.wait_for_timeout(1500)
+            # Wait for FacetWP to swap in new content (count must change, then stabilise)
+            try:
+                page.wait_for_function(
+                    f"() => document.querySelectorAll('.blog-item').length !== {prev_count}",
+                    timeout=20_000,
+                )
+            except Exception:
+                # Fall back: wait for the loading spinner to clear if present
+                try:
+                    page.wait_for_selector(".facetwp-loading", state="detached", timeout=10_000)
+                except Exception:
+                    pass
+            page.wait_for_timeout(1000)
             pages_html.append(page.content())
+            # Re-read the pager — later pages may reveal a higher total (e.g. "…" resolved)
+            new_max = _max_page_from_pager()
+            if new_max > max_page:
+                print(f"  Pager updated: max page is now {new_max}.")
+                max_page = new_max
+            pg += 1
 
         browser.close()
 
@@ -255,6 +318,18 @@ def find_description(title: str, descs: dict[str, str]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Title normalisation
+# ---------------------------------------------------------------------------
+
+_AMPM_RE = re.compile(r'\s+[AP]M$', re.IGNORECASE)
+
+
+def strip_ampm(title: str) -> str:
+    """Remove trailing AM / PM slot indicator from a course title."""
+    return _AMPM_RE.sub('', title).strip()
+
+
+# ---------------------------------------------------------------------------
 # HTML output
 # ---------------------------------------------------------------------------
 
@@ -354,6 +429,20 @@ HTML_TEMPLATE = """\
   .no-results{{
     text-align:center; padding:48px; color:var(--muted); display:none;
   }}
+  .summary-bar{{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
+    padding:10px 14px; background:var(--card); border:1px solid var(--border);
+    border-radius:10px; align-items:center;
+  }}
+  .sum-label{{ color:var(--muted); font-size:.8rem; margin-right:2px; flex-shrink:0; }}
+  .sum-badges{{ display:flex; flex-wrap:wrap; gap:6px; }}
+  .sum-badge{{
+    background:rgba(0,180,216,.1); border:1px solid rgba(0,180,216,.2);
+    color:var(--text); font-size:.77rem; padding:3px 10px; border-radius:20px;
+    cursor:pointer; transition:background .15s; white-space:nowrap;
+  }}
+  .sum-badge:hover{{ background:rgba(0,180,216,.3); }}
+  .sum-badge .cnt{{ color:var(--accent); font-weight:700; margin-left:5px; }}
   footer{{
     margin-top:28px; text-align:center; color:var(--muted); font-size:.79rem;
   }}
@@ -375,7 +464,7 @@ HTML_TEMPLATE = """\
 </header>
 
 <div class="controls">
-  <input type="text" id="searchBox" placeholder="Search course…" oninput="applyFilters()"/>
+  <input type="text" id="searchBox" placeholder="Filter course… (comma or OR for multiple)" oninput="applyFilters()"/>
   <select id="monthFilter" onchange="applyFilters()">
     <option value="">All months</option>
   </select>
@@ -387,6 +476,11 @@ HTML_TEMPLATE = """\
   <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">
     Copy for email
   </button>
+</div>
+
+<div class="summary-bar" id="summaryBar">
+  <span class="sum-label">Courses:</span>
+  <span class="sum-badges" id="summaryContent"></span>
 </div>
 
 <div class="table-wrap">
@@ -439,30 +533,50 @@ months.forEach(m => {{
 const now = Date.now();
 
 function applyFilters() {{
-  const q        = document.getElementById('searchBox').value.toLowerCase();
+  const raw      = document.getElementById('searchBox').value.toLowerCase().trim();
+  // Support OR: split on comma or the word "or" (case-insensitive)
+  const terms    = raw ? raw.split(/,|\\bor\\b/i).map(t => t.trim()).filter(Boolean) : [];
   const mon      = document.getElementById('monthFilter').value;
   const showPast = document.getElementById('showPast').checked;
   let visible = 0, total = 0;
+  const courseCounts = {{}};
   document.querySelectorAll('tbody tr.data-row').forEach(row => {{
-    const title   = row.dataset.title.toLowerCase();
-    const pt      = row.dataset.pt || '';
-    const isoStr  = row.dataset.iso || '';
+    const title    = row.dataset.title.toLowerCase();
+    const dispTitle = row.dataset.title;   // already stripped of AM/PM
+    const pt       = row.dataset.pt || '';
+    const isoStr   = row.dataset.iso || '';
     const isFuture = !isoStr || (new Date(isoStr).getTime() >= now);
     row.classList.toggle('past', !isFuture);
-    const show = (showPast || isFuture)
-                 && (!q   || title.includes(q))
-                 && (!mon || pt.includes(mon));
+    const matchesSearch = !terms.length || terms.some(t => title.includes(t));
+    const show = (showPast || isFuture) && matchesSearch && (!mon || pt.includes(mon));
     row.classList.toggle('hidden', !show);
     if (!show) {{
       const dr = document.getElementById('desc-' + row.dataset.idx);
       if (dr) dr.classList.remove('open');
     }}
-    if (show) visible++;
+    if (show) {{
+      visible++;
+      courseCounts[dispTitle] = (courseCounts[dispTitle] || 0) + 1;
+    }}
     total++;
   }});
   document.getElementById('countLabel').textContent =
     `Showing ${{visible}} of ${{total}} sessions`;
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  // Rebuild course summary badges (sorted by count desc, then alpha)
+  const summaryEl = document.getElementById('summaryContent');
+  if (summaryEl) {{
+    const entries = Object.entries(courseCounts)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    summaryEl.innerHTML = entries.map(([name, cnt]) =>
+      `<span class="sum-badge" onclick="filterByCourse(${{JSON.stringify(name)}})">${{name}}<span class="cnt">${{cnt}}</span></span>`
+    ).join('');
+  }}
+}}
+
+function filterByCourse(name) {{
+  document.getElementById('searchBox').value = name;
+  applyFilters();
 }}
 
 function toggleDesc(idx) {{
@@ -637,26 +751,27 @@ def build_rows(sessions: list[dict], descs: dict[str, str]) -> tuple[str, list]:
     js_data    = []
 
     for i, s in enumerate(sessions):
-        title    = s["title"]
-        reg_url  = s.get("reg_url", "#")
-        cols     = s.get("tz_columns", {})
-        pt_val   = cols.get("PT", "")
-        nz_val   = cols.get("NZ", "")
-        aet_val  = cols.get("AET", "")
-        sgt_val  = cols.get("SGT", "")
-        iso_start = s.get("data_start", "")
-        pt_end  = s.get("pt_end", "")
+        title         = s["title"]
+        display_title = strip_ampm(title)
+        reg_url       = s.get("reg_url", "#")
+        cols          = s.get("tz_columns", {})
+        pt_val        = cols.get("PT", "")
+        nz_val        = cols.get("NZ", "")
+        aet_val       = cols.get("AET", "")
+        sgt_val       = cols.get("SGT", "")
+        iso_start     = s.get("data_start", "")
+        pt_end        = s.get("pt_end", "")
 
-        desc = find_description(title, descs)
+        desc = find_description(display_title, descs)
 
         # Title cell — clickable if description exists
         if desc:
             title_html = (
                 f'<button class="course-btn" onclick="toggleDesc({i})">'
-                f'<span class="ei" id="ei-{i}">▶</span>{title}</button>'
+                f'<span class="ei" id="ei-{i}">▶</span>{display_title}</button>'
             )
         else:
-            title_html = f'<span class="course-btn" style="cursor:default">{title}</span>'
+            title_html = f'<span class="course-btn" style="cursor:default">{display_title}</span>'
 
         # PT end time annotation
         pt_display = pt_val
@@ -671,7 +786,7 @@ def build_rows(sessions: list[dict], descs: dict[str, str]) -> tuple[str, list]:
 
         html_parts.append(
             f'    <tr class="data-row" data-idx="{i}" '
-            f'data-title="{title}" data-pt="{pt_val}" data-iso="{iso_start}">\n'
+            f'data-title="{display_title}" data-pt="{pt_val}" data-iso="{iso_start}">\n'
             f'      <td class="title-cell">{title_html}</td>\n'
             f'      <td class="tz-val">{pt_display}</td>\n'
             f'      <td class="tz-val">{nz_val}</td>\n'
@@ -683,7 +798,7 @@ def build_rows(sessions: list[dict], descs: dict[str, str]) -> tuple[str, list]:
 
         # Description expand row
         if desc:
-            desc_body = f"<strong>{title} — course overview</strong>{desc}"
+            desc_body = f"<strong>{display_title} — course overview</strong>{desc}"
         else:
             desc_body = "<em>No description available.</em>"
 
@@ -693,7 +808,7 @@ def build_rows(sessions: list[dict], descs: dict[str, str]) -> tuple[str, list]:
             f'    </tr>\n'
         )
 
-        js_data.append({"idx": i, "title": title, "pt": pt_val})
+        js_data.append({"idx": i, "title": display_title, "pt": pt_val})
 
     return "".join(html_parts), js_data
 

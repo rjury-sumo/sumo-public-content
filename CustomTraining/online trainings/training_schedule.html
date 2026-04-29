@@ -93,6 +93,20 @@
   .no-results{
     text-align:center; padding:48px; color:var(--muted); display:none;
   }
+  .summary-bar{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
+    padding:10px 14px; background:var(--card); border:1px solid var(--border);
+    border-radius:10px; align-items:center;
+  }
+  .sum-label{ color:var(--muted); font-size:.8rem; margin-right:2px; flex-shrink:0; }
+  .sum-badges{ display:flex; flex-wrap:wrap; gap:6px; }
+  .sum-badge{
+    background:rgba(0,180,216,.1); border:1px solid rgba(0,180,216,.2);
+    color:var(--text); font-size:.77rem; padding:3px 10px; border-radius:20px;
+    cursor:pointer; transition:background .15s; white-space:nowrap;
+  }
+  .sum-badge:hover{ background:rgba(0,180,216,.3); }
+  .sum-badge .cnt{ color:var(--accent); font-weight:700; margin-left:5px; }
   footer{
     margin-top:28px; text-align:center; color:var(--muted); font-size:.79rem;
   }
@@ -104,7 +118,7 @@
   <div>
     <h1>Sumo Logic — Virtual Training Schedule</h1>
     <div class="subtitle">
-      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 29 Apr 2026 15:43
+      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 30 Apr 2026 10:11
       &nbsp;·&nbsp;
       <a class="source-link" href="https://www.sumologic.com/learn/training" target="_blank">
         sumologic.com/learn/training ↗
@@ -114,7 +128,7 @@
 </header>
 
 <div class="controls">
-  <input type="text" id="searchBox" placeholder="Search course…" oninput="applyFilters()"/>
+  <input type="text" id="searchBox" placeholder="Filter course… (comma or OR for multiple)" oninput="applyFilters()"/>
   <select id="monthFilter" onchange="applyFilters()">
     <option value="">All months</option>
   </select>
@@ -126,6 +140,11 @@
   <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">
     Copy for email
   </button>
+</div>
+
+<div class="summary-bar" id="summaryBar">
+  <span class="sum-label">Courses:</span>
+  <span class="sum-badges" id="summaryContent"></span>
 </div>
 
 <div class="table-wrap">
@@ -141,676 +160,676 @@
     </tr>
   </thead>
   <tbody id="tableBody">
-    <tr class="data-row" data-idx="0" data-title="Welcome Webinar AM" data-pt="Tue 07 Apr 2026  05:00 AM" data-iso="2026-04-07T05:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(0)"><span class="ei" id="ei-0">▶</span>Welcome Webinar AM</button></td>
-      <td class="tz-val">Tue 07 Apr 2026  05:00 AM<br/><span class="tz-end">ends 06:00 AM</span></td>
-      <td class="tz-val">Wed 08 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Tue 07 Apr 2026  10:00 PM</td>
-      <td class="tz-val">Tue 07 Apr 2026  08:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinaram04072026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-0">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
-    </tr>
-    <tr class="data-row" data-idx="1" data-title="Fundamental AM" data-pt="Tue 07 Apr 2026  07:00 AM" data-iso="2026-04-07T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(1)"><span class="ei" id="ei-1">▶</span>Fundamental AM</button></td>
-      <td class="tz-val">Tue 07 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Wed 08 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Tue 07 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalsam04072026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-1">
-      <td class="desc-cell" colspan="6"><strong>Fundamental AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
-    </tr>
-    <tr class="data-row" data-idx="2" data-title="Welcome Webinar PM" data-pt="Tue 07 Apr 2026  02:00 PM" data-iso="2026-04-07T14:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(2)"><span class="ei" id="ei-2">▶</span>Welcome Webinar PM</button></td>
-      <td class="tz-val">Tue 07 Apr 2026  02:00 PM<br/><span class="tz-end">ends 03:00 PM</span></td>
-      <td class="tz-val">Wed 08 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  07:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  05:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinarpm04072026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-2">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
-    </tr>
-    <tr class="data-row" data-idx="3" data-title="Fundamentals PM" data-pt="Tue 07 Apr 2026  04:00 PM" data-iso="2026-04-07T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(3)"><span class="ei" id="ei-3">▶</span>Fundamentals PM</button></td>
-      <td class="tz-val">Tue 07 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Wed 08 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalspm04072026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-3">
-      <td class="desc-cell" colspan="6"><strong>Fundamentals PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
-    </tr>
-    <tr class="data-row" data-idx="4" data-title="Search Mastery AM" data-pt="Wed 08 Apr 2026  07:00 AM" data-iso="2026-04-08T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(4)"><span class="ei" id="ei-4">▶</span>Search Mastery AM</button></td>
-      <td class="tz-val">Wed 08 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Thu 09 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Thu 09 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Wed 08 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/searchmasteryam04082026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-4">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="5" data-title="Search Mastery PM" data-pt="Wed 08 Apr 2026  04:00 PM" data-iso="2026-04-08T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(5)"><span class="ei" id="ei-5">▶</span>Search Mastery PM</button></td>
-      <td class="tz-val">Wed 08 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Thu 09 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Thu 09 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Thu 09 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/searchmasterypm04082026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-5">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="6" data-title="Best Practice for Query Efficiency AM" data-pt="Thu 09 Apr 2026  07:00 AM" data-iso="2026-04-09T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(6)"><span class="ei" id="ei-6">▶</span>Best Practice for Query Efficiency AM</button></td>
-      <td class="tz-val">Thu 09 Apr 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
-      <td class="tz-val">Fri 10 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Fri 10 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Thu 09 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/bp4qeam04092026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-6">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="7" data-title="Best Practice for Query Efficiency PM" data-pt="Thu 09 Apr 2026  04:00 PM" data-iso="2026-04-09T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(7)"><span class="ei" id="ei-7">▶</span>Best Practice for Query Efficiency PM</button></td>
-      <td class="tz-val">Thu 09 Apr 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
-      <td class="tz-val">Fri 10 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Fri 10 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Fri 10 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/bp4qepm04092026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-7">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="8" data-title="Adminstration AM" data-pt="Tue 14 Apr 2026  07:00 AM" data-iso="2026-04-14T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(8)"><span class="ei" id="ei-8">▶</span>Adminstration AM</button></td>
-      <td class="tz-val">Tue 14 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Wed 15 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Wed 15 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Tue 14 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/administrationam04142026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-8">
-      <td class="desc-cell" colspan="6"><strong>Adminstration AM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
-    </tr>
-    <tr class="data-row" data-idx="9" data-title="Administration PM" data-pt="Tue 14 Apr 2026  04:00 PM" data-iso="2026-04-14T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(9)"><span class="ei" id="ei-9">▶</span>Administration PM</button></td>
-      <td class="tz-val">Tue 14 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Wed 15 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Wed 15 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Wed 15 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/administrationpm04142026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-9">
-      <td class="desc-cell" colspan="6"><strong>Administration PM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
-    </tr>
-    <tr class="data-row" data-idx="10" data-title="Metrics Analytics AM" data-pt="Wed 15 Apr 2026  07:00 AM" data-iso="2026-04-15T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(10)"><span class="ei" id="ei-10">▶</span>Metrics Analytics AM</button></td>
-      <td class="tz-val">Wed 15 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Thu 16 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Thu 16 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Wed 15 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam04152026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-10">
-      <td class="desc-cell" colspan="6"><strong>Metrics Analytics AM — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="11" data-title="Metrics Analytics PM" data-pt="Wed 15 Apr 2026  04:00 PM" data-iso="2026-04-15T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(11)"><span class="ei" id="ei-11">▶</span>Metrics Analytics PM</button></td>
-      <td class="tz-val">Wed 15 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Thu 16 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Thu 16 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Thu 16 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticspm04152026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-11">
-      <td class="desc-cell" colspan="6"><strong>Metrics Analytics PM — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="12" data-title="Mobot Essentials AM" data-pt="Thu 16 Apr 2026  07:00 AM" data-iso="2026-04-16T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(12)"><span class="ei" id="ei-12">▶</span>Mobot Essentials AM</button></td>
-      <td class="tz-val">Thu 16 Apr 2026  07:00 AM<br/><span class="tz-end">ends 08:26 AM</span></td>
-      <td class="tz-val">Fri 17 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Fri 17 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Thu 16 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialsam04162026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-12">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="13" data-title="Mobot Essentials PM" data-pt="Thu 16 Apr 2026  04:00 PM" data-iso="2026-04-16T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(13)"><span class="ei" id="ei-13">▶</span>Mobot Essentials PM</button></td>
-      <td class="tz-val">Thu 16 Apr 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
-      <td class="tz-val">Fri 17 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Fri 17 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Fri 17 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialspm04162026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-13">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
-    </tr>
-    <tr class="data-row" data-idx="14" data-title="Logs for Security AM" data-pt="Tue 21 Apr 2026  07:00 AM" data-iso="2026-04-21T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(14)"><span class="ei" id="ei-14">▶</span>Logs for Security AM</button></td>
-      <td class="tz-val">Tue 21 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Wed 22 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Wed 22 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Tue 21 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecurityam04212026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-14">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security AM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
-    </tr>
-    <tr class="data-row" data-idx="15" data-title="Logs for Security PM" data-pt="Tue 21 Apr 2026  04:00 PM" data-iso="2026-04-21T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(15)"><span class="ei" id="ei-15">▶</span>Logs for Security PM</button></td>
-      <td class="tz-val">Tue 21 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Wed 22 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Wed 22 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Wed 22 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecuritypm04212026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-15">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security PM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
-    </tr>
-    <tr class="data-row" data-idx="16" data-title="Cloud SIEM AM" data-pt="Wed 22 Apr 2026  07:00 AM" data-iso="2026-04-22T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(16)"><span class="ei" id="ei-16">▶</span>Cloud SIEM AM</button></td>
-      <td class="tz-val">Wed 22 Apr 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
-      <td class="tz-val">Thu 23 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Thu 23 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Wed 22 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiemam04222026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-16">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="17" data-title="Cloud SIEM PM" data-pt="Wed 22 Apr 2026  04:00 PM" data-iso="2026-04-22T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(17)"><span class="ei" id="ei-17">▶</span>Cloud SIEM PM</button></td>
-      <td class="tz-val">Wed 22 Apr 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
-      <td class="tz-val">Thu 23 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Thu 23 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Thu 23 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiempm04222026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-17">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="18" data-title="Automation AM" data-pt="Thu 23 Apr 2026  07:00 AM" data-iso="2026-04-23T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(18)"><span class="ei" id="ei-18">▶</span>Automation AM</button></td>
-      <td class="tz-val">Thu 23 Apr 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
-      <td class="tz-val">Fri 24 Apr 2026  02:00 AM</td>
-      <td class="tz-val">Fri 24 Apr 2026  12:00 AM</td>
-      <td class="tz-val">Thu 23 Apr 2026  10:00 PM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/automationam04232026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-18">
-      <td class="desc-cell" colspan="6"><strong>Automation AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="19" data-title="Automation PM" data-pt="Thu 23 Apr 2026  04:00 PM" data-iso="2026-04-23T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(19)"><span class="ei" id="ei-19">▶</span>Automation PM</button></td>
-      <td class="tz-val">Thu 23 Apr 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
-      <td class="tz-val">Fri 24 Apr 2026  11:00 AM</td>
-      <td class="tz-val">Fri 24 Apr 2026  09:00 AM</td>
-      <td class="tz-val">Fri 24 Apr 2026  07:00 AM</td>
-      <td><a class="reg-btn" href="https://events.sumologic.com/automationpm04232026-event-training" target="_blank">Register →</a></td>
-    </tr>
-    <tr class="desc-row" id="desc-19">
-      <td class="desc-cell" colspan="6"><strong>Automation PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
-    </tr>
-    <tr class="data-row" data-idx="20" data-title="Welcome Webinar AM" data-pt="Tue 05 May 2026  05:00 AM" data-iso="2026-05-05T05:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(20)"><span class="ei" id="ei-20">▶</span>Welcome Webinar AM</button></td>
+    <tr class="data-row" data-idx="0" data-title="Welcome Webinar" data-pt="Tue 05 May 2026  05:00 AM" data-iso="2026-05-05T05:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(0)"><span class="ei" id="ei-0">▶</span>Welcome Webinar</button></td>
       <td class="tz-val">Tue 05 May 2026  05:00 AM<br/><span class="tz-end">ends 01:00 PM</span></td>
       <td class="tz-val">Wed 06 May 2026  12:00 AM</td>
       <td class="tz-val">Tue 05 May 2026  10:00 PM</td>
       <td class="tz-val">Tue 05 May 2026  08:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinaram05052026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-20">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-0">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="21" data-title="Fundamentals AM" data-pt="Tue 05 May 2026  07:00 AM" data-iso="2026-05-05T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(21)"><span class="ei" id="ei-21">▶</span>Fundamentals AM</button></td>
+    <tr class="data-row" data-idx="1" data-title="Fundamentals" data-pt="Tue 05 May 2026  07:00 AM" data-iso="2026-05-05T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(1)"><span class="ei" id="ei-1">▶</span>Fundamentals</button></td>
       <td class="tz-val">Tue 05 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 06 May 2026  02:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  12:00 AM</td>
       <td class="tz-val">Tue 05 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalsam05052026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-21">
-      <td class="desc-cell" colspan="6"><strong>Fundamentals AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-1">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="22" data-title="Welcome Webinar PM" data-pt="Tue 05 May 2026  02:00 PM" data-iso="2026-05-05T14:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(22)"><span class="ei" id="ei-22">▶</span>Welcome Webinar PM</button></td>
+    <tr class="data-row" data-idx="2" data-title="Welcome Webinar" data-pt="Tue 05 May 2026  02:00 PM" data-iso="2026-05-05T14:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(2)"><span class="ei" id="ei-2">▶</span>Welcome Webinar</button></td>
       <td class="tz-val">Tue 05 May 2026  02:00 PM<br/><span class="tz-end">ends 03:00 PM</span></td>
       <td class="tz-val">Wed 06 May 2026  09:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  07:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  05:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinarpm05052026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-22">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-2">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="23" data-title="Fundamentals PM" data-pt="Tue 05 May 2026  04:00 PM" data-iso="2026-05-05T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(23)"><span class="ei" id="ei-23">▶</span>Fundamentals PM</button></td>
+    <tr class="data-row" data-idx="3" data-title="Fundamentals" data-pt="Tue 05 May 2026  04:00 PM" data-iso="2026-05-05T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(3)"><span class="ei" id="ei-3">▶</span>Fundamentals</button></td>
       <td class="tz-val">Tue 05 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 06 May 2026  11:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  09:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalspm05052026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-23">
-      <td class="desc-cell" colspan="6"><strong>Fundamentals PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-3">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="24" data-title="Search Mastery AM" data-pt="Wed 06 May 2026  07:00 AM" data-iso="2026-05-06T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(24)"><span class="ei" id="ei-24">▶</span>Search Mastery AM</button></td>
+    <tr class="data-row" data-idx="4" data-title="Search Mastery" data-pt="Wed 06 May 2026  07:00 AM" data-iso="2026-05-06T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(4)"><span class="ei" id="ei-4">▶</span>Search Mastery</button></td>
       <td class="tz-val">Wed 06 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 07 May 2026  02:00 AM</td>
       <td class="tz-val">Thu 07 May 2026  12:00 AM</td>
       <td class="tz-val">Wed 06 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/searchmasteryam05062026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-24">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-4">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="25" data-title="Search Mastery PM" data-pt="Wed 06 May 2026  04:00 PM" data-iso="2026-05-06T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(25)"><span class="ei" id="ei-25">▶</span>Search Mastery PM</button></td>
+    <tr class="data-row" data-idx="5" data-title="Search Mastery" data-pt="Wed 06 May 2026  04:00 PM" data-iso="2026-05-06T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(5)"><span class="ei" id="ei-5">▶</span>Search Mastery</button></td>
       <td class="tz-val">Wed 06 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 07 May 2026  11:00 AM</td>
       <td class="tz-val">Thu 07 May 2026  09:00 AM</td>
       <td class="tz-val">Thu 07 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/searchmasterypm05062026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-25">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-5">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="26" data-title="Best Practice for Query Efficiency AM" data-pt="Thu 07 May 2026  07:00 AM" data-iso="2026-05-07T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(26)"><span class="ei" id="ei-26">▶</span>Best Practice for Query Efficiency AM</button></td>
+    <tr class="data-row" data-idx="6" data-title="Best Practice for Query Efficiency" data-pt="Thu 07 May 2026  07:00 AM" data-iso="2026-05-07T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(6)"><span class="ei" id="ei-6">▶</span>Best Practice for Query Efficiency</button></td>
       <td class="tz-val">Thu 07 May 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Fri 08 May 2026  02:00 AM</td>
       <td class="tz-val">Fri 08 May 2026  12:00 AM</td>
       <td class="tz-val">Thu 07 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/bp4qeam05072026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-26">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-6">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="27" data-title="Best Practice for Query Efficiency PM" data-pt="Thu 07 May 2026  04:00 PM" data-iso="2026-05-07T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(27)"><span class="ei" id="ei-27">▶</span>Best Practice for Query Efficiency PM</button></td>
+    <tr class="data-row" data-idx="7" data-title="Best Practice for Query Efficiency" data-pt="Thu 07 May 2026  04:00 PM" data-iso="2026-05-07T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(7)"><span class="ei" id="ei-7">▶</span>Best Practice for Query Efficiency</button></td>
       <td class="tz-val">Thu 07 May 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Fri 08 May 2026  11:00 AM</td>
       <td class="tz-val">Fri 08 May 2026  09:00 AM</td>
       <td class="tz-val">Fri 08 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/bp4qepm05072026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-27">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-7">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="28" data-title="Observability PM" data-pt="Mon 11 May 2026  04:00 PM" data-iso="2026-05-11T16:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Observability PM</span></td>
+    <tr class="data-row" data-idx="8" data-title="Observability" data-pt="Mon 11 May 2026  04:00 PM" data-iso="2026-05-11T16:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Observability</span></td>
       <td class="tz-val">Mon 11 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Tue 12 May 2026  11:00 AM</td>
       <td class="tz-val">Tue 12 May 2026  09:00 AM</td>
       <td class="tz-val">Tue 12 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/observabilitypm05111016-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-28">
+    <tr class="desc-row" id="desc-8">
       <td class="desc-cell" colspan="6"><em>No description available.</em></td>
     </tr>
-    <tr class="data-row" data-idx="29" data-title="Administration AM" data-pt="Tue 12 May 2026  07:00 AM" data-iso="2026-05-12T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(29)"><span class="ei" id="ei-29">▶</span>Administration AM</button></td>
+    <tr class="data-row" data-idx="9" data-title="Administration" data-pt="Tue 12 May 2026  07:00 AM" data-iso="2026-05-12T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(9)"><span class="ei" id="ei-9">▶</span>Administration</button></td>
       <td class="tz-val">Tue 12 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 13 May 2026  02:00 AM</td>
       <td class="tz-val">Wed 13 May 2026  12:00 AM</td>
       <td class="tz-val">Tue 12 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/administrationam05122026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-29">
-      <td class="desc-cell" colspan="6"><strong>Administration AM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    <tr class="desc-row" id="desc-9">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="30" data-title="Administration PM" data-pt="Tue 12 May 2026  04:00 PM" data-iso="2026-05-12T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(30)"><span class="ei" id="ei-30">▶</span>Administration PM</button></td>
+    <tr class="data-row" data-idx="10" data-title="Administration" data-pt="Tue 12 May 2026  04:00 PM" data-iso="2026-05-12T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(10)"><span class="ei" id="ei-10">▶</span>Administration</button></td>
       <td class="tz-val">Tue 12 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 13 May 2026  11:00 AM</td>
       <td class="tz-val">Wed 13 May 2026  09:00 AM</td>
       <td class="tz-val">Wed 13 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/administrationpm05122026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-30">
-      <td class="desc-cell" colspan="6"><strong>Administration PM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    <tr class="desc-row" id="desc-10">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="31" data-title="Metric Analytics AM" data-pt="Wed 13 May 2026  07:00 AM" data-iso="2026-05-13T07:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics AM</span></td>
+    <tr class="data-row" data-idx="11" data-title="Metric Analytics" data-pt="Wed 13 May 2026  07:00 AM" data-iso="2026-05-13T07:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
       <td class="tz-val">Wed 13 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 14 May 2026  02:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  12:00 AM</td>
       <td class="tz-val">Wed 13 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam05132026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-31">
+    <tr class="desc-row" id="desc-11">
       <td class="desc-cell" colspan="6"><em>No description available.</em></td>
     </tr>
-    <tr class="data-row" data-idx="32" data-title="Metric Analytics PM" data-pt="Wed 13 May 2026  04:00 PM" data-iso="2026-05-13T16:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics PM</span></td>
+    <tr class="data-row" data-idx="12" data-title="Metric Analytics" data-pt="Wed 13 May 2026  04:00 PM" data-iso="2026-05-13T16:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
       <td class="tz-val">Wed 13 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 14 May 2026  11:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  09:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyricspm05132026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-32">
+    <tr class="desc-row" id="desc-12">
       <td class="desc-cell" colspan="6"><em>No description available.</em></td>
     </tr>
-    <tr class="data-row" data-idx="33" data-title="Mobot Essentials AM" data-pt="Thu 14 May 2026  07:00 AM" data-iso="2026-05-14T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(33)"><span class="ei" id="ei-33">▶</span>Mobot Essentials AM</button></td>
+    <tr class="data-row" data-idx="13" data-title="Mobot Essentials" data-pt="Thu 14 May 2026  07:00 AM" data-iso="2026-05-14T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(13)"><span class="ei" id="ei-13">▶</span>Mobot Essentials</button></td>
       <td class="tz-val">Thu 14 May 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Fri 15 May 2026  02:00 AM</td>
       <td class="tz-val">Fri 15 May 2026  12:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialsam05142026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-33">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-13">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="34" data-title="Mobot Essentials PM" data-pt="Thu 14 May 2026  04:00 PM" data-iso="2026-05-14T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(34)"><span class="ei" id="ei-34">▶</span>Mobot Essentials PM</button></td>
+    <tr class="data-row" data-idx="14" data-title="Mobot Essentials" data-pt="Thu 14 May 2026  04:00 PM" data-iso="2026-05-14T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(14)"><span class="ei" id="ei-14">▶</span>Mobot Essentials</button></td>
       <td class="tz-val">Thu 14 May 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Fri 15 May 2026  11:00 AM</td>
       <td class="tz-val">Fri 15 May 2026  09:00 AM</td>
       <td class="tz-val">Fri 15 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialspm05142026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-34">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-14">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="35" data-title="Logs for Security AM" data-pt="Tue 19 May 2026  07:00 AM" data-iso="2026-05-19T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(35)"><span class="ei" id="ei-35">▶</span>Logs for Security AM</button></td>
+    <tr class="data-row" data-idx="15" data-title="Logs for Security" data-pt="Tue 19 May 2026  07:00 AM" data-iso="2026-05-19T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(15)"><span class="ei" id="ei-15">▶</span>Logs for Security</button></td>
       <td class="tz-val">Tue 19 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 20 May 2026  02:00 AM</td>
       <td class="tz-val">Wed 20 May 2026  12:00 AM</td>
       <td class="tz-val">Tue 19 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecurityam05192026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-35">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security AM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
+    <tr class="desc-row" id="desc-15">
+      <td class="desc-cell" colspan="6"><strong>Logs for Security — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
     </tr>
-    <tr class="data-row" data-idx="36" data-title="Logs for Security PM" data-pt="Tue 19 May 2026  04:00 PM" data-iso="2026-05-19T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(36)"><span class="ei" id="ei-36">▶</span>Logs for Security PM</button></td>
+    <tr class="data-row" data-idx="16" data-title="Logs for Security" data-pt="Tue 19 May 2026  04:00 PM" data-iso="2026-05-19T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(16)"><span class="ei" id="ei-16">▶</span>Logs for Security</button></td>
       <td class="tz-val">Tue 19 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 20 May 2026  11:00 AM</td>
       <td class="tz-val">Wed 20 May 2026  09:00 AM</td>
       <td class="tz-val">Wed 20 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecuritypm05192026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-36">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security PM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
+    <tr class="desc-row" id="desc-16">
+      <td class="desc-cell" colspan="6"><strong>Logs for Security — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
     </tr>
-    <tr class="data-row" data-idx="37" data-title="Essential Cloud SIEM Skills for SOC Analysts AM" data-pt="Wed 20 May 2026  07:00 AM" data-iso="2026-05-20T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(37)"><span class="ei" id="ei-37">▶</span>Essential Cloud SIEM Skills for SOC Analysts AM</button></td>
+    <tr class="data-row" data-idx="17" data-title="Essential Cloud SIEM Skills for SOC Analysts" data-pt="Wed 20 May 2026  07:00 AM" data-iso="2026-05-20T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(17)"><span class="ei" id="ei-17">▶</span>Essential Cloud SIEM Skills for SOC Analysts</button></td>
       <td class="tz-val">Wed 20 May 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Thu 21 May 2026  02:00 AM</td>
       <td class="tz-val">Thu 21 May 2026  12:00 AM</td>
       <td class="tz-val">Wed 20 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/esscloudsiemam05202026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-37">
-      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM Skills for SOC Analysts AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-17">
+      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM Skills for SOC Analysts — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="38" data-title="Essential Cloud SIEM Skills for SOC Analysts PM" data-pt="Wed 20 May 2026  04:00 PM" data-iso="2026-05-20T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(38)"><span class="ei" id="ei-38">▶</span>Essential Cloud SIEM Skills for SOC Analysts PM</button></td>
+    <tr class="data-row" data-idx="18" data-title="Essential Cloud SIEM Skills for SOC Analysts" data-pt="Wed 20 May 2026  04:00 PM" data-iso="2026-05-20T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(18)"><span class="ei" id="ei-18">▶</span>Essential Cloud SIEM Skills for SOC Analysts</button></td>
       <td class="tz-val">Wed 20 May 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Thu 21 May 2026  11:00 AM</td>
       <td class="tz-val">Thu 21 May 2026  09:00 AM</td>
       <td class="tz-val">Thu 21 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/esscloudsiempm05202026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-38">
-      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM Skills for SOC Analysts PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-18">
+      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM Skills for SOC Analysts — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="39" data-title="Cloud SIEM AM" data-pt="Thu 21 May 2026  07:00 AM" data-iso="2026-05-21T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(39)"><span class="ei" id="ei-39">▶</span>Cloud SIEM AM</button></td>
+    <tr class="data-row" data-idx="19" data-title="Cloud SIEM" data-pt="Thu 21 May 2026  07:00 AM" data-iso="2026-05-21T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(19)"><span class="ei" id="ei-19">▶</span>Cloud SIEM</button></td>
       <td class="tz-val">Thu 21 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Fri 22 May 2026  02:00 AM</td>
       <td class="tz-val">Fri 22 May 2026  12:00 AM</td>
       <td class="tz-val">Thu 21 May 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiemam05212026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-39">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-19">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="40" data-title="Cloud SIEM PM" data-pt="Thu 21 May 2026  04:00 PM" data-iso="2026-05-21T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(40)"><span class="ei" id="ei-40">▶</span>Cloud SIEM PM</button></td>
+    <tr class="data-row" data-idx="20" data-title="Cloud SIEM" data-pt="Thu 21 May 2026  04:00 PM" data-iso="2026-05-21T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(20)"><span class="ei" id="ei-20">▶</span>Cloud SIEM</button></td>
       <td class="tz-val">Thu 21 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Fri 22 May 2026  11:00 AM</td>
       <td class="tz-val">Fri 22 May 2026  09:00 AM</td>
       <td class="tz-val">Fri 22 May 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiempm05212026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-40">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-20">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="41" data-title="Welcome Webinar AM" data-pt="Tue 02 Jun 2026  05:00 AM" data-iso="2026-06-02T05:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(41)"><span class="ei" id="ei-41">▶</span>Welcome Webinar AM</button></td>
+    <tr class="data-row" data-idx="21" data-title="Welcome Webinar" data-pt="Tue 02 Jun 2026  05:00 AM" data-iso="2026-06-02T05:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(21)"><span class="ei" id="ei-21">▶</span>Welcome Webinar</button></td>
       <td class="tz-val">Tue 02 Jun 2026  05:00 AM<br/><span class="tz-end">ends 06:00 AM</span></td>
       <td class="tz-val">Wed 03 Jun 2026  12:00 AM</td>
       <td class="tz-val">Tue 02 Jun 2026  10:00 PM</td>
       <td class="tz-val">Tue 02 Jun 2026  08:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinaram06022026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-41">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-21">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="42" data-title="Fundamentals AM" data-pt="Tue 02 Jun 2026  07:00 AM" data-iso="2026-06-02T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(42)"><span class="ei" id="ei-42">▶</span>Fundamentals AM</button></td>
+    <tr class="data-row" data-idx="22" data-title="Fundamentals" data-pt="Tue 02 Jun 2026  07:00 AM" data-iso="2026-06-02T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(22)"><span class="ei" id="ei-22">▶</span>Fundamentals</button></td>
       <td class="tz-val">Tue 02 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 03 Jun 2026  02:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  12:00 AM</td>
       <td class="tz-val">Tue 02 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalsam06022026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-42">
-      <td class="desc-cell" colspan="6"><strong>Fundamentals AM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-22">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="43" data-title="Welcome Webinar PM" data-pt="Tue 02 Jun 2026  02:00 PM" data-iso="2026-06-02T14:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(43)"><span class="ei" id="ei-43">▶</span>Welcome Webinar PM</button></td>
+    <tr class="data-row" data-idx="23" data-title="Welcome Webinar" data-pt="Tue 02 Jun 2026  02:00 PM" data-iso="2026-06-02T14:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(23)"><span class="ei" id="ei-23">▶</span>Welcome Webinar</button></td>
       <td class="tz-val">Tue 02 Jun 2026  02:00 PM<br/><span class="tz-end">ends 03:00 PM</span></td>
       <td class="tz-val">Wed 03 Jun 2026  09:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  07:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  05:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinarpm06022026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-43">
-      <td class="desc-cell" colspan="6"><strong>Welcome Webinar PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-23">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="44" data-title="Fundamentals PM" data-pt="Tue 02 Jun 2026  04:00 PM" data-iso="2026-06-02T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(44)"><span class="ei" id="ei-44">▶</span>Fundamentals PM</button></td>
+    <tr class="data-row" data-idx="24" data-title="Fundamentals" data-pt="Tue 02 Jun 2026  04:00 PM" data-iso="2026-06-02T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(24)"><span class="ei" id="ei-24">▶</span>Fundamentals</button></td>
       <td class="tz-val">Tue 02 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 03 Jun 2026  11:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  09:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalspm06022026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-44">
-      <td class="desc-cell" colspan="6"><strong>Fundamentals PM — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    <tr class="desc-row" id="desc-24">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
     </tr>
-    <tr class="data-row" data-idx="45" data-title="Search Mastery AM" data-pt="Wed 03 Jun 2026  07:00 AM" data-iso="2026-06-03T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(45)"><span class="ei" id="ei-45">▶</span>Search Mastery AM</button></td>
+    <tr class="data-row" data-idx="25" data-title="Search Mastery" data-pt="Wed 03 Jun 2026  07:00 AM" data-iso="2026-06-03T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(25)"><span class="ei" id="ei-25">▶</span>Search Mastery</button></td>
       <td class="tz-val">Wed 03 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 04 Jun 2026  02:00 AM</td>
       <td class="tz-val">Thu 04 Jun 2026  12:00 AM</td>
       <td class="tz-val">Wed 03 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/searchmasteryam06032026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-45">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-25">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="46" data-title="Search Mastery PM" data-pt="Wed 03 Jun 2026  04:00 PM" data-iso="2026-06-03T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(46)"><span class="ei" id="ei-46">▶</span>Search Mastery PM</button></td>
+    <tr class="data-row" data-idx="26" data-title="Search Mastery" data-pt="Wed 03 Jun 2026  04:00 PM" data-iso="2026-06-03T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(26)"><span class="ei" id="ei-26">▶</span>Search Mastery</button></td>
       <td class="tz-val">Wed 03 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 04 Jun 2026  11:00 AM</td>
       <td class="tz-val">Thu 04 Jun 2026  09:00 AM</td>
       <td class="tz-val">Thu 04 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/searchmasterypm06032026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-46">
-      <td class="desc-cell" colspan="6"><strong>Search Mastery PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-26">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="47" data-title="Best Practice for Query Efficiency AM" data-pt="Thu 04 Jun 2026  07:00 AM" data-iso="2026-06-04T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(47)"><span class="ei" id="ei-47">▶</span>Best Practice for Query Efficiency AM</button></td>
+    <tr class="data-row" data-idx="27" data-title="Best Practice for Query Efficiency" data-pt="Thu 04 Jun 2026  07:00 AM" data-iso="2026-06-04T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(27)"><span class="ei" id="ei-27">▶</span>Best Practice for Query Efficiency</button></td>
       <td class="tz-val">Thu 04 Jun 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Fri 05 Jun 2026  02:00 AM</td>
       <td class="tz-val">Fri 05 Jun 2026  12:00 AM</td>
       <td class="tz-val">Thu 04 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/bp4qeam06042026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-47">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-27">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="48" data-title="Best Practice for Query Efficiency PM" data-pt="Thu 04 Jun 2026  04:00 PM" data-iso="2026-06-04T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(48)"><span class="ei" id="ei-48">▶</span>Best Practice for Query Efficiency PM</button></td>
+    <tr class="data-row" data-idx="28" data-title="Best Practice for Query Efficiency" data-pt="Thu 04 Jun 2026  04:00 PM" data-iso="2026-06-04T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(28)"><span class="ei" id="ei-28">▶</span>Best Practice for Query Efficiency</button></td>
       <td class="tz-val">Thu 04 Jun 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Fri 05 Jun 2026  11:00 AM</td>
       <td class="tz-val">Fri 05 Jun 2026  09:00 AM</td>
       <td class="tz-val">Fri 05 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/bp4qepm06042026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-48">
-      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-28">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="49" data-title="Administration AM" data-pt="Tue 09 Jun 2026  07:00 AM" data-iso="2026-06-09T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(49)"><span class="ei" id="ei-49">▶</span>Administration AM</button></td>
+    <tr class="data-row" data-idx="29" data-title="Administration" data-pt="Tue 09 Jun 2026  07:00 AM" data-iso="2026-06-09T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(29)"><span class="ei" id="ei-29">▶</span>Administration</button></td>
       <td class="tz-val">Tue 09 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 10 Jun 2026  02:00 AM</td>
       <td class="tz-val">Wed 10 Jun 2026  12:00 AM</td>
       <td class="tz-val">Tue 09 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/administrationam06092026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-49">
-      <td class="desc-cell" colspan="6"><strong>Administration AM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    <tr class="desc-row" id="desc-29">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="50" data-title="Administration PM" data-pt="Tue 09 Jun 2026  04:00 PM" data-iso="2026-06-09T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(50)"><span class="ei" id="ei-50">▶</span>Administration PM</button></td>
+    <tr class="data-row" data-idx="30" data-title="Administration" data-pt="Tue 09 Jun 2026  04:00 PM" data-iso="2026-06-09T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(30)"><span class="ei" id="ei-30">▶</span>Administration</button></td>
       <td class="tz-val">Tue 09 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 10 Jun 2026  11:00 AM</td>
       <td class="tz-val">Wed 10 Jun 2026  09:00 AM</td>
       <td class="tz-val">Wed 10 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/administrationpm06092026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-50">
-      <td class="desc-cell" colspan="6"><strong>Administration PM — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    <tr class="desc-row" id="desc-30">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="51" data-title="Metric Analytics AM" data-pt="Wed 10 Jun 2026  07:00 AM" data-iso="2026-06-10T07:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics AM</span></td>
+    <tr class="data-row" data-idx="31" data-title="Metric Analytics" data-pt="Wed 10 Jun 2026  07:00 AM" data-iso="2026-06-10T07:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
       <td class="tz-val">Wed 10 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 11 Jun 2026  02:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  12:00 AM</td>
       <td class="tz-val">Wed 10 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam06102026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-51">
+    <tr class="desc-row" id="desc-31">
       <td class="desc-cell" colspan="6"><em>No description available.</em></td>
     </tr>
-    <tr class="data-row" data-idx="52" data-title="Metric Analytics PM" data-pt="Wed 10 Jun 2026  04:00 PM" data-iso="2026-06-10T16:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics PM</span></td>
+    <tr class="data-row" data-idx="32" data-title="Metric Analytics" data-pt="Wed 10 Jun 2026  04:00 PM" data-iso="2026-06-10T16:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
       <td class="tz-val">Wed 10 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 11 Jun 2026  11:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  09:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticspm06102026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-52">
+    <tr class="desc-row" id="desc-32">
       <td class="desc-cell" colspan="6"><em>No description available.</em></td>
     </tr>
-    <tr class="data-row" data-idx="53" data-title="Mobot Essentials AM" data-pt="Thu 11 Jun 2026  07:00 AM" data-iso="2026-06-11T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(53)"><span class="ei" id="ei-53">▶</span>Mobot Essentials AM</button></td>
+    <tr class="data-row" data-idx="33" data-title="Mobot Essentials" data-pt="Thu 11 Jun 2026  07:00 AM" data-iso="2026-06-11T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(33)"><span class="ei" id="ei-33">▶</span>Mobot Essentials</button></td>
       <td class="tz-val">Thu 11 Jun 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Fri 12 Jun 2026  02:00 AM</td>
       <td class="tz-val">Fri 12 Jun 2026  12:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialsam06112026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-53">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials AM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-33">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="54" data-title="Mobot Essentials PM" data-pt="Thu 11 Jun 2026  04:00 PM" data-iso="2026-06-11T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(54)"><span class="ei" id="ei-54">▶</span>Mobot Essentials PM</button></td>
+    <tr class="data-row" data-idx="34" data-title="Mobot Essentials" data-pt="Thu 11 Jun 2026  04:00 PM" data-iso="2026-06-11T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(34)"><span class="ei" id="ei-34">▶</span>Mobot Essentials</button></td>
       <td class="tz-val">Thu 11 Jun 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Fri 12 Jun 2026  11:00 AM</td>
       <td class="tz-val">Fri 12 Jun 2026  09:00 AM</td>
       <td class="tz-val">Fri 12 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialspm06112026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-54">
-      <td class="desc-cell" colspan="6"><strong>Mobot Essentials PM — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    <tr class="desc-row" id="desc-34">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
     </tr>
-    <tr class="data-row" data-idx="55" data-title="Logs for Security AM" data-pt="Tue 16 Jun 2026  07:00 AM" data-iso="2026-06-16T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(55)"><span class="ei" id="ei-55">▶</span>Logs for Security AM</button></td>
+    <tr class="data-row" data-idx="35" data-title="Logs for Security" data-pt="Tue 16 Jun 2026  07:00 AM" data-iso="2026-06-16T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(35)"><span class="ei" id="ei-35">▶</span>Logs for Security</button></td>
       <td class="tz-val">Tue 16 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Wed 17 Jun 2026  02:00 AM</td>
       <td class="tz-val">Wed 17 Jun 2026  12:00 AM</td>
       <td class="tz-val">Tue 16 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecurityam06162026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-55">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security AM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
+    <tr class="desc-row" id="desc-35">
+      <td class="desc-cell" colspan="6"><strong>Logs for Security — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
     </tr>
-    <tr class="data-row" data-idx="56" data-title="Logs for Security PM" data-pt="Tue 16 Jun 2026  04:00 PM" data-iso="2026-06-16T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(56)"><span class="ei" id="ei-56">▶</span>Logs for Security PM</button></td>
+    <tr class="data-row" data-idx="36" data-title="Logs for Security" data-pt="Tue 16 Jun 2026  04:00 PM" data-iso="2026-06-16T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(36)"><span class="ei" id="ei-36">▶</span>Logs for Security</button></td>
       <td class="tz-val">Tue 16 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Wed 17 Jun 2026  11:00 AM</td>
       <td class="tz-val">Wed 17 Jun 2026  09:00 AM</td>
       <td class="tz-val">Wed 17 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/logsforsecuritypm06162026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-56">
-      <td class="desc-cell" colspan="6"><strong>Logs for Security PM — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
+    <tr class="desc-row" id="desc-36">
+      <td class="desc-cell" colspan="6"><strong>Logs for Security — course overview</strong>Learn how our Threat Intelligence can help you stay on top of your environment by matching IOCs like IP address, domain names, email addresses, and MD5 hashes. Also learn how to analyze AWS data to monitor account usage and monitor security groups effectively.</td>
     </tr>
-    <tr class="data-row" data-idx="57" data-title="Cloud SIEM AM" data-pt="Wed 17 Jun 2026  07:00 AM" data-iso="2026-06-17T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(57)"><span class="ei" id="ei-57">▶</span>Cloud SIEM AM</button></td>
+    <tr class="data-row" data-idx="37" data-title="Cloud SIEM" data-pt="Wed 17 Jun 2026  07:00 AM" data-iso="2026-06-17T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(37)"><span class="ei" id="ei-37">▶</span>Cloud SIEM</button></td>
       <td class="tz-val">Wed 17 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 18 Jun 2026  02:00 AM</td>
       <td class="tz-val">Thu 18 Jun 2026  12:00 AM</td>
       <td class="tz-val">Wed 17 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiemam06172026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-57">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-37">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="58" data-title="Cloud SIEM PM" data-pt="Wed 17 Jun 2026  04:00 PM" data-iso="2026-06-17T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(58)"><span class="ei" id="ei-58">▶</span>Cloud SIEM PM</button></td>
+    <tr class="data-row" data-idx="38" data-title="Cloud SIEM" data-pt="Wed 17 Jun 2026  04:00 PM" data-iso="2026-06-17T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(38)"><span class="ei" id="ei-38">▶</span>Cloud SIEM</button></td>
       <td class="tz-val">Wed 17 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 18 Jun 2026  11:00 AM</td>
       <td class="tz-val">Thu 18 Jun 2026  09:00 AM</td>
       <td class="tz-val">Thu 18 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiempm06172026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-58">
-      <td class="desc-cell" colspan="6"><strong>Cloud SIEM PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-38">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="59" data-title="Automation Workshop AM" data-pt="Thu 18 Jun 2026  07:00 AM" data-iso="2026-06-18T07:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(59)"><span class="ei" id="ei-59">▶</span>Automation Workshop AM</button></td>
+    <tr class="data-row" data-idx="39" data-title="Automation Workshop" data-pt="Thu 18 Jun 2026  07:00 AM" data-iso="2026-06-18T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(39)"><span class="ei" id="ei-39">▶</span>Automation Workshop</button></td>
       <td class="tz-val">Thu 18 Jun 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
       <td class="tz-val">Fri 19 Jun 2026  02:00 AM</td>
       <td class="tz-val">Fri 19 Jun 2026  12:00 AM</td>
       <td class="tz-val">Thu 18 Jun 2026  10:00 PM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/automationworkshopam06182026-event-training" target="_blank">Register →</a></td>
     </tr>
-    <tr class="desc-row" id="desc-59">
-      <td class="desc-cell" colspan="6"><strong>Automation Workshop AM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    <tr class="desc-row" id="desc-39">
+      <td class="desc-cell" colspan="6"><strong>Automation Workshop — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
-    <tr class="data-row" data-idx="60" data-title="Automation Workshop PM" data-pt="Thu 18 Jun 2026  04:00 PM" data-iso="2026-06-18T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(60)"><span class="ei" id="ei-60">▶</span>Automation Workshop PM</button></td>
+    <tr class="data-row" data-idx="40" data-title="Automation Workshop" data-pt="Thu 18 Jun 2026  04:00 PM" data-iso="2026-06-18T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(40)"><span class="ei" id="ei-40">▶</span>Automation Workshop</button></td>
       <td class="tz-val">Thu 18 Jun 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
       <td class="tz-val">Fri 19 Jun 2026  11:00 AM</td>
       <td class="tz-val">Fri 19 Jun 2026  09:00 AM</td>
       <td class="tz-val">Fri 19 Jun 2026  07:00 AM</td>
       <td><a class="reg-btn" href="https://events.sumologic.com/automationworkshoppm06182026-event-training" target="_blank">Register →</a></td>
     </tr>
+    <tr class="desc-row" id="desc-40">
+      <td class="desc-cell" colspan="6"><strong>Automation Workshop — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="41" data-title="Welcome Webinar" data-pt="Tue 30 Jun 2026  05:00 AM" data-iso="2026-06-30T05:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(41)"><span class="ei" id="ei-41">▶</span>Welcome Webinar</button></td>
+      <td class="tz-val">Tue 30 Jun 2026  05:00 AM<br/><span class="tz-end">ends 06:00 AM</span></td>
+      <td class="tz-val">Wed 01 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Tue 30 Jun 2026  10:00 PM</td>
+      <td class="tz-val">Tue 30 Jun 2026  08:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinaram06302026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-41">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    </tr>
+    <tr class="data-row" data-idx="42" data-title="Fundamentals" data-pt="Tue 30 Jun 2026  07:00 AM" data-iso="2026-06-30T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(42)"><span class="ei" id="ei-42">▶</span>Fundamentals</button></td>
+      <td class="tz-val">Tue 30 Jun 2026  07:00 AM<br/><span class="tz-end">ends 04:00 PM</span></td>
+      <td class="tz-val">Wed 01 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Tue 30 Jun 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalsam06302026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-42">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    </tr>
+    <tr class="data-row" data-idx="43" data-title="Welcome Webinar" data-pt="Tue 30 Jun 2026  10:00 AM" data-iso="2026-06-30T10:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(43)"><span class="ei" id="ei-43">▶</span>Welcome Webinar</button></td>
+      <td class="tz-val">Tue 30 Jun 2026  10:00 AM<br/><span class="tz-end">ends 03:00 PM</span></td>
+      <td class="tz-val">Wed 01 Jul 2026  05:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  03:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  01:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/welcomewebinarpm06302026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-43">
+      <td class="desc-cell" colspan="6"><strong>Welcome Webinar — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    </tr>
+    <tr class="data-row" data-idx="44" data-title="Fundamentals" data-pt="Tue 30 Jun 2026  04:00 PM" data-iso="2026-06-30T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(44)"><span class="ei" id="ei-44">▶</span>Fundamentals</button></td>
+      <td class="tz-val">Tue 30 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
+      <td class="tz-val">Wed 01 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/fundamentalspm06302026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-44">
+      <td class="desc-cell" colspan="6"><strong>Fundamentals — course overview</strong>Gain broad knowledge analyzing logs and metrics with the Fundamentals Certification. Get Sumo Logic up and running and learn to do simple filtering, data parsing, and analysis.</td>
+    </tr>
+    <tr class="data-row" data-idx="45" data-title="Search Mastery" data-pt="Wed 01 Jul 2026  07:00 AM" data-iso="2026-07-01T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(45)"><span class="ei" id="ei-45">▶</span>Search Mastery</button></td>
+      <td class="tz-val">Wed 01 Jul 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
+      <td class="tz-val">Thu 02 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Thu 02 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Wed 01 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/searchmasteryam07012026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-45">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="46" data-title="Search Mastery" data-pt="Wed 01 Jul 2026  04:00 PM" data-iso="2026-07-01T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(46)"><span class="ei" id="ei-46">▶</span>Search Mastery</button></td>
+      <td class="tz-val">Wed 01 Jul 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
+      <td class="tz-val">Thu 02 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Thu 02 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Thu 02 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/searchmasterypm07012026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-46">
+      <td class="desc-cell" colspan="6"><strong>Search Mastery — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="47" data-title="Best Practice for Query Efficiency" data-pt="Thu 02 Jul 2026  07:00 AM" data-iso="2026-07-02T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(47)"><span class="ei" id="ei-47">▶</span>Best Practice for Query Efficiency</button></td>
+      <td class="tz-val">Thu 02 Jul 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
+      <td class="tz-val">Fri 03 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Fri 03 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Thu 02 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/bp4qeam07022026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-47">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="48" data-title="Best Practice for Query Efficiency" data-pt="Thu 02 Jul 2026  04:00 PM" data-iso="2026-07-02T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(48)"><span class="ei" id="ei-48">▶</span>Best Practice for Query Efficiency</button></td>
+      <td class="tz-val">Thu 02 Jul 2026  04:00 PM<br/><span class="tz-end">ends 05:25 PM</span></td>
+      <td class="tz-val">Fri 03 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Fri 03 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Fri 03 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/bp4qepm07022026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-48">
+      <td class="desc-cell" colspan="6"><strong>Best Practice for Query Efficiency — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="49" data-title="Administration" data-pt="Tue 07 Jul 2026  07:00 AM" data-iso="2026-07-07T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(49)"><span class="ei" id="ei-49">▶</span>Administration</button></td>
+      <td class="tz-val">Tue 07 Jul 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
+      <td class="tz-val">Wed 08 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Wed 08 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Tue 07 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/administrationam07072026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-49">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    </tr>
+    <tr class="data-row" data-idx="50" data-title="Administration" data-pt="Tue 07 Jul 2026  04:00 PM" data-iso="2026-07-07T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(50)"><span class="ei" id="ei-50">▶</span>Administration</button></td>
+      <td class="tz-val">Tue 07 Jul 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
+      <td class="tz-val">Wed 08 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Wed 08 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Wed 08 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/administrationpm07072026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-50">
+      <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
+    </tr>
+    <tr class="data-row" data-idx="51" data-title="Metric Analytic" data-pt="Wed 08 Jul 2026  07:00 AM" data-iso="2026-07-08T07:00:00-07:00">
+      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytic</span></td>
+      <td class="tz-val">Wed 08 Jul 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
+      <td class="tz-val">Thu 09 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Thu 09 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Wed 08 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam07082026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-51">
+      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+    </tr>
+    <tr class="data-row" data-idx="52" data-title="Metrics Analytic" data-pt="Wed 08 Jul 2026  04:00 PM" data-iso="2026-07-08T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(52)"><span class="ei" id="ei-52">▶</span>Metrics Analytic</button></td>
+      <td class="tz-val">Wed 08 Jul 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
+      <td class="tz-val">Thu 09 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Thu 09 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Thu 09 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticspm07082026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-52">
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytic — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="53" data-title="Mobot Essentials" data-pt="Thu 09 Jul 2026  07:00 AM" data-iso="2026-07-09T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(53)"><span class="ei" id="ei-53">▶</span>Mobot Essentials</button></td>
+      <td class="tz-val">Thu 09 Jul 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
+      <td class="tz-val">Fri 10 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Fri 10 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Thu 09 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/mobotam07092026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-53">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="54" data-title="Mobot Essentials" data-pt="Thu 09 Jul 2026  04:00 PM" data-iso="2026-07-09T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(54)"><span class="ei" id="ei-54">▶</span>Mobot Essentials</button></td>
+      <td class="tz-val">Thu 09 Jul 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
+      <td class="tz-val">Fri 10 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Fri 10 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Fri 10 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/mobotessentialspm07092026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-54">
+      <td class="desc-cell" colspan="6"><strong>Mobot Essentials — course overview</strong>Build on the knowledge gained in Fundamentals to do more in-depth analysis of logs and metrics. Identify critical events with ease and create the dashboards and alerts necessary to monitor your environment.</td>
+    </tr>
+    <tr class="data-row" data-idx="55" data-title="Essential Cloud SIEM skills for SOC Analysts" data-pt="Tue 14 Jul 2026  07:00 AM" data-iso="2026-07-14T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(55)"><span class="ei" id="ei-55">▶</span>Essential Cloud SIEM skills for SOC Analysts</button></td>
+      <td class="tz-val">Tue 14 Jul 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
+      <td class="tz-val">Wed 15 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Wed 15 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Tue 14 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/esscloudsiemam07142026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-55">
+      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM skills for SOC Analysts — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="56" data-title="Essential Cloud SIEM skills for SOC Analysts" data-pt="Tue 14 Jul 2026  04:00 PM" data-iso="2026-07-14T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(56)"><span class="ei" id="ei-56">▶</span>Essential Cloud SIEM skills for SOC Analysts</button></td>
+      <td class="tz-val">Tue 14 Jul 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
+      <td class="tz-val">Wed 15 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Wed 15 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Wed 15 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/esscloudsiem07142026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-56">
+      <td class="desc-cell" colspan="6"><strong>Essential Cloud SIEM skills for SOC Analysts — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="57" data-title="Cloud SIEM" data-pt="Wed 15 Jul 2026  07:00 AM" data-iso="2026-07-15T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(57)"><span class="ei" id="ei-57">▶</span>Cloud SIEM</button></td>
+      <td class="tz-val">Wed 15 Jul 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
+      <td class="tz-val">Thu 16 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Thu 16 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Wed 15 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiemam07152026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-57">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="58" data-title="Cloud SIEM" data-pt="Wed 15 Jul 2026  04:00 PM" data-iso="2026-07-15T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(58)"><span class="ei" id="ei-58">▶</span>Cloud SIEM</button></td>
+      <td class="tz-val">Wed 15 Jul 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
+      <td class="tz-val">Thu 16 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Thu 16 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Thu 16 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/cloudsiempm07152026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-58">
+      <td class="desc-cell" colspan="6"><strong>Cloud SIEM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="59" data-title="Automation" data-pt="Thu 16 Jul 2026  07:00 AM" data-iso="2026-07-16T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(59)"><span class="ei" id="ei-59">▶</span>Automation</button></td>
+      <td class="tz-val">Thu 16 Jul 2026  07:00 AM<br/><span class="tz-end">ends 08:30 AM</span></td>
+      <td class="tz-val">Fri 17 Jul 2026  02:00 AM</td>
+      <td class="tz-val">Fri 17 Jul 2026  12:00 AM</td>
+      <td class="tz-val">Thu 16 Jul 2026  10:00 PM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/automationam07162026-event-training" target="_blank">Register →</a></td>
+    </tr>
+    <tr class="desc-row" id="desc-59">
+      <td class="desc-cell" colspan="6"><strong>Automation — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+    </tr>
+    <tr class="data-row" data-idx="60" data-title="Automation" data-pt="Thu 16 Jul 2026  04:00 PM" data-iso="2026-07-16T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(60)"><span class="ei" id="ei-60">▶</span>Automation</button></td>
+      <td class="tz-val">Thu 16 Jul 2026  04:00 PM<br/><span class="tz-end">ends 05:30 PM</span></td>
+      <td class="tz-val">Fri 17 Jul 2026  11:00 AM</td>
+      <td class="tz-val">Fri 17 Jul 2026  09:00 AM</td>
+      <td class="tz-val">Fri 17 Jul 2026  07:00 AM</td>
+      <td><a class="reg-btn" href="https://events.sumologic.com/automationpm07162026-event-training" target="_blank">Register →</a></td>
+    </tr>
     <tr class="desc-row" id="desc-60">
-      <td class="desc-cell" colspan="6"><strong>Automation Workshop PM — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
+      <td class="desc-cell" colspan="6"><strong>Automation — course overview</strong>Gain expertise in using Sumo Logic Cloud SIEM to transformingested data into actionable security insights. Through hands-on practice, you’ll learn how to conduct threat investigations, write and fine-tune detection rules, and create custom insights.</td>
     </tr>
 
   </tbody>
@@ -825,7 +844,7 @@
 </footer>
 
 <script>
-const SESSIONS = [{"idx": 0, "title": "Welcome Webinar AM", "pt": "Tue 07 Apr 2026  05:00 AM"}, {"idx": 1, "title": "Fundamental AM", "pt": "Tue 07 Apr 2026  07:00 AM"}, {"idx": 2, "title": "Welcome Webinar PM", "pt": "Tue 07 Apr 2026  02:00 PM"}, {"idx": 3, "title": "Fundamentals PM", "pt": "Tue 07 Apr 2026  04:00 PM"}, {"idx": 4, "title": "Search Mastery AM", "pt": "Wed 08 Apr 2026  07:00 AM"}, {"idx": 5, "title": "Search Mastery PM", "pt": "Wed 08 Apr 2026  04:00 PM"}, {"idx": 6, "title": "Best Practice for Query Efficiency AM", "pt": "Thu 09 Apr 2026  07:00 AM"}, {"idx": 7, "title": "Best Practice for Query Efficiency PM", "pt": "Thu 09 Apr 2026  04:00 PM"}, {"idx": 8, "title": "Adminstration AM", "pt": "Tue 14 Apr 2026  07:00 AM"}, {"idx": 9, "title": "Administration PM", "pt": "Tue 14 Apr 2026  04:00 PM"}, {"idx": 10, "title": "Metrics Analytics AM", "pt": "Wed 15 Apr 2026  07:00 AM"}, {"idx": 11, "title": "Metrics Analytics PM", "pt": "Wed 15 Apr 2026  04:00 PM"}, {"idx": 12, "title": "Mobot Essentials AM", "pt": "Thu 16 Apr 2026  07:00 AM"}, {"idx": 13, "title": "Mobot Essentials PM", "pt": "Thu 16 Apr 2026  04:00 PM"}, {"idx": 14, "title": "Logs for Security AM", "pt": "Tue 21 Apr 2026  07:00 AM"}, {"idx": 15, "title": "Logs for Security PM", "pt": "Tue 21 Apr 2026  04:00 PM"}, {"idx": 16, "title": "Cloud SIEM AM", "pt": "Wed 22 Apr 2026  07:00 AM"}, {"idx": 17, "title": "Cloud SIEM PM", "pt": "Wed 22 Apr 2026  04:00 PM"}, {"idx": 18, "title": "Automation AM", "pt": "Thu 23 Apr 2026  07:00 AM"}, {"idx": 19, "title": "Automation PM", "pt": "Thu 23 Apr 2026  04:00 PM"}, {"idx": 20, "title": "Welcome Webinar AM", "pt": "Tue 05 May 2026  05:00 AM"}, {"idx": 21, "title": "Fundamentals AM", "pt": "Tue 05 May 2026  07:00 AM"}, {"idx": 22, "title": "Welcome Webinar PM", "pt": "Tue 05 May 2026  02:00 PM"}, {"idx": 23, "title": "Fundamentals PM", "pt": "Tue 05 May 2026  04:00 PM"}, {"idx": 24, "title": "Search Mastery AM", "pt": "Wed 06 May 2026  07:00 AM"}, {"idx": 25, "title": "Search Mastery PM", "pt": "Wed 06 May 2026  04:00 PM"}, {"idx": 26, "title": "Best Practice for Query Efficiency AM", "pt": "Thu 07 May 2026  07:00 AM"}, {"idx": 27, "title": "Best Practice for Query Efficiency PM", "pt": "Thu 07 May 2026  04:00 PM"}, {"idx": 28, "title": "Observability PM", "pt": "Mon 11 May 2026  04:00 PM"}, {"idx": 29, "title": "Administration AM", "pt": "Tue 12 May 2026  07:00 AM"}, {"idx": 30, "title": "Administration PM", "pt": "Tue 12 May 2026  04:00 PM"}, {"idx": 31, "title": "Metric Analytics AM", "pt": "Wed 13 May 2026  07:00 AM"}, {"idx": 32, "title": "Metric Analytics PM", "pt": "Wed 13 May 2026  04:00 PM"}, {"idx": 33, "title": "Mobot Essentials AM", "pt": "Thu 14 May 2026  07:00 AM"}, {"idx": 34, "title": "Mobot Essentials PM", "pt": "Thu 14 May 2026  04:00 PM"}, {"idx": 35, "title": "Logs for Security AM", "pt": "Tue 19 May 2026  07:00 AM"}, {"idx": 36, "title": "Logs for Security PM", "pt": "Tue 19 May 2026  04:00 PM"}, {"idx": 37, "title": "Essential Cloud SIEM Skills for SOC Analysts AM", "pt": "Wed 20 May 2026  07:00 AM"}, {"idx": 38, "title": "Essential Cloud SIEM Skills for SOC Analysts PM", "pt": "Wed 20 May 2026  04:00 PM"}, {"idx": 39, "title": "Cloud SIEM AM", "pt": "Thu 21 May 2026  07:00 AM"}, {"idx": 40, "title": "Cloud SIEM PM", "pt": "Thu 21 May 2026  04:00 PM"}, {"idx": 41, "title": "Welcome Webinar AM", "pt": "Tue 02 Jun 2026  05:00 AM"}, {"idx": 42, "title": "Fundamentals AM", "pt": "Tue 02 Jun 2026  07:00 AM"}, {"idx": 43, "title": "Welcome Webinar PM", "pt": "Tue 02 Jun 2026  02:00 PM"}, {"idx": 44, "title": "Fundamentals PM", "pt": "Tue 02 Jun 2026  04:00 PM"}, {"idx": 45, "title": "Search Mastery AM", "pt": "Wed 03 Jun 2026  07:00 AM"}, {"idx": 46, "title": "Search Mastery PM", "pt": "Wed 03 Jun 2026  04:00 PM"}, {"idx": 47, "title": "Best Practice for Query Efficiency AM", "pt": "Thu 04 Jun 2026  07:00 AM"}, {"idx": 48, "title": "Best Practice for Query Efficiency PM", "pt": "Thu 04 Jun 2026  04:00 PM"}, {"idx": 49, "title": "Administration AM", "pt": "Tue 09 Jun 2026  07:00 AM"}, {"idx": 50, "title": "Administration PM", "pt": "Tue 09 Jun 2026  04:00 PM"}, {"idx": 51, "title": "Metric Analytics AM", "pt": "Wed 10 Jun 2026  07:00 AM"}, {"idx": 52, "title": "Metric Analytics PM", "pt": "Wed 10 Jun 2026  04:00 PM"}, {"idx": 53, "title": "Mobot Essentials AM", "pt": "Thu 11 Jun 2026  07:00 AM"}, {"idx": 54, "title": "Mobot Essentials PM", "pt": "Thu 11 Jun 2026  04:00 PM"}, {"idx": 55, "title": "Logs for Security AM", "pt": "Tue 16 Jun 2026  07:00 AM"}, {"idx": 56, "title": "Logs for Security PM", "pt": "Tue 16 Jun 2026  04:00 PM"}, {"idx": 57, "title": "Cloud SIEM AM", "pt": "Wed 17 Jun 2026  07:00 AM"}, {"idx": 58, "title": "Cloud SIEM PM", "pt": "Wed 17 Jun 2026  04:00 PM"}, {"idx": 59, "title": "Automation Workshop AM", "pt": "Thu 18 Jun 2026  07:00 AM"}, {"idx": 60, "title": "Automation Workshop PM", "pt": "Thu 18 Jun 2026  04:00 PM"}];
+const SESSIONS = [{"idx": 0, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  05:00 AM"}, {"idx": 1, "title": "Fundamentals", "pt": "Tue 05 May 2026  07:00 AM"}, {"idx": 2, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  02:00 PM"}, {"idx": 3, "title": "Fundamentals", "pt": "Tue 05 May 2026  04:00 PM"}, {"idx": 4, "title": "Search Mastery", "pt": "Wed 06 May 2026  07:00 AM"}, {"idx": 5, "title": "Search Mastery", "pt": "Wed 06 May 2026  04:00 PM"}, {"idx": 6, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  07:00 AM"}, {"idx": 7, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  04:00 PM"}, {"idx": 8, "title": "Observability", "pt": "Mon 11 May 2026  04:00 PM"}, {"idx": 9, "title": "Administration", "pt": "Tue 12 May 2026  07:00 AM"}, {"idx": 10, "title": "Administration", "pt": "Tue 12 May 2026  04:00 PM"}, {"idx": 11, "title": "Metric Analytics", "pt": "Wed 13 May 2026  07:00 AM"}, {"idx": 12, "title": "Metric Analytics", "pt": "Wed 13 May 2026  04:00 PM"}, {"idx": 13, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  07:00 AM"}, {"idx": 14, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  04:00 PM"}, {"idx": 15, "title": "Logs for Security", "pt": "Tue 19 May 2026  07:00 AM"}, {"idx": 16, "title": "Logs for Security", "pt": "Tue 19 May 2026  04:00 PM"}, {"idx": 17, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  07:00 AM"}, {"idx": 18, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  04:00 PM"}, {"idx": 19, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  07:00 AM"}, {"idx": 20, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  04:00 PM"}, {"idx": 21, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  05:00 AM"}, {"idx": 22, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  07:00 AM"}, {"idx": 23, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  02:00 PM"}, {"idx": 24, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  04:00 PM"}, {"idx": 25, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  07:00 AM"}, {"idx": 26, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  04:00 PM"}, {"idx": 27, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  07:00 AM"}, {"idx": 28, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  04:00 PM"}, {"idx": 29, "title": "Administration", "pt": "Tue 09 Jun 2026  07:00 AM"}, {"idx": 30, "title": "Administration", "pt": "Tue 09 Jun 2026  04:00 PM"}, {"idx": 31, "title": "Metric Analytics", "pt": "Wed 10 Jun 2026  07:00 AM"}, {"idx": 32, "title": "Metric Analytics", "pt": "Wed 10 Jun 2026  04:00 PM"}, {"idx": 33, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  07:00 AM"}, {"idx": 34, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  04:00 PM"}, {"idx": 35, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  07:00 AM"}, {"idx": 36, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  04:00 PM"}, {"idx": 37, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  07:00 AM"}, {"idx": 38, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  04:00 PM"}, {"idx": 39, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  07:00 AM"}, {"idx": 40, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  04:00 PM"}, {"idx": 41, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  05:00 AM"}, {"idx": 42, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  07:00 AM"}, {"idx": 43, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  10:00 AM"}, {"idx": 44, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  04:00 PM"}, {"idx": 45, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  07:00 AM"}, {"idx": 46, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  04:00 PM"}, {"idx": 47, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  07:00 AM"}, {"idx": 48, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  04:00 PM"}, {"idx": 49, "title": "Administration", "pt": "Tue 07 Jul 2026  07:00 AM"}, {"idx": 50, "title": "Administration", "pt": "Tue 07 Jul 2026  04:00 PM"}, {"idx": 51, "title": "Metric Analytic", "pt": "Wed 08 Jul 2026  07:00 AM"}, {"idx": 52, "title": "Metrics Analytic", "pt": "Wed 08 Jul 2026  04:00 PM"}, {"idx": 53, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  07:00 AM"}, {"idx": 54, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  04:00 PM"}, {"idx": 55, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  07:00 AM"}, {"idx": 56, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  04:00 PM"}, {"idx": 57, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  07:00 AM"}, {"idx": 58, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  04:00 PM"}, {"idx": 59, "title": "Automation", "pt": "Thu 16 Jul 2026  07:00 AM"}, {"idx": 60, "title": "Automation", "pt": "Thu 16 Jul 2026  04:00 PM"}];
 
 // Populate month filter from PT column values
 const months = [];
@@ -849,30 +868,50 @@ months.forEach(m => {
 const now = Date.now();
 
 function applyFilters() {
-  const q        = document.getElementById('searchBox').value.toLowerCase();
+  const raw      = document.getElementById('searchBox').value.toLowerCase().trim();
+  // Support OR: split on comma or the word "or" (case-insensitive)
+  const terms    = raw ? raw.split(/,|\bor\b/i).map(t => t.trim()).filter(Boolean) : [];
   const mon      = document.getElementById('monthFilter').value;
   const showPast = document.getElementById('showPast').checked;
   let visible = 0, total = 0;
+  const courseCounts = {};
   document.querySelectorAll('tbody tr.data-row').forEach(row => {
-    const title   = row.dataset.title.toLowerCase();
-    const pt      = row.dataset.pt || '';
-    const isoStr  = row.dataset.iso || '';
+    const title    = row.dataset.title.toLowerCase();
+    const dispTitle = row.dataset.title;   // already stripped of AM/PM
+    const pt       = row.dataset.pt || '';
+    const isoStr   = row.dataset.iso || '';
     const isFuture = !isoStr || (new Date(isoStr).getTime() >= now);
     row.classList.toggle('past', !isFuture);
-    const show = (showPast || isFuture)
-                 && (!q   || title.includes(q))
-                 && (!mon || pt.includes(mon));
+    const matchesSearch = !terms.length || terms.some(t => title.includes(t));
+    const show = (showPast || isFuture) && matchesSearch && (!mon || pt.includes(mon));
     row.classList.toggle('hidden', !show);
     if (!show) {
       const dr = document.getElementById('desc-' + row.dataset.idx);
       if (dr) dr.classList.remove('open');
     }
-    if (show) visible++;
+    if (show) {
+      visible++;
+      courseCounts[dispTitle] = (courseCounts[dispTitle] || 0) + 1;
+    }
     total++;
   });
   document.getElementById('countLabel').textContent =
     `Showing ${visible} of ${total} sessions`;
   document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  // Rebuild course summary badges (sorted by count desc, then alpha)
+  const summaryEl = document.getElementById('summaryContent');
+  if (summaryEl) {
+    const entries = Object.entries(courseCounts)
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    summaryEl.innerHTML = entries.map(([name, cnt]) =>
+      `<span class="sum-badge" onclick="filterByCourse(${JSON.stringify(name)})">${name}<span class="cnt">${cnt}</span></span>`
+    ).join('');
+  }
+}
+
+function filterByCourse(name) {
+  document.getElementById('searchBox').value = name;
+  applyFilters();
 }
 
 function toggleDesc(idx) {
@@ -1003,7 +1042,7 @@ function exportToClipboard() {
 </table>
 <p style="font-size:11px;color:#64748b;margin-top:6px;">
   Source: <a href="https://www.sumologic.com/learn/training">sumologic.com/learn/training</a>
-  &nbsp;·&nbsp; Generated 29 Apr 2026 15:43
+  &nbsp;·&nbsp; Generated 30 Apr 2026 10:11
 </p>`;
 
   // ---- Write both to clipboard ----
