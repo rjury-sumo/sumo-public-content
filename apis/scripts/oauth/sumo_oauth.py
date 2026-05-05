@@ -117,6 +117,21 @@ TOKEN_URLS = {
 # Reverse map: api endpoint → token URL (for auto-derivation)
 _API_TO_TOKEN_URL = {v: TOKEN_URLS[k] for k, v in REGIONS.items()}
 
+# MCP endpoints (one per region)
+MCP_URLS = {
+    "us1": "https://mcp.sumologic.com/mcp",
+    "us2": "https://mcp.us2.sumologic.com/mcp",
+    "eu":  "https://mcp.eu.sumologic.com/mcp",
+    "au":  "https://mcp.au.sumologic.com/mcp",
+    "de":  "https://mcp.de.sumologic.com/mcp",
+    "jp":  "https://mcp.jp.sumologic.com/mcp",
+    "ca":  "https://mcp.ca.sumologic.com/mcp",
+    "in":  "https://mcp.in.sumologic.com/mcp",
+}
+
+# Reverse map: api endpoint → MCP URL (for auto-derivation)
+_API_TO_MCP_URL = {v: MCP_URLS[k] for k, v in REGIONS.items()}
+
 DEFAULT_SESSION_FILE = Path.home() / ".sumo_oauth_session.json"
 DEFAULT_PROFILE      = "default"
 TOKEN_REFRESH_BUFFER_SECS = 60
@@ -1170,6 +1185,12 @@ def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
         or os.environ.get("SUMOLOGIC_OAUTH_TOKEN_URL", "")
     )
 
+    # Derive MCP URL from known endpoint mapping, fallback to env or default
+    mcp_url = (
+        _API_TO_MCP_URL.get(endpoint.rstrip("/"))
+        or os.environ.get("SUMOLOGIC_MCP_URL", "https://mcp.sumologic.com/mcp")
+    )
+
     # Get (or refresh) the access token
     access_token = ""
     if client_id and client_secret:
@@ -1184,7 +1205,7 @@ def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
         )
 
     lines = [
-        f'export SUMOLOGIC_MCP_URL="https://mcp.sumologic.com/mcp"',
+        f'export SUMOLOGIC_MCP_URL="{mcp_url}"',
         f'export SUMOLOGIC_OAUTH_CLIENT_ID="{client_id}"',
         f'export SUMOLOGIC_OAUTH_CLIENT_SECRET="{client_secret}"',
         f'export SUMOLOGIC_OAUTH_TOKEN_URL="{token_url}"',
@@ -1193,7 +1214,7 @@ def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
 
     if args.shell == "fish":
         lines = [
-            f'set -x SUMOLOGIC_MCP_URL "https://mcp.sumologic.com/mcp"',
+            f'set -x SUMOLOGIC_MCP_URL "{mcp_url}"',
             f'set -x SUMOLOGIC_OAUTH_CLIENT_ID "{client_id}"',
             f'set -x SUMOLOGIC_OAUTH_CLIENT_SECRET "{client_secret}"',
             f'set -x SUMOLOGIC_OAUTH_TOKEN_URL "{token_url}"',
