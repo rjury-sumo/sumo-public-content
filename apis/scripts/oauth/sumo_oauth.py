@@ -1498,7 +1498,7 @@ def cmd_oauth_clients(args: argparse.Namespace, session: Session) -> None:
 def _add_profile_arg(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--profile", "-p",
-        default=os.environ.get("SUMO_PROFILE", DEFAULT_PROFILE),
+        default=argparse.SUPPRESS,
         metavar="PROFILE",
         help=f"Profile to use (default: '{DEFAULT_PROFILE}'). Env: SUMO_PROFILE",
     )
