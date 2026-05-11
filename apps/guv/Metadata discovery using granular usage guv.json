@@ -1,0 +1,255 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Metadata Discovery Using Granular Usage Visibility (GUV)",
+    "description": "",
+    "title": "Metadata Discovery Using Granular Usage Visibility (GUV)",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-3h"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelPANE-49A36552BC949A47",
+                "structure": "{\"height\":15,\"width\":24,\"x\":0,\"y\":29}"
+            },
+            {
+                "key": "panelF5EDD47392B60943",
+                "structure": "{\"height\":15,\"width\":24,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panelB50A9F92ABC5EB4F",
+                "structure": "{\"height\":14,\"width\":12,\"x\":12,\"y\":0}"
+            },
+            {
+                "key": "panel5E9B55AEB1510847",
+                "structure": "{\"height\":14,\"width\":12,\"x\":0,\"y\":0}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelPANE-49A36552BC949A47",
+            "title": "Credit Used - Top 1000",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_volume\"\nAND _sourcecategory = \"granular_volume\"\n\n{{keywords}}\n//// built in\n| json field=_raw \"messageTier\" as datatier | where datatier matches \"{{datatier}}\"\n| json field=_raw \"sizeInBytes\" as bytes  \n| json field=_raw \"messageCount\" as events \n| json field=_raw \"viewName\"  as index | where index matches \"{{partition}}\"\n//\n//// defined in feature flag\n| json field=_raw \"collectorName\" as collector nodrop | where collector matches \"{{collector}}\"\n| json field=_raw \"sourceCategory\"  nodrop | where sourcecategory matches \"{{sourcecategory}}\"\n| json field=_raw \"bladeName\" as source nodrop\n//\n| timeslice 5m\n| sum(bytes) as bytes, sum(events) as events by datatier, collector,sourcecategory,source,index\n\n// add credits from contract for tiers\n| 20 as cr_rate \n| if (datatier = \"Infrequent\",.4,cr_rate) as cr_rate\n| if (datatier = \"Frequent\",9,cr_rate) as cr_rate\n| if (datatier = \"CSE\",25,cr_rate) as cr_rate\n| bytes / 1Gi as gb | fields - bytes\n| cr_rate * gb as credits \n| round(gb,2) as gb | round(credits,2) as credits\n| sort credits | limit 1000",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelF5EDD47392B60943",
+            "title": "Search Scope Per Index",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_volume\"\nAND _sourcecategory = \"granular_volume\"\n\n{{keywords}}\n//// built in\n| json field=_raw \"messageTier\" as datatier | where datatier matches \"{{datatier}}\"\n| json field=_raw \"sizeInBytes\" as bytes  \n| json field=_raw \"messageCount\" as events \n| json field=_raw \"viewName\"  as index | where index matches \"{{partition}}\"\n//\n//// defined in feature flag\n| json field=_raw \"collectorName\" as collector nodrop | where collector matches \"{{collector}}\"\n| json field=_raw \"sourceCategory\"  nodrop | where sourcecategory matches \"{{sourcecategory}}\"\n| json field=_raw \"bladeName\" as source nodrop\n\n|  sum(events) as events by datatier,index,sourcecategory\n| if(index=\"Default Index\",\"sumologic_default\",index) as index\n| concat(\"_index=\",index,\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as query_scope\n\n| limit 1000 | sort sourcecategory asc, index asc\n\n// prepare the category strings\n\n| concat(\"_index=\",index) as  i\n| concat(\"_sourcecategory=\",sourcecategory) as sc\n//| concat(\"\\n_collector=\",collector) as c\n//| concat(\"\\n_source=\",source) as s \n\n// fix if they put a space in their stuff\n| replace(i,\" \",\"?\") as i\n| replace(sc,\" \",\"?\") as sc\n//| replace(c,\" \",\"?\") as c\n//| replace(s,\" \",\"?\") as s\n\n// create one meta to avoid the 10 param limit on concat using multiple concats.\n| i as meta\n| concat (meta,\"\\n \",sc) as meta\n//| concat (meta,\"\\n // \",c,\"\\n //\",s,\" \") as meta\n| trim(meta) as meta\n\n| tourl(concat(\"https://{{my_instance_name}}/log-search/create?query=\",urlencode(meta)),\"»»\") as  %\"Open in Search\" \n| fields -i,sc,meta\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelB50A9F92ABC5EB4F",
+            "title": "Events Over Time Per {{graph_grouping}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_volume\"\nAND _sourcecategory = \"granular_volume\"\n\n{{keywords}}\n//// built in\n| json field=_raw \"messageTier\" as datatier | where datatier matches \"{{datatier}}\"\n| json field=_raw \"sizeInBytes\" as bytes  \n| json field=_raw \"messageCount\" as events \n| json field=_raw \"viewName\"  as index | where index matches \"{{partition}}\"\n//\n//// defined in feature flag\n| json field=_raw \"collectorName\" as collector nodrop | where collector matches \"{{collector}}\"\n| json field=_raw \"sourceCategory\"  nodrop | where sourcecategory matches \"{{sourcecategory}}\"\n| json field=_raw \"bladeName\" as source nodrop\n| timeslice \n| sum(events) as events by _timeslice,{{graph_grouping}} | transpose row _timeslice column {{graph_grouping}}\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5E9B55AEB1510847",
+            "title": "Top 25 By GB: {{graph_grouping}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"mode\":\"distribution\"},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_volume\"\nAND _sourcecategory = \"granular_volume\"\n\n{{keywords}}\n//// built in\n| json field=_raw \"messageTier\" as datatier | where datatier matches \"{{datatier}}\"\n| json field=_raw \"sizeInBytes\" as bytes  \n| json field=_raw \"messageCount\" as events \n| json field=_raw \"viewName\"  as index | where index matches \"{{partition}}\"\n//\n//// defined in feature flag\n| json field=_raw \"collectorName\" as collector nodrop | where collector matches \"{{collector}}\"\n| json field=_raw \"sourceCategory\"  nodrop | where sourcecategory matches \"{{sourcecategory}}\"\n| json field=_raw \"bladeName\"  as source nodrop\n| timeslice \n| sum(bytes) as bytes by {{graph_grouping}} | bytes / 1Gi as gb | sort gb | limit 25\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "keywords",
+            "displayName": "keywords",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "// one or more keyword expressions"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "sourcecategory",
+            "displayName": "sourcecategory",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_index=\"sumologic_volume\" AND _sourcecategory = \"granular_volume\"\n| json field=_raw \"messageTier\" as datatier \n| json field=_raw \"viewName\"  as index \n| json field=_raw \"collectorName\" as collector nodrop\n| json field=_raw \"sourceCategory\"  nodrop\n| json field=_raw \"bladeName\" nodrop\n\n| timeslice 5m\n| sourcecategory as series\n| count by series | sort series asc ",
+                "field": "series"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "collector",
+            "displayName": "collector",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_index=\"sumologic_volume\" AND _sourcecategory = \"granular_volume\"\n| json field=_raw \"messageTier\" as datatier \n| json field=_raw \"viewName\"  as index \n| json field=_raw \"collectorName\" as collector nodrop\n| json field=_raw \"sourceCategory\"  nodrop\n| json field=_raw \"bladeName\" nodrop\n\n| timeslice 5m\n| collector as series\n| count by series | sort series asc ",
+                "field": "series"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "partition",
+            "displayName": "partition",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "LogQueryVariableSourceDefinition",
+                "query": "_index=\"sumologic_volume\" AND _sourcecategory = \"granular_volume\"\n| json field=_raw \"messageTier\" as datatier \n| json field=_raw \"viewName\"  as index \n| json field=_raw \"collectorName\" as collector nodrop\n| json field=_raw \"sourceCategory\"  nodrop\n| json field=_raw \"bladeName\" nodrop\n\n| timeslice 5m\n| index as series\n| count by series | sort series asc ",
+                "field": "series"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "datatier",
+            "displayName": "datatier",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Continuous,Frequent,Infrequent,CSE,Flex"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "graph_grouping",
+            "displayName": "graph_grouping",
+            "defaultValue": "index",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "index,sourcecategory,collector,source,datatier"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "my_instance_name",
+            "displayName": "my_instance_name",
+            "defaultValue": "service.au.sumologic.com",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "service.au.sumologic.com"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
