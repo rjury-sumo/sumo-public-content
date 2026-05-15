@@ -69,11 +69,17 @@ Environment variables (loaded from .env if python-dotenv is installed):
 import argparse
 import base64
 import getpass
+import hashlib
 import json
 import logging
 import os
+import secrets
 import sys
+import threading
 import time
+import urllib.parse
+import webbrowser
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 import requests as _requests
@@ -132,6 +138,21 @@ MCP_URLS = {
 # Reverse map: api endpoint → MCP URL (for auto-derivation)
 _API_TO_MCP_URL = {v: MCP_URLS[k] for k, v in REGIONS.items()}
 
+# OAuth2 authorization endpoints (used by the authorization_code flow)
+AUTHORIZATION_URLS = {
+    "us1": "https://service.sumologic.com/oauth2/authorize",
+    "us2": "https://service.us2.sumologic.com/oauth2/authorize",
+    "eu":  "https://service.eu.sumologic.com/oauth2/authorize",
+    "au":  "https://service.au.sumologic.com/oauth2/authorize",
+    "de":  "https://service.de.sumologic.com/oauth2/authorize",
+    "jp":  "https://service.jp.sumologic.com/oauth2/authorize",
+    "ca":  "https://service.ca.sumologic.com/oauth2/authorize",
+    "in":  "https://service.in.sumologic.com/oauth2/authorize",
+}
+
+# Reverse map: api endpoint → authorization URL
+_API_TO_AUTHORIZATION_URL = {v: AUTHORIZATION_URLS[k] for k, v in REGIONS.items()}
+
 DEFAULT_SESSION_FILE = Path.home() / ".sumo_oauth_session.json"
 DEFAULT_PROFILE      = "default"
 TOKEN_REFRESH_BUFFER_SECS = 60
@@ -186,6 +207,10 @@ def _client_secret_key(profile: str) -> str:
 
 def _access_key_key(profile: str) -> str:
     return f"{profile}:access_key"
+
+
+def _refresh_token_key(profile: str) -> str:
+    return f"{profile}:refresh_token"
 
 
 # ---------------------------------------------------------------------------
@@ -360,6 +385,99 @@ def _fetch_oauth_token(endpoint: str, client_id: str, client_secret: str,
     return resp.json()
 
 
+def _pkce_pair() -> tuple[str, str]:
+    """Return (code_verifier, code_challenge) using S256 method (RFC 7636)."""
+    verifier  = base64.urlsafe_b64encode(secrets.token_bytes(32)).rstrip(b"=").decode()
+    digest    = hashlib.sha256(verifier.encode()).digest()
+    challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+    return verifier, challenge
+
+
+def _run_local_callback_server(port: int, timeout: int = 120) -> dict:
+    """
+    Listen on 127.0.0.1:<port> for a single GET request (the OAuth redirect).
+    Returns the parsed query-string parameters, or {} if nothing arrived in time.
+    """
+    result: dict = {}
+
+    class _Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            parsed = urllib.parse.urlparse(self.path)
+            params = urllib.parse.parse_qs(parsed.query, keep_blank_values=True)
+            result.update({k: v[0] for k, v in params.items()})
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(
+                b"<html><body><h2>Authorization complete.</h2>"
+                b"<p>You may close this tab and return to the terminal.</p></body></html>"
+            )
+
+        def log_message(self, *args):
+            pass  # suppress server access logs
+
+    server = HTTPServer(("127.0.0.1", port), _Handler)
+    server.timeout = timeout
+    # handle_request() blocks up to server.timeout seconds then returns
+    t = threading.Thread(target=server.handle_request)
+    t.start()
+    t.join(timeout=timeout + 2)
+    server.server_close()
+    return result
+
+
+def _fetch_auth_code_token(token_url: str, client_id: str, client_secret: str | None,
+                            code: str, redirect_uri: str,
+                            code_verifier: str | None = None) -> dict:
+    """Exchange an authorization code for tokens (RFC 6749 §4.1.3)."""
+    data: dict = {
+        "grant_type":   "authorization_code",
+        "code":         code,
+        "redirect_uri": redirect_uri,
+        "client_id":    client_id,
+    }
+    if code_verifier:
+        data["code_verifier"] = code_verifier
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept":       "application/json",
+    }
+    if client_secret:
+        creds = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+        headers["Authorization"] = f"Basic {creds}"
+    logger.debug("Auth-code token exchange: POST %s", token_url)
+    with _SumoSession() as session:
+        resp = session.post(token_url, data=data, headers=headers)
+    if not resp.ok:
+        logger.error("Token exchange failed – HTTP %s: %s", resp.status_code, resp.text[:500])
+        sys.exit(1)
+    return resp.json()
+
+
+def _fetch_refresh_token(token_url: str, client_id: str, client_secret: str | None,
+                          refresh_token: str) -> dict:
+    """Exchange a refresh token for a new access (and possibly refresh) token."""
+    data = {
+        "grant_type":    "refresh_token",
+        "refresh_token": refresh_token,
+        "client_id":     client_id,
+    }
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept":       "application/json",
+    }
+    if client_secret:
+        creds = base64.b64encode(f"{client_id}:{client_secret}".encode()).decode()
+        headers["Authorization"] = f"Basic {creds}"
+    logger.debug("Refresh-token grant: POST %s", token_url)
+    with _SumoSession() as session:
+        resp = session.post(token_url, data=data, headers=headers)
+    if not resp.ok:
+        logger.warning("Refresh token grant failed – HTTP %s: %s", resp.status_code, resp.text[:200])
+        return {}
+    return resp.json()
+
+
 # ---------------------------------------------------------------------------
 # Session / profile management
 #
@@ -441,14 +559,17 @@ class Session:
     def store_token(self, profile: str, endpoint: str, client_id: str,
                     client_secret: str, token_response: dict,
                     scopes: list[str] | None = None,
-                    token_url: str | None = None) -> None:
+                    token_url: str | None = None,
+                    refresh_token: str | None = None) -> None:
         """
         Persist token metadata to the session file.
-        Stores client_secret in keychain – never in the file.
+        Stores client_secret (and refresh_token if present) in keychain – never in the file.
         """
         if _keychain_available():
-            if _keychain_set(_client_secret_key(profile), client_secret):
+            if client_secret and _keychain_set(_client_secret_key(profile), client_secret):
                 logger.debug("client_secret stored in keychain for profile '%s'", profile)
+            if refresh_token and _keychain_set(_refresh_token_key(profile), refresh_token):
+                logger.debug("refresh_token stored in keychain for profile '%s'", profile)
         else:
             logger.warning(
                 "No keychain backend available. client_secret will not be persisted "
@@ -473,7 +594,7 @@ class Session:
         logger.info("Profile '%s' saved to %s (expires in %ds)", profile, self.path, expires_in)
 
     def require_token(self, profile: str) -> str:
-        """Return a valid 'Bearer <token>', refreshing via keychain if needed."""
+        """Return a valid 'Bearer <token>', refreshing via refresh_token or client_credentials."""
         p = self.get(profile)
         if not p or not p.get("client_id"):
             logger.error(
@@ -485,10 +606,35 @@ class Session:
 
         if not self._is_valid(profile):
             logger.info("Token for profile '%s' expired or expiring – refreshing…", profile)
+            token_url = (
+                p.get("token_url")
+                or _API_TO_TOKEN_URL.get(p["endpoint"].rstrip("/"))
+                or f"{p['endpoint']}/oauth/v2/token"
+            )
             client_secret = (
                 _keychain_get(_client_secret_key(profile))
                 or os.environ.get("SUMO_CLIENT_SECRET")
             )
+
+            # Prefer refresh_token grant (set by auth-code-login)
+            stored_refresh = _keychain_get(_refresh_token_key(profile))
+            if stored_refresh:
+                logger.debug("Using refresh_token grant for profile '%s'", profile)
+                token_resp = _fetch_refresh_token(
+                    token_url, p["client_id"], client_secret, stored_refresh
+                )
+                if token_resp.get("access_token"):
+                    new_refresh = token_resp.get("refresh_token") or stored_refresh
+                    self.store_token(
+                        profile, p["endpoint"], p["client_id"], client_secret or "",
+                        token_resp, scopes=p.get("scopes"), token_url=p.get("token_url"),
+                        refresh_token=new_refresh,
+                    )
+                    p = self.get(profile)
+                    return f"Bearer {p['access_token']}"
+                logger.warning("Refresh token grant failed – falling back to client_credentials…")
+
+            # Fall back to client_credentials grant
             if not client_secret:
                 logger.error(
                     "Cannot refresh token for profile '%s': client_secret not found.\n"
@@ -528,9 +674,10 @@ class Session:
             "expires_at_local":     time.strftime("%Y-%m-%dT%H:%M:%S %Z",
                                                   time.localtime(expires_at)) if expires_at else None,
             "remaining":            remaining_hms,
-            "client_secret_stored": bool(_keychain_get(_client_secret_key(profile))),
-            "access_key_stored":    bool(_keychain_get(_access_key_key(profile))),
-            "keychain_available":   _keychain_available(),
+            "client_secret_stored":  bool(_keychain_get(_client_secret_key(profile))),
+            "refresh_token_stored":  bool(_keychain_get(_refresh_token_key(profile))),
+            "access_key_stored":     bool(_keychain_get(_access_key_key(profile))),
+            "keychain_available":    _keychain_available(),
         }
 
 
@@ -1068,8 +1215,9 @@ def cmd_clear_creds(args: argparse.Namespace, session: Session) -> None:
     removed: list[str] = []
 
     for key, label in [
-        (_client_secret_key(profile), "client_secret"),
-        (_access_key_key(profile),    "access_key"),
+        (_client_secret_key(profile),  "client_secret"),
+        (_refresh_token_key(profile),  "refresh_token"),
+        (_access_key_key(profile),     "access_key"),
     ]:
         if _keychain_delete(key):
             removed.append(f"  {label}  (profile={profile})")
@@ -1151,6 +1299,134 @@ def cmd_login(args: argparse.Namespace, session: Session) -> None:
         print(f"  Scopes             : {' '.join(scopes)}")
     if token_url:
         print(f"  Token URL          : {token_url}")
+
+
+def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
+    """OAuth 2.0 Authorization Code + PKCE flow (RFC 6749 §4.1 / RFC 7636).
+
+    Opens a browser to the Sumo Logic authorization endpoint, starts a local
+    callback server on localhost:<port>, captures the returned code, exchanges
+    it for tokens, and stores the access token and refresh token in the profile.
+    """
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = _resolve_endpoint(args, profile_data)
+
+    # Resolve client_id
+    client_id = (
+        getattr(args, "client_id", None)
+        or profile_data.get("client_id")
+        or os.environ.get("SUMO_CLIENT_ID")
+    )
+    if not client_id:
+        logger.error(
+            "client_id required. Use --client-id or configure profile with 'store-creds'."
+        )
+        sys.exit(1)
+
+    # client_secret is optional for public PKCE clients but used if available
+    client_secret = (
+        getattr(args, "client_secret", None)
+        or _keychain_get(_client_secret_key(profile))
+        or os.environ.get("SUMO_CLIENT_SECRET")
+    )
+
+    token_url = (
+        getattr(args, "token_url", None)
+        or profile_data.get("token_url")
+        or _API_TO_TOKEN_URL.get(endpoint.rstrip("/"))
+        or f"{endpoint}/oauth/v2/token"
+    )
+
+    auth_url = (
+        getattr(args, "auth_url", None)
+        or _API_TO_AUTHORIZATION_URL.get(endpoint.rstrip("/"))
+        or token_url.replace("/token", "/authorize")
+    )
+
+    port         = getattr(args, "port", None) or 8765
+    timeout      = getattr(args, "timeout", None) or 120
+    redirect_uri = f"http://localhost:{port}/callback"
+    scopes       = [s.strip() for s in args.scopes.split()] if getattr(args, "scopes", None) else None
+
+    # PKCE + CSRF state
+    verifier, challenge = _pkce_pair()
+    state = secrets.token_urlsafe(16)
+
+    params: dict = {
+        "response_type":         "code",
+        "client_id":             client_id,
+        "redirect_uri":          redirect_uri,
+        "code_challenge":        challenge,
+        "code_challenge_method": "S256",
+        "state":                 state,
+    }
+    if scopes:
+        params["scope"] = " ".join(scopes)
+
+    full_auth_url = f"{auth_url}?{urllib.parse.urlencode(params)}"
+
+    print(f"Opening browser for authorization (profile: {profile})…")
+    print(f"  Redirect URI  : {redirect_uri}")
+    print(f"  Timeout       : {timeout}s")
+    print()
+    print("  NOTE: the redirect URI above must be registered on the OAuth client in Sumo Logic.")
+    print()
+    logger.debug("Authorization URL: %s", full_auth_url)
+
+    webbrowser.open(full_auth_url)
+
+    callback = _run_local_callback_server(port, timeout=timeout)
+
+    if not callback:
+        logger.error(
+            "No callback received within %ds. "
+            "Check that the browser opened and the redirect URI is registered.",
+            timeout,
+        )
+        sys.exit(1)
+
+    if "error" in callback:
+        error = callback.get("error", "")
+        desc  = callback.get("error_description", "")
+        logger.error("Authorization failed: %s – %s", error, desc)
+        if error == "invalid_scope":
+            logger.error(
+                "Sumo Logic's authorization code flow does not accept scope values in the "
+                "authorization request. Scopes are determined by the OAuth client's own "
+                "configuration in the Sumo Logic UI.\n"
+                "Re-run without --scopes: the client's registered scopes apply automatically."
+            )
+        sys.exit(1)
+
+    code = callback.get("code")
+    if not code:
+        logger.error("No authorization code in callback. Check the OAuth client redirect URI config.")
+        sys.exit(1)
+
+    if callback.get("state") != state:
+        logger.error("State mismatch – possible CSRF attack. Aborting.")
+        sys.exit(1)
+
+    logger.info("Authorization code received. Exchanging for tokens…")
+    token_resp = _fetch_auth_code_token(
+        token_url, client_id, client_secret, code, redirect_uri, verifier
+    )
+
+    refresh_token = token_resp.get("refresh_token")
+    session.store_token(
+        profile, endpoint, client_id, client_secret or "", token_resp,
+        scopes=scopes, token_url=token_url, refresh_token=refresh_token,
+    )
+
+    s = session.profile_status(profile)
+    print(f"Login successful (profile: {profile}, flow: authorization_code).")
+    print(f"  Endpoint           : {s['endpoint']}")
+    print(f"  Client ID          : {s['client_id']}")
+    print(f"  Expires at (UTC)   : {s['expires_at_utc']}  ({s['remaining']} remaining)")
+    print(f"  Refresh token      : {'stored in OS keychain' if refresh_token else 'not returned by server'}")
+    if scopes:
+        print(f"  Scopes             : {' '.join(scopes)}")
 
 
 def cmd_logout(args: argparse.Namespace, session: Session) -> None:
@@ -1650,6 +1926,40 @@ Environment variables:
                               "Use if your account uses a different token host "
                               "(e.g. https://service.sumologic.com/oauth2/token).")
 
+    # -- auth-code-login -----------------------------------------------------
+    p_acl = sub.add_parser(
+        "auth-code-login",
+        help="Obtain an OAuth token via browser-based Authorization Code + PKCE flow",
+        description=(
+            "Opens a browser to the Sumo Logic authorization endpoint, captures the "
+            "redirect on a local server, and exchanges the code for tokens.\n\n"
+            "The redirect URI 'http://localhost:<port>/callback' (default port 8765) "
+            "must be registered on the OAuth client in Sumo Logic before running this command."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    _add_profile_arg(p_acl)
+    _add_endpoint_args(p_acl)
+    p_acl.add_argument("--client-id",     metavar="CID",
+                       help="OAuth client ID override. Env: SUMO_CLIENT_ID")
+    p_acl.add_argument("--client-secret", metavar="SECRET",
+                       help="OAuth client secret override (optional for public clients). "
+                            "Prefer keychain.")
+    p_acl.add_argument("--scopes", metavar="SCOPE [SCOPE…]",
+                       help="Space-separated list of scopes to include in the authorization "
+                            "request. NOTE: Sumo Logic's authorization endpoint returns "
+                            "invalid_scope if scope values are passed here — scopes are "
+                            "configured on the OAuth client itself. Omit this flag unless "
+                            "your deployment explicitly supports it.")
+    p_acl.add_argument("--port", type=int, default=8765, metavar="PORT",
+                       help="Local port for the redirect callback server (default: 8765)")
+    p_acl.add_argument("--timeout", type=int, default=120, metavar="SECS",
+                       help="Seconds to wait for browser authorization (default: 120)")
+    p_acl.add_argument("--token-url", metavar="URL",
+                       help="Override the token endpoint URL.")
+    p_acl.add_argument("--auth-url", metavar="URL",
+                       help="Override the authorization endpoint URL.")
+
     # -- logout --------------------------------------------------------------
     p_lo = sub.add_parser("logout", help="Clear the OAuth token for a profile")
     _add_profile_arg(p_lo)
@@ -1843,6 +2153,7 @@ COMMAND_MAP = {
     "delete-profile":   cmd_delete_profile,
     "export-env":       cmd_export_env,
     "login":            cmd_login,
+    "auth-code-login":  cmd_auth_code_login,
     "logout":           cmd_logout,
     "token":            cmd_token,
     "status":           cmd_status,

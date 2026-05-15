@@ -164,6 +164,37 @@ sumo-oauth token --raw
 sumo-oauth logout [--profile NAME]
 ```
 
+### Authorization Code flow (experimental)
+
+> **Experimental.** The authorization endpoint URL (`service.<region>.sumologic.com/oauth2/authorize`) is inferred from the token endpoint and has not been validated against a live Sumo Logic deployment. Behaviour may differ from what is documented here. Please open an issue if you encounter problems.
+
+`auth-code-login` implements the OAuth 2.0 Authorization Code grant with PKCE (RFC 6749 §4.1 / RFC 7636). Unlike `login` (which uses `client_credentials` and runs as a service account), this flow authenticates as a real user via the browser. The resulting token is scoped to that user's roles intersected with the OAuth client's declared scopes.
+
+**Before running**, register the redirect URI on the OAuth client in Sumo Logic (Administration → Security → OAuth Clients):
+
+```text
+http://localhost:8765/callback
+```
+
+Use a different port if 8765 is taken — just pass `--port` and update the registered URI to match.
+
+```bash
+# Opens browser, waits for callback on localhost:8765, exchanges code for tokens
+sumo-oauth auth-code-login [--profile NAME]
+
+# Use a different callback port (must match the redirect URI registered on the OAuth client)
+sumo-oauth auth-code-login --port 9000
+
+# Override both endpoints if auto-derivation doesn't work for your deployment
+sumo-oauth auth-code-login \
+  --auth-url  https://service.au.sumologic.com/oauth2/authorize \
+  --token-url https://service.au.sumologic.com/oauth2/token
+```
+
+**Scopes** are not passed in the authorization request — Sumo Logic returns `invalid_scope` if you do. Effective scopes are determined by what is configured on the OAuth client in the Sumo Logic UI. The `--scopes` flag exists for deployments that may support it but should be omitted for standard Sumo Logic accounts.
+
+If the server returns a refresh token it is stored in the OS keychain under `{profile}:refresh_token`. Subsequent `token`, `export-env`, and `login`-style auto-refreshes will use the refresh token grant automatically, falling back to `client_credentials` only if the refresh token is absent or rejected.
+
 ### Export environment variables (MCP setup)
 
 Prints shell `export` statements for all variables required by the Sumo Logic MCP server. Retrieves the `client_secret` from the OS keychain and auto-refreshes the token if needed.
