@@ -634,11 +634,19 @@ class Session:
                     return f"Bearer {p['access_token']}"
                 logger.warning("Refresh token grant failed – falling back to client_credentials…")
 
-            # Fall back to client_credentials grant
+            # Fall back to client_credentials grant — not valid for AuthorizationCodeClient
+            if p.get("oauth_client_type") == "AuthorizationCodeClient":
+                logger.error(
+                    "Token for profile '%s' has expired and no refresh token is available.\n"
+                    "AuthorizationCodeClient does not support the client_credentials grant.\n"
+                    "Run 'sumo-oauth auth-code-login --profile %s' to authenticate again.",
+                    profile, profile,
+                )
+                sys.exit(1)
             if not client_secret:
                 logger.error(
                     "Cannot refresh token for profile '%s': client_secret not found.\n"
-                    "Run 'store-creds --profile %s --client-id %s' or set SUMO_CLIENT_SECRET.",
+                    "Run 'store-creds --profile %s --mode oauth --client-id %s' or set SUMO_CLIENT_SECRET.",
                     profile, profile, p["client_id"],
                 )
                 sys.exit(1)
@@ -674,6 +682,7 @@ class Session:
             "expires_at_local":     time.strftime("%Y-%m-%dT%H:%M:%S %Z",
                                                   time.localtime(expires_at)) if expires_at else None,
             "remaining":            remaining_hms,
+            "oauth_client_type":      p.get("oauth_client_type"),
             "client_secret_stored":  bool(_keychain_get(_client_secret_key(profile))),
             "refresh_token_stored":  bool(_keychain_get(_refresh_token_key(profile))),
             "access_key_stored":     bool(_keychain_get(_access_key_key(profile))),
@@ -1124,9 +1133,45 @@ def _prompt_secret(label: str, has_existing: bool) -> str | None:
     return val if val else None
 
 
+# Normalise user-supplied client type strings → canonical API type names
+_OAUTH_TYPE_ALIASES: dict[str, str] = {
+    "cc":                      "ClientCredentialsClient",
+    "client-credentials":      "ClientCredentialsClient",
+    "ClientCredentialsClient": "ClientCredentialsClient",
+    "ac":                      "AuthorizationCodeClient",
+    "authorization-code":      "AuthorizationCodeClient",
+    "AuthorizationCodeClient": "AuthorizationCodeClient",
+}
+
+# Short labels for display (status table, etc.)
+_OAUTH_TYPE_SHORT: dict[str, str] = {
+    "ClientCredentialsClient": "cc",
+    "AuthorizationCodeClient": "ac",
+}
+
+
+def _prompt_client_type(current: str | None) -> str | None:
+    """Interactive prompt for oauth_client_type. Returns canonical type or current if skipped."""
+    hint = _OAUTH_TYPE_SHORT.get(current or "", current) or "not set"
+    raw = input(
+        f"  oauth_client_type [{hint}]\n"
+        f"    cc = ClientCredentialsClient  (machine-to-machine, use 'login')\n"
+        f"    ac = AuthorizationCodeClient  (browser login, use 'auth-code-login')\n"
+        f"    Enter to keep: "
+    ).strip()
+    if not raw:
+        return current
+    resolved = _OAUTH_TYPE_ALIASES.get(raw)
+    if not resolved:
+        logger.warning("Unrecognised type '%s' – valid: cc, ac. Keeping current.", raw)
+        return current
+    return resolved
+
+
 def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
     """Configure a profile interactively; store secrets in the OS keychain."""
     profile = args.profile
+    mode    = getattr(args, "mode", "all")
 
     if not _keychain_available():
         logger.error(
@@ -1136,14 +1181,19 @@ def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
         )
         sys.exit(1)
 
-    # Seed from CLI flags / env vars, then fill from existing profile
+    # Start from existing profile data
     p = session.get(profile).copy()
 
-    # Apply any CLI overrides as starting values before prompting
-    cli_region   = getattr(args, "region",    None) or os.environ.get("SUMO_REGION")
-    cli_endpoint = getattr(args, "endpoint",  None)
-    cli_client   = getattr(args, "client_id", None) or os.environ.get("SUMO_CLIENT_ID")
-    cli_access   = getattr(args, "access_id", None) or os.environ.get("SUMO_ACCESS_ID")
+    # Apply explicit CLI flag overrides only — NOT env vars.
+    # Env vars (SUMO_ACCESS_ID, SUMO_CLIENT_ID, …) are runtime credential
+    # fallbacks for API commands, not setup values.  Pre-filling them here
+    # would silently bleed the active account's credentials into a named
+    # profile that belongs to a different account.
+    cli_region   = getattr(args, "region",       None)
+    cli_endpoint = getattr(args, "endpoint",     None)
+    cli_client   = getattr(args, "client_id",    None)
+    cli_access   = getattr(args, "access_id",    None)
+    cli_type     = getattr(args, "client_type",  None)  # already normalised by choices
 
     if cli_endpoint:
         p["endpoint"] = resolve_endpoint(cli_endpoint)
@@ -1153,10 +1203,12 @@ def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
         p["client_id"] = cli_client
     if cli_access:
         p["access_id"] = cli_access
+    if cli_type:
+        p["oauth_client_type"] = _OAUTH_TYPE_ALIASES[cli_type]
 
-    print(f"Configuring profile '{profile}' – press Enter to keep the current value.\n")
+    print(f"Configuring profile '{profile}' [{mode} mode] – press Enter to keep the current value.\n")
 
-    # --- region / endpoint --------------------------------------------------
+    # --- region / endpoint (always prompted) --------------------------------
     current_endpoint = p.get("endpoint")
     raw = input(f"  region or endpoint URL [current: {current_endpoint or 'not set'}]: ").strip()
     if raw:
@@ -1166,43 +1218,56 @@ def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
             logger.error("%s", exc)
             sys.exit(1)
 
-    # --- OAuth client credentials -------------------------------------------
-    p["client_id"] = _prompt_value("client_id    ", p.get("client_id"))
+    # --- OAuth client credentials (oauth | all mode) ------------------------
+    has_secret = new_secret = False
+    if mode in ("oauth", "all"):
+        p["client_id"] = _prompt_value("client_id        ", p.get("client_id"))
 
-    has_secret = bool(_keychain_get(_client_secret_key(profile)))
-    new_secret = _prompt_secret("client_secret", has_secret)
+        has_secret = bool(_keychain_get(_client_secret_key(profile)))
+        new_secret = _prompt_secret("client_secret    ", has_secret)
 
-    # --- Basic auth credentials ---------------------------------------------
-    p["access_id"] = _prompt_value("access_id    ", p.get("access_id"))
+        new_type = _prompt_client_type(p.get("oauth_client_type"))
+        if new_type:
+            p["oauth_client_type"] = new_type
 
-    has_key = bool(_keychain_get(_access_key_key(profile)))
-    new_key = _prompt_secret("access_key   ", has_key)
+    # --- Basic auth credentials (basic | all mode) --------------------------
+    has_key = new_key = False
+    if mode in ("basic", "all"):
+        p["access_id"] = _prompt_value("access_id        ", p.get("access_id"))
+
+        has_key = bool(_keychain_get(_access_key_key(profile)))
+        new_key = _prompt_secret("access_key       ", has_key)
 
     # --- Persist ------------------------------------------------------------
     stored: list[str] = []
 
-    if new_secret:
-        if _keychain_set(_client_secret_key(profile), new_secret):
-            stored.append(f"  client_secret  → keychain  (profile={profile})")
-    elif not has_secret and p.get("client_id"):
-        logger.warning("No client_secret stored – you will need one to run 'login'.")
+    if mode in ("oauth", "all"):
+        if new_secret:
+            if _keychain_set(_client_secret_key(profile), new_secret):
+                stored.append(f"  client_secret  → keychain  (profile={profile})")
+        elif not has_secret and p.get("client_id"):
+            logger.warning(
+                "No client_secret stored – you will need one to run 'login' or 'auth-code-login'."
+            )
 
-    if new_key:
-        if _keychain_set(_access_key_key(profile), new_key):
-            stored.append(f"  access_key     → keychain  (profile={profile})")
-    elif not has_key and p.get("access_id"):
-        logger.warning("No access_key stored – you will need one for API commands.")
+    if mode in ("basic", "all"):
+        if new_key:
+            if _keychain_set(_access_key_key(profile), new_key):
+                stored.append(f"  access_key     → keychain  (profile={profile})")
+        elif not has_key and p.get("access_id"):
+            logger.warning("No access_key stored – you will need one for admin API commands.")
 
-    # Persist non-sensitive profile config
     session.set(profile, p)
 
-    print(f"Profile '{profile}' configured.")
+    print(f"\nProfile '{profile}' configured.")
     if p.get("endpoint"):
-        print(f"  endpoint  : {p['endpoint']}")
+        print(f"  endpoint         : {p['endpoint']}")
     if p.get("client_id"):
-        print(f"  client_id : {p['client_id']}")
+        print(f"  client_id        : {p['client_id']}")
+    if p.get("oauth_client_type"):
+        print(f"  oauth_client_type: {p['oauth_client_type']}")
     if p.get("access_id"):
-        print(f"  access_id : {p['access_id']}")
+        print(f"  access_id        : {p['access_id']}")
     if stored:
         print("Secrets stored in OS keychain:")
         for s in stored:
@@ -1246,7 +1311,7 @@ def cmd_list_profiles(args: argparse.Namespace, session: Session) -> None:
     # Table output
     col_w = max(len(n) for n in names)
     header = (
-        f"{'Profile':<{col_w}} | {'Status':<9} | {'Endpoint':<36} | "
+        f"{'Profile':<{col_w}} | {'Status':<9} | {'Type':<2} | {'Endpoint':<36} | "
         f"{'client_id':<20} | {'access_id':<20} | {'secret':<6} | {'key':<6}"
     )
     sep = "-" * len(header)
@@ -1254,8 +1319,9 @@ def cmd_list_profiles(args: argparse.Namespace, session: Session) -> None:
     print(sep)
     for name in names:
         s = session.profile_status(name)
+        type_short = _OAUTH_TYPE_SHORT.get(s.get("oauth_client_type") or "", "-")
         print(
-            f"{name:<{col_w}} | {s['status']:<9} | {(s['endpoint'] or ''):<36} | "
+            f"{name:<{col_w}} | {s['status']:<9} | {type_short:<2} | {(s['endpoint'] or ''):<36} | "
             f"{(s['client_id'] or ''):<20} | {(s['access_id'] or ''):<20} | "
             f"{'yes' if s['client_secret_stored'] else 'no':<6} | "
             f"{'yes' if s['access_key_stored'] else 'no':<6}"
@@ -1277,6 +1343,17 @@ def cmd_delete_profile(args: argparse.Namespace, session: Session) -> None:
 def cmd_login(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
+
+    # Warn if the stored client type suggests the wrong command
+    stored_type = profile_data.get("oauth_client_type")
+    if stored_type == "AuthorizationCodeClient":
+        logger.warning(
+            "Profile '%s' has oauth_client_type=AuthorizationCodeClient. "
+            "The client_credentials grant is not designed for this client type — "
+            "use 'auth-code-login' for browser-based login.",
+            profile,
+        )
+
     endpoint     = _resolve_endpoint(args, profile_data)
     client_id, client_secret = _require_oauth_creds(args, profile, profile_data)
 
@@ -1289,10 +1366,17 @@ def cmd_login(args: argparse.Namespace, session: Session) -> None:
     session.store_token(profile, endpoint, client_id, client_secret, token_resp,
                         scopes=scopes, token_url=token_url)
 
+    # Record client type on first successful login if not already set
+    p = session.get(profile)
+    if not p.get("oauth_client_type"):
+        p["oauth_client_type"] = "ClientCredentialsClient"
+        session.set(profile, p)
+
     s = session.profile_status(profile)
     print(f"Login successful (profile: {profile}).")
     print(f"  Endpoint           : {s['endpoint']}")
     print(f"  Client ID          : {s['client_id']}")
+    print(f"  Client type        : {s['oauth_client_type'] or 'unknown'}")
     print(f"  Expires at (UTC)   : {s['expires_at_utc']}  ({s['remaining']} remaining)")
     print(f"  Secret in keychain : {s['client_secret_stored']}")
     if scopes:
@@ -1310,7 +1394,18 @@ def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
     """
     profile      = args.profile
     profile_data = session.get(profile)
-    endpoint     = _resolve_endpoint(args, profile_data)
+
+    # Warn if the stored client type suggests the wrong command
+    stored_type = profile_data.get("oauth_client_type")
+    if stored_type == "ClientCredentialsClient":
+        logger.warning(
+            "Profile '%s' has oauth_client_type=ClientCredentialsClient. "
+            "The authorization code flow is intended for AuthorizationCodeClient types — "
+            "use 'login' for the client credentials flow.",
+            profile,
+        )
+
+    endpoint = _resolve_endpoint(args, profile_data)
 
     # Resolve client_id
     client_id = (
@@ -1420,9 +1515,17 @@ def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
     )
 
     s = session.profile_status(profile)
+    # Record client type on first successful login if not already set
+    p = session.get(profile)
+    if not p.get("oauth_client_type"):
+        p["oauth_client_type"] = "AuthorizationCodeClient"
+        session.set(profile, p)
+
+    s = session.profile_status(profile)
     print(f"Login successful (profile: {profile}, flow: authorization_code).")
     print(f"  Endpoint           : {s['endpoint']}")
     print(f"  Client ID          : {s['client_id']}")
+    print(f"  Client type        : {s['oauth_client_type'] or 'unknown'}")
     print(f"  Expires at (UTC)   : {s['expires_at_utc']}  ({s['remaining']} remaining)")
     print(f"  Refresh token      : {'stored in OS keychain' if refresh_token else 'not returned by server'}")
     if scopes:
@@ -1943,12 +2046,18 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
         else:
             p = session.get(profile)
             p["client_id"] = returned_id
+            returned_type = client.get("type")
+            if returned_type and returned_type in _OAUTH_TYPE_ALIASES:
+                p["oauth_client_type"] = returned_type
             session.set(profile, p)
             if _keychain_available() and _keychain_set(_client_secret_key(profile), returned_secret):
                 print(f"\nCredentials saved to profile '{profile}':")
-                print(f"  client_id     : {returned_id}")
-                print(f"  client_secret : stored in OS keychain")
-                print("Run 'sumo-oauth login' to obtain a token with the new client.")
+                print(f"  client_id        : {returned_id}")
+                if returned_type:
+                    print(f"  oauth_client_type: {returned_type}")
+                print(f"  client_secret    : stored in OS keychain")
+                login_cmd = "auth-code-login" if returned_type == "AuthorizationCodeClient" else "login"
+                print(f"Run 'sumo-oauth {login_cmd}' to obtain a token with the new client.")
             else:
                 logger.warning(
                     "client_id saved to profile '%s' but client_secret could not be stored "
@@ -2099,11 +2208,39 @@ Environment variables:
     p_store = sub.add_parser(
         "store-creds",
         help="Configure a profile: save settings and store secrets in OS keychain",
+        description=(
+            "Interactive profile setup. Use --mode to configure only the credentials you need:\n\n"
+            "  all    prompt for OAuth client creds AND Basic auth creds (default)\n"
+            "  oauth  client_id, client_secret, oauth_client_type only\n"
+            "  basic  access_id, access_key only\n\n"
+            "Secrets are stored in the OS keychain — never on disk.\n"
+            "CLI flags (--client-id, --access-id, --region) pre-fill prompts without\n"
+            "reading env vars, so named profiles are not polluted by the active account."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     _add_profile_arg(p_store)
     _add_endpoint_args(p_store)
+    p_store.add_argument(
+        "--mode",
+        choices=["all", "oauth", "basic"],
+        default="all",
+        metavar="MODE",
+        help="Which credentials to configure: all (default), oauth, or basic",
+    )
     p_store.add_argument("--client-id", metavar="CID",
                          help="OAuth client ID (non-sensitive; stored in profile config)")
+    p_store.add_argument(
+        "--client-type",
+        choices=["client-credentials", "authorization-code"],
+        default=None,
+        metavar="TYPE",
+        help=(
+            "OAuth client type — skips the interactive type prompt:\n"
+            "  client-credentials  → ClientCredentialsClient (use 'login')\n"
+            "  authorization-code  → AuthorizationCodeClient (use 'auth-code-login')"
+        ),
+    )
     p_store.add_argument("--access-id", metavar="AID",
                          help="Access ID (non-sensitive; stored in profile config)")
 

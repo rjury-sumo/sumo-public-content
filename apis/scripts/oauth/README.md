@@ -45,33 +45,44 @@ Secrets (`client_secret`, `access_key`) are stored in the OS keychain (macOS Key
 
 ### 1. Configure a profile
 
-`store-creds` is interactive — all fields are optional and you can leave any blank to skip it. Run it multiple times to add credentials incrementally.
+`store-creds` is interactive. Use `--mode` to configure only what you need:
+
+| Mode | Prompts for |
+| --- | --- |
+| `all` (default) | region, OAuth client creds, Basic auth creds |
+| `oauth` | region, `client_id`, `client_secret`, `oauth_client_type` |
+| `basic` | region, `access_id`, `access_key` |
 
 ```bash
-# Minimal setup for admin API commands only (Basic auth — no OAuth client needed)
-sumo-oauth store-creds --region au --access-id <AID>
-# Prompts for: region (pre-filled), client_id (skip), client_secret (skip), access_id (pre-filled), access_key
+# OAuth client only (for login / auth-code-login)
+sumo-oauth store-creds --mode oauth --region au --client-id <CID>
+# Prompts for client_secret (masked) and oauth_client_type (cc or ac)
 
-# Minimal setup for OAuth token commands only (no Basic auth needed)
-sumo-oauth store-creds --region au --client-id <CID>
-# Prompts for: region (pre-filled), client_id (pre-filled), client_secret, access_id (skip), access_key (skip)
+# Basic auth only (for admin API commands)
+sumo-oauth store-creds --mode basic --region au --access-id <AID>
+# Prompts for access_key (masked)
 
-# Full setup — all credentials at once
+# Full setup — both credential types at once
 sumo-oauth store-creds --region au --client-id <CID> --access-id <AID>
-# Prompts for all secrets securely via keychain
 
-# Re-run to add or update individual values without affecting others
-sumo-oauth store-creds  # shows current values; press Enter to keep any unchanged
+# Skip the type prompt by passing it directly
+sumo-oauth store-creds --mode oauth --client-type client-credentials --region au --client-id <CID>
+sumo-oauth store-creds --mode oauth --client-type authorization-code  --region au --client-id <CID>
+
+# Named profile (CLI flags pre-fill prompts; env vars are NOT used, avoiding cross-account bleed)
+sumo-oauth store-creds --profile prod --mode oauth --region us1 --client-id <CID>
 ```
-
-Any values passed as CLI flags (`--region`, `--client-id`, `--access-id`) are pre-filled in the prompts. Secrets (`client_secret`, `access_key`) are always entered interactively via a masked prompt and stored in the OS keychain — never on disk.
 
 ### 2. Obtain an OAuth token
 
+The login command to use depends on the OAuth client type:
+
 ```bash
+# ClientCredentialsClient (machine-to-machine)
 sumo-oauth login
-# Logs in using the 'default' profile; token is stored in ~/.sumo_oauth_session.json
-# Token endpoint: service.<region>.sumologic.com/oauth2/token (not api.*)
+
+# AuthorizationCodeClient (browser login — see experimental section below)
+sumo-oauth auth-code-login
 ```
 
 ### 3. List resources
@@ -102,34 +113,33 @@ A full base URL can be passed instead of a region key via `--endpoint`.
 
 ### Profile management
 
-`store-creds` is interactive. All fields are optional — press Enter at any prompt to keep the existing value. Run it as many times as needed to build up a profile incrementally.
+`store-creds` is interactive. Use `--mode` to configure only what you need. Press Enter at any prompt to keep the current value.
 
 ```bash
-# First-time setup: region + Basic auth credentials only (for users/service-accounts/oauth-clients)
-sumo-oauth store-creds --region au --access-id <AID>
+# OAuth client credentials only (ClientCredentialsClient)
+sumo-oauth store-creds --mode oauth --region au --client-id <CID> --client-type client-credentials
 
-# First-time setup: region + OAuth client credentials only (for login/token)
-sumo-oauth store-creds --region au --client-id <CID>
+# OAuth client credentials only (AuthorizationCodeClient)
+sumo-oauth store-creds --mode oauth --region au --client-id <CID> --client-type authorization-code
 
-# Add OAuth client credentials to a profile that already has Basic auth set up
-sumo-oauth store-creds --client-id <CID>
-# → press Enter to keep region/access_id unchanged; enter client_secret at the prompt
+# Basic auth only (admin API commands)
+sumo-oauth store-creds --mode basic --region au --access-id <AID>
 
-# Add Basic auth credentials to a profile that already has OAuth set up
-sumo-oauth store-creds --access-id <AID>
-# → press Enter to keep region/client_id/client_secret unchanged; enter access_key at the prompt
+# Both credential types at once (default mode)
+sumo-oauth store-creds --region au --client-id <CID> --access-id <AID>
 
-# Update a single secret (e.g. rotated access_key) without changing anything else
-sumo-oauth store-creds
-# → press Enter for every field except access_key
+# Update the client type on an existing profile (without re-entering secrets)
+sumo-oauth store-creds --mode oauth --client-type authorization-code
+# → press Enter for client_id and client_secret to keep them unchanged
 
-# Named profile
-sumo-oauth store-creds --profile prod --region us1 --client-id <CID> --access-id <AID>
+# Named profile — CLI flags pre-fill prompts; env vars are NOT read here
+# so named profiles stay isolated from the active account's credentials
+sumo-oauth store-creds --profile prod --mode oauth --region us1 --client-id <CID>
 
-# List all configured profiles
+# List all configured profiles (Type column shows cc/ac/-)
 sumo-oauth list-profiles [--output {table,json}]
 
-# Show status for a profile (token validity, expiry HH:mm:ss remaining, local and UTC times)
+# Show status for a profile (includes token validity, expiry, oauth_client_type, keychain state)
 sumo-oauth status [--profile NAME]
 sumo-oauth status --all
 
@@ -443,8 +453,8 @@ For each credential, the resolution order is:
 
 ## Security notes
 
-- `~/.sumo_oauth_session.json` is created with `chmod 600` and stores only non-sensitive data (endpoint, client_id, access_id, access_token, expiry). It is safe to inspect.
-- `client_secret` and `access_key` are stored exclusively in the OS keychain, keyed per profile as `{profile}:client_secret` and `{profile}:access_key`.
+- `~/.sumo_oauth_session.json` is created with `chmod 600` and stores only non-sensitive data: endpoint, client_id, access_id, oauth_client_type, access_token, expiry. It is safe to inspect.
+- `client_secret`, `access_key`, and `refresh_token` are stored exclusively in the OS keychain, keyed per profile as `{profile}:client_secret`, `{profile}:access_key`, and `{profile}:refresh_token`.
 - Access tokens are short-lived and auto-refreshed from the keychain when they expire.
 - Never commit `.env` to git — it is listed in `.gitignore`.
 
