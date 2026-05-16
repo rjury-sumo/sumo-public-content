@@ -1686,6 +1686,11 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
     endpoint     = _resolve_endpoint(args, profile_data)
     aid, akey    = _require_basic_auth(args, profile, profile_data)
 
+    _CLIENT_TYPE_MAP = {
+        "client-credentials": "ClientCredentialsClient",
+        "authorization-code":  "AuthorizationCodeClient",
+    }
+
     if args.from_file:
         try:
             payload = json.loads(Path(args.from_file).read_text())
@@ -1698,18 +1703,41 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
         if not args.name:
             logger.error("--name is required when not using --from-file")
             sys.exit(1)
-        if not args.redirect_uris and not args.scopes:
-            logger.error("--redirect-uris and --scopes are required when not using --from-file")
+
+        client_type = _CLIENT_TYPE_MAP[args.type]
+
+        if client_type == "ClientCredentialsClient" and not args.run_as_id:
+            logger.error(
+                "--run-as-id is required for client-credentials type.\n"
+                "  Run 'sumo-oauth service-accounts' to find your service account ID, "
+                "then pass it with --run-as-id."
+            )
             sys.exit(1)
-        payload = {"name": args.name}
+
+        if client_type == "AuthorizationCodeClient" and not args.redirect_uris:
+            logger.error(
+                "--redirect-uris is required for authorization-code type.\n"
+                "  Example: --redirect-uris \"http://localhost:8765/callback\""
+            )
+            sys.exit(1)
+
+        payload: dict = {
+            "type": client_type,
+            "name": args.name,
+        }
         if args.description:
             payload["description"] = args.description
-        if args.redirect_uris:
-            payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
         if args.scopes:
             payload["scopes"] = [s.strip() for s in args.scopes.split(",") if s.strip()]
-        logger.info("Creating OAuth client '%s' [profile=%s, endpoint=%s] …",
-                    args.name, profile, endpoint)
+
+        if client_type == "ClientCredentialsClient":
+            payload["runAs"] = {"type": "ServiceAccount", "runAsId": args.run_as_id}
+
+        if client_type == "AuthorizationCodeClient":
+            payload["redirectUris"] = [u.strip() for u in args.redirect_uris.split(",") if u.strip()]
+
+        logger.info("Creating %s '%s' [profile=%s, endpoint=%s] …",
+                    client_type, args.name, profile, endpoint)
 
     client = create_oauth_client(endpoint, _basic_auth_header(aid, akey), payload)
     print("OAuth client created.")
@@ -2095,11 +2123,32 @@ Environment variables:
                        help="ID of the OAuth client to retrieve")
 
     # -- create-oauth-client -------------------------------------------------
-    p_coc = sub.add_parser("create-oauth-client", help="Create a new OAuth client [Basic auth]")
+    p_coc = sub.add_parser(
+        "create-oauth-client",
+        help="Create a new OAuth client [Basic auth]",
+        description=(
+            "Create a ClientCredentialsClient (machine-to-machine, runs as a service account) "
+            "or an AuthorizationCodeClient (browser-based user login).\n\n"
+            "ClientCredentialsClient  requires --run-as-id.\n"
+            "AuthorizationCodeClient  requires --redirect-uris."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     _add_profile_arg(p_coc)
     _add_endpoint_args(p_coc)
     _add_basic_auth_args(p_coc)
     _add_output_arg(p_coc)
+    p_coc.add_argument(
+        "--type",
+        choices=["client-credentials", "authorization-code"],
+        default="client-credentials",
+        metavar="TYPE",
+        help=(
+            "OAuth client type (default: client-credentials):\n"
+            "  client-credentials  → ClientCredentialsClient (machine-to-machine)\n"
+            "  authorization-code  → AuthorizationCodeClient (browser login)"
+        ),
+    )
     p_coc.add_argument("--save-creds", action="store_true",
                        help="Save the returned clientId to the profile and store "
                             "clientSecret in the OS keychain (enables immediate 'login')")
@@ -2110,10 +2159,15 @@ Environment variables:
                        help="Display name for the OAuth client (required without --from-file)")
     p_coc.add_argument("--description", default="",
                        help="Optional description")
+    p_coc.add_argument("--run-as-id", default=None, metavar="SERVICE_ACCOUNT_ID",
+                       help="Service account ID to run as — required for client-credentials type. "
+                            "Use 'sumo-oauth service-accounts' to find the ID.")
     p_coc.add_argument("--redirect-uris", default=None, metavar="URI[,URI…]",
-                       help="Comma-separated list of allowed redirect URIs")
+                       help="Comma-separated redirect URIs — required for authorization-code type.")
     p_coc.add_argument("--scopes", default=None, metavar="SCOPE[,SCOPE…]",
-                       help="Comma-separated list of OAuth scope IDs to grant")
+                       help="Comma-separated OAuth scope IDs (optional for both types; "
+                            "empty means all scopes the service account or user possesses). "
+                            "Use 'sumo-oauth oauth-scopes' to list available IDs.")
 
     # -- oauth-clients -------------------------------------------------------
     p_oc = sub.add_parser("oauth-clients", help="List OAuth clients [Basic auth]")

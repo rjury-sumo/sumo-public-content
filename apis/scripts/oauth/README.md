@@ -269,25 +269,48 @@ Scopes show `(all)` when empty; large scope lists are shown as a preview with ov
 # Get a specific OAuth client by ID
 sumo-oauth get-oauth-client --id <CLIENT_ID> [--profile NAME] [--output {table,json}]
 
-# Create a new OAuth client from a JSON file (recommended for complex payloads)
-# The JSON is posted as-is, so fields like type, runAs, scopes array etc. are all supported
+# ---------------------------------------------------------------------------
+# Creating a ClientCredentialsClient (machine-to-machine, runs as a service account)
+# ---------------------------------------------------------------------------
+
+# Inline flags — --run-as-id is required (use 'sumo-oauth service-accounts' to find it)
+sumo-oauth create-oauth-client \
+  --type client-credentials \
+  --name "My MCP Client" \
+  --run-as-id 0000000000A123456 \
+  --scopes "runLogSearch,viewCollectors" \
+  [--description "Optional description"] \
+  [--save-creds] \
+  [--profile NAME]
+
+# From a JSON file (posted as-is — useful for runAs, full scopes lists, etc.)
 sumo-oauth create-oauth-client --from-file oauth-client-example.json [--profile NAME]
 
-# Add --save-creds to automatically save the returned clientId/clientSecret to the profile
-# (clientSecret is only returned at creation time — this avoids losing it)
+# Add --save-creds to automatically persist the returned clientId/clientSecret to the profile
+# (clientSecret is only returned at creation time — --save-creds ensures you don't lose it)
 sumo-oauth create-oauth-client --from-file oauth-client-example.json --save-creds
 # Then immediately log in with the new client:
 sumo-oauth login
 
-# Or create inline with individual flags
+# ---------------------------------------------------------------------------
+# Creating an AuthorizationCodeClient (browser-based user login)
+# ---------------------------------------------------------------------------
+
+# --redirect-uris is required; must match the URI used by auth-code-login (default port 8765)
 sumo-oauth create-oauth-client \
-  --name "My App" \
-  --redirect-uris "https://myapp.example.com/callback" \
-  --scopes "scope_id_1,scope_id_2" \
+  --type authorization-code \
+  --name "My Browser App" \
+  --redirect-uris "http://localhost:8765/callback" \
+  [--scopes "runLogSearch,viewCollectors"] \
   [--description "Optional description"] \
   [--save-creds] \
-  [--profile NAME] \
-  [--output {table,json}]
+  [--profile NAME]
+
+# Multiple redirect URIs (comma-separated)
+sumo-oauth create-oauth-client \
+  --type authorization-code \
+  --name "My Browser App" \
+  --redirect-uris "http://localhost:8765/callback,https://myapp.example.com/callback"
 
 # Update an OAuth client by ID
 sumo-oauth update-oauth-client --id <CLIENT_ID> --from-file updated-client.json [--profile NAME]
