@@ -195,6 +195,44 @@ sumo-oauth auth-code-login \
 
 If the server returns a refresh token it is stored in the OS keychain under `{profile}:refresh_token`. Subsequent `token`, `export-env`, and `login`-style auto-refreshes will use the refresh token grant automatically, falling back to `client_credentials` only if the refresh token is absent or rejected.
 
+### MCP client configuration
+
+Prints a ready-to-use configuration block (or CLI command) for registering the Sumo Logic MCP server in a supported AI client or IDE. Values are read from the active profile.
+
+```bash
+# Claude Code CLI command (default)
+sumo-oauth client-config [--profile NAME]
+
+# Specific format
+sumo-oauth client-config --format vscode
+sumo-oauth client-config --format cursor
+
+# All formats at once
+sumo-oauth client-config --format all
+
+# Custom server name and callback port
+sumo-oauth client-config --server-name my-sumo --callback-port 9000
+```
+
+Supported formats:
+
+| Format | Config location | Auth approach |
+| --- | --- | --- |
+| `claude-code` | CLI command | OAuth authorization code + fixed callback port |
+| `claude-code-json` | `.mcp.json` / `~/.claude.json` | OAuth authorization code + fixed callback port |
+| `vscode` | `.vscode/mcp.json` | `clientId`/`clientSecret` inline (no fixed callback port) |
+| `cursor` | `~/.cursor/mcp.json` | Bearer token (OAuth callback not supported) |
+| `windsurf` | `~/.codeium/windsurf/mcp_config.json` | Bearer token (OAuth callback not supported) |
+| `gemini` | `~/.gemini/settings.json` | OAuth `dynamic_discovery` + `redirectUri` |
+| `codex` | `~/.codex/config.toml` | OAuth callback port (OpenAI Codex CLI) |
+| `all` | — | All of the above |
+
+For formats that use bearer tokens (`cursor`, `windsurf`), the command automatically uses the current stored access token. Tokens expire — re-run `client-config` to get a fresh one.
+
+For formats that store `clientSecret` inline (`vscode`, `gemini`), **do not commit the config file to source control**.
+
+---
+
 ### Export environment variables (MCP setup)
 
 Prints shell `export` statements for all variables required by the Sumo Logic MCP server. Retrieves the `client_secret` from the OS keychain and auto-refreshes the token if needed.

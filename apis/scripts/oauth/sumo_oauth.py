@@ -1501,6 +1501,195 @@ def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
         print(line)
 
 
+# ---------------------------------------------------------------------------
+# MCP client configuration output
+# ---------------------------------------------------------------------------
+
+_CLIENT_CONFIG_FORMATS = [
+    "claude-code",
+    "claude-code-json",
+    "vscode",
+    "cursor",
+    "windsurf",
+    "gemini",
+    "codex",
+]
+
+_CLIENT_CONFIG_FORMAT_HELP = """\
+  claude-code       claude mcp add CLI command          (OAuth authorization code + callback port)
+  claude-code-json  .mcp.json / ~/.claude.json block    (OAuth authorization code + callback port)
+  vscode            .vscode/mcp.json block              (VS Code / GitHub Copilot — OAuth inline)
+  cursor            ~/.cursor/mcp.json block             (bearer token — OAuth callback not supported)
+  windsurf          ~/.codeium/windsurf/mcp_config.json  (bearer token — OAuth callback not supported)
+  gemini            ~/.gemini/settings.json block        (OAuth dynamic_discovery + redirectUri)
+  codex             ~/.codex/config.toml block           (OpenAI Codex CLI — OAuth callback port)
+  all               Print all formats"""
+
+
+def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
+    """Print MCP client configuration blocks for common AI platforms."""
+    profile      = args.profile
+    profile_data = session.get(profile)
+    endpoint     = profile_data.get("endpoint", "")
+
+    client_id     = profile_data.get("client_id") or "<CLIENT_ID>"
+    client_secret = _keychain_get(_client_secret_key(profile)) or "<CLIENT_SECRET>"
+    mcp_url       = (
+        _API_TO_MCP_URL.get(endpoint.rstrip("/"))
+        or os.environ.get("SUMOLOGIC_MCP_URL", "<MCP_URL>")
+    )
+    server_name   = args.server_name
+    callback_port = args.callback_port
+
+    # Bearer token for clients that don't support OAuth callback
+    access_token = profile_data.get("access_token", "")
+    if not access_token or not profile_data.get("client_id"):
+        access_token = "<ACCESS_TOKEN>"
+    else:
+        # Try a non-fatal refresh so the token is as fresh as possible
+        try:
+            bearer = session.require_token(profile)
+            access_token = bearer.removeprefix("Bearer ")
+        except SystemExit:
+            access_token = profile_data.get("access_token", "<ACCESS_TOKEN>")
+
+    # ------------------------------------------------------------------
+    # Format renderers
+    # ------------------------------------------------------------------
+
+    def _fmt_claude_code() -> str:
+        return (
+            "# Claude Code CLI — run once to register the server\n"
+            "# --client-secret prompts for the secret (stored in system keychain, never on disk)\n"
+            f"claude mcp add --transport http \\\n"
+            f"  --client-id {client_id} \\\n"
+            f"  --client-secret \\\n"
+            f"  --callback-port {callback_port} \\\n"
+            f"  {server_name} {mcp_url}"
+        )
+
+    def _fmt_claude_code_json() -> str:
+        block = {
+            "mcpServers": {
+                server_name: {
+                    "type":  "http",
+                    "url":   mcp_url,
+                    "oauth": {
+                        "clientId":    client_id,
+                        "callbackPort": callback_port,
+                    },
+                }
+            }
+        }
+        return (
+            "# .mcp.json (project root) or merge mcpServers into ~/.claude.json\n"
+            + json.dumps(block, indent=2)
+        )
+
+    def _fmt_vscode() -> str:
+        block = {
+            "servers": {
+                server_name: {
+                    "type":         "http",
+                    "url":          mcp_url,
+                    "clientId":     client_id,
+                    "clientSecret": client_secret,
+                }
+            }
+        }
+        return (
+            "# .vscode/mcp.json (workspace) — VS Code / GitHub Copilot\n"
+            "# NOTE: VS Code uses a dynamic callback port; fixed port not supported.\n"
+            "# NOTE: clientSecret is stored inline — do not commit this file to source control.\n"
+            + json.dumps(block, indent=2)
+        )
+
+    def _fmt_cursor() -> str:
+        block = {
+            "mcpServers": {
+                server_name: {
+                    "type": "http",
+                    "url":  mcp_url,
+                    "headers": {
+                        "Authorization": f"Bearer {access_token}",
+                    },
+                }
+            }
+        }
+        return (
+            "# ~/.cursor/mcp.json — Cursor\n"
+            "# Cursor does not support the OAuth callback flow — use a bearer token instead.\n"
+            "# Token expires — refresh with: sumo-oauth token --raw  (re-run client-config to update this file).\n"
+            + json.dumps(block, indent=2)
+        )
+
+    def _fmt_windsurf() -> str:
+        block = {
+            "mcpServers": {
+                server_name: {
+                    "type": "http",
+                    "url":  mcp_url,
+                    "headers": {
+                        "Authorization": f"Bearer {access_token}",
+                    },
+                }
+            }
+        }
+        return (
+            "# ~/.codeium/windsurf/mcp_config.json — Windsurf\n"
+            "# Windsurf does not support the OAuth callback flow — use a bearer token instead.\n"
+            "# Token expires — refresh with: sumo-oauth token --raw  (re-run client-config to update this file).\n"
+            + json.dumps(block, indent=2)
+        )
+
+    def _fmt_gemini() -> str:
+        block = {
+            "mcpServers": {
+                server_name: {
+                    "httpUrl":          mcp_url,
+                    "authProviderType": "dynamic_discovery",
+                    "oauth": {
+                        "clientId":     client_id,
+                        "clientSecret": client_secret,
+                        "redirectUri":  f"http://localhost:{callback_port}/oauth/callback",
+                    },
+                }
+            }
+        }
+        return (
+            "# ~/.gemini/settings.json — Gemini CLI\n"
+            "# NOTE: clientSecret is stored inline — do not commit this file to source control.\n"
+            + json.dumps(block, indent=2)
+        )
+
+    def _fmt_codex() -> str:
+        return (
+            "# ~/.codex/config.toml — OpenAI Codex CLI\n"
+            "# Add to the [global] section or project .codex/config.toml\n"
+            f"mcp_oauth_callback_port = {callback_port}\n"
+            "\n"
+            f"[mcp_servers.{server_name}]\n"
+            f'url = "{mcp_url}"\n'
+        )
+
+    renderers: dict = {
+        "claude-code":      _fmt_claude_code,
+        "claude-code-json": _fmt_claude_code_json,
+        "vscode":           _fmt_vscode,
+        "cursor":           _fmt_cursor,
+        "windsurf":         _fmt_windsurf,
+        "gemini":           _fmt_gemini,
+        "codex":            _fmt_codex,
+    }
+
+    fmt = args.format
+    if fmt == "all":
+        sep = "\n" + "─" * 70 + "\n"
+        print(sep.join(fn() for fn in renderers.values()))
+    else:
+        print(renderers[fmt]())
+
+
 def cmd_token(args: argparse.Namespace, session: Session) -> None:
     profile = args.profile
     auth    = session.require_token(profile)
@@ -2014,6 +2203,42 @@ Environment variables:
         help="Shell syntax to use for export statements (default: bash)",
     )
 
+    # -- client-config -------------------------------------------------------
+    p_cfg = sub.add_parser(
+        "client-config",
+        help="Print MCP client configuration for common AI platforms",
+        description=(
+            "Prints the configuration block (or CLI command) for registering the Sumo Logic MCP\n"
+            "server in a supported AI client or IDE.\n\n"
+            "Formats:\n" + _CLIENT_CONFIG_FORMAT_HELP
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    _add_profile_arg(p_cfg)
+    p_cfg.add_argument(
+        "--format", "-f",
+        choices=_CLIENT_CONFIG_FORMATS + ["all"],
+        default="claude-code",
+        metavar="FORMAT",
+        help=(
+            "Output format (default: claude-code). Options:\n"
+            + _CLIENT_CONFIG_FORMAT_HELP
+        ),
+    )
+    p_cfg.add_argument(
+        "--server-name",
+        default="sumologic",
+        metavar="NAME",
+        help="Server name/key used in the config block (default: sumologic)",
+    )
+    p_cfg.add_argument(
+        "--callback-port",
+        type=int,
+        default=8765,
+        metavar="PORT",
+        help="OAuth callback port (default: 8765 — matches auth-code-login default)",
+    )
+
     # -- token ---------------------------------------------------------------
     p_token = sub.add_parser("token", help="Show or refresh the access token for a profile")
     _add_profile_arg(p_token)
@@ -2206,6 +2431,7 @@ COMMAND_MAP = {
     "list-profiles":    cmd_list_profiles,
     "delete-profile":   cmd_delete_profile,
     "export-env":       cmd_export_env,
+    "client-config":    cmd_client_config,
     "login":            cmd_login,
     "auth-code-login":  cmd_auth_code_login,
     "logout":           cmd_logout,
