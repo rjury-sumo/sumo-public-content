@@ -211,6 +211,12 @@ class TestKeychainHelpers(unittest.TestCase):
     def test_access_key_key_format(self):
         self.assertEqual(so._access_key_key("staging"), "staging:access_key")
 
+    def test_refresh_token_key_format(self):
+        self.assertEqual(so._refresh_token_key("myprofile"), "myprofile:refresh_token")
+
+    def test_refresh_token_key_default_profile(self):
+        self.assertEqual(so._refresh_token_key("default"), "default:refresh_token")
+
 
 # ===========================================================================
 # Session class
@@ -342,19 +348,82 @@ class TestSession(unittest.TestCase):
 
     @patch("sumo_oauth._keychain_available", return_value=True)
     @patch("sumo_oauth._keychain_set", return_value=True)
-    @patch("sumo_oauth._keychain_get", return_value="secret")
     @patch("sumo_oauth._fetch_oauth_token",
            return_value={"access_token": "newtoken", "expires_in": 1800})
-    def test_require_token_refreshes_expired(self, mock_fetch, mock_get, mock_set, mock_avail):
+    def test_require_token_refreshes_expired(self, mock_fetch, mock_set, mock_avail):
+        # _keychain_get: return None for refresh_token key so refresh grant is skipped,
+        # return "secret" for client_secret key so client_credentials grant proceeds.
+        def _keychain_side_effect(key):
+            if "refresh_token" in key:
+                return None
+            return "secret"
+
         session = self._session({"default": {
             "endpoint": "https://api.au.sumologic.com",
             "client_id": "cid",
             "access_token": "oldtoken",
             "expires_at": time.time() - 10,  # expired
         }})
-        bearer = session.require_token("default")
+        with patch("sumo_oauth._keychain_get", side_effect=_keychain_side_effect):
+            bearer = session.require_token("default")
         self.assertEqual(bearer, "Bearer newtoken")
         mock_fetch.assert_called_once()
+
+    def test_profile_status_includes_oauth_client_type(self):
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "cid",
+            "oauth_client_type": "ClientCredentialsClient",
+        }})
+        with patch("sumo_oauth._keychain_get", return_value=None):
+            status = session.profile_status("default")
+        self.assertEqual(status["oauth_client_type"], "ClientCredentialsClient")
+
+    def test_profile_status_includes_refresh_token_stored_false(self):
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "cid",
+        }})
+        with patch("sumo_oauth._keychain_get", return_value=None):
+            status = session.profile_status("default")
+        self.assertFalse(status["refresh_token_stored"])
+
+    def test_profile_status_includes_refresh_token_stored_true(self):
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "cid",
+        }})
+        with patch("sumo_oauth._keychain_get", return_value="somerefreshtoken"):
+            status = session.profile_status("default")
+        self.assertTrue(status["refresh_token_stored"])
+
+    @patch("sumo_oauth._keychain_available", return_value=True)
+    @patch("sumo_oauth._keychain_set", return_value=True)
+    def test_store_token_persists_refresh_token(self, mock_set, mock_avail):
+        session = self._session()
+        token_resp = {"access_token": "tok123", "token_type": "Bearer", "expires_in": 1800}
+        session.store_token("default", "https://api.au.sumologic.com", "cid", "secret",
+                            token_resp, refresh_token="myrefreshtoken")
+        # keychain_set should have been called with the refresh_token key
+        calls = [str(c) for c in mock_set.call_args_list]
+        self.assertTrue(
+            any("refresh_token" in c for c in calls),
+            f"refresh_token not stored in keychain. Calls: {calls}"
+        )
+
+    @patch("sumo_oauth._keychain_available", return_value=True)
+    @patch("sumo_oauth._keychain_set", return_value=True)
+    def test_store_token_skips_empty_client_secret(self, mock_set, mock_avail):
+        """Empty client_secret must not be written to the keychain."""
+        session = self._session()
+        token_resp = {"access_token": "tok", "expires_in": 1800}
+        session.store_token("default", "https://api.au.sumologic.com", "cid", "",
+                            token_resp)
+        calls_keys = [c[0][1] for c in mock_set.call_args_list]  # second positional arg = key
+        self.assertFalse(
+            any("client_secret" in k for k in calls_keys),
+            f"client_secret was stored for empty value. Keys: {calls_keys}"
+        )
 
     @patch("sumo_oauth._keychain_available", return_value=True)
     @patch("sumo_oauth._keychain_set", return_value=True)
@@ -374,6 +443,45 @@ class TestSession(unittest.TestCase):
         session = self._session()
         with self.assertRaises(SystemExit):
             session.require_token("nonexistent")
+
+    def test_require_token_auth_code_client_no_refresh_exits(self):
+        """AuthorizationCodeClient with expired token and no refresh_token must exit."""
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "cid",
+            "oauth_client_type": "AuthorizationCodeClient",
+            "access_token": "oldtok",
+            "expires_at": time.time() - 10,
+        }})
+        # No refresh token stored
+        with patch("sumo_oauth._keychain_get", return_value=None):
+            with self.assertRaises(SystemExit):
+                session.require_token("default")
+
+    def test_require_token_uses_refresh_token_when_present(self):
+        """When a refresh_token exists, require_token should call _fetch_refresh_token."""
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "cid",
+            "access_token": "oldtok",
+            "expires_at": time.time() - 10,
+        }})
+
+        def _kc_get(key):
+            if "refresh_token" in key:
+                return "myrefresh"
+            if "client_secret" in key:
+                return "secret"
+            return None
+
+        new_token_resp = {"access_token": "refreshed", "expires_in": 1800}
+        with patch("sumo_oauth._keychain_get", side_effect=_kc_get), \
+             patch("sumo_oauth._keychain_set", return_value=True), \
+             patch("sumo_oauth._keychain_available", return_value=True), \
+             patch("sumo_oauth._fetch_refresh_token", return_value=new_token_resp) as mock_refresh:
+            bearer = session.require_token("default")
+        self.assertEqual(bearer, "Bearer refreshed")
+        mock_refresh.assert_called_once()
 
 
 # ===========================================================================
@@ -918,6 +1026,186 @@ class TestMockData(unittest.TestCase):
             self.assertIn(field, data,
                           f"Table column field '{field}' not in API response — "
                           f"update print_access_keys columns. Available: {list(data.keys())}")
+
+
+# ===========================================================================
+# OAuth type aliases and short labels
+# ===========================================================================
+
+class TestOauthTypeAliases(unittest.TestCase):
+
+    def test_cc_alias_resolves(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["cc"], "ClientCredentialsClient")
+
+    def test_client_credentials_alias_resolves(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["client-credentials"], "ClientCredentialsClient")
+
+    def test_canonical_cc_passthrough(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["ClientCredentialsClient"],
+                         "ClientCredentialsClient")
+
+    def test_ac_alias_resolves(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["ac"], "AuthorizationCodeClient")
+
+    def test_authorization_code_alias_resolves(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["authorization-code"], "AuthorizationCodeClient")
+
+    def test_canonical_ac_passthrough(self):
+        self.assertEqual(so._OAUTH_TYPE_ALIASES["AuthorizationCodeClient"],
+                         "AuthorizationCodeClient")
+
+    def test_short_cc(self):
+        self.assertEqual(so._OAUTH_TYPE_SHORT["ClientCredentialsClient"], "cc")
+
+    def test_short_ac(self):
+        self.assertEqual(so._OAUTH_TYPE_SHORT["AuthorizationCodeClient"], "ac")
+
+    def test_unknown_alias_not_present(self):
+        self.assertNotIn("garbage", so._OAUTH_TYPE_ALIASES)
+
+
+# ===========================================================================
+# PKCE helpers
+# ===========================================================================
+
+class TestPkce(unittest.TestCase):
+
+    def test_returns_two_strings(self):
+        verifier, challenge = so._pkce_pair()
+        self.assertIsInstance(verifier, str)
+        self.assertIsInstance(challenge, str)
+
+    def test_verifier_and_challenge_differ(self):
+        verifier, challenge = so._pkce_pair()
+        self.assertNotEqual(verifier, challenge)
+
+    def test_verifier_reasonable_length(self):
+        verifier, _ = so._pkce_pair()
+        # 32 random bytes base64url-encoded without padding ≈ 43 chars
+        self.assertGreaterEqual(len(verifier), 40)
+
+    def test_no_padding_chars(self):
+        verifier, challenge = so._pkce_pair()
+        self.assertNotIn("=", verifier)
+        self.assertNotIn("=", challenge)
+
+    def test_s256_challenge_is_correct(self):
+        import hashlib, base64
+        verifier, challenge = so._pkce_pair()
+        digest = hashlib.sha256(verifier.encode()).digest()
+        expected = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+        self.assertEqual(challenge, expected)
+
+    def test_each_call_returns_unique_pair(self):
+        v1, c1 = so._pkce_pair()
+        v2, c2 = so._pkce_pair()
+        self.assertNotEqual(v1, v2)
+        self.assertNotEqual(c1, c2)
+
+
+# ===========================================================================
+# AUTHORIZATION_URLS and _API_TO_AUTHORIZATION_URL
+# ===========================================================================
+
+class TestAuthorizationUrls(unittest.TestCase):
+
+    def test_all_regions_have_authorization_url(self):
+        for region in so.REGIONS:
+            self.assertIn(region, so.AUTHORIZATION_URLS,
+                          f"Region '{region}' missing from AUTHORIZATION_URLS")
+
+    def test_authorization_urls_contain_authorize_path(self):
+        for region, url in so.AUTHORIZATION_URLS.items():
+            self.assertIn("/oauth2/authorize", url,
+                          f"Region '{region}' URL missing /oauth2/authorize: {url}")
+
+    def test_authorization_urls_use_service_host(self):
+        for region, url in so.AUTHORIZATION_URLS.items():
+            self.assertIn("service.", url,
+                          f"Region '{region}' URL should use service host: {url}")
+
+    def test_api_to_authorization_url_mapped(self):
+        for region, api_url in so.REGIONS.items():
+            auth_url = so._API_TO_AUTHORIZATION_URL.get(api_url)
+            self.assertIsNotNone(auth_url,
+                                 f"No authorization URL mapped for API endpoint {api_url}")
+
+    def test_us1_authorization_url(self):
+        self.assertEqual(so.AUTHORIZATION_URLS["us1"],
+                         "https://service.sumologic.com/oauth2/authorize")
+
+    def test_au_authorization_url(self):
+        self.assertEqual(so.AUTHORIZATION_URLS["au"],
+                         "https://service.au.sumologic.com/oauth2/authorize")
+
+
+# ===========================================================================
+# cmd_client_config output
+# ===========================================================================
+
+class TestCmdClientConfig(unittest.TestCase):
+
+    def _make_args(self, fmt="claude-code", profile="default",
+                   server_name="sumologic", callback_port=7878):
+        args = MagicMock()
+        args.format = fmt
+        args.profile = profile
+        args.server_name = server_name
+        args.callback_port = callback_port
+        return args
+
+    def _run_config(self, fmt, profile_data=None):
+        import tempfile
+        f = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        data = {"default": profile_data or {
+            "endpoint": "https://api.au.sumologic.com",
+            "client_id": "TEST_CLIENT_ID",
+            "access_token": "TEST_TOKEN",
+            "expires_at": time.time() + 3600,
+            "oauth_client_type": "AuthorizationCodeClient",
+        }}
+        f.write(json.dumps(data).encode())
+        f.close()
+        session = so.Session(Path(f.name))
+        args = self._make_args(fmt=fmt)
+        buf = StringIO()
+        with patch("sys.stdout", buf), \
+             patch("sumo_oauth._keychain_get", return_value="TEST_SECRET"), \
+             patch("sumo_oauth._keychain_available", return_value=True), \
+             patch("sumo_oauth._fetch_oauth_token",
+                   return_value={"access_token": "TEST_TOKEN", "expires_in": 3600}):
+            so.cmd_client_config(args, session)
+        Path(f.name).unlink()
+        return buf.getvalue()
+
+    def test_claude_code_output_contains_mcp_add(self):
+        output = self._run_config("claude-code")
+        self.assertIn("claude mcp add", output)
+        self.assertIn("--transport http", output)
+
+    def test_claude_code_json_output_is_valid_json_block(self):
+        output = self._run_config("claude-code-json")
+        # Strip comment lines, parse the JSON block
+        lines = [l for l in output.splitlines() if not l.strip().startswith("#")]
+        parsed = json.loads("\n".join(lines))
+        self.assertIn("mcpServers", parsed)
+
+    def test_vscode_output_contains_servers_key(self):
+        output = self._run_config("vscode")
+        lines = [l for l in output.splitlines() if not l.strip().startswith("#")]
+        parsed = json.loads("\n".join(lines))
+        self.assertIn("servers", parsed)
+
+    def test_cursor_output_has_authorization_header(self):
+        output = self._run_config("cursor")
+        self.assertIn("Authorization", output)
+        self.assertIn("Bearer", output)
+
+    def test_all_format_produces_multiple_blocks(self):
+        output = self._run_config("all")
+        # "all" should include multiple platform headers
+        self.assertIn("claude", output.lower())
+        self.assertIn("cursor", output.lower())
 
 
 if __name__ == "__main__":
