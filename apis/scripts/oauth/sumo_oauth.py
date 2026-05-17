@@ -66,6 +66,8 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
+__version__ = "0.2.0"
+
 import argparse
 import base64
 import getpass
@@ -1570,11 +1572,8 @@ def cmd_export_env(args: argparse.Namespace, session: Session) -> None:
         or os.environ.get("SUMOLOGIC_MCP_URL", "https://mcp.sumologic.com/mcp")
     )
 
-    # Get (or refresh) the access token
-    access_token = ""
-    if client_id and client_secret:
-        bearer = session.require_token(profile)
-        access_token = bearer.removeprefix("Bearer ")
+    # Use the stored access token — do not refresh automatically
+    access_token = p.get("access_token", "")
 
     if not client_secret:
         logger.warning(
@@ -2066,6 +2065,41 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
                 )
 
 
+def cmd_migrate_profile(args: argparse.Namespace, session: Session) -> None:
+    """Iterate all profiles and prompt for any fields added in newer versions."""
+    names = session.names()
+    if not names:
+        print("No profiles configured. Nothing to migrate.")
+        return
+
+    updated = 0
+    for name in names:
+        p = session.get(name).copy()
+        changed = False
+        print(f"\nProfile: '{name}'")
+
+        # oauth_client_type was added as a required field — old profiles lack it
+        if p.get("client_id") and not p.get("oauth_client_type"):
+            print(f"  client_id        : {p.get('client_id')}")
+            print(f"  oauth_client_type: (missing)")
+            new_type = _prompt_client_type(None)
+            if new_type:
+                p["oauth_client_type"] = new_type
+                changed = True
+            else:
+                print("  Skipped (no type entered).")
+        else:
+            type_val = p.get("oauth_client_type") or "(none — no client_id configured)"
+            print(f"  oauth_client_type: {type_val}  OK")
+
+        if changed:
+            session.set(name, p)
+            print(f"  -> Profile '{name}' updated.")
+            updated += 1
+
+    print(f"\nMigration complete. {updated} profile(s) updated.")
+
+
 def cmd_roles(args: argparse.Namespace, session: Session) -> None:
     profile      = args.profile
     profile_data = session.get(profile)
@@ -2182,6 +2216,11 @@ Environment variables:
     )
 
     # Global options
+    parser.add_argument(
+        "--version", "-V",
+        action="version",
+        version=f"%(prog)s {__version__}",
+    )
     parser.add_argument(
         "--profile", "-p",
         default=os.environ.get("SUMO_PROFILE", DEFAULT_PROFILE),
@@ -2540,6 +2579,19 @@ Environment variables:
     _add_limit_arg(p_oc)
     _add_filter_arg(p_oc, "Filter by name or clientId (case-insensitive regex)")
 
+    # -- migrate-profile -----------------------------------------------------
+    sub.add_parser(
+        "migrate-profile",
+        help="Migrate all profiles to current format (prompts for missing fields)",
+        description=(
+            "Iterates every profile and interactively prompts for any fields that\n"
+            "are required by the current version but absent from older profiles.\n\n"
+            "Currently migrates: oauth_client_type  (added after initial release)\n\n"
+            "Run this once after upgrading if you see errors about missing profile fields."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
     # -- roles ---------------------------------------------------------------
     p_roles = sub.add_parser("roles", help="List roles v2 [Basic auth]")
     _add_profile_arg(p_roles)
@@ -2585,12 +2637,17 @@ COMMAND_MAP = {
     "create-oauth-client": cmd_create_oauth_client,
     "oauth-clients":       cmd_oauth_clients,
     "roles":               cmd_roles,
+    "migrate-profile":     cmd_migrate_profile,
 }
 
 
 def main() -> None:
     parser = build_parser()
     args = parser.parse_args()
+    # Ensure profile is always resolved — subparser SUPPRESS default can leave it unset
+    # in some edge cases (e.g. argparse version differences or missing _add_profile_arg call)
+    if not getattr(args, "profile", None):
+        args.profile = os.environ.get("SUMO_PROFILE", DEFAULT_PROFILE)
     setup_logging(args.log_level)
     session = Session(args.session_file)
     COMMAND_MAP[args.command](args, session)

@@ -6,6 +6,18 @@ Supports multiple named profiles so different Sumo Logic instances (regions, acc
 
 > For a step-by-step walkthrough of setting up OAuth for the Sumo Logic MCP server, see [mcp-setup.md](mcp-setup.md).
 
+## Upgrading from 0.1.x
+
+Version 0.2.0 added `oauth_client_type` as a required field on profiles (values: `ClientCredentialsClient` or `AuthorizationCodeClient`). Existing profiles created with 0.1.x do not have this field, which can cause errors when running `login`, `auth-code-login`, or `token`.
+
+Run the migration command once after upgrading:
+
+```bash
+sumo-oauth migrate-profile
+```
+
+This walks every profile that has a `client_id` but is missing `oauth_client_type` and prompts you to classify it as `cc` (ClientCredentialsClient — used with `login`) or `ac` (AuthorizationCodeClient — used with `auth-code-login`). Profiles with no `client_id` (basic-auth-only) are skipped automatically.
+
 ## Requirements
 
 - Python 3.9+
@@ -148,6 +160,10 @@ sumo-oauth clear-creds [--profile NAME]
 
 # Remove a profile entirely (config + keychain secrets)
 sumo-oauth delete-profile --profile NAME
+
+# Migrate all profiles to the current format (prompts for any missing fields)
+# Run once after upgrading from 0.1.x — classifies each profile as cc or ac
+sumo-oauth migrate-profile
 ```
 
 ### OAuth token commands
