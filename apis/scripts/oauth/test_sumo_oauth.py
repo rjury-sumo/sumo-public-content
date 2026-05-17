@@ -10,6 +10,7 @@ fetch_mock_data.py).  Tests that rely on mock_data files are skipped
 gracefully if the files do not exist yet.
 """
 
+import argparse
 import base64
 import json
 import sys
@@ -1206,6 +1207,157 @@ class TestCmdClientConfig(unittest.TestCase):
         # "all" should include multiple platform headers
         self.assertIn("claude", output.lower())
         self.assertIn("cursor", output.lower())
+
+
+# ===========================================================================
+# _prompt_client_type
+# ===========================================================================
+
+class TestPromptClientType(unittest.TestCase):
+
+    def _call(self, user_input: str, current: str | None = None) -> str | None:
+        with patch("builtins.input", return_value=user_input):
+            return so._prompt_client_type(current)
+
+    def test_cc_alias_returns_canonical(self):
+        self.assertEqual(self._call("cc"), "ClientCredentialsClient")
+
+    def test_client_credentials_alias_returns_canonical(self):
+        self.assertEqual(self._call("client-credentials"), "ClientCredentialsClient")
+
+    def test_ac_alias_returns_canonical(self):
+        self.assertEqual(self._call("ac"), "AuthorizationCodeClient")
+
+    def test_authorization_code_alias_returns_canonical(self):
+        self.assertEqual(self._call("authorization-code"), "AuthorizationCodeClient")
+
+    def test_empty_input_keeps_current(self):
+        self.assertEqual(self._call("", current="ClientCredentialsClient"),
+                         "ClientCredentialsClient")
+
+    def test_empty_input_no_current_returns_none(self):
+        self.assertIsNone(self._call("", current=None))
+
+    def test_invalid_input_keeps_current(self):
+        with patch("builtins.input", return_value="garbage"):
+            result = so._prompt_client_type("ClientCredentialsClient")
+        self.assertEqual(result, "ClientCredentialsClient")
+
+    def test_invalid_input_no_current_returns_none(self):
+        with patch("builtins.input", return_value="garbage"):
+            result = so._prompt_client_type(None)
+        self.assertIsNone(result)
+
+
+# ===========================================================================
+# store-creds --client-type (argparse + cmd_store_creds)
+# ===========================================================================
+
+class TestStoreCreds(unittest.TestCase):
+
+    def _make_args(self, profile="default", mode="oauth", region=None,
+                   client_id=None, client_type=None, access_id=None):
+        args = argparse.Namespace(
+            profile=profile,
+            mode=mode,
+            region=region,
+            endpoint=None,
+            client_id=client_id,
+            client_type=client_type,
+            access_id=access_id,
+        )
+        return args
+
+    def _run_store_creds(self, args, session, inputs=(), new_secret=None, new_key=None):
+        """Patch interactive prompts and keychain, run cmd_store_creds."""
+        input_iter = iter(inputs)
+        with patch("builtins.input", side_effect=lambda _: next(input_iter, "")), \
+             patch("getpass.getpass", return_value=""), \
+             patch("sumo_oauth._keychain_available", return_value=True), \
+             patch("sumo_oauth._keychain_get", return_value=None), \
+             patch("sumo_oauth._keychain_set", return_value=True):
+            so.cmd_store_creds(args, session)
+
+    def _fresh_session(self):
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        tmp.close()
+        Path(tmp.name).unlink()
+        return so.Session(Path(tmp.name))
+
+    # -- --client-type flag bypasses the interactive prompt ------------------
+
+    def test_client_type_cc_flag_sets_profile(self):
+        session = self._fresh_session()
+        args = self._make_args(client_type="client-credentials", region="us1",
+                               client_id="cid123")
+        # inputs: region(enter=keep), client_id(enter=keep), type prompt never reached
+        self._run_store_creds(args, session, inputs=["", "", ""])
+        p = session.get("default")
+        self.assertEqual(p.get("oauth_client_type"), "ClientCredentialsClient")
+
+    def test_client_type_ac_flag_sets_profile(self):
+        session = self._fresh_session()
+        args = self._make_args(client_type="authorization-code", region="au",
+                               client_id="cid456")
+        self._run_store_creds(args, session, inputs=["", "", ""])
+        p = session.get("default")
+        self.assertEqual(p.get("oauth_client_type"), "AuthorizationCodeClient")
+
+    def test_no_client_type_flag_prompts_interactively(self):
+        """Without --client-type, the user is prompted; 'ac' should be saved."""
+        session = self._fresh_session()
+        args = self._make_args(region="us1", client_id="cid789")
+        # inputs: region(enter), client_id(enter), type prompt → "ac"
+        self._run_store_creds(args, session, inputs=["", "", "ac"])
+        p = session.get("default")
+        self.assertEqual(p.get("oauth_client_type"), "AuthorizationCodeClient")
+
+    def test_endpoint_stored_from_region_flag(self):
+        session = self._fresh_session()
+        args = self._make_args(region="au", client_type="client-credentials",
+                               client_id="cid")
+        self._run_store_creds(args, session, inputs=["", "", ""])
+        p = session.get("default")
+        self.assertEqual(p.get("endpoint"), "https://api.au.sumologic.com")
+
+    def test_client_id_stored_from_flag(self):
+        session = self._fresh_session()
+        args = self._make_args(region="us1", client_id="MY_CLIENT_ID",
+                               client_type="client-credentials")
+        self._run_store_creds(args, session, inputs=["", "", ""])
+        p = session.get("default")
+        self.assertEqual(p.get("client_id"), "MY_CLIENT_ID")
+
+    # -- argparse: --client-type appears in store-creds help -----------------
+
+    def test_store_creds_help_includes_client_type(self):
+        parser = so.build_parser()
+        buf = StringIO()
+        try:
+            parser.parse_args(["store-creds", "--help"])
+        except SystemExit:
+            pass
+        import io
+        buf = io.StringIO()
+        with patch("sys.stdout", buf), self.assertRaises(SystemExit):
+            parser.parse_args(["store-creds", "--help"])
+        self.assertIn("--client-type", buf.getvalue())
+
+    def test_store_creds_client_type_choices(self):
+        parser = so.build_parser()
+        # Both valid choices should parse without error
+        for choice in ("client-credentials", "authorization-code"):
+            args = parser.parse_args([
+                "store-creds", "--client-type", choice, "--region", "us1"
+            ])
+            self.assertEqual(args.client_type, choice)
+
+    def test_store_creds_invalid_client_type_rejected(self):
+        parser = so.build_parser()
+        with self.assertRaises(SystemExit):
+            with patch("sys.stderr", StringIO()):
+                parser.parse_args(["store-creds", "--client-type", "garbage"])
 
 
 if __name__ == "__main__":

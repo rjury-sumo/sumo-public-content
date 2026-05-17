@@ -61,25 +61,33 @@ Secrets (`client_secret`, `access_key`) are stored in the OS keychain (macOS Key
 
 | Mode | Prompts for |
 | --- | --- |
-| `all` (default) | region, OAuth client creds, Basic auth creds |
+| `all` (default) | region, `client_id`, `client_secret`, `oauth_client_type`, `access_id`, `access_key` |
 | `oauth` | region, `client_id`, `client_secret`, `oauth_client_type` |
 | `basic` | region, `access_id`, `access_key` |
 
-```bash
-# OAuth client only (for login / auth-code-login)
-sumo-oauth store-creds --mode oauth --region au --client-id <CID>
-# Prompts for client_secret (masked) and oauth_client_type (cc or ac)
+`oauth_client_type` determines which login command to use:
 
-# Basic auth only (for admin API commands)
+| Value | Short | Login command |
+| --- | --- | --- |
+| `ClientCredentialsClient` | `cc` | `sumo-oauth login` (machine-to-machine) |
+| `AuthorizationCodeClient` | `ac` | `sumo-oauth auth-code-login` (browser login) |
+
+Pass `--client-type` to skip the interactive type prompt. Press Enter at any other prompt to keep the current value.
+
+```bash
+# OAuth client only — prompts for client_secret and oauth_client_type (cc or ac)
+sumo-oauth store-creds --mode oauth --region au --client-id <CID>
+
+# Skip the type prompt by passing --client-type directly
+sumo-oauth store-creds --mode oauth --client-type client-credentials --region au --client-id <CID>
+sumo-oauth store-creds --mode oauth --client-type authorization-code  --region au --client-id <CID>
+
+# Basic auth only (for admin API commands — users, service-accounts, oauth-clients, etc.)
 sumo-oauth store-creds --mode basic --region au --access-id <AID>
 # Prompts for access_key (masked)
 
-# Full setup — both credential types at once
+# Full setup — both credential types at once (default mode)
 sumo-oauth store-creds --region au --client-id <CID> --access-id <AID>
-
-# Skip the type prompt by passing it directly
-sumo-oauth store-creds --mode oauth --client-type client-credentials --region au --client-id <CID>
-sumo-oauth store-creds --mode oauth --client-type authorization-code  --region au --client-id <CID>
 
 # Named profile (CLI flags pre-fill prompts; env vars are NOT used, avoiding cross-account bleed)
 sumo-oauth store-creds --profile prod --mode oauth --region us1 --client-id <CID>
@@ -125,13 +133,16 @@ A full base URL can be passed instead of a region key via `--endpoint`.
 
 ### Profile management
 
-`store-creds` is interactive. Use `--mode` to configure only what you need. Press Enter at any prompt to keep the current value.
+`store-creds` is interactive. Use `--mode` to configure only what you need. Press Enter at any prompt to keep the current value. `oauth_client_type` (`cc` = ClientCredentialsClient, `ac` = AuthorizationCodeClient) is prompted in `oauth` and `all` modes; pass `--client-type` to skip the prompt.
 
 ```bash
-# OAuth client credentials only (ClientCredentialsClient)
+# OAuth client credentials only — prompts for client_secret and oauth_client_type (cc/ac)
+sumo-oauth store-creds --mode oauth --region au --client-id <CID>
+
+# Same but skip the type prompt (cc = ClientCredentialsClient)
 sumo-oauth store-creds --mode oauth --region au --client-id <CID> --client-type client-credentials
 
-# OAuth client credentials only (AuthorizationCodeClient)
+# Same but for AuthorizationCodeClient (browser login)
 sumo-oauth store-creds --mode oauth --region au --client-id <CID> --client-type authorization-code
 
 # Basic auth only (admin API commands)
@@ -219,7 +230,13 @@ sumo-oauth auth-code-login \
 
 **Scopes** are not passed in the authorization request — Sumo Logic returns `invalid_scope` if you do. Effective scopes are determined by what is configured on the OAuth client in the Sumo Logic UI. The `--scopes` flag exists for deployments that may support it but should be omitted for standard Sumo Logic accounts.
 
-If the server returns a refresh token it is stored in the OS keychain under `{profile}:refresh_token`. Subsequent `token`, `export-env`, and `login`-style auto-refreshes will use the refresh token grant automatically, falling back to `client_credentials` only if the refresh token is absent or rejected.
+If the server returns a refresh token it is stored in the OS keychain under `{profile}:refresh_token`. Subsequent `token` calls will use the refresh token grant automatically to obtain a new access token without opening the browser again.
+
+Refresh tokens expire on the server side (the period varies by Sumo Logic deployment). When a refresh token is rejected (`invalid_grant`), the tool exits with an error — it cannot fall back to `client_credentials` for `AuthorizationCodeClient` profiles. Re-authenticate:
+
+```bash
+sumo-oauth auth-code-login --profile stg-code
+```
 
 ### MCP client configuration
 
@@ -261,7 +278,7 @@ For formats that store `clientSecret` inline (`vscode`, `gemini`), **do not comm
 
 ### Export environment variables (MCP setup)
 
-Prints shell `export` statements for all variables required by the Sumo Logic MCP server. Retrieves the `client_secret` from the OS keychain and auto-refreshes the token if needed.
+Prints shell `export` statements for all variables required by the Sumo Logic MCP server. Retrieves `client_secret` from the OS keychain and outputs the currently stored access token as-is — it does **not** automatically refresh. Run `sumo-oauth login` (CC) or `sumo-oauth token` (AC) first if your token has expired.
 
 ```bash
 sumo-oauth export-env [--profile NAME]

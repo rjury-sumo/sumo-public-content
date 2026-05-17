@@ -66,7 +66,7 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import argparse
 import base64
@@ -159,6 +159,8 @@ DEFAULT_SESSION_FILE = Path.home() / ".sumo_oauth_session.json"
 DEFAULT_PROFILE      = "default"
 TOKEN_REFRESH_BUFFER_SECS = 60
 KEYCHAIN_SERVICE     = "sumo-oauth"
+# (connect_timeout, read_timeout) in seconds — prevents infinite hangs on network issues
+HTTP_TIMEOUT         = (10, 30)
 
 
 # ---------------------------------------------------------------------------
@@ -274,6 +276,7 @@ def _api_get(url: str, auth_header: str, params: dict | None = None) -> dict:
             url,
             headers={"Authorization": auth_header, "Accept": "application/json"},
             params=params,
+            timeout=HTTP_TIMEOUT,
         )
     if resp.history:
         for r in resp.history:
@@ -303,6 +306,7 @@ def _api_post(url: str, auth_header: str, payload: dict) -> dict:
             headers={"Authorization": auth_header,
                      "Content-Type": "application/json",
                      "Accept": "application/json"},
+            timeout=HTTP_TIMEOUT,
         )
     if resp.history:
         for r in resp.history:
@@ -325,6 +329,7 @@ def _api_put(url: str, auth_header: str, payload: dict) -> dict:
             headers={"Authorization": auth_header,
                      "Content-Type": "application/json",
                      "Accept": "application/json"},
+            timeout=HTTP_TIMEOUT,
         )
     if resp.history:
         for r in resp.history:
@@ -344,6 +349,7 @@ def _api_delete(url: str, auth_header: str) -> None:
         resp = session.delete(
             url,
             headers={"Authorization": auth_header, "Accept": "application/json"},
+            timeout=HTTP_TIMEOUT,
         )
     if resp.history:
         for r in resp.history:
@@ -380,6 +386,7 @@ def _fetch_oauth_token(endpoint: str, client_id: str, client_secret: str,
                 "Content-Type":  "application/x-www-form-urlencoded",
                 "Accept":        "application/json",
             },
+            timeout=HTTP_TIMEOUT,
         )
     if not resp.ok:
         logger.error("Token request failed – HTTP %s: %s", resp.status_code, resp.text[:500])
@@ -449,7 +456,7 @@ def _fetch_auth_code_token(token_url: str, client_id: str, client_secret: str | 
         headers["Authorization"] = f"Basic {creds}"
     logger.debug("Auth-code token exchange: POST %s", token_url)
     with _SumoSession() as session:
-        resp = session.post(token_url, data=data, headers=headers)
+        resp = session.post(token_url, data=data, headers=headers, timeout=HTTP_TIMEOUT)
     if not resp.ok:
         logger.error("Token exchange failed – HTTP %s: %s", resp.status_code, resp.text[:500])
         sys.exit(1)
@@ -473,7 +480,7 @@ def _fetch_refresh_token(token_url: str, client_id: str, client_secret: str | No
         headers["Authorization"] = f"Basic {creds}"
     logger.debug("Refresh-token grant: POST %s", token_url)
     with _SumoSession() as session:
-        resp = session.post(token_url, data=data, headers=headers)
+        resp = session.post(token_url, data=data, headers=headers, timeout=HTTP_TIMEOUT)
     if not resp.ok:
         logger.warning("Refresh token grant failed – HTTP %s: %s", resp.status_code, resp.text[:200])
         return {}
