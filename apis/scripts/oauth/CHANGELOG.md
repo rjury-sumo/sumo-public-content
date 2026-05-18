@@ -7,6 +7,45 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.7] — 2026-05-19
+
+### Added
+
+- **`oauth-clients --type` filter** — filter output by client type using short codes (`cc`, `ac`) or full canonical names (`ClientCredentialsClient`, `AuthorizationCodeClient`). Can be combined with the existing `--filter` regex on name/clientId.
+- **`oauth-clients` Port column** — table output now includes a `Port` column showing the localhost callback port(s) extracted from `redirectUris`. Shows `-` for `ClientCredentialsClient` clients (no redirect URIs).
+
+### Changed
+
+- **`mcp-setup.md` overview** — expanded "Choosing an authentication approach" section with dedicated subsections explaining the mechanics of each flow (runtime identity, browser requirement, token refresh) and a comparison table.
+- **`mcp-setup.md` oauth-clients commands** — added `--type cc` / `--type ac` to the verify steps in Workflow A and Workflow B respectively.
+
+### Tests
+
+- Added 23 new tests covering: Port column extraction from redirect URIs, `--type` filter (all aliases, unknown exits), `callback_port` in `profile_status`, `store-creds` callback_port flag/prompt/CC exclusion, `DEPLOYMENT_NAMES` / `_API_TO_SERVER_NAME` map, and `client-config` server name derivation.
+
+---
+
+## [0.2.6] — 2026-05-19
+
+### Added
+
+- **`callback_port` stored in profile** — for `AuthorizationCodeClient` profiles, the OAuth callback port is now persisted in the session file. `store-creds` prompts for it (or accepts `--callback-port` to skip the prompt); `auth-code-login` and `client-config` read it automatically so the correct port is used without repeating `--port` / `--callback-port` flags.
+- **`store-creds --callback-port`** — flag to set the callback port non-interactively when configuring an AC profile.
+- **`auth-code-login` port resolution order** — explicit `--port` flag → stored `callback_port` in profile → default 8888.
+- **`client-config` port resolution order** — explicit `--callback-port` flag → stored `callback_port` in profile → default 8888.
+- **`migrate-profile` callback_port migration** — prompts for `callback_port` on existing AC profiles that lack it; defaults to 8888 on Enter.
+- **`profile_status` / `status` JSON** — now includes `callback_port` field (null for CC profiles).
+
+---
+
+## [0.2.5] — 2026-05-19
+
+### Changed
+
+- **`client-config` default server name** — `--server-name` now defaults to `sumo-mcp-<deployment>` derived from the profile endpoint (e.g. `sumo-mcp-prod` for us1, `sumo-mcp-us2` for us2, `sumo-mcp-au` for au, etc.), matching the official Sumo Logic MCP setup documentation. Falls back to `"sumologic"` for unknown endpoints. The `--server-name` flag still overrides the derived name.
+
+---
+
 ## [0.2.4] — 2026-05-19
 
 ### Added

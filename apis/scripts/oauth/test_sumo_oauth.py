@@ -879,8 +879,19 @@ class TestPrintFunctions(unittest.TestCase):
         self.assertIn("Client ID", output)
         self.assertIn("Type", output)
         self.assertIn("Run As ID", output)
+        self.assertIn("Port", output)
         # scopes rendered via _fmt_scopes
         self.assertIn("runLogSearch", output)
+
+    def test_print_oauth_clients_port_from_redirect_uri(self):
+        ac_client = dict(self.OAUTH_CLIENT, redirectUris=["http://localhost:8888/callback"])
+        output = self._capture(so.print_oauth_clients, [ac_client], "table")
+        self.assertIn("8888", output)
+
+    def test_print_oauth_clients_no_redirect_uri_shows_dash(self):
+        # CC clients have no redirectUris — port column should show "-"
+        output = self._capture(so.print_oauth_clients, [self.OAUTH_CLIENT], "table")
+        self.assertIn("-", output)
 
     # -- oauth scopes --------------------------------------------------------
 
@@ -1362,6 +1373,283 @@ class TestStoreCreds(unittest.TestCase):
         with self.assertRaises(SystemExit):
             with patch("sys.stderr", StringIO()):
                 parser.parse_args(["store-creds", "--client-type", "garbage"])
+
+
+# ===========================================================================
+# cmd_oauth_clients --type filter
+# ===========================================================================
+
+class TestCmdOauthClientsTypeFilter(unittest.TestCase):
+
+    ENDPOINT = "https://api.au.sumologic.com"
+
+    def _session(self, profile_data=None):
+        import tempfile
+        f = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        data = {"default": profile_data or {"endpoint": self.ENDPOINT}}
+        f.write(json.dumps(data).encode())
+        f.close()
+        self._tmp = Path(f.name)
+        return so.Session(self._tmp)
+
+    def tearDown(self):
+        if hasattr(self, "_tmp") and self._tmp.exists():
+            self._tmp.unlink()
+
+    def _make_args(self, type_filter=None, name_filter=None):
+        args = argparse.Namespace(
+            profile="default",
+            region=None,
+            endpoint=None,
+            access_id="aid",
+            access_key=None,
+            output="table",
+            limit=100,
+            filter=name_filter,
+            type=type_filter,
+        )
+        return args
+
+    def _run(self, clients, type_filter=None):
+        session = self._session()
+        args = self._make_args(type_filter=type_filter)
+        buf = StringIO()
+        with patch("sumo_oauth._keychain_get", return_value="akey"), \
+             patch("sumo_oauth.list_oauth_clients", return_value=clients), \
+             patch("sys.stdout", buf):
+            so.cmd_oauth_clients(args, session)
+        return buf.getvalue()
+
+    def test_no_type_filter_shows_all(self):
+        clients = [
+            {"type": "ClientCredentialsClient", "clientId": "C1", "name": "CC"},
+            {"type": "AuthorizationCodeClient", "clientId": "A1", "name": "AC"},
+        ]
+        output = self._run(clients)
+        self.assertIn("CC", output)
+        self.assertIn("AC", output)
+
+    def test_type_cc_filters_to_cc_only(self):
+        clients = [
+            {"type": "ClientCredentialsClient", "clientId": "C1", "name": "CC Client"},
+            {"type": "AuthorizationCodeClient", "clientId": "A1", "name": "AC Client"},
+        ]
+        output = self._run(clients, type_filter="cc")
+        self.assertIn("CC Client", output)
+        self.assertNotIn("AC Client", output)
+
+    def test_type_ac_filters_to_ac_only(self):
+        clients = [
+            {"type": "ClientCredentialsClient", "clientId": "C1", "name": "CC Client"},
+            {"type": "AuthorizationCodeClient", "clientId": "A1", "name": "AC Client"},
+        ]
+        output = self._run(clients, type_filter="ac")
+        self.assertNotIn("CC Client", output)
+        self.assertIn("AC Client", output)
+
+    def test_type_full_name_accepted(self):
+        clients = [
+            {"type": "ClientCredentialsClient", "clientId": "C1", "name": "CC Client"},
+        ]
+        output = self._run(clients, type_filter="ClientCredentialsClient")
+        self.assertIn("CC Client", output)
+
+    def test_type_unknown_exits(self):
+        with self.assertRaises(SystemExit):
+            self._run([], type_filter="garbage")
+
+
+# ===========================================================================
+# profile_status callback_port
+# ===========================================================================
+
+class TestProfileStatusCallbackPort(unittest.TestCase):
+
+    def _session(self, data):
+        import tempfile
+        f = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        f.write(json.dumps(data).encode())
+        f.close()
+        self._tmp = Path(f.name)
+        return so.Session(self._tmp)
+
+    def tearDown(self):
+        if hasattr(self, "_tmp") and self._tmp.exists():
+            self._tmp.unlink()
+
+    def test_callback_port_included_in_status(self):
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "oauth_client_type": "AuthorizationCodeClient",
+            "callback_port": 9000,
+        }})
+        with patch("sumo_oauth._keychain_get", return_value=None):
+            status = session.profile_status("default")
+        self.assertEqual(status["callback_port"], 9000)
+
+    def test_callback_port_none_when_not_set(self):
+        session = self._session({"default": {
+            "endpoint": "https://api.au.sumologic.com",
+            "oauth_client_type": "ClientCredentialsClient",
+        }})
+        with patch("sumo_oauth._keychain_get", return_value=None):
+            status = session.profile_status("default")
+        self.assertIsNone(status["callback_port"])
+
+
+# ===========================================================================
+# store-creds callback_port handling
+# ===========================================================================
+
+class TestStoreCredsCallbackPort(unittest.TestCase):
+
+    def _fresh_session(self):
+        import tempfile
+        tmp = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        tmp.close()
+        Path(tmp.name).unlink()
+        return so.Session(Path(tmp.name))
+
+    def _run(self, args, session, inputs=()):
+        input_iter = iter(inputs)
+        with patch("builtins.input", side_effect=lambda _: next(input_iter, "")), \
+             patch("getpass.getpass", return_value=""), \
+             patch("sumo_oauth._keychain_available", return_value=True), \
+             patch("sumo_oauth._keychain_get", return_value=None), \
+             patch("sumo_oauth._keychain_set", return_value=True):
+            so.cmd_store_creds(args, session)
+
+    def test_callback_port_flag_stored_for_ac(self):
+        session = self._fresh_session()
+        args = argparse.Namespace(
+            profile="default", mode="oauth", region="us1", endpoint=None,
+            client_id="cid", client_type="authorization-code", access_id=None,
+            callback_port=9877,
+        )
+        self._run(args, session)
+        p = session.get("default")
+        self.assertEqual(p.get("callback_port"), 9877)
+
+    def test_callback_port_default_8888_for_ac_when_not_set(self):
+        session = self._fresh_session()
+        args = argparse.Namespace(
+            profile="default", mode="oauth", region="au", endpoint=None,
+            client_id="cid", client_type="authorization-code", access_id=None,
+            callback_port=None,
+        )
+        # inputs: region, client_id, type prompt, callback_port (enter = default)
+        self._run(args, session, inputs=["", "", "", ""])
+        p = session.get("default")
+        self.assertEqual(p.get("callback_port"), 8888)
+
+    def test_callback_port_not_stored_for_cc(self):
+        session = self._fresh_session()
+        args = argparse.Namespace(
+            profile="default", mode="oauth", region="us1", endpoint=None,
+            client_id="cid", client_type="client-credentials", access_id=None,
+            callback_port=None,
+        )
+        self._run(args, session)
+        p = session.get("default")
+        self.assertNotIn("callback_port", p)
+
+    def test_store_creds_callback_port_arg_exists(self):
+        parser = so.build_parser()
+        args = parser.parse_args([
+            "store-creds", "--client-type", "authorization-code",
+            "--region", "us1", "--callback-port", "9500",
+        ])
+        self.assertEqual(args.callback_port, 9500)
+
+
+# ===========================================================================
+# DEPLOYMENT_NAMES and _API_TO_SERVER_NAME
+# ===========================================================================
+
+class TestDeploymentNames(unittest.TestCase):
+
+    def test_us1_maps_to_prod(self):
+        self.assertEqual(so.DEPLOYMENT_NAMES["us1"], "prod")
+
+    def test_all_other_regions_map_to_key(self):
+        for region in ("us2", "eu", "au", "de", "jp", "ca", "in", "fed", "kr", "ch"):
+            self.assertEqual(so.DEPLOYMENT_NAMES[region], region,
+                             f"Expected {region} → '{region}', got '{so.DEPLOYMENT_NAMES[region]}'")
+
+    def test_all_regions_covered(self):
+        self.assertEqual(set(so.DEPLOYMENT_NAMES.keys()), set(so.REGIONS.keys()))
+
+    def test_api_to_server_name_us1(self):
+        us1_api = so.REGIONS["us1"]
+        self.assertEqual(so._API_TO_SERVER_NAME[us1_api], "sumo-mcp-prod")
+
+    def test_api_to_server_name_au(self):
+        au_api = so.REGIONS["au"]
+        self.assertEqual(so._API_TO_SERVER_NAME[au_api], "sumo-mcp-au")
+
+    def test_api_to_server_name_all_regions_mapped(self):
+        for region, api_url in so.REGIONS.items():
+            self.assertIn(api_url, so._API_TO_SERVER_NAME,
+                          f"No server name for region '{region}'")
+            self.assertTrue(so._API_TO_SERVER_NAME[api_url].startswith("sumo-mcp-"))
+
+
+# ===========================================================================
+# cmd_client_config server name derivation
+# ===========================================================================
+
+class TestCmdClientConfigServerName(unittest.TestCase):
+
+    def _run_config(self, fmt, server_name=None, callback_port=None, endpoint=None):
+        import tempfile
+        f = tempfile.NamedTemporaryFile(suffix=".json", delete=False)
+        ep = endpoint or "https://api.sumologic.com"
+        data = {"default": {
+            "endpoint": ep,
+            "client_id": "TEST_CLIENT_ID",
+            "access_token": "TEST_TOKEN",
+            "expires_at": time.time() + 3600,
+            "oauth_client_type": "AuthorizationCodeClient",
+            "callback_port": 8888,
+        }}
+        f.write(json.dumps(data).encode())
+        f.close()
+        session = so.Session(Path(f.name))
+        args = MagicMock()
+        args.format = fmt
+        args.profile = "default"
+        args.server_name = server_name   # None triggers derivation
+        args.callback_port = callback_port
+        buf = StringIO()
+        with patch("sys.stdout", buf), \
+             patch("sumo_oauth._keychain_get", return_value="TEST_SECRET"), \
+             patch("sumo_oauth._keychain_available", return_value=True), \
+             patch("sumo_oauth._fetch_oauth_token",
+                   return_value={"access_token": "TEST_TOKEN", "expires_in": 3600}):
+            so.cmd_client_config(args, session)
+        Path(f.name).unlink()
+        return buf.getvalue()
+
+    def test_server_name_derived_as_prod_for_us1(self):
+        output = self._run_config("claude-code", server_name=None,
+                                  endpoint="https://api.sumologic.com")
+        self.assertIn("sumo-mcp-prod", output)
+
+    def test_server_name_derived_for_au(self):
+        output = self._run_config("claude-code", server_name=None,
+                                  endpoint="https://api.au.sumologic.com")
+        self.assertIn("sumo-mcp-au", output)
+
+    def test_explicit_server_name_overrides_derivation(self):
+        output = self._run_config("claude-code", server_name="my-custom-server",
+                                  endpoint="https://api.sumologic.com")
+        self.assertIn("my-custom-server", output)
+        self.assertNotIn("sumo-mcp-prod", output)
+
+    def test_callback_port_from_profile_used_when_arg_is_none(self):
+        output = self._run_config("claude-code", callback_port=None,
+                                  endpoint="https://api.sumologic.com")
+        self.assertIn("8888", output)
 
 
 if __name__ == "__main__":

@@ -66,7 +66,7 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
-__version__ = "0.2.4"
+__version__ = "0.2.7"
 
 import argparse
 import base64
@@ -158,6 +158,27 @@ MCP_URLS = {
 
 # Reverse map: api endpoint → MCP URL (for auto-derivation)
 _API_TO_MCP_URL = {v: MCP_URLS[k] for k, v in REGIONS.items()}
+
+# Deployment names used in the official Sumo Logic MCP server naming convention
+# (sumo-mcp-<deployment>).  us1 uses "prod"; all others match their region key.
+DEPLOYMENT_NAMES = {
+    "us1": "prod",
+    "us2": "us2",
+    "eu":  "eu",
+    "au":  "au",
+    "de":  "de",
+    "jp":  "jp",
+    "ca":  "ca",
+    "in":  "in",
+    "fed": "fed",
+    "kr":  "kr",
+    "ch":  "ch",
+}
+
+# Reverse map: api endpoint → MCP server name (e.g. "sumo-mcp-prod")
+_API_TO_SERVER_NAME = {
+    v: f"sumo-mcp-{DEPLOYMENT_NAMES[k]}" for k, v in REGIONS.items()
+}
 
 # OAuth2 authorization endpoints (used by the authorization_code flow)
 AUTHORIZATION_URLS = {
@@ -714,6 +735,7 @@ class Session:
                                                   time.localtime(expires_at)) if expires_at else None,
             "remaining":            remaining_hms,
             "oauth_client_type":      p.get("oauth_client_type"),
+            "callback_port":          p.get("callback_port"),
             "client_secret_stored":  bool(_keychain_get(_client_secret_key(profile))),
             "refresh_token_stored":  bool(_keychain_get(_refresh_token_key(profile))),
             "access_key_stored":     bool(_keychain_get(_access_key_key(profile))),
@@ -1010,11 +1032,18 @@ def print_oauth_clients(clients: list[dict], fmt: str) -> None:
         row["_scopes"]          = _fmt_scopes(c.get("scopes", []))
         row["_effectiveScopes"] = _fmt_scopes(c.get("effectiveScopes", []))
         row["_runAsId"]         = (c.get("runAs") or {}).get("runAsId", "-")
+        ports = sorted({
+            str(urllib.parse.urlparse(u).port)
+            for u in c.get("redirectUris") or []
+            if urllib.parse.urlparse(u).port
+        })
+        row["_ports"] = ", ".join(ports) if ports else "-"
         rows.append(row)
     _print_table(rows, [
         ("Client ID",        "clientId"),
         ("Name",             "name"),
         ("Type",             "type"),
+        ("Port",             "_ports"),
         ("Disabled",         "disabled"),
         ("Run As ID",        "_runAsId"),
         ("Scopes",           "_scopes"),
@@ -1262,6 +1291,22 @@ def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
         if new_type:
             p["oauth_client_type"] = new_type
 
+        # --- Callback port (AC clients only) ---------------------------------
+        if p.get("oauth_client_type") == "AuthorizationCodeClient":
+            cli_port = getattr(args, "callback_port", None)
+            if cli_port is not None:
+                p["callback_port"] = cli_port
+            else:
+                current_port = p.get("callback_port", 8888)
+                raw = input(f"  callback_port    [current: {current_port}]: ").strip()
+                if raw:
+                    try:
+                        p["callback_port"] = int(raw)
+                    except ValueError:
+                        logger.warning("Invalid port '%s' — keeping %s", raw, current_port)
+                elif "callback_port" not in p:
+                    p["callback_port"] = 8888
+
     # --- Basic auth credentials (basic | all mode) --------------------------
     has_key = new_key = False
     if mode in ("basic", "all"):
@@ -1298,6 +1343,8 @@ def cmd_store_creds(args: argparse.Namespace, session: Session) -> None:
         print(f"  client_id        : {p['client_id']}")
     if p.get("oauth_client_type"):
         print(f"  oauth_client_type: {p['oauth_client_type']}")
+    if p.get("callback_port") and p.get("oauth_client_type") == "AuthorizationCodeClient":
+        print(f"  callback_port    : {p['callback_port']}")
     if p.get("access_id"):
         print(f"  access_id        : {p['access_id']}")
     if stored:
@@ -1480,7 +1527,7 @@ def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
         or token_url.replace("/token", "/authorize")
     )
 
-    port         = getattr(args, "port", None) or 8888
+    port         = getattr(args, "port", None) or profile_data.get("callback_port") or 8888
     timeout      = getattr(args, "timeout", None) or 120
     redirect_uri = f"http://localhost:{port}/callback"
     scopes       = [s.strip() for s in args.scopes.split()] if getattr(args, "scopes", None) else None
@@ -1556,10 +1603,16 @@ def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
     )
 
     s = session.profile_status(profile)
-    # Record client type on first successful login if not already set
+    # Record client type and callback port on successful login
     p = session.get(profile)
+    changed = False
     if not p.get("oauth_client_type"):
         p["oauth_client_type"] = "AuthorizationCodeClient"
+        changed = True
+    if p.get("callback_port") != port:
+        p["callback_port"] = port
+        changed = True
+    if changed:
         session.set(profile, p)
 
     s = session.profile_status(profile)
@@ -1683,8 +1736,8 @@ def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
         _API_TO_AUTH_METADATA_URL.get(endpoint.rstrip("/"))
         or "<AUTH_SERVER_METADATA_URL>"
     )
-    server_name   = args.server_name
-    callback_port = args.callback_port
+    server_name   = args.server_name or _API_TO_SERVER_NAME.get(endpoint.rstrip("/"), "sumologic")
+    callback_port = args.callback_port or profile_data.get("callback_port") or 8888
 
     # Bearer token for clients that don't support OAuth callback
     access_token = profile_data.get("access_token", "")
@@ -2140,6 +2193,24 @@ def cmd_migrate_profile(args: argparse.Namespace, session: Session) -> None:
             type_val = p.get("oauth_client_type") or "(none — no client_id configured)"
             print(f"  oauth_client_type: {type_val}  OK")
 
+        # callback_port was added for AuthorizationCodeClient profiles
+        if p.get("oauth_client_type") == "AuthorizationCodeClient" and not p.get("callback_port"):
+            print(f"  callback_port    : (missing)")
+            raw = input(f"  callback_port [8888]: ").strip()
+            if raw:
+                try:
+                    p["callback_port"] = int(raw)
+                    changed = True
+                except ValueError:
+                    print("  Invalid port — defaulting to 8888.")
+                    p["callback_port"] = 8888
+                    changed = True
+            else:
+                p["callback_port"] = 8888
+                changed = True
+        elif p.get("oauth_client_type") == "AuthorizationCodeClient":
+            print(f"  callback_port    : {p['callback_port']}  OK")
+
         if changed:
             session.set(name, p)
             print(f"  -> Profile '{name}' updated.")
@@ -2172,6 +2243,13 @@ def cmd_oauth_clients(args: argparse.Namespace, session: Session) -> None:
         list_oauth_clients(endpoint, _basic_auth_header(aid, akey), args.limit),
         args.filter, ["name", "clientId"],
     )
+    type_arg = getattr(args, "type", None)
+    if type_arg:
+        canonical = _OAUTH_TYPE_ALIASES.get(type_arg)
+        if not canonical:
+            logger.error("Unknown client type '%s'. Use: cc, ac, ClientCredentialsClient, AuthorizationCodeClient", type_arg)
+            sys.exit(1)
+        clients = [c for c in clients if c.get("type") == canonical]
     print_oauth_clients(clients, args.output)
 
 
@@ -2330,6 +2408,17 @@ Environment variables:
     )
     p_store.add_argument("--access-id", metavar="AID",
                          help="Access ID (non-sensitive; stored in profile config)")
+    p_store.add_argument(
+        "--callback-port",
+        type=int,
+        default=None,
+        metavar="PORT",
+        help=(
+            "OAuth callback port for AuthorizationCodeClient profiles — "
+            "skips the interactive port prompt (default: 8888). "
+            "Must match the redirect URI registered on the OAuth client."
+        ),
+    )
 
     # -- clear-creds ---------------------------------------------------------
     p_cc = sub.add_parser(
@@ -2393,8 +2482,8 @@ Environment variables:
                             "invalid_scope if scope values are passed here — scopes are "
                             "configured on the OAuth client itself. Omit this flag unless "
                             "your deployment explicitly supports it.")
-    p_acl.add_argument("--port", type=int, default=8888, metavar="PORT",
-                       help="Local port for the redirect callback server (default: 8888)")
+    p_acl.add_argument("--port", type=int, default=None, metavar="PORT",
+                       help="Local port for the redirect callback server (default: callback_port stored in profile, or 8888)")
     p_acl.add_argument("--timeout", type=int, default=120, metavar="SECS",
                        help="Seconds to wait for browser authorization (default: 120)")
     p_acl.add_argument("--token-url", metavar="URL",
@@ -2452,16 +2541,16 @@ Environment variables:
     )
     p_cfg.add_argument(
         "--server-name",
-        default="sumologic",
+        default=None,
         metavar="NAME",
-        help="Server name/key used in the config block (default: sumologic)",
+        help="Server name/key used in the config block (default: sumo-mcp-<deployment> derived from profile endpoint, e.g. sumo-mcp-prod for us1)",
     )
     p_cfg.add_argument(
         "--callback-port",
         type=int,
-        default=8888,
+        default=None,
         metavar="PORT",
-        help="OAuth callback port (default: 8888 — matches Sumo Logic official docs and auth-code-login default)",
+        help="OAuth callback port (default: value stored in profile, or 8888 if not set)",
     )
 
     # -- token ---------------------------------------------------------------
@@ -2627,6 +2716,16 @@ Environment variables:
     _add_output_arg(p_oc)
     _add_limit_arg(p_oc)
     _add_filter_arg(p_oc, "Filter by name or clientId (case-insensitive regex)")
+    p_oc.add_argument(
+        "--type",
+        default=None,
+        metavar="TYPE",
+        help=(
+            "Filter by client type (default: show all).\n"
+            "Accepts: cc, ac, client-credentials, authorization-code,\n"
+            "         ClientCredentialsClient, AuthorizationCodeClient"
+        ),
+    )
 
     # -- migrate-profile -----------------------------------------------------
     sub.add_parser(

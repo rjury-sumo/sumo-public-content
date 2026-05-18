@@ -4,14 +4,28 @@ This guide walks through configuring the Sumo Logic MCP server using the `sumo-o
 
 ## Choosing an authentication approach
 
-Two OAuth client types are supported:
+Two OAuth client types are supported, each with a different runtime identity and token flow:
 
-| Client type | Who runs as | Login command | Best for |
-| --- | --- | --- | --- |
-| `ClientCredentialsClient` | A service account (machine identity) | `sumo-oauth login` | Automated tooling, CI, shared MCP servers |
-| `AuthorizationCodeClient` (experimental) | The logged-in user (browser identity) | `sumo-oauth auth-code-login` | Interactive dev use, personal MCP access |
+### Workflow A — ClientCredentialsClient (machine-to-machine)
 
-Use **Workflow A** for machine-to-machine access. Use **Workflow B** if you want the MCP server to act as your user identity.
+The MCP client authenticates using a **client ID and secret** directly — no browser required. The MCP server runs as a designated **service account**, so all actions are performed under that account's roles. Token refresh is fully automatic.
+
+**Best for:** automated tooling, CI pipelines, shared MCP servers, or any context where a persistent non-interactive credential is needed.
+
+### Workflow B — AuthorizationCodeClient (user identity, experimental)
+
+The MCP client opens a **browser window** so you log in as yourself. After you approve the consent screen, an authorization code is returned to a local callback listener, exchanged for an access + refresh token, and stored in the OS keychain. The MCP server sees **your user identity** scoped to the OAuth client's declared scopes. Re-authentication via browser is only required if the refresh token is revoked.
+
+**Best for:** interactive developer use, personal MCP access, or when you want server actions to run as your own identity.
+
+| | Workflow A | Workflow B |
+| --- | --- | --- |
+| **Client type** | `ClientCredentialsClient` | `AuthorizationCodeClient` |
+| **Runtime identity** | Service account | Logged-in user (browser) |
+| **Login command** | `sumo-oauth login` | `sumo-oauth auth-code-login` |
+| **Browser required** | No | Yes (once; refresh token reused) |
+| **Token refresh** | Automatic | Automatic via refresh token |
+| **Status** | Supported | Experimental |
 
 ---
 
@@ -182,7 +196,7 @@ Run 'sumo-oauth login' to obtain a token with the new client.
 To verify the client was created:
 
 ```bash
-sumo-oauth oauth-clients --filter "MCP"
+sumo-oauth oauth-clients --type cc --filter "MCP"
 ```
 
 The new client is also visible in the Sumo Logic UI under **Administration → Security → OAuth Clients**.
@@ -262,6 +276,14 @@ The `--save-creds` flag stores the `clientId` in your profile and the `clientSec
 
 > **Note:** The `--name` value (or `"name"` in the JSON file) becomes the `clientName` shown when listing consent grants with `sumo-oauth oauth-consents`.
 
+To verify the client was created (note the `Port` column confirms the redirect URI port):
+
+```bash
+sumo-oauth oauth-clients --type ac --filter "MCP"
+```
+
+The new client is also visible in the Sumo Logic UI under **Administration → Security → OAuth Clients**.
+
 ### Step 3: Authenticate via browser
 
 ```bash
@@ -306,7 +328,7 @@ The refresh token (if returned by Sumo Logic) is stored in the OS keychain under
 
 **Scopes note:** Do not pass `--scopes` to `auth-code-login` — Sumo Logic returns `invalid_scope` if scopes are included in the authorization request. Effective scopes are configured on the OAuth client itself (Step 2).
 
-Use a different callback port if 8765 is taken:
+Use a different callback port if 8888 is taken:
 
 ```bash
 sumo-oauth auth-code-login --port 9000
