@@ -7,6 +7,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.3] — 2026-05-18
+
+### Fixed
+
+- **Default callback port changed `8765` → `8888`** — matches the port used in the official Sumo Logic MCP setup docs. Applies to `auth-code-login --port` default and `client-config --callback-port` default.
+- **`claude-code-json` format now includes `clientSecret`** — Sumo Logic requires `client_secret` in the token exchange even for PKCE/AuthorizationCode flows; omitting it caused silent token exchange failure after a successful browser redirect.
+- **Removed `--scope user` from `claude mcp add` output** — `--scope user` registers the server at user scope, conflicting with any existing project-scope registration in `.claude.json` and causing both to compete for the same callback port.
+
+---
+
 ## [0.2.2] — 2026-05-18
 
 ### Added

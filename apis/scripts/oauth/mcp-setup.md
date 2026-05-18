@@ -227,7 +227,7 @@ sumo-oauth store-creds --mode basic --region <REGION> --access-id <YOUR_ACCESS_I
 sumo-oauth create-oauth-client \
   --type authorization-code \
   --name "Sumo Logic MCP (User Auth)" \
-  --redirect-uris "http://localhost:8765/callback" \
+  --redirect-uris "http://localhost:8888/callback" \
   --scopes "runLogSearch,viewCollectors,viewPartitions,viewMonitorsV2" \
   --save-creds
 ```
@@ -248,7 +248,7 @@ Or from a JSON file:
         "runMetricsQuery",
         "viewLibrary"
     ],
-    "redirectUris": ["http://localhost:8765/callback"]
+    "redirectUris": ["http://localhost:8888/callback"]
 }
 ```
 
@@ -282,7 +282,7 @@ This does the following:
    ```text
    sumo-oauth auth-code-login --profile myprofile
    Opening browser for authorization (profile: myprofile)…
-     Redirect URI  : http://localhost:8765/callback
+     Redirect URI  : http://localhost:8888/callback
      Timeout       : 120s
 
      NOTE: the redirect URI above must be registered on the OAuth client in Sumo Logic.
@@ -297,14 +297,14 @@ This does the following:
      Refresh token      : stored in OS keychain
    ```
 
-3. Listens on `localhost:8765` for the OAuth callback
+3. Listens on `localhost:8888` for the OAuth callback
 4. Exchanges the authorization code for an access token (and refresh token if issued)
 
 The refresh token (if returned by Sumo Logic) is stored in the OS keychain under `{profile}:refresh_token`. Subsequent `token` commands will use the refresh token grant automatically, so re-authentication via browser is only needed if the refresh token is revoked.
 
 **Scopes note:** Do not pass `--scopes` to `auth-code-login` — Sumo Logic returns `invalid_scope` if scopes are included in the authorization request. Effective scopes are configured on the OAuth client itself (Step 2).
 
-Use a different callback port if 8765 is taken:
+Use a different callback port if 8888 is taken:
 
 ```bash
 sumo-oauth auth-code-login --port 9000
@@ -358,7 +358,7 @@ uv run sumo-oauth client-config --format claude-code-json --profile myprofile
       "url": "https://mcp.sumologic.com/mcp",
       "oauth": {
         "clientId": "<your-client-id>",
-        "callbackPort": 8765
+        "callbackPort": 8888
       }
     }
   }

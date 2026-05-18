@@ -66,7 +66,7 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 import argparse
 import base64
@@ -1694,7 +1694,8 @@ def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
                     "type":  "http",
                     "url":   mcp_url,
                     "oauth": {
-                        "clientId":    client_id,
+                        "clientId":     client_id,
+                        "clientSecret": client_secret,
                         "callbackPort": callback_port,
                     },
                 }
@@ -1702,6 +1703,7 @@ def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
         }
         return (
             "# .mcp.json (project root) or merge mcpServers into ~/.claude.json\n"
+            "# NOTE: clientSecret is stored inline — do not commit this file to source control.\n"
             + json.dumps(block, indent=2)
         )
 
@@ -2027,7 +2029,7 @@ def cmd_create_oauth_client(args: argparse.Namespace, session: Session) -> None:
         if client_type == "AuthorizationCodeClient" and not args.redirect_uris:
             logger.error(
                 "--redirect-uris is required for authorization-code type.\n"
-                "  Example: --redirect-uris \"http://localhost:8765/callback\""
+                "  Example: --redirect-uris \"http://localhost:8888/callback\""
             )
             sys.exit(1)
 
@@ -2346,7 +2348,7 @@ Environment variables:
         description=(
             "Opens a browser to the Sumo Logic authorization endpoint, captures the "
             "redirect on a local server, and exchanges the code for tokens.\n\n"
-            "The redirect URI 'http://localhost:<port>/callback' (default port 8765) "
+            "The redirect URI 'http://localhost:<port>/callback' (default port 8888) "
             "must be registered on the OAuth client in Sumo Logic before running this command."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -2364,8 +2366,8 @@ Environment variables:
                             "invalid_scope if scope values are passed here — scopes are "
                             "configured on the OAuth client itself. Omit this flag unless "
                             "your deployment explicitly supports it.")
-    p_acl.add_argument("--port", type=int, default=8765, metavar="PORT",
-                       help="Local port for the redirect callback server (default: 8765)")
+    p_acl.add_argument("--port", type=int, default=8888, metavar="PORT",
+                       help="Local port for the redirect callback server (default: 8888)")
     p_acl.add_argument("--timeout", type=int, default=120, metavar="SECS",
                        help="Seconds to wait for browser authorization (default: 120)")
     p_acl.add_argument("--token-url", metavar="URL",
@@ -2430,9 +2432,9 @@ Environment variables:
     p_cfg.add_argument(
         "--callback-port",
         type=int,
-        default=8765,
+        default=8888,
         metavar="PORT",
-        help="OAuth callback port (default: 8765 — matches auth-code-login default)",
+        help="OAuth callback port (default: 8888 — matches Sumo Logic official docs and auth-code-login default)",
     )
 
     # -- token ---------------------------------------------------------------
