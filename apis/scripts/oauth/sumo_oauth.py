@@ -66,7 +66,7 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 import argparse
 import base64
@@ -108,6 +108,9 @@ REGIONS = {
     "jp":  "https://api.jp.sumologic.com",
     "ca":  "https://api.ca.sumologic.com",
     "in":  "https://api.in.sumologic.com",
+    "fed": "https://api.fed.sumologic.com",
+    "kr":  "https://api.kr.sumologic.com",
+    "ch":  "https://api.ch.sumologic.com",
 }
 
 # OAuth2 token endpoints (service.* host, /oauth2/token path — different from the API host)
@@ -120,10 +123,23 @@ TOKEN_URLS = {
     "jp":  "https://service.jp.sumologic.com/oauth2/token",
     "ca":  "https://service.ca.sumologic.com/oauth2/token",
     "in":  "https://service.in.sumologic.com/oauth2/token",
+    "fed": "https://service.fed.sumologic.com/oauth2/token",
+    "kr":  "https://service.kr.sumologic.com/oauth2/token",
+    "ch":  "https://service.ch.sumologic.com/oauth2/token",
 }
 
 # Reverse map: api endpoint → token URL (for auto-derivation)
 _API_TO_TOKEN_URL = {v: TOKEN_URLS[k] for k, v in REGIONS.items()}
+
+# OAuth authorization server metadata endpoints (RFC 8414)
+# Claude Code uses these for OAuth discovery when the MCP host differs from the auth server
+AUTH_SERVER_METADATA_URLS = {
+    region: url.replace("/oauth2/token", "/.well-known/oauth-authorization-server")
+    for region, url in TOKEN_URLS.items()
+}
+
+# Reverse map: api endpoint → auth server metadata URL
+_API_TO_AUTH_METADATA_URL = {v: AUTH_SERVER_METADATA_URLS[k] for k, v in REGIONS.items()}
 
 # MCP endpoints (one per region)
 MCP_URLS = {
@@ -135,6 +151,9 @@ MCP_URLS = {
     "jp":  "https://mcp.jp.sumologic.com/mcp",
     "ca":  "https://mcp.ca.sumologic.com/mcp",
     "in":  "https://mcp.in.sumologic.com/mcp",
+    "fed": "https://mcp.fed.sumologic.com/mcp",
+    "kr":  "https://mcp.kr.sumologic.com/mcp",
+    "ch":  "https://mcp.ch.sumologic.com/mcp",
 }
 
 # Reverse map: api endpoint → MCP URL (for auto-derivation)
@@ -150,6 +169,9 @@ AUTHORIZATION_URLS = {
     "jp":  "https://service.jp.sumologic.com/oauth2/authorize",
     "ca":  "https://service.ca.sumologic.com/oauth2/authorize",
     "in":  "https://service.in.sumologic.com/oauth2/authorize",
+    "fed": "https://service.fed.sumologic.com/oauth2/authorize",
+    "kr":  "https://service.kr.sumologic.com/oauth2/authorize",
+    "ch":  "https://service.ch.sumologic.com/oauth2/authorize",
 }
 
 # Reverse map: api endpoint → authorization URL
@@ -1458,7 +1480,7 @@ def cmd_auth_code_login(args: argparse.Namespace, session: Session) -> None:
         or token_url.replace("/token", "/authorize")
     )
 
-    port         = getattr(args, "port", None) or 8765
+    port         = getattr(args, "port", None) or 8888
     timeout      = getattr(args, "timeout", None) or 120
     redirect_uri = f"http://localhost:{port}/callback"
     scopes       = [s.strip() for s in args.scopes.split()] if getattr(args, "scopes", None) else None
@@ -1657,6 +1679,10 @@ def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
         _API_TO_MCP_URL.get(endpoint.rstrip("/"))
         or os.environ.get("SUMOLOGIC_MCP_URL", "<MCP_URL>")
     )
+    auth_metadata_url = (
+        _API_TO_AUTH_METADATA_URL.get(endpoint.rstrip("/"))
+        or "<AUTH_SERVER_METADATA_URL>"
+    )
     server_name   = args.server_name
     callback_port = args.callback_port
 
@@ -1694,9 +1720,10 @@ def cmd_client_config(args: argparse.Namespace, session: Session) -> None:
                     "type":  "http",
                     "url":   mcp_url,
                     "oauth": {
-                        "clientId":     client_id,
-                        "clientSecret": client_secret,
-                        "callbackPort": callback_port,
+                        "clientId":              client_id,
+                        "clientSecret":          client_secret,
+                        "authServerMetadataUrl": auth_metadata_url,
+                        "callbackPort":          callback_port,
                     },
                 }
             }

@@ -7,6 +7,22 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.4] — 2026-05-19
+
+### Added
+
+- **New regions: `fed`, `kr`, `ch`** — added to `REGIONS`, `TOKEN_URLS`, `AUTHORIZATION_URLS`, `MCP_URLS`, and `AUTH_SERVER_METADATA_URLS` based on official Sumo Logic engineering docs (US East/fed, Asia Pacific Seoul/kr, Europe Zurich/ch).
+- **`mcp-setup.md` region table** — reference table now lists all regions with MCP URL and Token URL columns including the three new regions.
+- **`mcp-setup.md` server naming note** — documents the `sumo-mcp-<deployment-org>` naming convention with a `--server-name` example.
+- **`mcp-setup.md` Dynamic Client Registration notice** — notes that Dynamic Client Registration and CIMD are not supported; OAuth clients must be created manually.
+
+### Fixed
+
+- **Default callback port restored to `8888`** — confirmed correct by official Sumo Logic engineering docs (`http://localhost:8888/callback`).
+- **`claude-code` format reverts to `claude mcp add`** — official Sumo docs use `claude mcp add --transport http`, not `add-json`; `authServerMetadataUrl` remains in the JSON format only.
+
+---
+
 ## [0.2.3] — 2026-05-18
 
 ### Fixed

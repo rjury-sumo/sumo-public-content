@@ -1184,8 +1184,9 @@ class TestCmdClientConfig(unittest.TestCase):
 
     def test_claude_code_output_contains_mcp_add(self):
         output = self._run_config("claude-code")
-        self.assertIn("claude mcp add", output)
-        self.assertIn("--transport http", output)
+        self.assertIn("claude mcp add --transport http", output)
+        self.assertIn("--callback-port", output)
+        self.assertIn("--client-secret", output)
 
     def test_claude_code_json_output_is_valid_json_block(self):
         output = self._run_config("claude-code-json")

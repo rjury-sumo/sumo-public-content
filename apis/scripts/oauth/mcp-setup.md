@@ -17,9 +17,11 @@ Use **Workflow A** for machine-to-machine access. Use **Workflow B** if you want
 
 ## Common prerequisites
 
-- Sumo Logic Administrator role
+- Sumo Logic Administrator role (required — only Administrators can create/modify/delete OAuth clients)
 - `sumo-oauth` installed — see [README.md](README.md) for installation steps
 - MCP-compatible client (Claude Code CLI or VS Code + GitHub Copilot)
+
+> **Note:** Sumo Logic does not support Dynamic Client Registration or Client ID Metadata Documents (CIMD). OAuth clients must be created manually via the UI or CLI before connecting an MCP client.
 
 ## Understanding credential types
 
@@ -304,7 +306,7 @@ The refresh token (if returned by Sumo Logic) is stored in the OS keychain under
 
 **Scopes note:** Do not pass `--scopes` to `auth-code-login` — Sumo Logic returns `invalid_scope` if scopes are included in the authorization request. Effective scopes are configured on the OAuth client itself (Step 2).
 
-Use a different callback port if 8888 is taken:
+Use a different callback port if 8765 is taken:
 
 ```bash
 sumo-oauth auth-code-login --port 9000
@@ -344,6 +346,12 @@ sumo-oauth client-config --format gemini
 sumo-oauth client-config --format all
 ```
 
+The server name defaults to `sumologic` but Sumo Logic's convention is `sumo-mcp-<deployment-org>`. Pass `--server-name` to override:
+
+```bash
+uv run sumo-oauth client-config --format claude-code --server-name sumo-mcp-prod
+```
+
 Example — `claude-code-json` format with an `AuthorizationCodeClient` profile (token is auto-refreshed before output):
 
 ```text
@@ -351,6 +359,7 @@ uv run sumo-oauth client-config --format claude-code-json --profile myprofile
 13:02:08 INFO Token for profile 'myprofile' expired or expiring – refreshing…
 13:02:09 INFO Profile 'myprofile' saved to /Users/username/.sumo_oauth_session.json (expires in 299s)
 # .mcp.json (project root) or merge mcpServers into ~/.claude.json
+# NOTE: clientSecret is stored inline — do not commit this file to source control.
 {
   "mcpServers": {
     "sumologic": {
@@ -358,6 +367,8 @@ uv run sumo-oauth client-config --format claude-code-json --profile myprofile
       "url": "https://mcp.sumologic.com/mcp",
       "oauth": {
         "clientId": "<your-client-id>",
+        "clientSecret": "<your-client-secret>",
+        "authServerMetadataUrl": "https://service.sumologic.com/.well-known/oauth-authorization-server",
         "callbackPort": 8888
       }
     }
@@ -424,15 +435,18 @@ If you need to retrieve values individually:
 | `SUMOLOGIC_OAUTH_TOKEN_URL` | `sumo-oauth export-env` (derived from profile region) |
 | `SUMOLOGIC_MCP_URL` | `sumo-oauth export-env` (derived from profile region) |
 
-The token URL for common regions:
+Region reference:
 
-| Region | Token URL |
-| --- | --- |
-| us1 | `https://service.sumologic.com/oauth2/token` |
-| us2 | `https://service.us2.sumologic.com/oauth2/token` |
-| au | `https://service.au.sumologic.com/oauth2/token` |
-| eu | `https://service.eu.sumologic.com/oauth2/token` |
-| de | `https://service.de.sumologic.com/oauth2/token` |
-| jp | `https://service.jp.sumologic.com/oauth2/token` |
-| ca | `https://service.ca.sumologic.com/oauth2/token` |
-| in | `https://service.in.sumologic.com/oauth2/token` |
+| Region | MCP URL | Token URL |
+| --- | --- | --- |
+| us1 (US East, N. Virginia) | `https://mcp.sumologic.com/mcp` | `https://service.sumologic.com/oauth2/token` |
+| us2 (US West, Oregon) | `https://mcp.us2.sumologic.com/mcp` | `https://service.us2.sumologic.com/oauth2/token` |
+| au (Asia Pacific, Sydney) | `https://mcp.au.sumologic.com/mcp` | `https://service.au.sumologic.com/oauth2/token` |
+| eu (Europe, Ireland) | `https://mcp.eu.sumologic.com/mcp` | `https://service.eu.sumologic.com/oauth2/token` |
+| de (Europe, Frankfurt) | `https://mcp.de.sumologic.com/mcp` | `https://service.de.sumologic.com/oauth2/token` |
+| jp (Asia Pacific, Tokyo) | `https://mcp.jp.sumologic.com/mcp` | `https://service.jp.sumologic.com/oauth2/token` |
+| ca (Canada, Central) | `https://mcp.ca.sumologic.com/mcp` | `https://service.ca.sumologic.com/oauth2/token` |
+| in | `https://mcp.in.sumologic.com/mcp` | `https://service.in.sumologic.com/oauth2/token` |
+| fed (US East, N. Virginia) | `https://mcp.fed.sumologic.com/mcp` | `https://service.fed.sumologic.com/oauth2/token` |
+| kr (Asia Pacific, Seoul) | `https://mcp.kr.sumologic.com/mcp` | `https://service.kr.sumologic.com/oauth2/token` |
+| ch (Europe, Zurich) | `https://mcp.ch.sumologic.com/mcp` | `https://service.ch.sumologic.com/oauth2/token` |
