@@ -66,7 +66,7 @@ Environment variables (loaded from .env if python-dotenv is installed):
   SUMO_ACCESS_KEY      Basic auth access key override ← prefer keychain
 """
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 import argparse
 import base64
@@ -921,6 +921,7 @@ def print_oauth_consents(consents: list[dict], fmt: str) -> None:
     _print_table(consents, [
         ("Consent ID",  "id"),
         ("Client ID",   "clientId"),
+        ("Client Name", "clientName"),
         ("User ID",     "userId"),
         ("Scopes",      "scopes"),
         ("Created",     "createdAt"),
@@ -1313,12 +1314,22 @@ def cmd_list_profiles(args: argparse.Namespace, session: Session) -> None:
         print("No profiles configured. Run 'store-creds' to create one.")
         return
 
+    statuses = _apply_regex_filter(
+        [session.profile_status(n) for n in names],
+        getattr(args, "filter", None),
+        ["profile", "oauth_client_type"],
+    )
+
+    if not statuses:
+        print("No profiles match the filter.")
+        return
+
     if getattr(args, "output", "table") == "json":
-        print(json.dumps([session.profile_status(n) for n in names], indent=2))
+        print(json.dumps(statuses, indent=2))
         return
 
     # Table output
-    col_w = max(len(n) for n in names)
+    col_w = max(len(s["profile"]) for s in statuses)
     header = (
         f"{'Profile':<{col_w}} | {'Status':<9} | {'Type':<2} | {'Endpoint':<36} | "
         f"{'client_id':<20} | {'access_id':<20} | {'secret':<6} | {'key':<6}"
@@ -1326,11 +1337,10 @@ def cmd_list_profiles(args: argparse.Namespace, session: Session) -> None:
     sep = "-" * len(header)
     print(header)
     print(sep)
-    for name in names:
-        s = session.profile_status(name)
+    for s in statuses:
         type_short = _OAUTH_TYPE_SHORT.get(s.get("oauth_client_type") or "", "-")
         print(
-            f"{name:<{col_w}} | {s['status']:<9} | {type_short:<2} | {(s['endpoint'] or ''):<36} | "
+            f"{s['profile']:<{col_w}} | {s['status']:<9} | {type_short:<2} | {(s['endpoint'] or ''):<36} | "
             f"{(s['client_id'] or ''):<20} | {(s['access_id'] or ''):<20} | "
             f"{'yes' if s['client_secret_stored'] else 'no':<6} | "
             f"{'yes' if s['access_key_stored'] else 'no':<6}"
@@ -1904,7 +1914,7 @@ def cmd_oauth_consents(args: argparse.Namespace, session: Session) -> None:
     logger.info("Fetching OAuth consents [profile=%s, endpoint=%s] …", profile, endpoint)
     consents = _apply_regex_filter(
         list_oauth_consents(endpoint, _basic_auth_header(aid, akey), args.limit),
-        args.filter, ["clientId", "userId"],
+        args.filter, ["clientId", "clientName", "userId"],
     )
     print_oauth_consents(consents, args.output)
 
@@ -1928,6 +1938,7 @@ def cmd_update_oauth_client(args: argparse.Namespace, session: Session) -> None:
     profile_data = session.get(profile)
     endpoint     = _resolve_endpoint(args, profile_data)
     aid, akey    = _require_basic_auth(args, profile, profile_data)
+    auth_header  = _basic_auth_header(aid, akey)
 
     if args.from_file:
         try:
@@ -1938,10 +1949,11 @@ def cmd_update_oauth_client(args: argparse.Namespace, session: Session) -> None:
         logger.info("Updating OAuth client '%s' from file '%s' [profile=%s, endpoint=%s] …",
                     args.id, args.from_file, profile, endpoint)
     else:
-        if not args.name:
-            logger.error("--name is required when not using --from-file")
-            sys.exit(1)
-        payload = {"name": args.name}
+        # PUT is a full replace — fetch the existing client and merge changes in
+        logger.info("Fetching existing OAuth client '%s' …", args.id)
+        payload = get_oauth_client(endpoint, auth_header, args.id)
+        if args.name:
+            payload["name"] = args.name
         if args.description:
             payload["description"] = args.description
         if args.redirect_uris:
@@ -1951,7 +1963,7 @@ def cmd_update_oauth_client(args: argparse.Namespace, session: Session) -> None:
         logger.info("Updating OAuth client '%s' [profile=%s, endpoint=%s] …",
                     args.id, profile, endpoint)
 
-    client = update_oauth_client(endpoint, _basic_auth_header(aid, akey), args.id, payload)
+    client = update_oauth_client(endpoint, auth_header, args.id, payload)
     print(f"OAuth client '{args.id}' updated.")
     print_oauth_client(client, args.output)
 
@@ -2300,6 +2312,7 @@ Environment variables:
     # -- list-profiles -------------------------------------------------------
     p_lp = sub.add_parser("list-profiles", help="List all configured profiles")
     p_lp.add_argument("--output", "-o", choices=["table", "json"], default="table")
+    _add_filter_arg(p_lp, "Filter by profile name or client type (case-insensitive regex, e.g. 'ac' or 'Authorization')")
 
     # -- delete-profile ------------------------------------------------------
     p_dp = sub.add_parser(
@@ -2478,7 +2491,7 @@ Environment variables:
     _add_basic_auth_args(p_oco)
     _add_output_arg(p_oco)
     _add_limit_arg(p_oco)
-    _add_filter_arg(p_oco, "Filter by clientId or userId (case-insensitive regex)")
+    _add_filter_arg(p_oco, "Filter by clientId, clientName, or userId (case-insensitive regex)")
 
     # -- oauth-scopes --------------------------------------------------------
     p_os = sub.add_parser("oauth-scopes", help="List available OAuth scopes [Basic auth]")
@@ -2513,7 +2526,7 @@ Environment variables:
     p_uoc.add_argument("--from-file", metavar="FILE",
                        help="Path to a JSON file containing the full update payload (posted as-is)")
     p_uoc.add_argument("--name", default=None,
-                       help="New display name (required without --from-file)")
+                       help="New display name")
     p_uoc.add_argument("--description", default="",
                        help="New description")
     p_uoc.add_argument("--redirect-uris", default=None, metavar="URI[,URI…]",

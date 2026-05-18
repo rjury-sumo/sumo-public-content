@@ -7,6 +7,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.2.2] — 2026-05-18
+
+### Added
+
+- **`list-profiles --filter`** — filter listed profiles by name or `oauth_client_type` using a case-insensitive regex (e.g. `--filter authorization` or `--filter stg`).
+- **`oauth-consents` `clientName` column** — tabular output now includes the OAuth client display name; `--filter` matches on `clientName` in addition to `clientId` and `userId`.
+- **`mcp-setup.md` browser login screenshots** — 3-column image table (login → consent → authorization complete) with CLI output example added to Workflow B Step 3.
+- **`mcp-setup.md` UI verification screenshots** — OAuth Clients administration tab screenshot added after Workflow A Step 3; Personal Authorized Apps screenshot and `oauth-consents --filter` example added after Workflow B Step 3.
+- **`mcp-setup.md` UI alternative callouts** — both Step 1s and both OAuth-client-creation steps now note that clients can be created/managed in the UI, with skip-ahead instructions including the correct `store-creds --mode oauth --client-type` command.
+- **`mcp-setup.md` `client-config` type-aware example** — explains that output is tailored to the profile's OAuth client type; adds a sanitized `claude-code-json` example for `AuthorizationCodeClient`.
+- **`mcp-setup.md` `clientName` notes** — both workflows note that `--name` / `"name"` becomes the `clientName` visible in `oauth-consents` output.
+
+### Fixed
+
+- **`update-oauth-client` full-replace correctness** — PUT is a full-replace operation; the command now fetches the existing client first and merges only the supplied fields, preventing accidental clearing of scopes, redirectUris, or runAs. `--name` is no longer required when only updating other fields.
+
+---
+
 ## [0.2.1] — 2026-05-18
 
 ### Added

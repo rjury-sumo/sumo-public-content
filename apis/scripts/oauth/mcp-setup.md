@@ -38,6 +38,12 @@ For Workflow A you will need both. For Workflow B, Basic auth is needed to creat
 
 ### Step 1: Configure Basic auth credentials
 
+> **Skip if using the UI:** Basic auth is only needed to drive the CLI admin API commands in Steps 2 and 3. If you created your OAuth client in the Sumo Logic UI, store its credentials first (you will be prompted for the client secret), then skip to Step 4:
+
+```bash
+sumo-oauth store-creds --mode oauth --region <REGION> --client-id <YOUR_CLIENT_ID> --client-type client-credentials
+```
+
 Basic auth (access ID + access key) is required for the admin API commands in Steps 2 and 3. You can generate an access key in the Sumo Logic UI under **Preferences → Access Keys**.
 
 ```bash
@@ -79,6 +85,8 @@ sumo-oauth service-accounts --filter "mcp"
 Note the **ID** value — you will use it as `runAsId` in the next step.
 
 ### Step 3: Create the OAuth client
+
+> **UI alternative:** OAuth clients can also be created and managed in the Sumo Logic UI under **Administration → Security → OAuth Clients**. Use the CLI steps below for scripted or repeatable setup, or the UI for one-off creation and ongoing client management.
 
 #### 3a. Review available scopes
 
@@ -144,6 +152,8 @@ sumo-oauth create-oauth-client \
   --save-creds
 ```
 
+> **Note:** The `--name` value (or `"name"` in the JSON file) becomes the `clientName` shown when listing consent grants with `sumo-oauth oauth-consents`.
+
 #### 3c. Create the client and save credentials
 
 ```bash
@@ -173,6 +183,10 @@ To verify the client was created:
 sumo-oauth oauth-clients --filter "MCP"
 ```
 
+The new client is also visible in the Sumo Logic UI under **Administration → Security → OAuth Clients**.
+
+<img src="./images/oauth.clients.ui.filtered.png" alt="OAuth Clients administration tab in Sumo Logic UI" width="30%">
+
 ### Step 4: Obtain a token
 
 ```bash
@@ -191,6 +205,12 @@ This flow authenticates as a **real user** via the browser. The resulting token 
 
 ### Step 1: Configure Basic auth credentials (same as Workflow A)
 
+> **Skip if using the UI:** Basic auth is only needed to drive the CLI admin API commands in Step 2. If you created your OAuth client in the Sumo Logic UI, store its credentials first (you will be prompted for the client secret), then skip to Step 3:
+
+```bash
+sumo-oauth store-creds --mode oauth --region <REGION> --client-id <YOUR_CLIENT_ID> --client-type authorization-code
+```
+
 You need Basic auth to create the OAuth client via the admin API.
 
 ```bash
@@ -198,6 +218,8 @@ sumo-oauth store-creds --mode basic --region <REGION> --access-id <YOUR_ACCESS_I
 ```
 
 ### Step 2: Create the AuthorizationCodeClient
+
+> **UI alternative:** OAuth clients can also be created and managed in the Sumo Logic UI under **Administration → Security → OAuth Clients**. Use the CLI steps below for scripted or repeatable setup, or the UI for one-off creation and ongoing client management.
 
 `AuthorizationCodeClient` does not run as a service account — the user who authenticates via the browser is the identity. A redirect URI pointing to `localhost` is required for the PKCE callback.
 
@@ -236,6 +258,8 @@ sumo-oauth create-oauth-client --from-file mcp-auth-code.json --save-creds
 
 The `--save-creds` flag stores the `clientId` in your profile and the `clientSecret` in the OS keychain, and records `oauth_client_type = AuthorizationCodeClient`.
 
+> **Note:** The `--name` value (or `"name"` in the JSON file) becomes the `clientName` shown when listing consent grants with `sumo-oauth oauth-consents`.
+
 ### Step 3: Authenticate via browser
 
 ```bash
@@ -246,6 +270,33 @@ This does the following:
 
 1. Generates a PKCE code challenge
 2. Opens your browser to the Sumo Logic authorization endpoint
+
+   You must log in via browser (if no active session), accept the consent/scope screen, and will then be redirected to an authorization successful page.
+
+   | Login | Accept consent | Authorization complete |
+   |:---:|:---:|:---:|
+   | <img src="./images/login.png" alt="Browser login screen" width="30%"> | <img src="./images/consent.scope.ui.png" alt="OAuth consent and scope approval screen" width="30%"> | <img src="./images/auth.complete.png" alt="Authorization successful page" width="30%"> |
+
+   While this happens the CLI listens on the local port for the redirect callback:
+
+   ```text
+   sumo-oauth auth-code-login --profile myprofile
+   Opening browser for authorization (profile: myprofile)…
+     Redirect URI  : http://localhost:8765/callback
+     Timeout       : 120s
+
+     NOTE: the redirect URI above must be registered on the OAuth client in Sumo Logic.
+
+   12:42:30 INFO Authorization code received. Exchanging for tokens…
+   12:42:31 INFO Profile 'myprofile' saved to /Users/username/.sumo_oauth_session.json (expires in 299s)
+   Login successful (profile: myprofile, flow: authorization_code).
+     Endpoint           : https://api.sumologic.com
+     Client ID          : ABC123def-gHiJ-kLmN-oPqR-STuvWXyz012345
+     Client type        : AuthorizationCodeClient
+     Expires at (UTC)   : 2026-05-18T00:47:30Z  (00:04:58 remaining)
+     Refresh token      : stored in OS keychain
+   ```
+
 3. Listens on `localhost:8765` for the OAuth callback
 4. Exchanges the authorization code for an access token (and refresh token if issued)
 
@@ -260,13 +311,25 @@ sumo-oauth auth-code-login --port 9000
 # The redirect URI registered on the client must match: http://localhost:9000/callback
 ```
 
+#### Verifying the authorization
+
+After authenticating, you can confirm the consent grant was recorded using the `oauth-consents` command:
+
+```bash
+uv run sumo-oauth oauth-consents --profile myprofile --filter MCP
+```
+
+Authorized apps are also visible in the Sumo Logic UI. Click your user icon in the top-right corner and select **Personal Authorized Apps**.
+
+<img src="./images/personal.authorised.apps.png" alt="Personal Authorized Apps in Sumo Logic UI" width="30%">
+
 ---
 
 ## Step 4 (both workflows): Configure your MCP client
 
 ### Generate a ready-to-use config block
 
-The `client-config` command reads your active profile and prints a configuration block for your AI client or IDE:
+The `client-config` command reads your active profile and prints a ready-to-use configuration block for your AI client or IDE. The output format is **tailored to your OAuth client type**: an `AuthorizationCodeClient` profile emits OAuth browser-callback config (e.g. `callbackPort`), while a `ClientCredentialsClient` profile emits `clientId`/`clientSecret` or Bearer token config depending on the format.
 
 ```bash
 # Claude Code CLI (default — prints the claude mcp add command)
@@ -279,6 +342,27 @@ sumo-oauth client-config --format gemini
 
 # All supported formats at once
 sumo-oauth client-config --format all
+```
+
+Example — `claude-code-json` format with an `AuthorizationCodeClient` profile (token is auto-refreshed before output):
+
+```text
+uv run sumo-oauth client-config --format claude-code-json --profile myprofile
+13:02:08 INFO Token for profile 'myprofile' expired or expiring – refreshing…
+13:02:09 INFO Profile 'myprofile' saved to /Users/username/.sumo_oauth_session.json (expires in 299s)
+# .mcp.json (project root) or merge mcpServers into ~/.claude.json
+{
+  "mcpServers": {
+    "sumologic": {
+      "type": "http",
+      "url": "https://mcp.sumologic.com/mcp",
+      "oauth": {
+        "clientId": "<your-client-id>",
+        "callbackPort": 8765
+      }
+    }
+  }
+}
 ```
 
 Supported formats:

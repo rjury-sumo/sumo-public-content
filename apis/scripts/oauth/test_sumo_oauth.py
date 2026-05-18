@@ -782,6 +782,7 @@ class TestPrintFunctions(unittest.TestCase):
     OAUTH_CONSENT = {
         "id": "0000000000000099",
         "clientId": "TEST-CLIENT-ID-0001",
+        "clientName": "Sumo Logic MCP Client",
         "userId": "0000000000000001",
         "scopes": ["runLogSearch"],
         "createdAt": "2026-04-20T00:00:00Z",
@@ -902,6 +903,8 @@ class TestPrintFunctions(unittest.TestCase):
         output = self._capture(so.print_oauth_consents, [self.OAUTH_CONSENT], "table")
         self.assertIn("Consent ID", output)
         self.assertIn("Client ID", output)
+        self.assertIn("Client Name", output)
+        self.assertIn("Sumo Logic MCP Client", output)
 
     # -- roles ---------------------------------------------------------------
 
