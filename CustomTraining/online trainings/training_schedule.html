@@ -10,6 +10,16 @@
     --accent:#00b4d8; --accent2:#ff6b35; --text:#e2e8f0;
     --muted:#94a3b8; --green:#22c55e; --purple:#a855f7;
   }
+  body.theme-light {
+    --bg:#f1f5f9; --card:#ffffff; --border:#cbd5e1;
+    --accent:#0284c7; --accent2:#ea580c; --text:#1e293b;
+    --muted:#64748b; --green:#16a34a; --purple:#9333ea;
+  }
+  body.theme-plain {
+    --bg:#ffffff; --card:#f8f8f8; --border:#cccccc;
+    --accent:#000000; --accent2:#111111; --text:#000000;
+    --muted:#444444; --green:#000000; --purple:#000000;
+  }
   *{ box-sizing:border-box; margin:0; padding:0; }
   body{ background:var(--bg); color:var(--text);
     font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; padding:24px; }
@@ -30,7 +40,14 @@
     transition:border-color .2s;
   }
   .controls input:focus,.controls select:focus{ border-color:var(--accent); }
-  .controls input{ width:250px; }
+  .controls input[type="text"]{ width:250px; }
+  .controls input[type="number"]{ width:90px; }
+  .controls input[type="date"]{ width:155px; }
+  input[type="date"]{ color-scheme:dark; }
+  body.theme-light input[type="date"],
+  body.theme-plain input[type="date"]{ color-scheme:light; }
+  .controls-group{ display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }
+  .date-label{ color:var(--muted); font-size:.82rem; white-space:nowrap; }
   .count{ color:var(--muted); font-size:0.83rem; margin-left:auto; }
 
   .table-wrap{ overflow-x:auto; border-radius:12px; border:1px solid var(--border); }
@@ -45,6 +62,7 @@
   th.sorted .si{ opacity:1; }
   tbody tr{ border-bottom:1px solid var(--border); transition:background .15s; }
   tbody tr:hover{ background:rgba(0,180,216,.06); }
+  body.theme-plain tbody tr:hover{ background:#f0f0f0; }
   tbody tr.hidden{ display:none; }
   td{ padding:10px 13px; vertical-align:top; }
   td.title-cell{ min-width:200px; max-width:280px; }
@@ -64,6 +82,7 @@
     background:rgba(0,180,216,.04);
     color:var(--muted); font-size:.84rem; line-height:1.65;
   }
+  body.theme-plain .desc-cell{ background:#fafafa; }
   .desc-cell strong{ color:var(--text); display:block; margin-bottom:4px; font-size:.82rem; }
 
   .reg-btn{
@@ -72,6 +91,7 @@
     font-weight:600; white-space:nowrap;
   }
   .reg-btn:hover{ opacity:.85; }
+  body.theme-plain .reg-btn{ background:#333333; color:#ffffff; }
   .tba{ color:var(--muted); font-size:.8rem; }
 
   .tz-val{ font-size:.82rem; white-space:nowrap; color:var(--text); }
@@ -107,6 +127,8 @@
   }
   .sum-badge:hover{ background:rgba(0,180,216,.3); }
   .sum-badge .cnt{ color:var(--accent); font-weight:700; margin-left:5px; }
+  body.theme-plain .sum-badge{ background:#eeeeee; border-color:#bbbbbb; color:#000; }
+  body.theme-plain .sum-badge .cnt{ color:#000000; }
   footer{
     margin-top:28px; text-align:center; color:var(--muted); font-size:.79rem;
   }
@@ -118,7 +140,7 @@
   <div>
     <h1>Sumo Logic — Virtual Training Schedule</h1>
     <div class="subtitle">
-      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 30 Apr 2026 10:40
+      Instructor-Led Virtual Classes &nbsp;·&nbsp; Generated 19 May 2026 12:29
       &nbsp;·&nbsp;
       <a class="source-link" href="https://www.sumologic.com/learn/training" target="_blank">
         sumologic.com/learn/training ↗
@@ -132,17 +154,25 @@
   <select id="monthFilter" onchange="applyFilters()">
     <option value="">All months</option>
   </select>
+  <div class="controls-group">
+    <span class="date-label">From:</span>
+    <input type="date" id="startDate" onchange="applyFilters()" title="Show sessions on or after this date"/>
+    <span class="date-label">To:</span>
+    <input type="date" id="endDate" onchange="applyFilters()" title="Show sessions on or before this date"/>
+  </div>
+  <input type="number" id="limitBox" placeholder="Limit" min="0" oninput="applyFilters()" title="Max results to show (blank or 0 = show all)"/>
   <label class="toggle-label">
     <input type="checkbox" id="showPast" onchange="applyFilters()"/>
-    Show past sessions
+    Show past
   </label>
-  <button class="export-btn" id="clearBtn" onclick="clearFilters()">
-    Clear
-  </button>
+  <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+    <option value="plain">Plain</option>
+  </select>
+  <button class="export-btn" id="clearBtn" onclick="clearFilters()">Clear</button>
   <span class="count" id="countLabel"></span>
-  <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">
-    Copy for email
-  </button>
+  <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">Copy for email</button>
 </div>
 
 <div class="summary-bar" id="summaryBar">
@@ -284,8 +314,8 @@
     <tr class="desc-row" id="desc-10">
       <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="11" data-title="Metric Analytics" data-pt="Wed 13 May 2026  07:00 AM" data-iso="2026-05-13T07:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
+    <tr class="data-row" data-idx="11" data-title="Metrics Analytics" data-pt="Wed 13 May 2026  07:00 AM" data-iso="2026-05-13T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(11)"><span class="ei" id="ei-11">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 13 May 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 14 May 2026  02:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  12:00 AM</td>
@@ -293,10 +323,10 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam05132026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-11">
-      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
-    <tr class="data-row" data-idx="12" data-title="Metric Analytics" data-pt="Wed 13 May 2026  04:00 PM" data-iso="2026-05-13T16:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
+    <tr class="data-row" data-idx="12" data-title="Metrics Analytics" data-pt="Wed 13 May 2026  04:00 PM" data-iso="2026-05-13T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(12)"><span class="ei" id="ei-12">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 13 May 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 14 May 2026  11:00 AM</td>
       <td class="tz-val">Thu 14 May 2026  09:00 AM</td>
@@ -304,7 +334,7 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyricspm05132026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-12">
-      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
     <tr class="data-row" data-idx="13" data-title="Mobot Essentials" data-pt="Thu 14 May 2026  07:00 AM" data-iso="2026-05-14T07:00:00-07:00">
       <td class="title-cell"><button class="course-btn" onclick="toggleDesc(13)"><span class="ei" id="ei-13">▶</span>Mobot Essentials</button></td>
@@ -504,8 +534,8 @@
     <tr class="desc-row" id="desc-30">
       <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="31" data-title="Metric Analytics" data-pt="Wed 10 Jun 2026  07:00 AM" data-iso="2026-06-10T07:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
+    <tr class="data-row" data-idx="31" data-title="Metrics Analytics" data-pt="Wed 10 Jun 2026  07:00 AM" data-iso="2026-06-10T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(31)"><span class="ei" id="ei-31">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 10 Jun 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 11 Jun 2026  02:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  12:00 AM</td>
@@ -513,10 +543,10 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam06102026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-31">
-      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
-    <tr class="data-row" data-idx="32" data-title="Metric Analytics" data-pt="Wed 10 Jun 2026  04:00 PM" data-iso="2026-06-10T16:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytics</span></td>
+    <tr class="data-row" data-idx="32" data-title="Metrics Analytics" data-pt="Wed 10 Jun 2026  04:00 PM" data-iso="2026-06-10T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(32)"><span class="ei" id="ei-32">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 10 Jun 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 11 Jun 2026  11:00 AM</td>
       <td class="tz-val">Thu 11 Jun 2026  09:00 AM</td>
@@ -524,7 +554,7 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticspm06102026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-32">
-      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
     <tr class="data-row" data-idx="33" data-title="Mobot Essentials" data-pt="Thu 11 Jun 2026  07:00 AM" data-iso="2026-06-11T07:00:00-07:00">
       <td class="title-cell"><button class="course-btn" onclick="toggleDesc(33)"><span class="ei" id="ei-33">▶</span>Mobot Essentials</button></td>
@@ -724,8 +754,8 @@
     <tr class="desc-row" id="desc-50">
       <td class="desc-cell" colspan="6"><strong>Administration — course overview</strong>Receive critical Administration expertise on how to set up your organization with Sumo Logic as well as how to optimize and manage queries and content to make the whole team more effective.</td>
     </tr>
-    <tr class="data-row" data-idx="51" data-title="Metric Analytic" data-pt="Wed 08 Jul 2026  07:00 AM" data-iso="2026-07-08T07:00:00-07:00">
-      <td class="title-cell"><span class="course-btn" style="cursor:default">Metric Analytic</span></td>
+    <tr class="data-row" data-idx="51" data-title="Metrics Analytics" data-pt="Wed 08 Jul 2026  07:00 AM" data-iso="2026-07-08T07:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(51)"><span class="ei" id="ei-51">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 08 Jul 2026  07:00 AM<br/><span class="tz-end">ends 10:00 AM</span></td>
       <td class="tz-val">Thu 09 Jul 2026  02:00 AM</td>
       <td class="tz-val">Thu 09 Jul 2026  12:00 AM</td>
@@ -733,10 +763,10 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticsam07082026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-51">
-      <td class="desc-cell" colspan="6"><em>No description available.</em></td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
-    <tr class="data-row" data-idx="52" data-title="Metrics Analytic" data-pt="Wed 08 Jul 2026  04:00 PM" data-iso="2026-07-08T16:00:00-07:00">
-      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(52)"><span class="ei" id="ei-52">▶</span>Metrics Analytic</button></td>
+    <tr class="data-row" data-idx="52" data-title="Metrics Analytics" data-pt="Wed 08 Jul 2026  04:00 PM" data-iso="2026-07-08T16:00:00-07:00">
+      <td class="title-cell"><button class="course-btn" onclick="toggleDesc(52)"><span class="ei" id="ei-52">▶</span>Metrics Analytics</button></td>
       <td class="tz-val">Wed 08 Jul 2026  04:00 PM<br/><span class="tz-end">ends 07:00 PM</span></td>
       <td class="tz-val">Thu 09 Jul 2026  11:00 AM</td>
       <td class="tz-val">Thu 09 Jul 2026  09:00 AM</td>
@@ -744,7 +774,7 @@
       <td><a class="reg-btn" href="https://events.sumologic.com/metricanalyticspm07082026-event-training" target="_blank">Register →</a></td>
     </tr>
     <tr class="desc-row" id="desc-52">
-      <td class="desc-cell" colspan="6"><strong>Metrics Analytic — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
+      <td class="desc-cell" colspan="6"><strong>Metrics Analytics — course overview</strong>Build on your foundational skills with this course focused on metrics analysis in Sumo Logic. Learn to perform deeper analysis using metrics, quickly identify critical events, and create dashboards and alerts to efficiently monitor your Sumo Logic environment and ensure timely insights.</td>
     </tr>
     <tr class="data-row" data-idx="53" data-title="Mobot Essentials" data-pt="Thu 09 Jul 2026  07:00 AM" data-iso="2026-07-09T07:00:00-07:00">
       <td class="title-cell"><button class="course-btn" onclick="toggleDesc(53)"><span class="ei" id="ei-53">▶</span>Mobot Essentials</button></td>
@@ -847,7 +877,7 @@
 </footer>
 
 <script>
-const SESSIONS = [{"idx": 0, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  05:00 AM"}, {"idx": 1, "title": "Fundamentals", "pt": "Tue 05 May 2026  07:00 AM"}, {"idx": 2, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  02:00 PM"}, {"idx": 3, "title": "Fundamentals", "pt": "Tue 05 May 2026  04:00 PM"}, {"idx": 4, "title": "Search Mastery", "pt": "Wed 06 May 2026  07:00 AM"}, {"idx": 5, "title": "Search Mastery", "pt": "Wed 06 May 2026  04:00 PM"}, {"idx": 6, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  07:00 AM"}, {"idx": 7, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  04:00 PM"}, {"idx": 8, "title": "Observability", "pt": "Mon 11 May 2026  04:00 PM"}, {"idx": 9, "title": "Administration", "pt": "Tue 12 May 2026  07:00 AM"}, {"idx": 10, "title": "Administration", "pt": "Tue 12 May 2026  04:00 PM"}, {"idx": 11, "title": "Metric Analytics", "pt": "Wed 13 May 2026  07:00 AM"}, {"idx": 12, "title": "Metric Analytics", "pt": "Wed 13 May 2026  04:00 PM"}, {"idx": 13, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  07:00 AM"}, {"idx": 14, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  04:00 PM"}, {"idx": 15, "title": "Logs for Security", "pt": "Tue 19 May 2026  07:00 AM"}, {"idx": 16, "title": "Logs for Security", "pt": "Tue 19 May 2026  04:00 PM"}, {"idx": 17, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  07:00 AM"}, {"idx": 18, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  04:00 PM"}, {"idx": 19, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  07:00 AM"}, {"idx": 20, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  04:00 PM"}, {"idx": 21, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  05:00 AM"}, {"idx": 22, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  07:00 AM"}, {"idx": 23, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  02:00 PM"}, {"idx": 24, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  04:00 PM"}, {"idx": 25, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  07:00 AM"}, {"idx": 26, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  04:00 PM"}, {"idx": 27, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  07:00 AM"}, {"idx": 28, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  04:00 PM"}, {"idx": 29, "title": "Administration", "pt": "Tue 09 Jun 2026  07:00 AM"}, {"idx": 30, "title": "Administration", "pt": "Tue 09 Jun 2026  04:00 PM"}, {"idx": 31, "title": "Metric Analytics", "pt": "Wed 10 Jun 2026  07:00 AM"}, {"idx": 32, "title": "Metric Analytics", "pt": "Wed 10 Jun 2026  04:00 PM"}, {"idx": 33, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  07:00 AM"}, {"idx": 34, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  04:00 PM"}, {"idx": 35, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  07:00 AM"}, {"idx": 36, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  04:00 PM"}, {"idx": 37, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  07:00 AM"}, {"idx": 38, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  04:00 PM"}, {"idx": 39, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  07:00 AM"}, {"idx": 40, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  04:00 PM"}, {"idx": 41, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  05:00 AM"}, {"idx": 42, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  07:00 AM"}, {"idx": 43, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  10:00 AM"}, {"idx": 44, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  04:00 PM"}, {"idx": 45, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  07:00 AM"}, {"idx": 46, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  04:00 PM"}, {"idx": 47, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  07:00 AM"}, {"idx": 48, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  04:00 PM"}, {"idx": 49, "title": "Administration", "pt": "Tue 07 Jul 2026  07:00 AM"}, {"idx": 50, "title": "Administration", "pt": "Tue 07 Jul 2026  04:00 PM"}, {"idx": 51, "title": "Metric Analytic", "pt": "Wed 08 Jul 2026  07:00 AM"}, {"idx": 52, "title": "Metrics Analytic", "pt": "Wed 08 Jul 2026  04:00 PM"}, {"idx": 53, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  07:00 AM"}, {"idx": 54, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  04:00 PM"}, {"idx": 55, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  07:00 AM"}, {"idx": 56, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  04:00 PM"}, {"idx": 57, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  07:00 AM"}, {"idx": 58, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  04:00 PM"}, {"idx": 59, "title": "Automation", "pt": "Thu 16 Jul 2026  07:00 AM"}, {"idx": 60, "title": "Automation", "pt": "Thu 16 Jul 2026  04:00 PM"}];
+const SESSIONS = [{"idx": 0, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  05:00 AM"}, {"idx": 1, "title": "Fundamentals", "pt": "Tue 05 May 2026  07:00 AM"}, {"idx": 2, "title": "Welcome Webinar", "pt": "Tue 05 May 2026  02:00 PM"}, {"idx": 3, "title": "Fundamentals", "pt": "Tue 05 May 2026  04:00 PM"}, {"idx": 4, "title": "Search Mastery", "pt": "Wed 06 May 2026  07:00 AM"}, {"idx": 5, "title": "Search Mastery", "pt": "Wed 06 May 2026  04:00 PM"}, {"idx": 6, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  07:00 AM"}, {"idx": 7, "title": "Best Practice for Query Efficiency", "pt": "Thu 07 May 2026  04:00 PM"}, {"idx": 8, "title": "Observability", "pt": "Mon 11 May 2026  04:00 PM"}, {"idx": 9, "title": "Administration", "pt": "Tue 12 May 2026  07:00 AM"}, {"idx": 10, "title": "Administration", "pt": "Tue 12 May 2026  04:00 PM"}, {"idx": 11, "title": "Metrics Analytics", "pt": "Wed 13 May 2026  07:00 AM"}, {"idx": 12, "title": "Metrics Analytics", "pt": "Wed 13 May 2026  04:00 PM"}, {"idx": 13, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  07:00 AM"}, {"idx": 14, "title": "Mobot Essentials", "pt": "Thu 14 May 2026  04:00 PM"}, {"idx": 15, "title": "Logs for Security", "pt": "Tue 19 May 2026  07:00 AM"}, {"idx": 16, "title": "Logs for Security", "pt": "Tue 19 May 2026  04:00 PM"}, {"idx": 17, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  07:00 AM"}, {"idx": 18, "title": "Essential Cloud SIEM Skills for SOC Analysts", "pt": "Wed 20 May 2026  04:00 PM"}, {"idx": 19, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  07:00 AM"}, {"idx": 20, "title": "Cloud SIEM", "pt": "Thu 21 May 2026  04:00 PM"}, {"idx": 21, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  05:00 AM"}, {"idx": 22, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  07:00 AM"}, {"idx": 23, "title": "Welcome Webinar", "pt": "Tue 02 Jun 2026  02:00 PM"}, {"idx": 24, "title": "Fundamentals", "pt": "Tue 02 Jun 2026  04:00 PM"}, {"idx": 25, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  07:00 AM"}, {"idx": 26, "title": "Search Mastery", "pt": "Wed 03 Jun 2026  04:00 PM"}, {"idx": 27, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  07:00 AM"}, {"idx": 28, "title": "Best Practice for Query Efficiency", "pt": "Thu 04 Jun 2026  04:00 PM"}, {"idx": 29, "title": "Administration", "pt": "Tue 09 Jun 2026  07:00 AM"}, {"idx": 30, "title": "Administration", "pt": "Tue 09 Jun 2026  04:00 PM"}, {"idx": 31, "title": "Metrics Analytics", "pt": "Wed 10 Jun 2026  07:00 AM"}, {"idx": 32, "title": "Metrics Analytics", "pt": "Wed 10 Jun 2026  04:00 PM"}, {"idx": 33, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  07:00 AM"}, {"idx": 34, "title": "Mobot Essentials", "pt": "Thu 11 Jun 2026  04:00 PM"}, {"idx": 35, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  07:00 AM"}, {"idx": 36, "title": "Logs for Security", "pt": "Tue 16 Jun 2026  04:00 PM"}, {"idx": 37, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  07:00 AM"}, {"idx": 38, "title": "Cloud SIEM", "pt": "Wed 17 Jun 2026  04:00 PM"}, {"idx": 39, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  07:00 AM"}, {"idx": 40, "title": "Automation Workshop", "pt": "Thu 18 Jun 2026  04:00 PM"}, {"idx": 41, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  05:00 AM"}, {"idx": 42, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  07:00 AM"}, {"idx": 43, "title": "Welcome Webinar", "pt": "Tue 30 Jun 2026  10:00 AM"}, {"idx": 44, "title": "Fundamentals", "pt": "Tue 30 Jun 2026  04:00 PM"}, {"idx": 45, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  07:00 AM"}, {"idx": 46, "title": "Search Mastery", "pt": "Wed 01 Jul 2026  04:00 PM"}, {"idx": 47, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  07:00 AM"}, {"idx": 48, "title": "Best Practice for Query Efficiency", "pt": "Thu 02 Jul 2026  04:00 PM"}, {"idx": 49, "title": "Administration", "pt": "Tue 07 Jul 2026  07:00 AM"}, {"idx": 50, "title": "Administration", "pt": "Tue 07 Jul 2026  04:00 PM"}, {"idx": 51, "title": "Metrics Analytics", "pt": "Wed 08 Jul 2026  07:00 AM"}, {"idx": 52, "title": "Metrics Analytics", "pt": "Wed 08 Jul 2026  04:00 PM"}, {"idx": 53, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  07:00 AM"}, {"idx": 54, "title": "Mobot Essentials", "pt": "Thu 09 Jul 2026  04:00 PM"}, {"idx": 55, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  07:00 AM"}, {"idx": 56, "title": "Essential Cloud SIEM skills for SOC Analysts", "pt": "Tue 14 Jul 2026  04:00 PM"}, {"idx": 57, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  07:00 AM"}, {"idx": 58, "title": "Cloud SIEM", "pt": "Wed 15 Jul 2026  04:00 PM"}, {"idx": 59, "title": "Automation", "pt": "Thu 16 Jul 2026  07:00 AM"}, {"idx": 60, "title": "Automation", "pt": "Thu 16 Jul 2026  04:00 PM"}];
 
 // Populate month filter from PT column values
 const months = [];
@@ -870,30 +900,61 @@ months.forEach(m => {
 
 const now = Date.now();
 
+// ---------------------------------------------------------------------------
+// Theme management
+// ---------------------------------------------------------------------------
+function setTheme(t) {
+  document.body.className = t === 'dark' ? '' : 'theme-' + t;
+  try { localStorage.setItem('schedTheme', t); } catch(e) {}
+}
+
+(function initTheme() {
+  let saved = 'dark';
+  try { saved = localStorage.getItem('schedTheme') || 'dark'; } catch(e) {}
+  const sel = document.getElementById('themeSelect');
+  if (sel) sel.value = saved;
+  setTheme(saved);
+})();
+
+// ---------------------------------------------------------------------------
+// Filters
+// ---------------------------------------------------------------------------
 function applyFilters() {
-  const raw      = document.getElementById('searchBox').value.toLowerCase().trim();
+  const raw       = document.getElementById('searchBox').value.toLowerCase().trim();
   // Support OR: split on comma or the word "or" (case-insensitive)
-  const terms    = raw ? raw.split(/,|\bor\b/i).map(t => t.trim()).filter(Boolean) : [];
-  const mon      = document.getElementById('monthFilter').value;
-  const showPast = document.getElementById('showPast').checked;
-  let visible = 0, total = 0;
+  const terms     = raw ? raw.split(/,|\bor\b/i).map(t => t.trim()).filter(Boolean) : [];
+  const mon       = document.getElementById('monthFilter').value;
+  const showPast  = document.getElementById('showPast').checked;
+  const limitVal  = parseInt(document.getElementById('limitBox').value) || 0;
+  const startDate = document.getElementById('startDate').value;   // 'yyyy-mm-dd' or ''
+  const endDate   = document.getElementById('endDate').value;     // 'yyyy-mm-dd' or ''
+  let shown = 0, matched = 0, total = 0;
   const courseCounts = {};
   document.querySelectorAll('tbody tr.data-row').forEach(row => {
-    const title    = row.dataset.title.toLowerCase();
+    const title     = row.dataset.title.toLowerCase();
     const dispTitle = row.dataset.title;   // already stripped of AM/PM
-    const pt       = row.dataset.pt || '';
-    const isoStr   = row.dataset.iso || '';
-    const isFuture = !isoStr || (new Date(isoStr).getTime() >= now);
+    const pt        = row.dataset.pt || '';
+    const isoStr    = row.dataset.iso || '';
+    const isFuture  = !isoStr || (new Date(isoStr).getTime() >= now);
     row.classList.toggle('past', !isFuture);
     const matchesSearch = !terms.length || terms.some(t => title.includes(t));
-    const show = (showPast || isFuture) && matchesSearch && (!mon || pt.includes(mon));
+    const matchesMonth  = !mon || pt.includes(mon);
+    // Date range: compare date portion of ISO string (first 10 chars = 'yyyy-mm-dd')
+    const rowDate      = isoStr ? isoStr.substring(0, 10) : '';
+    const matchesStart = !startDate || !rowDate || rowDate >= startDate;
+    const matchesEnd   = !endDate   || !rowDate || rowDate <= endDate;
+    const passesFilters = (showPast || isFuture) && matchesSearch && matchesMonth
+                          && matchesStart && matchesEnd;
+    if (passesFilters) matched++;
+    // Apply limit: only show first limitVal matching rows (0 = unlimited)
+    const show = passesFilters && (limitVal <= 0 || shown < limitVal);
     row.classList.toggle('hidden', !show);
     if (!show) {
       const dr = document.getElementById('desc-' + row.dataset.idx);
       if (dr) dr.classList.remove('open');
     }
     if (show) {
-      visible++;
+      shown++;
       // Group case-insensitively; keep the first-seen casing as display name
       const key = dispTitle.toLowerCase();
       if (!courseCounts[key]) courseCounts[key] = { display: dispTitle, count: 0 };
@@ -901,9 +962,10 @@ function applyFilters() {
     }
     total++;
   });
-  document.getElementById('countLabel').textContent =
-    `Showing ${visible} of ${total} sessions`;
-  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  let countText = `Showing ${shown} of ${total} sessions`;
+  if (matched > shown) countText += ` (${matched} match filter, limited to ${shown})`;
+  document.getElementById('countLabel').textContent = countText;
+  document.getElementById('noResults').style.display = shown === 0 ? 'block' : 'none';
   // Rebuild course summary badges (sorted by count desc, then alpha)
   const summaryEl = document.getElementById('summaryContent');
   if (summaryEl) {
@@ -925,6 +987,9 @@ function clearFilters() {
   document.getElementById('searchBox').value = '';
   document.getElementById('monthFilter').value = '';
   document.getElementById('showPast').checked = false;
+  document.getElementById('limitBox').value = '';
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
   applyFilters();
 }
 
@@ -1009,16 +1074,19 @@ function exportToClipboard() {
   });
 
   // ---- Build HTML version (renders as table in Gmail / Outlook) ----
+  const isPlain   = document.body.classList.contains('theme-plain');
   const fontStack = "'Segoe UI', Arial, sans-serif";
-  const colourHdr = "#00b4d8";
-  const colourBg1 = "#f8fafc";
-  const colourBg2 = "#ffffff";
-  const colourBdr = "#cbd5e1";
+  const colourHdr = isPlain ? '#000000' : '#00b4d8';
+  const colourBg1 = isPlain ? '#f8f8f8' : '#f8fafc';
+  const colourBg2 = '#ffffff';
+  const colourBdr = isPlain ? '#aaaaaa' : '#cbd5e1';
+  const hdrBg     = isPlain ? '#eeeeee' : '#0f1117';
+  const regColour = isPlain ? '#111111' : '#ff6b35';
 
   let html = `
 <table style="border-collapse:collapse;font-family:${fontStack};font-size:13px;width:100%;">
   <thead>
-    <tr style="background:#0f1117;">
+    <tr style="background:${hdrBg};">
       ${HEADERS.map(h =>
         `<th style="padding:8px 10px;text-align:left;color:${colourHdr};
                     border:1px solid ${colourBdr};white-space:nowrap;">${h}</th>`
@@ -1036,7 +1104,7 @@ function exportToClipboard() {
                            vertical-align:top;background:${bgCol};"`;
     const regLink = row.querySelector('td:last-child a');
     const regCell = regLink
-      ? `<a href="${regLink.href}" style="color:#ff6b35;font-weight:600;">Register →</a>`
+      ? `<a href="${regLink.href}" style="color:${regColour};font-weight:600;">Register →</a>`
       : '<span style="color:#94a3b8;">TBA</span>';
 
     const colVals = [0,1,2,3,4].map(i => {
@@ -1056,7 +1124,7 @@ function exportToClipboard() {
 </table>
 <p style="font-size:11px;color:#64748b;margin-top:6px;">
   Source: <a href="https://www.sumologic.com/learn/training">sumologic.com/learn/training</a>
-  &nbsp;·&nbsp; Generated 30 Apr 2026 10:40
+  &nbsp;·&nbsp; Generated 19 May 2026 12:29
 </p>`;
 
   // ---- Write both to clipboard ----
