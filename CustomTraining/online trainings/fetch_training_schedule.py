@@ -346,6 +346,16 @@ HTML_TEMPLATE = """\
     --accent:#00b4d8; --accent2:#ff6b35; --text:#e2e8f0;
     --muted:#94a3b8; --green:#22c55e; --purple:#a855f7;
   }}
+  body.theme-light {{
+    --bg:#f1f5f9; --card:#ffffff; --border:#cbd5e1;
+    --accent:#0284c7; --accent2:#ea580c; --text:#1e293b;
+    --muted:#64748b; --green:#16a34a; --purple:#9333ea;
+  }}
+  body.theme-plain {{
+    --bg:#ffffff; --card:#f8f8f8; --border:#cccccc;
+    --accent:#000000; --accent2:#111111; --text:#000000;
+    --muted:#444444; --green:#000000; --purple:#000000;
+  }}
   *{{ box-sizing:border-box; margin:0; padding:0; }}
   body{{ background:var(--bg); color:var(--text);
     font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; padding:24px; }}
@@ -366,7 +376,14 @@ HTML_TEMPLATE = """\
     transition:border-color .2s;
   }}
   .controls input:focus,.controls select:focus{{ border-color:var(--accent); }}
-  .controls input{{ width:250px; }}
+  .controls input[type="text"]{{ width:250px; }}
+  .controls input[type="number"]{{ width:90px; }}
+  .controls input[type="date"]{{ width:155px; }}
+  input[type="date"]{{ color-scheme:dark; }}
+  body.theme-light input[type="date"],
+  body.theme-plain input[type="date"]{{ color-scheme:light; }}
+  .controls-group{{ display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }}
+  .date-label{{ color:var(--muted); font-size:.82rem; white-space:nowrap; }}
   .count{{ color:var(--muted); font-size:0.83rem; margin-left:auto; }}
 
   .table-wrap{{ overflow-x:auto; border-radius:12px; border:1px solid var(--border); }}
@@ -381,6 +398,7 @@ HTML_TEMPLATE = """\
   th.sorted .si{{ opacity:1; }}
   tbody tr{{ border-bottom:1px solid var(--border); transition:background .15s; }}
   tbody tr:hover{{ background:rgba(0,180,216,.06); }}
+  body.theme-plain tbody tr:hover{{ background:#f0f0f0; }}
   tbody tr.hidden{{ display:none; }}
   td{{ padding:10px 13px; vertical-align:top; }}
   td.title-cell{{ min-width:200px; max-width:280px; }}
@@ -400,6 +418,7 @@ HTML_TEMPLATE = """\
     background:rgba(0,180,216,.04);
     color:var(--muted); font-size:.84rem; line-height:1.65;
   }}
+  body.theme-plain .desc-cell{{ background:#fafafa; }}
   .desc-cell strong{{ color:var(--text); display:block; margin-bottom:4px; font-size:.82rem; }}
 
   .reg-btn{{
@@ -408,6 +427,7 @@ HTML_TEMPLATE = """\
     font-weight:600; white-space:nowrap;
   }}
   .reg-btn:hover{{ opacity:.85; }}
+  body.theme-plain .reg-btn{{ background:#333333; color:#ffffff; }}
   .tba{{ color:var(--muted); font-size:.8rem; }}
 
   .tz-val{{ font-size:.82rem; white-space:nowrap; color:var(--text); }}
@@ -443,6 +463,8 @@ HTML_TEMPLATE = """\
   }}
   .sum-badge:hover{{ background:rgba(0,180,216,.3); }}
   .sum-badge .cnt{{ color:var(--accent); font-weight:700; margin-left:5px; }}
+  body.theme-plain .sum-badge{{ background:#eeeeee; border-color:#bbbbbb; color:#000; }}
+  body.theme-plain .sum-badge .cnt{{ color:#000000; }}
   footer{{
     margin-top:28px; text-align:center; color:var(--muted); font-size:.79rem;
   }}
@@ -468,17 +490,25 @@ HTML_TEMPLATE = """\
   <select id="monthFilter" onchange="applyFilters()">
     <option value="">All months</option>
   </select>
+  <div class="controls-group">
+    <span class="date-label">From:</span>
+    <input type="date" id="startDate" onchange="applyFilters()" title="Show sessions on or after this date"/>
+    <span class="date-label">To:</span>
+    <input type="date" id="endDate" onchange="applyFilters()" title="Show sessions on or before this date"/>
+  </div>
+  <input type="number" id="limitBox" placeholder="Limit" min="0" oninput="applyFilters()" title="Max results to show (blank or 0 = show all)"/>
   <label class="toggle-label">
     <input type="checkbox" id="showPast" onchange="applyFilters()"/>
-    Show past sessions
+    Show past
   </label>
-  <button class="export-btn" id="clearBtn" onclick="clearFilters()">
-    Clear
-  </button>
+  <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark</option>
+    <option value="light">Light</option>
+    <option value="plain">Plain</option>
+  </select>
+  <button class="export-btn" id="clearBtn" onclick="clearFilters()">Clear</button>
   <span class="count" id="countLabel"></span>
-  <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">
-    Copy for email
-  </button>
+  <button class="export-btn" id="exportBtn" onclick="exportToClipboard()">Copy for email</button>
 </div>
 
 <div class="summary-bar" id="summaryBar">
@@ -535,30 +565,61 @@ months.forEach(m => {{
 
 const now = Date.now();
 
+// ---------------------------------------------------------------------------
+// Theme management
+// ---------------------------------------------------------------------------
+function setTheme(t) {{
+  document.body.className = t === 'dark' ? '' : 'theme-' + t;
+  try {{ localStorage.setItem('schedTheme', t); }} catch(e) {{}}
+}}
+
+(function initTheme() {{
+  let saved = 'dark';
+  try {{ saved = localStorage.getItem('schedTheme') || 'dark'; }} catch(e) {{}}
+  const sel = document.getElementById('themeSelect');
+  if (sel) sel.value = saved;
+  setTheme(saved);
+}})();
+
+// ---------------------------------------------------------------------------
+// Filters
+// ---------------------------------------------------------------------------
 function applyFilters() {{
-  const raw      = document.getElementById('searchBox').value.toLowerCase().trim();
+  const raw       = document.getElementById('searchBox').value.toLowerCase().trim();
   // Support OR: split on comma or the word "or" (case-insensitive)
-  const terms    = raw ? raw.split(/,|\\bor\\b/i).map(t => t.trim()).filter(Boolean) : [];
-  const mon      = document.getElementById('monthFilter').value;
-  const showPast = document.getElementById('showPast').checked;
-  let visible = 0, total = 0;
+  const terms     = raw ? raw.split(/,|\\bor\\b/i).map(t => t.trim()).filter(Boolean) : [];
+  const mon       = document.getElementById('monthFilter').value;
+  const showPast  = document.getElementById('showPast').checked;
+  const limitVal  = parseInt(document.getElementById('limitBox').value) || 0;
+  const startDate = document.getElementById('startDate').value;   // 'yyyy-mm-dd' or ''
+  const endDate   = document.getElementById('endDate').value;     // 'yyyy-mm-dd' or ''
+  let shown = 0, matched = 0, total = 0;
   const courseCounts = {{}};
   document.querySelectorAll('tbody tr.data-row').forEach(row => {{
-    const title    = row.dataset.title.toLowerCase();
+    const title     = row.dataset.title.toLowerCase();
     const dispTitle = row.dataset.title;   // already stripped of AM/PM
-    const pt       = row.dataset.pt || '';
-    const isoStr   = row.dataset.iso || '';
-    const isFuture = !isoStr || (new Date(isoStr).getTime() >= now);
+    const pt        = row.dataset.pt || '';
+    const isoStr    = row.dataset.iso || '';
+    const isFuture  = !isoStr || (new Date(isoStr).getTime() >= now);
     row.classList.toggle('past', !isFuture);
     const matchesSearch = !terms.length || terms.some(t => title.includes(t));
-    const show = (showPast || isFuture) && matchesSearch && (!mon || pt.includes(mon));
+    const matchesMonth  = !mon || pt.includes(mon);
+    // Date range: compare date portion of ISO string (first 10 chars = 'yyyy-mm-dd')
+    const rowDate      = isoStr ? isoStr.substring(0, 10) : '';
+    const matchesStart = !startDate || !rowDate || rowDate >= startDate;
+    const matchesEnd   = !endDate   || !rowDate || rowDate <= endDate;
+    const passesFilters = (showPast || isFuture) && matchesSearch && matchesMonth
+                          && matchesStart && matchesEnd;
+    if (passesFilters) matched++;
+    // Apply limit: only show first limitVal matching rows (0 = unlimited)
+    const show = passesFilters && (limitVal <= 0 || shown < limitVal);
     row.classList.toggle('hidden', !show);
     if (!show) {{
       const dr = document.getElementById('desc-' + row.dataset.idx);
       if (dr) dr.classList.remove('open');
     }}
     if (show) {{
-      visible++;
+      shown++;
       // Group case-insensitively; keep the first-seen casing as display name
       const key = dispTitle.toLowerCase();
       if (!courseCounts[key]) courseCounts[key] = {{ display: dispTitle, count: 0 }};
@@ -566,9 +627,10 @@ function applyFilters() {{
     }}
     total++;
   }});
-  document.getElementById('countLabel').textContent =
-    `Showing ${{visible}} of ${{total}} sessions`;
-  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  let countText = `Showing ${{shown}} of ${{total}} sessions`;
+  if (matched > shown) countText += ` (${{matched}} match filter, limited to ${{shown}})`;
+  document.getElementById('countLabel').textContent = countText;
+  document.getElementById('noResults').style.display = shown === 0 ? 'block' : 'none';
   // Rebuild course summary badges (sorted by count desc, then alpha)
   const summaryEl = document.getElementById('summaryContent');
   if (summaryEl) {{
@@ -590,6 +652,9 @@ function clearFilters() {{
   document.getElementById('searchBox').value = '';
   document.getElementById('monthFilter').value = '';
   document.getElementById('showPast').checked = false;
+  document.getElementById('limitBox').value = '';
+  document.getElementById('startDate').value = '';
+  document.getElementById('endDate').value = '';
   applyFilters();
 }}
 
@@ -674,16 +739,19 @@ function exportToClipboard() {{
   }});
 
   // ---- Build HTML version (renders as table in Gmail / Outlook) ----
+  const isPlain   = document.body.classList.contains('theme-plain');
   const fontStack = "'Segoe UI', Arial, sans-serif";
-  const colourHdr = "#00b4d8";
-  const colourBg1 = "#f8fafc";
-  const colourBg2 = "#ffffff";
-  const colourBdr = "#cbd5e1";
+  const colourHdr = isPlain ? '#000000' : '#00b4d8';
+  const colourBg1 = isPlain ? '#f8f8f8' : '#f8fafc';
+  const colourBg2 = '#ffffff';
+  const colourBdr = isPlain ? '#aaaaaa' : '#cbd5e1';
+  const hdrBg     = isPlain ? '#eeeeee' : '#0f1117';
+  const regColour = isPlain ? '#111111' : '#ff6b35';
 
   let html = `
 <table style="border-collapse:collapse;font-family:${{fontStack}};font-size:13px;width:100%;">
   <thead>
-    <tr style="background:#0f1117;">
+    <tr style="background:${{hdrBg}};">
       ${{HEADERS.map(h =>
         `<th style="padding:8px 10px;text-align:left;color:${{colourHdr}};
                     border:1px solid ${{colourBdr}};white-space:nowrap;">${{h}}</th>`
@@ -701,7 +769,7 @@ function exportToClipboard() {{
                            vertical-align:top;background:${{bgCol}};"`;
     const regLink = row.querySelector('td:last-child a');
     const regCell = regLink
-      ? `<a href="${{regLink.href}}" style="color:#ff6b35;font-weight:600;">Register →</a>`
+      ? `<a href="${{regLink.href}}" style="color:${{regColour}};font-weight:600;">Register →</a>`
       : '<span style="color:#94a3b8;">TBA</span>';
 
     const colVals = [0,1,2,3,4].map(i => {{
