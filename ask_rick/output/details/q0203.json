@@ -1,9 +1,9 @@
 {
   "id": "q0203",
-  "hash": "35c84335277c",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_hpa_spec_min_replicas   | quantize 1m | min",
+  "hash": "c354c747bfa8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal  {{{keywords}}}\n\n| where (isempty(suppressedReasons))\n//\n//\n| timeslice  | count as generated  by _timeslice | compare with timeshift 7d",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
@@ -23,30 +23,47 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - HPA v4.6",
-      "dashboardDescription": "The Kubernetes - HPA dashboard provides a high-level view of the health of the Horizontal Pod Autoscalar.",
-      "panelTitle": "Max vs Min Replicas",
+      "folder": "Signals",
+      "dashboardName": "Signals Console (sec_signal)",
+      "dashboardDescription": "",
+      "panelTitle": "Signals Generated Vs Last Week",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f01fb9b0b3f82844",
+      "panelKey": "panel4AFCC1EE9A6D7842",
       "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Diverging 2\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Max\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Min\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Desired\"}},{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Current\"}}]}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name and hpa is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "hpa",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Signals Console sec_signal (Tuning Pack)",
+      "dashboardDescription": "Detailed review of sec_signal events matching a keyword expresison.",
+      "panelTitle": "Signals Generated Vs Last Week",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4AFCC1EE9A6D7842",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

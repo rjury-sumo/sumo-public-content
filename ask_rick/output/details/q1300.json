@@ -1,0 +1,85 @@
+{
+  "id": "q1300",
+  "hash": "c2493c011495",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by uom | sort credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{lookup",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "days",
+      "description": "90",
+      "dataType": "ANY",
+      "value": "90"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Long Term Credits Report (credits_report lookup)",
+      "dashboardDescription": "Uses the credits_report lookup table to show long term credits consumption.",
+      "panelTitle": "Total Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC8187B99AB7A0844",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "/shared/lookups/credits_report",
+          "values": "/shared/lookups/credits_report",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "days",
+          "defaultValue": "90",
+          "values": "90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "anniversary",
+          "defaultValue": "2023/03/11",
+          "values": "yyyy/MM/dd,2023/03/11",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

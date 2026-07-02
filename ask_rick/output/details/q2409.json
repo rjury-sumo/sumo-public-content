@@ -1,0 +1,73 @@
+{
+  "id": "q2409",
+  "hash": "d617fee5d9c5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by dimension\n| sort gbytes\n| total gbytes as tgb \n| (gbytes / tgb ) * 100 as ingest_percent | fields -tgb",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "dimension",
+      "description": "sourcecategory,sourcehost,collector,view,sourcename",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "filter",
+      "description": "a,b,c*,*d*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/recent_logs_by_category.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Recent Log Ingest By Category",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest by {{dimension}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF817FB1DB6955945",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "*",
+          "values": "a,b,c*,*d*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "15m,1h,1d",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dimension",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,sourcehost,collector,view,sourcename",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

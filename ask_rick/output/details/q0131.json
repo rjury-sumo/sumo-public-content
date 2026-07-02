@@ -1,9 +1,9 @@
 {
   "id": "q0131",
-  "hash": "cf8e1e9710c2",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_memory_working_set_bytes cluster={{cluster}} namespace={{namespace}} pod={{pod}} container={{container}} | eval _value / 1000000 | avg by container, pod | sum by container | sum",
+  "hash": "263074aa33bc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n  {{{entity}}}\n\n| where (isempty(suppressedreasons))\n\n//| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n//| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n\n| timeslice  | count by rule,_timeslice | transpose row _timeslice column rule",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,88 +12,80 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{entity",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "container",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "Memory Usage (MB)",
+      "folder": "Entity",
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Generated Over Time By Rule",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3D7D1705BC6E0A4F",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"option\":\"Average\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}]},\"series\":{}}",
+      "panelKey": "panelB6E9031E908A1849",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Overview"
+        "Timeline And Summary"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/cse_reflected_data/dash_single_entity_view.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Generated Over Time By Rule",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB6E9031E908A1849",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "Timeline And Summary"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Single Entity View (Tuning Pack)",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Generated Over Time By Rule",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB6E9031E908A1849",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "Timeline And Summary"
+      ],
+      "variables": [
         {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
         }

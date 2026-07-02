@@ -1,24 +1,11 @@
 {
   "id": "q1151",
-  "hash": "23564320c7b4",
+  "hash": "00fd81066879",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n|data_scanned_bytes / 1Gi as sizeInGB\n| timeslice 1d\n| sum (sizeInGB) as total_data_scanned_GB by _timeslice\n| avg(total_data_scanned_GB) as %\"AvgLogDataScanPerDay\"\n//| sort by total_data_scanned_GB\n//| ingest_gbytes / duration_in_day as %\"AvgLogIngestPerDay\"\n| {{Subscribed_Log_Data_Scan_Capacity}} as %\"DailyLogDataScanCapacity\" // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| (%\"AvgLogDataScanPerDay\"/%\"DailyLogDataScanCapacity\")*100 as %\"LogDataScan_Capacity_Utilization\"\n| fields %\"LogDataScan_Capacity_Utilization\"",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Subscribed_Log_Data_Scan_Capacity",
-      "description": "100",
-      "dataType": "ANY",
-      "value": "100"
-    }
-  ],
-  "viewerType": "svp",
+  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where _sourceCategory matches \"sourcecategory_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes\n| sum(gbytes) by _timeslice",
+  "queryParameters": [],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,27 +13,33 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Capacity Utilization",
-      "dashboardDescription": "This dashboard displays the subscribed, actual, and percentage capacity utilization for logs and metrics",
-      "panelTitle": "Log Data Scan Capacity Utilization",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Ingest Volume Trend",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3030B79099692A46",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelPANE-7A16249DBE8F194A",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Log Data Scan"
+        "Logs"
       ],
       "variables": [
         {
-          "name": "Subscribed_Log_Data_Scan_Capacity",
-          "defaultValue": "100",
-          "values": "100",
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

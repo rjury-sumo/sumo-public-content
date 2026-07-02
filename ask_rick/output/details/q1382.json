@@ -1,0 +1,67 @@
+{
+  "id": "q1382",
+  "hash": "8c8f91d08c93",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} namespace={{namespace}} statefulset=*otelcol* metric=otelcol_exporter_requests_bytes service=*metadata-logs* \n| quantize 1m using max\n| delta increasing | sum by cluster,service, pod",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sumologic"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes-collection-healthcheck-otelcol.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes - Collection Healthcheck (otelcol)",
+      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
+      "panelTitle": "otelcol_exporter_requests_bytes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelFB4EBC45A9AF784C",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"\",\"unit\":{\"value\":\"B\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{cluster}} {{service}} {{pod}}\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Level 2 Logs Gateway Pods e.g sumo-otelcol-logs-0"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "sumologic",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

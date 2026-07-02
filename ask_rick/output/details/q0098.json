@@ -1,82 +1,45 @@
 {
   "id": "q0098",
-  "hash": "17bd8dbf950d",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} statefulset=*{{sumologic_override}}-otelcol-logs* metric=container_memory_working_set_bytes \n| quantize 1m using avg | avg by container, pod | sum by pod",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sumologic_override",
-      "description": "sumo,sumologic",
-      "dataType": "ANY",
-      "value": "sumologic"
-    }
-  ],
-  "viewerType": "line",
+  "hash": "8ce28210e62d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceDetails, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\")\n| json field=SourceDetails \"sourceType\" as SourceTypeCreated nodrop\n| json field=CurrentValue \"sourceType\" as SourceTypeUpdated nodrop\n| if(isNull(SourceTypeCreated), if(isNull(SourceTypeUpdated),\"-\",SourceTypeUpdated),SourceTypeCreated) as SourceType\n| where EventName matches \"*\" and UserIp matches \"*\" and UserEmail matches \"*\"  and CollectorName matches \"*\"\n|count by EventName, EventTime, CollectorName, SourceName, SourceDetails, SourceType, UserEmail, userId, UserIp, CurrentValue, PreviousValue\n| sort by EventTime\n| fields -_count, PreviousValue, CurrentValue, userId, SourceDetails\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Memory Usage by Pod",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Source Changes (Audit Log)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelB2869A96986EE947",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+      "panelKey": "panelC5B9F48483582B4E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
       "rowContext": [
-        "Opentelemetry Logs Collection Monitoring"
+        "Collection Health Events"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

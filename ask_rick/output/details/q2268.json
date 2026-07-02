@@ -1,0 +1,126 @@
+{
+  "id": "q2268",
+  "hash": "356b1ff9a1f2",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n| timeslice by {{timeslice}}\n|sum(data_scanned_bytes) as bytes   by user_name | replace (user_name,/@.+/,\"\") as user_name  \n| bytes / 1G as gb\n| sum(gb) as gb by user_name | sort gb",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,15m,1d,10m,5m",
+      "dataType": "ANY",
+      "value": "15m"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_optitmization.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Optimization",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs.",
+      "panelTitle": "Gb Scan Top Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel59A9028A819B2B4A",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":20,\"mode\":\"distribution\",\"indexLabelFontSize\":12},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Search Scan Overview and KPIs"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Gb Scan Top Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel59A9028A819B2B4A",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"mode\":\"distribution\",\"indexLabelFontSize\":10},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Search Statistics"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

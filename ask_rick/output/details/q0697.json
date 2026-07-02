@@ -1,27 +1,119 @@
 {
   "id": "q0697",
-  "hash": "e45fc8651320",
+  "hash": "3b16ebc9324b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| json field=_raw \"insight.signals.length()\" as signal_count\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| timeslice 1d\n| count by _timeslice \n| fillmissing timeslice\n| sort by _timeslice\n| outlier _count window=10,threshold=3,consecutive=2,direction=+",
-  "queryParameters": [],
-  "viewerType": "line",
+  "query": "_index=sec_record_authentication\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(user_username)\n| count by user_username\n| sort by _count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "device_ip",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "srcDevice_ip",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "dstDevice_ip",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "device_hostname",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Insight Analysis",
-      "dashboardName": "Cloud SIEM - Insights Overview",
-      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
-      "panelTitle": "Insights Created - Outlier",
+      "folder": "Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Authentication Records",
+      "dashboardDescription": "This dashboard provides analysis of Authentication Records.",
+      "panelTitle": "Top 10 Authentication Records by Username",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD2AC8CB8AC44B841",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#bf2121\",\"name\":\"Insights-Created\"}}]}",
+      "panelKey": "panel8AB31946A6C2084A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "srcDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dstDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_hostname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

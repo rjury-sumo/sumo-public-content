@@ -1,0 +1,65 @@
+{
+  "id": "q2171",
+  "hash": "ff672bc871d3",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by x_forwarded_for, c_ip, sc_status, cs_uri_stem, Referrer, user_agent | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i, sc_status, cs_uri_stem, Referrer, user_agent | where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as Malicious_Confidence from sumo://threat/cs on threat= c_ip \n| where  type=\"ip_address\" and !isNull(Malicious_Confidence)\n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n| where Malicious_Confidence matches \"high\"\n| sum(ip_count) as ip_count by Malicious_Confidence, Actor,  c_ip, sc_status, cs_uri_stem, Referrer, user_agent\n| sort by ip_count\n| limit 20",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx  - Threat Intel",
+      "dashboardDescription": "The Nginx - Threat Intel Dashboard provides an at-a-glance view of threats to Nginx servers on your network. Dashboard panels display threat count over a selected time period, geographic locations where threats occurred, source breakdown, actors responsible for threats, severity, and a correlation of IP addresses, cs_method, and status code of threats.",
+      "panelTitle": "Highly Malicious Threat Table",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-BA1609C1B6DF3949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

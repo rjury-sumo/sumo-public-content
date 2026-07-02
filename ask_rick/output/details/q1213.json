@@ -1,0 +1,29 @@
+{
+  "id": "q1213",
+  "hash": "0c18e733efaa",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"*\")\n| where datatier matches \"*\"\n| timeslice by 1d\n| sizeInBytes / 1024/1024/1024 as gb\n// remove long categories\n| if (length(value) > 40,concat(substring(value,0,40),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,_timeslice,datatier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> .1,value,\"other\" ) as value\n| fraction * 100 as percent\n//|count as rows, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as percent by view,value\n//| sort percent\n\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n\n| sum(credits) as series by _timeslice,value \n| transpose row _timeslice column value",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/audit/usage_key_stats.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Credits By Category Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-B8C9F2A5A6913B42",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+      "rowContext": [
+        "Log Ingestion"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,83 +1,29 @@
 {
   "id": "q1081",
-  "hash": "c1c15719d6e3",
+  "hash": "55287e901959",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\" as EventName, Admin, AdminIp nodrop\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\") \n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d), values(\"UserCreated\",\"UserUpdated\",\"UserDeleted\") in EventName\n| transpose row _timeslice column EventName",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Admin",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "line",
+  "query": "_view=sumologic_search_usage_per_query \n| count as queries by query\n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| replace(scope_section_raw,\" \",\"\") as scope_section | if (scope_section=\"\" or isNull(scope_section) or scope_section=\"*\",1, 0) as  select_all\n| parse regex field=scope_section_raw \"_(?<meta>sourcecategory|sourcehost|collector|source|sourcename)\\s*=\"  nodrop  | if (meta!=\"\",1,0) as use_meta\n| parse regex field=scope_section_raw \"_(?<idx>view|index)\\s*=\"  nodrop  | if (idx!=\"\",1,0) as use_idx\n| parse regex field=scope_section_raw \"(?:^|\\s+)(?<kfield>\\w+)\\s*=\"  nodrop  | if (kfield!=\"\" and !(kfield in (\"sourcecategory\",\"collector\",\"index\",\"view\",\"source\",\"sourcehost\",\"sourcename\")),1,0) as use_field\n| 0 as use_kw | parse regex field=scope_section_raw \"(?:^|\\s+)(?<first>\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|[\\w\\\"\\']+)(?<bridge>\\s*=\\s*|\\s+|$)(?<second>\\w+|$)\" multi nodrop | if ( !(bridge matches \"*=*\") and select_all!=1,1,use_kw) as use_kw\n| max(use_kw) as use_kw, max(use_field) as use_field, max(use_meta) as use_meta, max(use_idx) as use_idx, max(queries) as queries by query\n| (use_kw+use_field+use_meta+use_idx) as optimizations\n| format(\"%d Optimizations\",int(optimizations)) as OptimizationsStr\n//| where optimizationsStr matches \"4*\" \n| sum(queries) as queries by optimizationsStr | sort by optimizationsStr",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Activities",
-      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
-      "panelTitle": "Trend - User Events",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Queries Characteristics and Opportunities to Improve",
+      "dashboardDescription": "The Enterprise Search Audit - Queries Characteristics and Opportunities to Improve dashboard provides information about which of your queries take and don’t take advantage of important optimization techniques and metadata to improve efficiency.",
+      "panelTitle": "Queries by Optimization Techniques",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel1b3e71e4abd8d845",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Admin",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "AdminIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel973468bf9c8f1a45",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"}}",
+      "rowContext": [
+        "Search Optimization Considerations"
+      ],
+      "variables": []
     }
   ]
 }

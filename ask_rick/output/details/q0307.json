@@ -1,9 +1,9 @@
 {
   "id": "q0307",
-  "hash": "e382dcfa1920",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_node_status_condition node={{node}} cluster={{cluster}} status=\"true\" !condition=ready | sum by condition, node | topk(500,max)",
+  "hash": "b31a5ac2b32b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n// \n| timeslice\n| count as events by eventname ,_timeslice\n| transpose row _timeslice column eventname\n\n//| sort _messagetime | fields -events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_audit_actions.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes Overview dashboard provides high-level information on the health and performance of the cluster nodes.",
-      "panelTitle": "Node Not Ready over Time",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Audit Actions",
+      "dashboardDescription": "",
+      "panelTitle": "Events Over Time By Eventname",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B66A5F6F9AE4F94E",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"fillOpacity\":\"0.6\",\"displayType\":\"smooth\"},\"color\":{\"family\":\"scheme2\"},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{node}} - {{condition}}\"}}],\"series\":{}}",
+      "panelKey": "panel403FDCFEAE6E094F",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{\"A_AppCentralPackageCreated\":{\"visible\":true},\"A_AutomationActionUpdated\":{\"visible\":true},\"A_CustomFieldUpdated\":{\"visible\":true},\"A_DaemonCreated\":{\"visible\":true},\"A_DaemonUpdated\":{\"visible\":true},\"A_DashboardCreated\":{\"visible\":true},\"A_DashboardUpdated\":{\"visible\":true},\"A_EntityCreated\":{\"visible\":true},\"A_EntityUpdated\":{\"visible\":true},\"A_GroupCreated\":{\"visible\":true},\"A_GroupUpdated\":{\"visible\":true},\"A_IncidentAttachmentCreated\":{\"visible\":true},\"A_IncidentCreated\":{\"visible\":true},\"A_IncidentDeleted\":{\"visible\":true},\"A_IncidentInvestigatorCreated\":{\"visible\":true},\"A_IncidentInvestigatorUpdated\":{\"visible\":true},\"A_IncidentNoteCreated\":{\"visible\":true},\"A_IncidentUpdated\":{\"visible\":true},\"A_IntegrationCreated\":{\"visible\":true},\"A_IntegrationResourceUpdated\":{\"visible\":true},\"A_PlaybookExecutionCreated\":{\"visible\":true},\"A_PlaybookRevisionCreated\":{\"visible\":true},\"A_PlaybookRevisionDeleted\":{\"visible\":true},\"A_PlaybookRevisionUpdated\":{\"visible\":true},\"A_ReportCreated\":{\"visible\":true},\"A_ReportUpdated\":{\"visible\":true},\"A_TaskCreated\":{\"visible\":true},\"A_TaskUpdated\":{\"visible\":true},\"A_WidgetCreated\":{\"visible\":true},\"A_WidgetDeleted\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name and node is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         }
       ]

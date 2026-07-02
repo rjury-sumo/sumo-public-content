@@ -1,9 +1,9 @@
 {
   "id": "q0953",
-  "hash": "f36b603247b3",
+  "hash": "3585473761df",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventTime\", \"eventName\", \"operator.id\", \"operator.email\", \"operator.sourceIp\", \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"destination.destinationType\",\"destination.enabled\",\"destination.encrypted\", \"from\", \"to\" as EventTime, eventName, UserId, User, UserIp, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, PreviousValue, CurrentValue nodrop\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\")\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and User matches \"{{User}}\"\n| count as Count by EventName\n| fillmissing values(\"DataForwardingDestinationCreated\",\"DataForwardingDestinationUpdated\",\"DataForwardingDestinationDeleted\") in EventName\n| compare with timeshift 1d as Shift_1d",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"fieldExtractionRuleIdentity.fieldExtractionRuleId\", \"fieldExtractionRule.enabled\", \"to.enabled\",\"operator.email\" as EventName, FieldExtractionRuleId, CreatedEnabled, UpdatedEnabled, User nodrop\n| where EventName in (\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\")\n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n| if(isNull(CreatedEnabled),if(isNull(UpdatedEnabled),\"-\",UpdatedEnabled),CreatedEnabled) as CurrentEnabled\n| withtime CurrentEnabled\n| most_recent(CurrentEnabled_withtime) as Status by FieldExtractionRuleId\n| where Status!=\"-\"\n| if(Status matches \"true\", \"Active\", \"InActive\") as Status\n| count as Count by Status",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,19 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserIp",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -42,33 +30,27 @@
       "value": "*"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Forwarding Management",
-      "dashboardName": "Enterprise Audit - Data Forwarding Destination Activities",
-      "dashboardDescription": "Data Forwarding Destination Activities DashBoard provides detailed information on data forwarding destination activities. You can review trends for activities, their geographical locations, one-day times shift comparisons, user activity, and recent destination activities.",
-      "panelTitle": "One Day Time Shift Comparison",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "Active vs InActive FER",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8912a426bd3e384d",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "panelKey": "paneldc0232e28490384b",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {
           "name": "EventName",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserIp",
-          "defaultValue": "*",
-          "values": null,
+          "values": "*",
           "allowMultiSelect": false
         },
         {

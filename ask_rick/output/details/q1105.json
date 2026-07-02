@@ -1,83 +1,27 @@
 {
   "id": "q1105",
-  "hash": "c72ffdcbadd0",
+  "hash": "09e57c551eeb",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users (UserEmailChangeRequested OR UserEmailChanged)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\"  as EventName, Admin, AdminIp nodrop\n| where EventName in (\"UserEmailChangeRequested\", \"UserEmailChanged\") \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d), values(\"UserEmailChangeRequested\", \"UserEmailChanged\") in EventName\n| transpose row _timeslice column EventName",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Admin",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "line",
+  "queryMode": "SavedSearch",
+  "query": "_view=sumologic_search_usage_per_query \n| \"dummy\" as dummy // this field is only used to artificially link the parent query and subquery\n| where [subquery from=(-30d) to=(-1d):\n              // this subquery saves the average daily ingest for the org to a lookup table\n              _index=sumologic_volume _sourceCategory=view_and_tier_volume \n              | parse regex \"\\\"field\\\":\\\"(?<field>.*?)\\\",\\\"dataTier\\\":\\\"(?<tier>.*?)\\\",\\\"sizeInBytes\\\":(?<size>.*?),\" multi\n              | where tier in (\"Continuous\", \"Infrequent\", \"Frequent\", \"Flex\")  \n              | timeslice 1d \n              | where (queryStartTime() < _timeslice and queryEndTime() > __timeslice_end) // this eliminates partial time slices\n              | sum(size) as dailyIngest by _timeslice\n              | avg(dailyIngest) as avgDailyIngest\n              | round(avgDailyIngest,0) as avgDailyIngest\n              // create artificial primary key for later use as lookup in parent query\n              | 0 as pkey\n              // save the avgDailyIngest and primary key to legacy lookup table\n              | save /avgDailyIngest2\n              // create dummy field to link to parent query\n              | \"dummy\" as dummy\n              | compose dummy]\n// break out the scan volume for each query by tier\n| parse regex field=scanned_bytes_breakdown \"\\\"(?<tier>[a-zA-Z]+)\\\" \\: (?<tier_scanned_bytes>[0-9]+)\" multi nodrop\n| sum(tier_scanned_bytes) as avgDailyScanned by tier, query_type, content_name, content_identifier\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| 0 as pkey\n| lookup avgDailyIngest from /avgDailyIngest2 on  pkey=pkey\n| fields -pkey\n// calculate the scan of each query to the overall ingest\n| round(100*avgDailyScanned/avgDailyIngest,0) as percent_scan_of_ingest\n| where percent_scan_of_ingest > 1000\n| sort percent_scan_of_ingest",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User(Email, Password) Activities",
-      "dashboardDescription": "User (Email, Password) Activities DashBoard provides detailed information on user password and email activities, such as password changes, password resets by admins, and user email change requests and changes.",
-      "panelTitle": "Trend - User Email Activity",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panela6c99311bc4fd94b",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "objectType": "SavedSearch",
+      "folder": "Flex",
+      "dashboardName": "Content items with scan volume > 10x of avg daily ingest of last 30 days",
+      "dashboardDescription": "This search helps in monitoring all content items (scheduled search, monitors, dashboards)  for whom daily average volume of data scanned is > 10x of average daily ingest of last 30 days.",
+      "panelTitle": "Content items with scan volume > 10x of avg daily ingest of last 30 days",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
       "rowContext": [],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Admin",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "AdminIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": [],
+      "defaultTimeRange": "Last 24 Hours"
     }
   ]
 }

@@ -1,0 +1,85 @@
+{
+  "id": "q1652",
+  "hash": "895851ad01f4",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_node_status_condition node={{node}} cluster={{cluster}} status=\"true\" condition=ready | quantize to {{quantization_interval}} using max |  avg",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "node",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantization_interval",
+      "description": "1m,5m,15m",
+      "dataType": "ANY",
+      "value": "1m"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Node",
+      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
+      "panelTitle": "Status",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-33C10B48B3D2B846",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Label\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":true,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1.1,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":1.2,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"title\":{\"fontSize\":16}}",
+      "rowContext": [
+        "Overview"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantization_interval",
+          "defaultValue": "1m",
+          "values": "1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,23 +1,10 @@
 {
   "id": "q0858",
-  "hash": "2284876420b0",
+  "hash": "d021a81ec460",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| where status=\"closed\"\n//| timeslice by 1d\n| timeToResponse as t\n | where t >0\n| sort t\n| min(t) as fastest,pct(t,50) as median,max(t) as slowest ,last(insightid) as worst",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
+  "query": "_index=sec_signal \n| count by  matchExpression\n| sort by _count desc\n| limit 10",
+  "queryParameters": [],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -25,31 +12,16 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Security Operations Overview",
-      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
-      "panelTitle": "Time To Response",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Analysis - Rules",
+      "dashboardDescription": "This dashboard provides trend analysis of triggered rules,  rules by match expression and top rules triggered",
+      "panelTitle": "Top 10 Match Expressions by Rule Count",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel195AE83F9DE96943",
+      "panelKey": "panelD5384D249D1EC844",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"labelFontSize\":11,\"titleFontSize\":11},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"minimum\":0}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
-      "rowContext": [
-        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
-      ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "graph_by_timeslice",
-          "defaultValue": "1d",
-          "values": "15m,1h,3h,1d,1w",
-          "allowMultiSelect": false
-        }
-      ]
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

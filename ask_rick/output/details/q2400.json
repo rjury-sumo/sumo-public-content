@@ -1,0 +1,121 @@
+{
+  "id": "q2400",
+  "hash": "5a2b4772d257",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n\n| sum(credits) as credits by datatier",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "view",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_filter",
+      "description": "filter_value",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier_filter",
+      "description": "Continuous,Frequent,Infrequent,CSE",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "5m,15m,1h,6h,24h",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/datavolume-with-tier/data-volume-tiers-investigation-console.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Data Volume With Tiers Console",
+      "dashboardDescription": "",
+      "panelTitle": "Total Credits By Tier",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE81B48D8A9AA6844",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "view",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "5m",
+          "values": "5m,15m,1h,6h,24h",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_pct",
+          "defaultValue": ".3",
+          "values": ".0,1,.5,1,2,3,5",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_filter",
+          "defaultValue": "*",
+          "values": "filter_value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier_filter",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_chrs",
+          "defaultValue": "40",
+          "values": "30,35,45,50,55",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "graphs_by",
+          "defaultValue": "credits",
+          "values": "gbytes,credits",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

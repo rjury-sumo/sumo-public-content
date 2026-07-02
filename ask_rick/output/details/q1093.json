@@ -1,9 +1,9 @@
 {
   "id": "q1093",
-  "hash": "30528620086c",
+  "hash": "9b9cb5194a38",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=userSessions (UserLoggedOut OR UserLoggedIn OR UserLockedOut OR UserUnlocked OR UserLoginTimedOut)\n| json \"eventName\", \"eventTime\", \"accountId\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, UserIp nodrop\n| json \"userSession.email\", \"userSession.id\" as LoginUser, LoginUserId nodrop\n| json \"sessionIdentity.userEmail\", \"sessionIdentity.userId\" as LogoutUser, LogoutUserId nodrop\n| json \"userIdentity.userEmail\", \"userIdentity.userId\" as LockedUser, LockedUserId nodrop\n| json \"authenticationSource\" as AuthenticationSource nodrop\n| if(isEmpty(LoginUser), if(isEmpty(LogoutUser), if(isEmpty(LockedUser), \"\", LockedUser),LogoutUser), LoginUser) as User\n| if(isEmpty(LoginUserId), if(isEmpty(LogoutUserId), if(isEmpty(LockedUserId), \"\", LockedUserId),LogoutUserId), LoginUserId) as UserId\n| _sourceHost as UserIp\n| where EventName in (\"UserLoggedOut\", \"UserLoggedIn\", \"UserLockedOut\", \"UserUnlocked\", \"UserLoginTimedOut\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by EventName, EventTime, User, UserId, UserIp, AuthenticationSource\n| sort by EventTime\n| fields - _count, UserId\n| limit 100",
+  "query": "_view=sumologic_search_usage_per_query \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| count as queries by analytics_tier \n| order by queries",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "query_type",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
   "viewerType": "table",
@@ -37,25 +37,25 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Session Activities",
-      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
-      "panelTitle": "Events - Recent Sessions",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Data Tier Searches",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0cf635a1b7694842",
+      "panelKey": "panel9e11a39ab639594a",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
+          "name": "query_type",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
-          "defaultValue": "*",
+          "name": "user_name",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         }

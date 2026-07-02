@@ -1,35 +1,65 @@
 {
   "id": "q0342",
-  "hash": "8618864d55b7",
+  "hash": "ee98155b3028",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*falco* output_fields rule priority output\n| json  \"log.priority\" as priority\n| where priority = \"Critical\"\n| count",
-  "queryParameters": [],
-  "viewerType": "svp",
-  "metricsQueryData": {
-    "metric": "",
-    "aggregationType": "None",
-    "groupBy": "",
-    "filters": [],
-    "operators": null
-  },
+  "query": "_index=_trace_spans service={{service}} {{keywords}}\n//| json field=tags \"$['telemetry.sdk.name']\" as telemetry_sdk_name\n//| json field=tags \"$['telemetry.sdk.language']\" as telemetry_sdk_language\n| json field=tags \"$['http.url']\" as http_url nodrop\n//| json field=tags \"$['deployment.environment']\" as deployment_environment\n//| json field=tags \"$['telemetry.sdk.version']\" as telemetry_sdk_version\n//| if(isempty(parentspanid),0,1) as has_parentspanid\n//| if(isempty(traceid),0,1) as has_traceid\n| timeslice\n| parse regex field=http_url \"https*://(?<host>[^\\/]+)\\/(?<path>[^\\&\\?]{0,25})\" nodrop\n | billedbytes / 1024/1024 as mb  \n| count as spans, sum(mb) as mb by service,operation,host,path | sort mb\n| total spans as ts | 100 * (spans / ts) as span_pct",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "service",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "any keywords",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/Span.ingestion.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
-      "panelTitle": "Critical Alerts",
+      "folder": null,
+      "dashboardName": "Span Ingestion",
+      "dashboardDescription": "",
+      "panelTitle": "Operation and HTTP_URL Ingestion",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-d5735b83b428e849",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"green\"},{\"from\":null,\"to\":null,\"color\":\"yellow\"},{\"from\":1,\"to\":null,\"color\":\"red\"}],\"label\":\"Critical Alert(s)\",\"noDataString\":\"0\"}}",
-      "rowContext": [
-        "Rule Priorities"
-      ],
-      "variables": []
+      "panelKey": "panel95C25AD0A358E943",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keywords",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

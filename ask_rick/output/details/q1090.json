@@ -1,9 +1,9 @@
 {
   "id": "q1090",
-  "hash": "49577fba0df0",
+  "hash": "8f2bcca0c0a8",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserUnlocked\n| json \"eventName\", \"eventTime\", \"accountId\", \"userIdentity\", \"operator\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, userIdentity, operator, UserIp nodrop\n| where EventName=\"UserUnlocked\"\n| json field=userIdentity \"userEmail\", \"userId\" as User, UserId nodrop\n| json field=operator \"email\", \"sourceIp\", \"interface\" as UnlockedBy, UnlockedByIp , Interface nodrop\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by EventName, EventTime, AccountId, User, UserId, UnlockedBy, UnlockedByIp, Interface\n| sort by EventTime\n| fields - _count, EventName, AccountId, UserId",
+  "query": "_view=sumologic_search_usage_per_query\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "query_type",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,38 +24,38 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Session Activities",
-      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
-      "panelTitle": "Users Unlocked Activity",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Total Searches",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel43eec43bbee3e948",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panel8a6752a193a5094b",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Total Searches\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#000000\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
+          "name": "query_type",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
-          "defaultValue": "*",
+          "name": "user_name",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         }

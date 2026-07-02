@@ -1,27 +1,49 @@
 {
   "id": "q0482",
-  "hash": "a5505df06ea6",
+  "hash": "2fc3476610ba",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit class=scheduled_search action=FINISH status=FAILURE\n| where _sourceCategory=\"scheduled_search\" \n| KV \"Name\", \"SchSearchId\", \"SchTime\"\n| count",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| timeslice 1d\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by _timeslice, collector\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, collector\n| transpose row _timeslice column collector",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Audit",
-      "dashboardName": "User Activity - Scheduled Search",
-      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
-      "panelTitle": "Finished with Errors",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Log Spikes",
+      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
+      "panelTitle": "Top 5 Collectors",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelef08ec96b7e4ca4a",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
-      "rowContext": [],
-      "variables": []
+      "panelKey": "panelPANE-4",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Top 5 Per Day"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

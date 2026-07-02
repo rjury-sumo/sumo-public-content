@@ -1,9 +1,9 @@
 {
   "id": "q0308",
-  "hash": "3f079048295e",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} pod={{pod}}  metric=kube_pod_container_status_waiting_reason !reason=ContainerCreating   | quantize 1m |  sum by reason",
+  "hash": "1de39491a428",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_audit_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.source_ip\" as source_ip nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as email nodrop\n| json field=_raw \"subsystem\"\n\n// \n| timeslice\n| count as events by subsystem ,_timeslice\n| transpose row _timeslice column subsystem\n\n//| sort _messagetime | fields -events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_audit_actions.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Waiting Containers by Reason",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Audit Actions",
+      "dashboardDescription": "",
+      "panelTitle": "Events Over Time By Subsystem",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-ef49e9cabda5d94c",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"lineThickness\":2},\"color\":{\"family\":\"scheme5\"},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{reason}}\"}}],\"series\":{}}",
+      "panelKey": "panel8863FA2DAF5DDA4F",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
       "rowContext": [
-        "Containers"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         }
       ]

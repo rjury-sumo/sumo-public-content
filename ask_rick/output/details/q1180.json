@@ -1,39 +1,154 @@
 {
   "id": "q1180",
-  "hash": "b9fdb1a43408",
+  "hash": "ce8e8f5d94e0",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory=\"collector_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1h\n| sum(datapoints) as curr_hrs_datapoints by _timeslice\n| sort by _timeslice asc \n| diff curr_hrs_datapoints\n| where !isNull(_diff)\n| (_diff+curr_hrs_datapoints) as prev_hrs_datapoints\n| ((_diff / curr_hrs_datapoints) * 100) as pct_incr\n| 50 as spikePercent\n| where (-1 * pct_incr) > spikePercent\n| abs(pct_incr) as pct_incr\n| fields _timeslice, curr_hrs_datapoints, prev_hrs_datapoints, pct_incr",
-  "queryParameters": [],
-  "viewerType": "table",
+  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n|where if (\"{{user_name}}\" = \"*\", true, user_name matches \"{{user_name}}\") AND if (\"{{session_id}}\" = \"*\", true, session_id matches \"{{session_id}}\") AND if (\"{{is_aggregate}}\" = \"*\", true, toString(is_aggregate) matches \"{{is_aggregate}}\") AND if (\"{{status_message}}\" = \"*\", true, status_message matches \"{{status_message}}\") AND if (\"{{query}}\" = \"*\", true, query matches \"{{query}}\") AND if (\"{{query_type}}\" = \"*\", true, query_type matches \"{{query_type}}\")\n|sum (sizeInGB) as total_data_scanned_GB by query_type \n| where if (\"{{total_data_scanned_GB}}\" = \"0\", true, total_data_scanned_GB > {{total_data_scanned_GB}})\n| sort by total_data_scanned_GB",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "session_id",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "is_aggregate",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "status_message",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "total_data_scanned_GB",
+      "description": "0,1,5,10,100",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Metrics",
-      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Spike (Last Data Point)",
+      "folder": "Infrequent Data Tier",
+      "dashboardName": "Infrequent Data Tier - Data Scanned Overview",
+      "dashboardDescription": "The Infrequent Data Tier - Data Scanned Overview dashboard provides visibility into the total amount of data scanned by infrequent queries. This allows you to monitor and control on-demand search costs for the Infrequent Tier.",
+      "panelTitle": "Data Scanned By Caller Module",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-12",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "panelKey": "panelc97c7a0abb26a84c",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"SET3\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false},\"series\":{}}",
       "rowContext": [
-        "Note for Ingest Spike Panels"
+        "Data Scanned by Other Dimensions"
       ],
       "variables": [
         {
-          "name": "MetricsSources",
-          "defaultValue": "sourcecategory_metrics_volume",
+          "name": "session_id",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "query",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "is_aggregate",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "status_message",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "total_data_scanned_GB",
+          "defaultValue": "0",
+          "values": "0,1,5,10,100",
           "allowMultiSelect": false
         }
       ]

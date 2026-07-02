@@ -1,0 +1,85 @@
+{
+  "id": "q2318",
+  "hash": "f31747605644",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| round((data_scanned_bytes /1024/1024/1024) * 10 )/10 as scan_gbytes\n| round((inf_scan_bytes/1024/1024/1024) * 10) / 10 as inf_scan_gbytes\n\n| time_range_m/60 as time_range_h\n| count as searches, sum(scan_gbytes) as scan_gb, sum(inf_scan_gbytes) as inf_scan_gb, sum(retrieved_message_count) as results, max(scanned_partition_count) as max_partitions, avg(time_range_h) as avg_range_h by user_name, query | sort query asc | limit 1000\n//| sort avg_exec_ms",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "jane.doe*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_pattern",
+      "description": "*mycategory*,*_datatier*,*_index*,*ategory*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_regex",
+      "description": ".*,^.,a|b|c",
+      "dataType": "ANY",
+      "value": "^."
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/copilot_use_v2.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Copilot or Mobot Usage",
+      "dashboardDescription": "Dashboard uses search audit data to show queries run by copilot or mobot.",
+      "panelTitle": "Query Details",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD1F667969010194E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Detail Query Limit 1000"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "jane.doe*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_regex",
+          "defaultValue": "^.",
+          "values": ".*,^.,a|b|c",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_pattern",
+          "defaultValue": "*",
+          "values": "*mycategory*,*_datatier*,*_index*,*ategory*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

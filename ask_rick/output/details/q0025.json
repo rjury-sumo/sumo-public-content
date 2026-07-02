@@ -1,33 +1,69 @@
 {
   "id": "q0025",
-  "hash": "b8b37471dce1",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "1 - #B / #C | eval _value * 100 | avg | quantize to 1m drop last",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "hash": "060ccd856602",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 365))\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToResponse / 3600 as timeToResponse\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| avg(timeToResponse) as timeToResponse by _timeslice,severity | transpose row _timeslice column severity",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{lookup",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.exec.view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Disk Space Usage",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Average Hours To Response",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f042c901b8daea4f",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"hiddenQueryKeys\":[\"B\",\"C\"],\"svp\":{\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"sparkline\":{\"show\":false,\"color\":\"\"},\"gauge\":{\"show\":true},\"label\":\"%\",\"rounding\":1},\"series\":{}}",
+      "panelKey": "panel0C2A7B4DADA7DB43",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Average Hours To Response",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0C2A7B4DADA7DB43",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

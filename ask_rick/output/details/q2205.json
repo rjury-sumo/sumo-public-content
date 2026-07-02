@@ -1,0 +1,65 @@
+{
+  "id": "q2205",
+  "hash": "1fe6aee12fdb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n|  sum(sc_bytes) as Bytes_Served\n| Bytes_Served/(1024*1024*1000) as Gbytes_Served\n| fields Gbytes_Served",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx - Visitor Traffic Insight",
+      "dashboardDescription": "The Nginx - Visitor Traffic Insight Dashboard provides detailed information on the top documents accessed, top referrers, top search terms from popular search engines, and the media types served.",
+      "panelTitle": "Bytes Served",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-E968E0A3A63E3947",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"svp\":{\"option\":\"Average\",\"label\":\"GBytes Served\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"rounding\":2,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false},\"labelFontSize\":8},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

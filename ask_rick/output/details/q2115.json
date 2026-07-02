@@ -1,0 +1,139 @@
+{
+  "id": "q2115",
+  "hash": "93222266d3c7",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n|  sum(events) as events by sourcename\n | sort sourcename asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookup_datamap",
+      "description": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+      "dataType": "ANY",
+      "value": "/shared/lookups/log_datamap"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "index",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "any_meta_regex",
+      "description": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+      "dataType": "ANY",
+      "value": ".*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/metadata_explorer_2025.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metadata Explorer",
+      "dashboardDescription": "",
+      "panelTitle": "_sourcename",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelBD95671EB5112B48",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Metadata Found For Logs Matching the Filter Scope"
+      ],
+      "variables": [
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "index",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "any_meta_regex",
+          "defaultValue": ".*",
+          "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_partitions",
+          "defaultValue": "/shared/lookups/partitions",
+          "values": "/shared/lookups/partitions",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_datamap",
+          "defaultValue": "/shared/lookups/log_datamap",
+          "values": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "service.us2",
+          "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "metadata_values_by",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcename,sourcecategory,index",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

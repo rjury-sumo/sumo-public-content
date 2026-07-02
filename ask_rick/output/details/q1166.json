@@ -1,11 +1,36 @@
 {
   "id": "q1166",
-  "hash": "6fc76529160d",
+  "hash": "aee9724826a0",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as daily_ingest_gbytes",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 5m\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n| compare timeshift 1d",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tracingsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_tracing_volume"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,21 +38,25 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Logs",
-      "dashboardDescription": "The Logs dashboard helps you see your log ingest volume between default and non-default indexes along with the predicted growth. This dashboard also provides predicted growth for scan volume.",
-      "panelTitle": "Ingest Volume",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Today vs Yesterday of {{Tracingsources}}  by {{Unit}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B557CD5D9153F845",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"gbytes\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":15,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Log Ingest"
-      ],
+      "panelKey": "panel230D55689E47E849",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[\"A\"],\"series\":{},\"overrides\":[{\"series\":[\"billedBytes\"],\"queries\":[],\"properties\":{\"name\":\"Today\"}},{\"series\":[\"billedBytes_1d\"],\"queries\":[],\"properties\":{\"name\":\"Yesterday\"}},{\"series\":[\"spansCount\"],\"queries\":[],\"properties\":{\"name\":\"Today\"}},{\"series\":[\"spansCount_1d\"],\"queries\":[],\"properties\":{\"name\":\"Yesterday\"}}]}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "Subscribed_Average_Daily_Log_Ingest_Capacity",
-          "defaultValue": "100",
-          "values": "100",
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

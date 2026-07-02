@@ -1,0 +1,29 @@
+{
+  "id": "q1211",
+  "hash": "fcbc279a2f43",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> .01,value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories, sum(credits) as credits, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB \n| credits/gbytes as %\"cr/gb\" \n| avg(%\"cr/gb\") as %\"cr/gb\"",
+  "queryParameters": [],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/audit/usage_key_stats.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Cr/GB Log Ingest",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-FFFFDEEEB293B84F",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credits Per GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":17,\"color\":\"#DFBE2E\"},{\"from\":17,\"to\":50,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":30}},\"series\":{}}",
+      "rowContext": [
+        "Log Ingestion"
+      ],
+      "variables": []
+    }
+  ]
+}

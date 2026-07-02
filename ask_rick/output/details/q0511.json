@@ -1,9 +1,9 @@
 {
   "id": "q0511",
-  "hash": "43e1e03af06c",
+  "hash": "56f6af3dea32",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes\n| timeslice 1d\n| sum(gbytes) as gbytes by _timeslice",
+  "query": "_index=sumologic_volume _sourceCategory = \"sourcehost_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourceHost, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| timeslice 1h\n| sum(gbytes) as daily_ingest_gbytes by _timeslice, sourceHost\n| transpose row _timeslice column sourceHost",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,27 +26,19 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Logs",
-      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
-      "panelTitle": "Daily Ingest (GB)",
+      "dashboardName": "Data Volume - Logs by Metadata Fields",
+      "dashboardDescription": "The Data Volume - Logs by Metadata Fields dashboard allows you to view log ingest volume by tier, source categories, collectors and hosts.",
+      "panelTitle": "Ingest by Source Host",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [
-        "Note: Daily Ingest Capacity"
-      ],
+      "panelKey": "panelPANE-5",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [],
       "variables": [
         {
           "name": "Tier",
           "defaultValue": "*",
           "values": "Continuous,Frequent,Infrequent,CSE,Flex",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Daily_Log_Ingest_Capacity",
-          "defaultValue": "100",
-          "values": "100",
           "allowMultiSelect": false
         }
       ]

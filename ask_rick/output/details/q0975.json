@@ -1,11 +1,36 @@
 {
   "id": "q0975",
-  "hash": "95139eaf1509",
+  "hash": "ae5e58021e7d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content ContentExported\n| json \"eventName\" as EventName nodrop\n| where EventName=\"ContentExported\"\n| count as Count by EventName\n| fillmissing values(\"ContentExported\") in EventName",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentUpdated OR ContentMoved OR ContentCopied)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\" as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\") AND AdminMode=\"false\"\n| where  UserIp matches \"{{UserIp}}\" and  EventName matches \"{{EventName}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\") in EventName\n| transpose row _timeslice column EventName",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,15 +38,30 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Content Management Overview",
-      "dashboardDescription": "Content - Overview Dashboard provides a high-level view of system activities with data on content activities over time, top applications, top content, publicly accessed content, and exported content. You can also view data on user activity and top content on which permission are added and deleted.",
-      "panelTitle": "Content Exported",
+      "dashboardName": "Enterprise Audit - Updated, Moved, Copied Content",
+      "dashboardDescription": "Content - Updated, Moved, Copied DashBoard provides detailed information about content that is updated, moved and copied. The dashboard is organized according to activities performed  by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Trend - User Mode",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelbbf84921977a7b48",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
-      "rowContext": [],
-      "variables": []
+      "panelKey": "panele3322ce0b5eddb4b",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

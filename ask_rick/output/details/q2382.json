@@ -1,0 +1,109 @@
+{
+  "id": "q2382",
+  "hash": "50b2fe97be2d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "( _view=data_volume_custom_* )\ndimension ={{view}}\nitem={{value_filter}}\ndatatier = {{tier_filter}}\n| sum(events) as events, sum(credits) as credits,sum(gbytes) as gbytes by datatier,dimension, item\n| item as i\n// remove long categories\n| if (length(item) > {{max_chrs}},concat(substring(item,0,{{max_chrs}}),\"...\"),item) as item\n| count_distinct(i) as categories,sum(events) as events, sum(credits) as credits,sum(gbytes) as gbytes by datatier,dimension,item\n\n| credits/gbytes as %\"cr/gb\"\n| sort credits\n| total credits as tc | (credits/tc) * 100 as cr_pct | fields -tc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "view",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_filter",
+      "description": "filter_value",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier_filter",
+      "description": "Continuous,Frequent,Infrequent",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "max_chrs",
+      "description": "25,2530,35,45,50",
+      "dataType": "ANY",
+      "value": "35"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/data-tiers-viewbased-dashboard/Data Tiers Console - Custom Views.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Data Tiers Console - Custom Views",
+      "dashboardDescription": "",
+      "panelTitle": "Tabular View - Credits Used By Tier, Dimension and Item. Items are rolled up to max_chrs",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6DA0287589046847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "view",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "30m",
+          "values": "5m,15m,30m,1h,6h,24h",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_filter",
+          "defaultValue": "*",
+          "values": "filter_value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier_filter",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_chrs",
+          "defaultValue": "35",
+          "values": "25,2530,35,45,50",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

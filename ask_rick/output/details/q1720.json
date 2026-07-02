@@ -1,0 +1,91 @@
+{
+  "id": "q1720",
+  "hash": "78b25cb16d7d",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_network_transmit_bytes_total cluster={{cluster}} pod={{pod}}| quantize to {{quantization_interval}} | rate | sum by pod | eval _value/1000000 | topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantization_interval",
+      "description": "1m,5m,15m",
+      "dataType": "ANY",
+      "value": "1m"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Pod",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Network - Incoming and Outgoing (MB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8E776726BA494842",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme4\"},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Incoming - {{pod}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Outgoing - {{pod}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantization_interval",
+          "defaultValue": "1m",
+          "values": "1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

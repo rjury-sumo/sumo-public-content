@@ -1,9 +1,9 @@
 {
   "id": "q0295",
-  "hash": "1c04985b4d19",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=node_load5  node={{node}} | quantize 1m| max by node | topk(5,max)",
+  "hash": "326970861e8f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_rum_errors service={{service}} application={{application}} %\"deployment.environment\"={{environment}}\n//| json field=_raw \"$['error.stack']\" as error_stack nodrop\n//| json field=_raw \"$['error.message']\" as error_message nodrop\n//| json field=_raw \"$['error.name']\" as error_name nodrop\n//| json field=_raw \"type\" as type nodrop\n//| json field=_raw \"log\" nodrop\n//| json field=_raw \"$['http.url']\" as http_url nodrop\n//| json field=_raw \"$['element.xpath']\" as xpath nodrop\n//| json field=_raw \"type\" nodrop\n//\n| count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "service",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,39 +24,61 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
+      "name": "application",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/RUM/Rum_browser_errors.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes Overview dashboard provides high-level information on the health and performance of the cluster nodes.",
-      "panelTitle": "Top 5 Nodes Load Average (15 Min)",
+      "folder": null,
+      "dashboardName": "RUM Browser Errors",
+      "dashboardDescription": "",
+      "panelTitle": "Total Errors",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B6321AB39810E949",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"5\",\"markerType\":\"circle\"},\"color\":{\"family\":\"scheme2\"},\"legend\":{\"verticalAlign\":\"bottom\",\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"CPUs\"}},\"series\":{},\"overrides\":[{\"series\":[\"metric=max(node_load1)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 1\"}},{\"series\":[\"metric=max(node_load15)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 15\"}},{\"series\":[\"metric=max(node_load5)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 5\"}}],\"hiddenQueryKeys\":[\"A\",\"B\"]}",
-      "rowContext": [
-        "Note: Selecting cluster name and node is mandatory for dashboard to work"
-      ],
+      "panelKey": "panel20ADFE1E81180B45",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Errors\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "node",
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword(s),error,error*,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

@@ -1,0 +1,73 @@
+{
+  "id": "q2079",
+  "hash": "f22599180a83",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}}  metric=kube_pod_container_status_restarts_total job=kube-state-metrics \n| quantize {{quantize_interval}} using max | filter max > 0 | delta counter | sum by pod,container \n| topk(20,sum)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Containers - Top 20 Most Restarts",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel33EF3BCAA1C31A4E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0,\"aggregationType\":\"sum\"}}",
+      "rowContext": [
+        "Containers Frequently Restarting"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

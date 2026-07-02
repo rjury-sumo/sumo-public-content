@@ -1,10 +1,22 @@
 {
   "id": "q0527",
-  "hash": "c043341c4c28",
+  "hash": "54d1c456722b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| timeslice 1h\n| sum(gbytes) as daily_ingest_gbytes by _timeslice, collector\n| transpose row _timeslice column collector",
+  "query": "_index=sumologic_volume _sourcecategory={{LogView}}_and_tier_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| gbytes / duration_in_day as %\"GB/Day\"\n| fields %\"GB/Day\"",
   "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "LogView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
     {
       "autoComplete": {
         "type": "SKIP_AUTOCOMPLETE",
@@ -18,7 +30,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,19 +38,39 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Logs by Metadata Fields",
-      "dashboardDescription": "The Data Volume - Logs by Metadata Fields dashboard allows you to view log ingest volume by tier, source categories, collectors and hosts.",
-      "panelTitle": "Ingest by Collector",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Ingest {{LogView}} - GB/Day",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
-      "rowContext": [],
+      "panelKey": "panelPANE-C0DD99659092E947",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"GB/Day\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Logs"
+      ],
       "variables": [
         {
           "name": "Tier",
           "defaultValue": "*",
           "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

@@ -1,0 +1,29 @@
+{
+  "id": "q1267",
+  "hash": "eb9f92a501cf",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024 as mb \n| timeslice 15m| sum(mb) as mb by collector ,_timeslice\n| if (collector matches \"*_volume\",\"views\",collector) as collector\n| total mb as tmb by _timeslice\n| if (mb/tmb <.01,\"others\",collector) as collector \n| sum(mb) as mbby collector,_timeslice | transpose row _timeslice column collector",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Collection Over Time by collector > 1% ingest",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4AA70633B1CC7B49",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

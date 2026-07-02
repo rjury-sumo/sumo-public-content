@@ -1,0 +1,29 @@
+{
+  "id": "q1262",
+  "hash": "1b4fd3130478",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes _sourcecategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by collector \n| where !(collector matches \"*_volume\") \n| compare timeshift -14d \n| if(isNull(gbytes_14d), 0, gbytes_14d) as gbytes_14d \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes / 1024) as mb\n| round(gbytes_14d / 1024) as mb_baseline \n| where  pct_increase <= -10 and ingest_weight > .5 and ( mb > 100 or mb_baseline > 100)\n//update pct_increase and/or weight value to adjust alert sensitivity\n| concat (round(pct_increase,1),\"% less ingest was: \",round(mb_baseline),\"MB now: \",round(mb),\"MB pct of total:\",round(ingest_weight,1)) as comment\n| last(pct_increase) by collector,comment",
+  "queryParameters": [],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Large Decreases in Collection (10% drop, .5% total ingest, >100mb) vs 14d ago",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD721B480AD8C9B41",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":-25,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":-50,\"to\":-25,\"color\":\"#F2DA73\"},{\"from\":-1000000,\"to\":-50,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"series\":{}}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

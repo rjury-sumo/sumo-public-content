@@ -1,0 +1,29 @@
+{
+  "id": "q2142",
+  "hash": "ff1066862b97",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH triggered\n| parse \"[AlertType=*]\" as type nodrop\n| parse \"[Destination=*]\" as dest nodrop\n| parse \"[Name=*]\" as name nodrop\n| count as fired by name, type\n| sort fired \n| total fired as total\n| (fired/total)*100 as pct\n| round(pct,2) as pct",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/Alert Tuning - Monitor or Schedule Search.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alert Tuning - Monitor and Scheduled Searches",
+      "dashboardDescription": "",
+      "panelTitle": "Alerts Fired (Sched. Search)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel60495FEE92C98848",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Scheduled Searches"
+      ],
+      "variables": []
+    }
+  ]
+}

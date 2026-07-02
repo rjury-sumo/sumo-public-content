@@ -1,9 +1,9 @@
 {
   "id": "q0367",
-  "hash": "393ceaa424f1",
+  "hash": "cad2aefd7da5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*falco* cluster={{cluster}} output_fields rule priority output \n | json  \"log.priority\" as priority \n| json  \"log.rule\" as rule\n| where rule=\"Write below rpm database\"\n| count",
+  "query": "_index=_trace_spans  \"db.system\" {{keywords}}\nservice={{service}}\n| json field=tags \"$['deployment.environment']\" as environment nodrop | where environment matches \"{{environment}}\"\n| json field=tags \"$['db.system']\" as db_system | where db_system matches \"{{db_system}}\"\n| json field=tags \"$['db.name']\" as db_name nodrop | where db_name matches \"{{db_name}}\"\n//| json field=tags \"$['db.sql.table']\" as db_sql_table nodrop\n//| json field=tags \"$['telemetry.sdk.version']\" as telemetry_sdk_version nodrop\n//| json field=tags \"$['telemetry.sdk.language']\" as telemetry_sdk_language nodrop\n//| json field=tags \"$['db.statement']\" as db_statement nodrop\n//| json field=tags \"$['db.connection_string']\" as db_connection_string nodrop\n| if (statuscode=\"ERROR\",1,0) as errors\n| duration / 1000000 as ms\n| count as spans,sum(errors) as errors,sum(ms) as total_ms,avg(ms) as avg_ms by service,environment,db_system,db_name //,telemetry_sdk_language,telemetry_sdk_version\n| round(spans) as spans",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,34 +12,106 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "keywords",
+      "description": "any keyword string",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "service",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "prod"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_system",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing - database operations.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Rules Triggered v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides detailed information of anomalous activity, in addition it also provides details of the OOB Falco rules triggered by the activity on your infrastructure.",
-      "panelTitle": "Write below rpm database",
+      "folder": null,
+      "dashboardName": "Tracing - Database Operations",
+      "dashboardDescription": "",
+      "panelTitle": "Database Details By Service,Environment, DB system and DB",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-22d4377398cee94a",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\" \",\"noDataString\":\"0\"}}",
+      "panelKey": "panel72E20154A3B21942",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"decimals\":0},\"version\":3,\"settings\":{\"table\":{\"version\":2,\"configuration\":{\"textTruncationMode\":\"none\",\"fontSize\":\"medium\",\"fontSizeOverride\":null,\"tableState\":null}},\"bar\":{\"chartType\":\"bar\",\"version\":2,\"configuration\":{\"colors\":{\"index\":null,\"overrides\":null},\"legend\":{\"enabled\":true,\"position\":\"right\",\"dimensions\":{\"width\":null,\"height\":null}},\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"xAxis\":{\"title\":null,\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":null,\"logScale\":false,\"min\":null,\"max\":null,\"bands\":null,\"minorTickInterval\":null}],\"seriesInfo\":{},\"showLineMarker\":true,\"lineMouseTracking\":true,\"multiSeriesTooltipOrder\":\"none\"}},\"column\":{\"chartType\":\"column\",\"version\":2,\"configuration\":{\"colors\":{\"index\":null,\"overrides\":null},\"legend\":{\"enabled\":true,\"position\":\"right\",\"dimensions\":{\"width\":null,\"height\":null}},\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"xAxis\":{\"title\":null,\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":null,\"logScale\":false,\"min\":null,\"max\":null,\"bands\":null,\"minorTickInterval\":null}],\"seriesInfo\":{},\"showLineMarker\":true,\"lineMouseTracking\":true,\"multiSeriesTooltipOrder\":\"none\"}},\"line\":{\"chartType\":\"line\",\"version\":2,\"configuration\":{\"colors\":{\"index\":null,\"overrides\":null},\"legend\":{\"enabled\":true,\"position\":\"right\",\"dimensions\":{\"width\":null,\"height\":null}},\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"xAxis\":{\"title\":null,\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":null,\"logScale\":false,\"min\":null,\"max\":null,\"bands\":null,\"minorTickInterval\":null}],\"seriesInfo\":{},\"showLineMarker\":true,\"lineMouseTracking\":true,\"multiSeriesTooltipOrder\":\"none\"}},\"area\":{\"chartType\":\"area\",\"version\":2,\"configuration\":{\"colors\":{\"index\":null,\"overrides\":null},\"legend\":{\"enabled\":true,\"position\":\"right\",\"dimensions\":{\"width\":null,\"height\":null}},\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"xAxis\":{\"title\":null,\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":null,\"logScale\":false,\"min\":null,\"max\":null,\"bands\":null,\"minorTickInterval\":null}],\"seriesInfo\":{},\"showLineMarker\":true,\"lineMouseTracking\":true,\"multiSeriesTooltipOrder\":\"none\"}},\"pie\":{\"chartType\":\"pie\",\"version\":3,\"configuration\":{\"donutMode\":true,\"colors\":{\"index\":null,\"overrides\":null},\"legend\":{\"enabled\":true,\"position\":\"right\"},\"plotOptions\":{\"label\":{\"truncationMode\":\"middle\"},\"showSliceBorders\":true,\"maxNumOfPieSlices\":\"10\"}}},\"boxplot\":{\"chartType\":\"boxplot\",\"version\":1,\"configuration\":{\"xAxis\":{\"title\":null,\"label\":{\"truncationMode\":\"middle\"}},\"yAxis\":{\"title\":null,\"min\":null,\"max\":null}}},\"map\":{\"chartType\":\"map\",\"version\":1,\"configuration\":{\"maptype\":\"cluster\"}},\"svv\":{\"version\":2,\"configuration\":{\"colorOverride\":null,\"backgroundColorEnabled\":false,\"noDataBehavior\":{\"enabled\":false,\"color\":\"#cccccc\",\"value\":null,\"isString\":null},\"valueType\":{\"number\":{\"showNumber\":true,\"unit\":null,\"colorsByValueRange\":null},\"boolean\":{\"trueColor\":\"#6aa84f\",\"falseColor\":\"#cc0000\"}},\"labels\":{\"prefix\":{\"enabled\":false,\"text\":\"\",\"align\":\"left\"},\"postfix\":{\"enabled\":false,\"text\":\"\",\"align\":\"right\"}}}},\"sankey\":{\"version\":1,\"configuration\":{}},\"text\":{\"version\":1,\"configuration\":{\"text\":null}},\"metrics\":{\"version\":2,\"configuration\":{\"blockSettings\":{},\"viewType\":\"timeline\",\"zoom\":\"xy\",\"yAxis\":{\"defaults\":[{\"name\":\"\"},{\"name\":\"\"}],\"custom\":[{},{}]},\"xAxis\":{\"scrubber\":true},\"outliers\":{\"enabled\":true,\"top\":1,\"scope\":\"Chart\",\"cyclicality\":false,\"threshold\":7,\"autoShowBand\":true},\"colorFamily\":\"METRIC_DEFAULT\"}},\"common\":{\"version\":1,\"configuration\":{\"drilldown\":{\"fallback\":{\"target\":{\"id\":null,\"name\":null,\"enabled\":null}}}}}},\"series\":{}}",
       "rowContext": [
-        "Untitled"
+        "Other Details"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
+          "defaultValue": "prod",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_system",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

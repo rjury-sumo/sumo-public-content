@@ -1,0 +1,96 @@
+{
+  "id": "q1410",
+  "hash": "48f35de438cf",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} (metric=node_network_receive_drop_total OR metric=node_network_transmit_drop_total) !device=veth* | quantize to {{quantization_interval}} using sum | rate | sum | quantize to {{quantization_interval}} drop last",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantization_interval",
+      "description": "1m,5m,15m",
+      "dataType": "ANY",
+      "value": "1m"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Cluster",
+      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
+      "panelTitle": "Dropped Network Traffic",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-ed80055593adc94f",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"yellow\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"gauge\":{\"show\":true}},\"hiddenQueryKeys\":[\"D\",\"E\"],\"series\":{}}",
+      "rowContext": [
+        "Overview"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantization_interval",
+          "defaultValue": "1m",
+          "values": "1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Cluster - Overview",
+      "dashboardDescription": "The Kubernetes - Cluster Overview dashboard provides a high-level view of the cluster health, along with details on all the components and resources.",
+      "panelTitle": "Dropped Network Traffic",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-ed80055593adc94f",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"yellow\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"gauge\":{\"show\":true}},\"hiddenQueryKeys\":[\"E\",\"D\",\"B\",\"A\"],\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantization_interval",
+          "defaultValue": "1m",
+          "values": "1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

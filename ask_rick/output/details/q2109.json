@@ -1,0 +1,67 @@
+{
+  "id": "q2109",
+  "hash": "787971b9d53f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n_sourcecategory=sourcehost_and_tier_volume\n//(_sourceCategory = collector_and_tier_volume or _sourcecategory=collector_and_tier_volume or _sourcecategory=source_and_tier_volume )\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as meta_value, dataTier, bytes, count\n| bytes/1Gi as gbytes \n| sum(count) as events,sum(gbytes) as gbytes by collector,meta_value,dataTier,_sourcecategory\n| tolowercase(meta_value) as meta_value\n| where meta_value matches tolowercase(\"{{keyword_matches}}\")  and meta_value matches /(?i){{keyword_regular_expression}}/\n| sum(events) as events, sum(gbytes) as gbytes by meta_value,_sourcecategory,dataTier\n| parse field=_sourcecategory \"*_and_*\" as meta_type,junk | fields -junk,_sourcecategory,_some_matched \n| round(gbytes,3) as gbytes\n| sort meta_value asc,dataTier asc\n| concat(\"_\",meta_type,\"=\",meta_value) as search",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keyword_matches",
+      "description": "*keyword*",
+      "dataType": "ANY",
+      "value": "*some_value*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keyword_regular_expression",
+      "description": ".*",
+      "dataType": "ANY",
+      "value": ".*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/metadata_catalog.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "SumoLogic Metadata Catalog",
+      "dashboardDescription": "",
+      "panelTitle": "SourceHost Found With Search String",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel41073C1CBAF5F84B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "How To Use This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "keyword_matches",
+          "defaultValue": "*some_value*",
+          "values": "*keyword*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keyword_regular_expression",
+          "defaultValue": ".*",
+          "values": ".*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

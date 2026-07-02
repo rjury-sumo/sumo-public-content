@@ -1,9 +1,9 @@
 {
   "id": "q0009",
-  "hash": "d3b7a55a4f0d",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated )\ntokenId\n| json field=_raw \"operator.name\" as tokenname \n| json field=_raw \"operator.tokenId\" as token nodrop\n\n| json field=_raw \"collectorIdentity.collectorId\" as collectorId\n| json field=_raw \"collectorIdentity.collectorName\" as collectorName\n| json \"eventName\",  \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName,  user, userid, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorDeleted\")\n\n//| where user matches \"*\"\n| json field=_raw \"operator.sourceIp\" as ip nodrop\n\n| \"Token\" as interface\n| count by _messagetime, ip,interface,subsystem,eventname,token,tokenname,collectorName, collectorid\n| sum(_count) as changes by ip,interface,subsystem,eventname,token,tokenname,collectorName, collectorid\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| geoip ip \n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| first(collectorName) as example_collector, sum(changes)  as changes by interface,subsystem,eventname,token,tokenname,asn_geo,location\n| sort changes",
+  "hash": "83b38e31d8a2",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "account={{account}}  metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,{{field}} | filter max > 0",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "expected_asn_geo_regex",
-      "description": "regular expression for expected asn geo strings",
+      "name": "account",
+      "description": "",
       "dataType": "ANY",
-      "value": ".*"
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -24,47 +24,113 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "show_asn_geo",
-      "description": "exception,normal",
+      "name": "region",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "instanceid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "honeyComb",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/audit/sumologic_login_api_activity.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch-overview.json",
       "objectType": "Dashboard",
       "folder": null,
-      "dashboardName": "Sumo Logic Login and API Activity",
-      "dashboardDescription": "",
-      "panelTitle": "Collector Registration Via Install Tokens",
+      "dashboardName": "98. AWS EC2 Cloudwatch Metrics Overview",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "Status Check Failed: System",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelBD3870378B292940",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "panelKey": "panel2398E603934BF947",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#98ECA9\"},{\"from\":1,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"series\":{}}",
       "rowContext": [
-        "Collector Registration and Creation"
+        "About"
       ],
       "variables": [
         {
-          "name": "expected_asn_geo_regex",
-          "defaultValue": ".*",
-          "values": "regular expression for expected asn geo strings",
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user",
-          "defaultValue": "*",
-          "values": "",
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "show_asn_geo",
+          "name": "instanceid",
           "defaultValue": "*",
-          "values": "exception,normal",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "account",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0250",
-  "hash": "14f9537034bf",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=node_load5  node={{node}} | quantize 1m| max",
+  "hash": "e8c5e0be7bef",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * {{days}}))\n| tolong(createdtime) as _messagetime\n| timeslice by 1w \n//| timeToDetection / 3600 as timeToDetection\n|( timeassigned - createdtime) / 1000 as s\n| pct(s,25,50,75) , min(s), max(s) by _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,41 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
-      "description": "",
+      "name": "days",
+      "description": "30,60,90,180,365,1000",
       "dataType": "ANY",
-      "value": "*"
+      "value": "365"
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "boxAndWhisker",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Node Load Average",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "Assignment Time Last {{days}} days",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-e6b14061bfc17941",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"markerSize\":\"5\",\"markerType\":\"circle\"},\"color\":{\"family\":\"scheme2\"},\"legend\":{\"verticalAlign\":\"bottom\",\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"CPUs\",\"gridColor\":\"#e2e7e9\"},\"axisX\":{}},\"series\":{},\"overrides\":[{\"series\":[\"metric=max(node_load1)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 1\"}},{\"series\":[\"metric=max(node_load15)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 15\"}},{\"series\":[\"metric=max(node_load5)\"],\"queries\":[],\"properties\":{\"name\":\"Node Load 5\"}}]}",
+      "panelKey": "panel034E8EFB83A88B4E",
+      "visualization": "boxAndWhisker",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0,\"unit\":{\"value\":\"s\",\"isCustom\":false},\"maximum\":604800}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"boxAndWhisker\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"timeSeries\"}}",
       "rowContext": [
-        "Resource Utilization"
+        "Detection, Response and Resolution Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

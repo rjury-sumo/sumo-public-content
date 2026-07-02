@@ -1,85 +1,27 @@
 {
   "id": "q1016",
-  "hash": "bad36f7ede21",
+  "hash": "df227d1e7a06",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPubliclyAccessed\n| json \"eventName\", \"operator.email\", \"contentIdentity.type\",\"viewerIp\" as EventName, UserEmail, ContentName, UserIp  nodrop\n| where EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\" and ContentName matches \"{{ContentName}}\"\n| where EventName=\"ContentPubliclyAccessed\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "ContentName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "map",
+  "queryMode": "SavedSearch",
+  "query": "_index=sumologic_audit_events (_sourceCategory=userSessions or _sourceCategory=collection) (UserLoggedIn OR CollectorCreated OR CollectorUpdated OR CollectorDeleted OR EphemeralCollectorDeleted OR ClobberCollectorDeleted OR CollectorUpgradeRequested OR CollectorUpgradeCompleted)\n| json \"eventName\"  as EventName\n| where EventName in (\"UserLoggedIn\", \"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"EphemeralCollectorDeleted\", \"ClobberCollectorDeleted\", \"CollectorUpgradeRequested\", \"CollectorUpgradeCompleted\")\n| json \"userSession.sourceIp\" as srcIP  nodrop \n| json \"operator.sourceIp\" as  srcIp_1 nodrop\n| if (isNull(srcIp), srcIp_1, srcIp) as srcIp\n| lookup country_name from geo://location on ip=srcIp \n| where country_name in (\"Iran\", \"North Korea\", \"Syria\",\"Sudan\",\"Cuba\",\"Venezuela\")",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Publicly Accessed, Application Installed",
-      "dashboardDescription": "Content - Publicly Accessed, Application DashBoard provides detailed information on installed applications, shared and publicly accessed content. The dashboard is organized according to installed applications and publicly accessed content. For a more granular view of the data, you can filter on Event Type, Content Type, Admin Mode, Visibility using the pre-populated filters.",
-      "panelTitle": "Geo Location - Content Publicly Accsessed",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel17cd7f7b976b0b41",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
-      "rowContext": [
-        "Application Installed"
-      ],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "ContentName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "objectType": "SavedSearch",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - US embargoed countries",
+      "dashboardDescription": "User and Collector activities from Countries under targeted sanctions programs by United States",
+      "panelTitle": "Enterprise Audit - US embargoed countries",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-24h"
     }
   ]
 }

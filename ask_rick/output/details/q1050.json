@@ -1,27 +1,65 @@
 {
   "id": "q1050",
-  "hash": "bf1ce2861098",
+  "hash": "30528620086c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events\n| where _sourceCategory in (\"accessKeys\", \"saml\", \"serviceAllowlist\", \"passwordPolicy\", \"multiFactorAuthentication\")\n| timeslice 1d\n| count as Count by _timeslice, _sourceCategory\n| fillmissing timeslice(1d),\n  values(\"accessKeys\", \"saml\", \"serviceAllowlist\", \"passwordPolicy\", \"multiFactorAuthentication\") in _sourceCategory\n| transpose row _timeslice column _sourceCategory",
-  "queryParameters": [],
-  "viewerType": "column",
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions (UserLoggedOut OR UserLoggedIn OR UserLockedOut OR UserUnlocked OR UserLoginTimedOut)\n| json \"eventName\", \"eventTime\", \"accountId\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, UserIp nodrop\n| json \"userSession.email\", \"userSession.id\" as LoginUser, LoginUserId nodrop\n| json \"sessionIdentity.userEmail\", \"sessionIdentity.userId\" as LogoutUser, LogoutUserId nodrop\n| json \"userIdentity.userEmail\", \"userIdentity.userId\" as LockedUser, LockedUserId nodrop\n| json \"authenticationSource\" as AuthenticationSource nodrop\n| if(isEmpty(LoginUser), if(isEmpty(LogoutUser), if(isEmpty(LockedUser), \"\", LockedUser),LogoutUser), LoginUser) as User\n| if(isEmpty(LoginUserId), if(isEmpty(LogoutUserId), if(isEmpty(LockedUserId), \"\", LockedUserId),LogoutUserId), LoginUserId) as UserId\n| _sourceHost as UserIp\n| where EventName in (\"UserLoggedOut\", \"UserLoggedIn\", \"UserLockedOut\", \"UserUnlocked\", \"UserLoginTimedOut\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by EventName, EventTime, User, UserId, UserIp, AuthenticationSource\n| sort by EventTime\n| fields - _count, UserId\n| limit 100",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Security Management Overview",
-      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
-      "panelTitle": "Activities Over Time",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Events - Recent Sessions",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela80e0908afcfba49",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "panelKey": "panel0cf635a1b7694842",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

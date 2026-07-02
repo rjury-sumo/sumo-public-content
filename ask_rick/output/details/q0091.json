@@ -1,9 +1,9 @@
 {
   "id": "q0091",
-  "hash": "4d286ab62ddf",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}}  metric=up job=kubelet | quantize 2m |  sum",
+  "hash": "1e615b5774b9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n//| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"*\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by value,dataTier\n//| total gbytes as tgb \n//| total gbytes as tgbs by value,datatier\n//| tgbs / tgb as fraction\n//\n//// *** THIS LINE rolls up small sources into 'other' ***\n//| if(( fraction * 100 )> .01,value,\"other\" ) as value\n//| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n//| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n//| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n//| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories,  sum(events) as events,sum(gbytes) as gbytes by datatier,value\n| sort gbytes\n| round(categories) as categories | round(gbytes) as gbytes // | round(pct_GB,2) as pct_GB",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,47 +12,59 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
+      "name": "data_volume_view",
+      "description": "sourcecategory,collector,view",
       "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_max_chr",
+      "description": "35,50,70,250",
+      "dataType": "ANY",
+      "value": "50"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Kubelet",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Data Volume Ingestion Stats by {{data_volume_view}} and Tier",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD3C7732195D42948",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Endpoints\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#82edd6\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":1,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panel8559BCA7B8D8EA48",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
       "rowContext": [
-        "Untitled"
+        "Data Volume Log Ingestion - Sourcecategory"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

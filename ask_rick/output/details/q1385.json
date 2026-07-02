@@ -1,0 +1,67 @@
+{
+  "id": "q1385",
+  "hash": "2610958b3ac3",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}\n// exclude chatty\nnot (tinfo and !(err* or warn* or fail* or retr*))\n| json field=_raw \"log\"\n| parse field=log \"*\\t*\\t*\\t*\" as datetime,level,logger,event\n//| parse regex field=event \"(?<json_data>\\{.+\\})\"\n//| parse regex field=event \"^(?<event_prefix>[^\\r\\n\\{]+)\" nodrop\n//| json field=json_data \"error\" nodrop\n//| json field=json_data \"message\" nodrop\n//| json field=json_data \"code\" nodrop\n//| json field=json_data \"status\" nodrop\n//| json field=json_data \"name\" nodrop\n//| json field=json_data \"kind\" nodrop\n\n//| if(isempty(message),error,message) as description\n| timeslice | count by _timeslice,level | transpose row _timeslice column level",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sumologic"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes-collection-healthcheck-otelcol.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes - Collection Healthcheck (otelcol)",
+      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
+      "panelTitle": "No Info Events- over time by level",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC098F326BC143B4B",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":150,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Error and Warn Logs for Log *otelcol* pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "sumologic",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

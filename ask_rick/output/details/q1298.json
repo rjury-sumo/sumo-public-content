@@ -1,0 +1,109 @@
+{
+  "id": "q1298",
+  "hash": "551062e553ff",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| avg(avg_units) as avg_units,sum(units) as units,sum(credits) as credits by uom,rate,unit,_timeslice\n| avg(avg_units) as avg_units,sum(units) as units,sum(credits) as credits,avg(credits) as %\"cr/day\" by uom,rate,unit\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan\n| sort uom asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{lookup",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "days",
+      "description": "90",
+      "dataType": "ANY",
+      "value": "90"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "21900"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Long Term Credits Report (credits_report lookup)",
+      "dashboardDescription": "Uses the credits_report lookup table to show long term credits consumption.",
+      "panelTitle": "Total Credits and Daily Average Vs Plan (Use avg_units for metric DPM)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel605249409A547949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "/shared/lookups/credits_report",
+          "values": "/shared/lookups/credits_report",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "days",
+          "defaultValue": "90",
+          "values": "90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "anniversary",
+          "defaultValue": "2023/03/11",
+          "values": "yyyy/MM/dd,2023/03/11",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

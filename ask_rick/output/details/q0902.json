@@ -1,27 +1,101 @@
 {
   "id": "q0902",
-  "hash": "25fa05d4c37f",
+  "hash": "ac55a48ccb49",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| count by ruleName\n| compare with timeshift 7d 4\n| order by _count",
-  "queryParameters": [],
-  "viewerType": "table",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"sourceIdentity.sourceId\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceId, Source, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\")\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorName matches \"{{CollectorName}}\"\n| if(isNull(Source), if (isNull(CurrentValue), \"-\", CurrentValue), Source) as Source\n| withtime Source\n| most_recent(Source_withtime) as SourceType by SourceId\n| where SourceType != \"-\"\n| count as Count by SourceType",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "CollectorName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Cloud SIEM - Signal Monitoring",
-      "dashboardDescription": "This dashboard provides times based metrics for CSE Signals.",
-      "panelTitle": "Signal Disappearances by Rule",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Sources Activities",
+      "dashboardDescription": "Collector Sources Activities DashBoard provides detailed information on created, updated and deleted sources, the top collectors where sources were added, active users, and one-day time comparisons. You can use pre-populated filters for a more granular view of selected data.",
+      "panelTitle": "Distribution By Existing Source Type",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7160C17398358942",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panele4dd4e89ba18c846",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "CollectorName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

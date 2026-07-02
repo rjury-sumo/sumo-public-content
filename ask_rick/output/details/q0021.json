@@ -1,33 +1,94 @@
 {
   "id": "q0021",
-  "hash": "08283646d35e",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "#B * 100 along node",
-  "queryParameters": [],
-  "viewerType": "honeyComb",
+  "hash": "dfe59a7dde87",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{raw_log_sourcecategory}}\n{{raw_log_keywords}}\n_siemforward=true\n| ceil((_receipttime - _messagetime)  / (1000)) as lag_s_ingest\n| values(_collector) as collectors,values(_source) as sources,count as events,min(lag_s_ingest) as min_lag_receipt, avg(lag_s_ingest) as avg_lag_receipt,max(lag_s_ingest) as max_lag_receipt by _sourcecategory\n| \"1.OK\" as state\n| if(max_lag_receipt > {{max_lag_error_secs}},\"2.ERR: high lag\\nCheck ingest pipeline.\", state) as state\n| if(min_lag_receipt <0,\"3.TZERR: future time\\nCheck source TZ config.\",state) as state\n| sort state,max_lag_receipt",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "raw_log_sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "raw_log_keywords",
+      "description": "Any keywords in raw log or record fields,foo,bar*,(foo or bar)",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "max_lag_error_secs",
+      "description": "1200",
+      "dataType": "ANY",
+      "value": "1200"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSE_Lag_Analysis/cse_lag_analysis.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "CPUs Usage per Node",
+      "folder": null,
+      "dashboardName": "CSE Lag Analysis",
+      "dashboardDescription": "",
+      "panelTitle": "Raw Log CIP Event Ingest Lag Stats for _sourcecategory={{raw_log_sourcecategory}}  _siemforward=true. log keywords: {{raw_log_keywords}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-b72be265a0f6b943",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"honeyComb\"},\"hiddenQueryKeys\":[\"B\",\"C\"],\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#69DB4A\"},{\"from\":null,\"to\":null,\"color\":\"#E1C60E\"},{\"from\":null,\"to\":null,\"color\":\"#C73A25\"}]},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"honeyComb\",\"name\":\"node={{node}}\"}}],\"series\":{}}",
+      "panelKey": "panelPANE-D8E75FD58CEFB848",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
       "rowContext": [
-        "Nodes"
+        "CIP Raw Log Ingestion Lag"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "raw_log_sourcecategory",
+          "defaultValue": "*",
           "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "raw_log_keywords",
+          "defaultValue": "*",
+          "values": "Any keywords in raw log or record fields,foo,bar*,(foo or bar)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "signal_keywords",
+          "defaultValue": "*",
+          "values": "Any keyword(s) in signal payload. foo,bar*,( foo or bar)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cip_instance",
+          "defaultValue": "https://live.us2.sumologic.com",
+          "values": "https://service.sumologic.com",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_lag_error_secs",
+          "defaultValue": "1200",
+          "values": "1200",
           "allowMultiSelect": false
         }
       ]

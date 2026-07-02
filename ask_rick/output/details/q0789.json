@@ -1,24 +1,11 @@
 {
   "id": "q0789",
-  "hash": "56234717e6e5",
+  "hash": "79a8669e2f7a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"insight.severity\" \n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by severity\n| fields severity",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "insightid",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where insight_status = \"closed\"\n| timeslice 1d\n| where insight_severity= \"3\"\n| avg(insight_time_to_detection) by _timeslice\n| round(_avg / 60) as _avg_low\n| fields - _avg\n| order by _timeslice asc",
+  "queryParameters": [],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Insight Explorer",
-      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
-      "panelTitle": "Severity",
+      "dashboardName": "Cloud SIEM - SOC KPIs",
+      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
+      "panelTitle": "Average Hours to Detection",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-356A66FABEB25B41",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"table\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Label\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Insight Details"
-      ],
-      "variables": [
-        {
-          "name": "insightid",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelPANE-D83C9C4E9F1FE949",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#bf2121\",\"displayType\":\"smooth\",\"name\":\"High Severity\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#116b25\",\"displayType\":\"smooth\",\"name\":\"Low Severity\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"color\":\"#dfbe2e\",\"displayType\":\"smooth\",\"name\":\"Medium Severity\"}}]}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

@@ -1,0 +1,85 @@
+{
+  "id": "q2322",
+  "hash": "9d68e0668ac5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches by user_name | sort searches",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "jane.doe*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_pattern",
+      "description": "*mycategory*,*_datatier*,*_index*,*ategory*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_regex",
+      "description": ".*,^.,a|b|c",
+      "dataType": "ANY",
+      "value": "^."
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/copilot_use_v2.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Copilot or Mobot Usage",
+      "dashboardDescription": "Dashboard uses search audit data to show queries run by copilot or mobot.",
+      "panelTitle": "Top Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDD36D389BFDB4A4A",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":20,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "jane.doe*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_regex",
+          "defaultValue": "^.",
+          "values": ".*,^.,a|b|c",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_pattern",
+          "defaultValue": "*",
+          "values": "*mycategory*,*_datatier*,*_index*,*ategory*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

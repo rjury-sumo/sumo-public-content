@@ -1,29 +1,83 @@
 {
   "id": "q0917",
-  "hash": "c9892c0707b7",
+  "hash": "9f3d697d9960",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| where vendor = \"Duo Security\"\n| json field=entities \"[0].type\" as entity_type nodrop\n| count \n| sort by _count",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingForIndexEnabled OR DataForwardingForIndexUpdated OR DataForwardingForIndexDisabled)\n| json \"eventName\", \"eventTime\", \"indexName\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"dataForwarding\", \"from\", \"to\" as EventName, EventTime, IndexName, User, UserId, UserIp, dataForwarding, PreviousValue, CurrentValue nodrop\n| where EventName in (\"DataForwardingForIndexEnabled\", \"DataForwardingForIndexUpdated\", \"DataForwardingForIndexDisabled\") \n| where  EventName matches \"{{EventName}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Cloud SIEM - Signals by Product",
-      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
-      "panelTitle": "Duo Security",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Index Activities",
+      "dashboardDescription": "Data Forwarding Index Activities DashBoard provides detailed information about data forwarding indexes that were created using partitions and scheduled views. You can review trends, geographical locations for data forwarding index activities, one-day time shift comparisons, user activities, as well as data on disabled indexes and recent index activities.",
+      "panelTitle": "Geo Location",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelE8BE2A178BEDF841",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Signals\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Duo Security"
-      ],
-      "variables": []
+      "panelKey": "panel8ba2a0b58119c945",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

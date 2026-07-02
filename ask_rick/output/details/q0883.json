@@ -1,9 +1,9 @@
 {
   "id": "q0883",
-  "hash": "bbfd8b1f7099",
+  "hash": "9c36ce3c15d9",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\" AND !(isBlank(device_ip))\n| count by device_ip | fields -_count",
+  "query": "_index=sec_signal \n {{{keywords}}}\n \n| where !(isempty(suppressedreasons))\n| if (isempty(suppressedReasons),\"NO\",\"YES\") as suppressed\n| where suppressed = \"YES\"\n| if (suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n| sum(is_suppressed) as suppressed by ruleName | sort by suppressed",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_username",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - User Telemetry",
-      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
-      "panelTitle": "Distinct Addresses List",
+      "folder": "Signal Analysis",
+      "dashboardName": "Signal Analysis - Suppression",
+      "dashboardDescription": "This dashboard shows an overview and some detailed tabular views for reflected CSE Signal events, specifically mapping, parsers and suppression.",
+      "panelTitle": "Rule Signal Counts  Showing Suppression Count",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelB9BD0501BCE26B4D",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
-      "rowContext": [],
+      "panelKey": "panel0A9E954A96FCAB46",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":0,\"labelFontSize\":10,\"title\":\"rule_name\",\"labelMaxWidth\":250,\"labelWrap\":false},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "About"
+      ],
       "variables": [
         {
-          "name": "user_username",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0019",
-  "hash": "4291637e0ae6",
+  "hash": "d5c75dc8dcfe",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=node_cpu_seconds_total mode=idle | rate | avg | eval 1 - _value | eval _value*100 | quantize to 1m drop last",
+  "query": "account={{account}} {{field}}={{{value}}} region={{region}} instanceid={{instanceid}} namespace={{namespace}} metric=DedicatedHostCPUUtilization statistic=average| avg by  instanceid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,58 +12,131 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "account",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "region",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "instanceid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "timeSeries",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "CPU Usage",
+      "folder": null,
+      "dashboardName": "99. AWS EC2 Cloudwatch Metrics - Custom Tags",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "DedicatedHostCPUUtilization (If applicable)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0e9a3375829ca84c",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"useBackgroundColor\":false,\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"gauge\":{\"show\":true}},\"series\":{}}",
+      "panelKey": "panel653018F79C88EA4A",
+      "visualization": "timeSeries",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\"},\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Disk Write Bytes\",\"unit\":{\"value\":\"B\",\"isCustom\":false}},\"axisX\":{\"title\":\"\"}},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}]}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "account",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster Overview dashboard provides a high-level view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "CPU Usage",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0e9a3375829ca84c",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"useBackgroundColor\":false,\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"gauge\":{\"show\":true}},\"series\":{}}",
-      "rowContext": [
-        "Note: Selecting cluster name is mandatory for dashboard to work"
-      ],
-      "variables": [
+        },
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "region",
+          "defaultValue": "*",
           "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instanceid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Table_GroupBy",
+          "defaultValue": "aws:cloudformation:stack-name",
+          "values": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
           "allowMultiSelect": false
         }
       ]

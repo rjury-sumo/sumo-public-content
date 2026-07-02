@@ -1,0 +1,73 @@
+{
+  "id": "q2057",
+  "hash": "42e2a91d3438",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}}  metric=kube_node_status_condition job=kube-state-metrics not condition=ready  status=true | quantize {{quantize_interval}} using max | filter max > 0 | max by cluster,condition,node | sum by cluster,condition",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "kube-state-metrics Clusters With Nodes Not Ready",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelFE33DCA58A5BD849",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+      "rowContext": [
+        "Node Status"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

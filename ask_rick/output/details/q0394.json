@@ -1,9 +1,9 @@
 {
   "id": "q0394",
-  "hash": "2019daed18ee",
+  "hash": "705bc3119237",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "metric=container_network_transmit_bytes_total cluster={{cluster}} service={{service}}| quantize 1m | rate | sum by service | eval _value/1000000 | topk(500,max)",
+  "query": "application={{application}}\nservice={{service}} deployment.environment={{environment}} metric=service_operation_errors  | quantize using sum | sum by operation",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "application",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -27,43 +27,55 @@
       "name": "service",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "prod"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing.metrics.contentfromtrace.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Network - Incoming and Outgoing (MB)",
+      "folder": null,
+      "dashboardName": "Tracing Metrics contentfromtrace",
+      "dashboardDescription": "",
+      "panelTitle": "Service Operation Errors",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3F072E1182062A40",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme4\"},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Incoming - {{service}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Outgoing - {{service}}\"}}],\"series\":{}}",
+      "panelKey": "panel85637D2A9705594F",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":true}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"horizontalAlign\":\"right\",\"maxWidth\":425,\"maxHeight\":50,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"latest\",\"max\",\"avg\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{operation}}\"}}]}",
       "rowContext": [
-        "Resource Utilization"
+        "Top K Performance History Filtered by application: {{application}} env: {{environment}} service: {{service}}"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
+          "name": "environment",
+          "defaultValue": "prod",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
           "name": "service",
-          "defaultValue": null,
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

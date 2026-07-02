@@ -1,10 +1,23 @@
 {
   "id": "q1141",
-  "hash": "72a727233a5c",
+  "hash": "8596cfe9dceb",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| count as queries by user_name, analytics_tier\n| topk(10,user_name) by analytics_tier | fields -_rank\n| transpose row analytics_tier column user_name",
-  "queryParameters": [],
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches\"{{Metricsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints by collector\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| top 5 collector by %\"DPM\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Metricsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_metrics_volume"
+    }
+  ],
   "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -12,25 +25,33 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - User Insights",
-      "dashboardDescription": "The Enterprise Search Audit - User Insights dashboard provides a high-level view to understand who are the key users of  search in your account. The dashboard panels provide details about search usage of top users in terms of search query count, data scanned and retrieved by tiers.",
-      "panelTitle": "Top 10 Users by Query Count per Tier",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Top 5 {{Metricsources}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel3d61a81eb00fab4b",
+      "panelKey": "panelPANE-7",
       "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
-      "rowContext": [],
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"collector\",\"hideLabels\":true},\"axisY\":{\"title\":\"DPM\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Metrics"
+      ],
       "variables": [
         {
-          "name": "analytics_tier",
-          "defaultValue": null,
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
           "values": null,
           "allowMultiSelect": false
         }

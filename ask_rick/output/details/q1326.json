@@ -1,0 +1,288 @@
+{
+  "id": "q1326",
+  "hash": "13c06be8acfd",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric={{disk_metric}}  {{host_metric}}={{host_value}} \n{{filter_field}}={{filter_value}} \nfield=Percent_Free_Space\n| avg by {{host_metric}},{{disk_name}}\n| bottomk({{N}},latest)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "disk_metric",
+      "description": "Disk_UsedPercent,win_disk",
+      "dataType": "ANY",
+      "value": "win_disk"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "host_metric",
+      "description": "_sourcehost,host.name,host,_collector",
+      "dataType": "ANY",
+      "value": "host"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "host_value",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "filter_field",
+      "description": "_sourcehost,_sourcecategory,application,service,location,environment,account",
+      "dataType": "ANY",
+      "value": "_sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "filter_value",
+      "description": "a,*b*,c/d/e,etc",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "disk_name",
+      "description": "devname,what disk or volume tag name is,instance",
+      "dataType": "ANY",
+      "value": "instance"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "N",
+      "description": "10,20,25,30",
+      "dataType": "ANY",
+      "value": "20"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/host metrics/host_top_N_telegraf_win_perf.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Host Metrics Telegraf Win",
+      "dashboardDescription": "",
+      "panelTitle": "Bottom Percent_Free_Space  {{host_metric}},{{disk_name}} {{disk_metric }}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel07499DAAA660D848",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":15,\"to\":100,\"color\":\"#28aa55\"},{\"from\":5,\"to\":15,\"color\":\"#f6c851\"},{\"from\":-1,\"to\":5,\"color\":\"#f36644\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"title\":{\"fontSize\":16},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "N",
+          "defaultValue": "20",
+          "values": "10,20,25,30",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "host_metric",
+          "defaultValue": "host",
+          "values": "_sourcehost,host.name,host,_collector",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "host_value",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "filter_field",
+          "defaultValue": "_sourcecategory",
+          "values": "_sourcehost,_sourcecategory,application,service,location,environment,account",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "filter_value",
+          "defaultValue": "*",
+          "values": "a,*b*,c/d/e,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cpu_metric",
+          "defaultValue": "win_cpu",
+          "values": "cpu_total,win_cpu",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "mem_metric",
+          "defaultValue": "win_swap ",
+          "values": "Mem_UsedPercent,win_swap",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "disk_metric",
+          "defaultValue": "win_disk",
+          "values": "Disk_UsedPercent,win_disk",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "disk_name",
+          "defaultValue": "instance",
+          "values": "devname,what disk or volume tag name is,instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_metric_a",
+          "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "values": "any_other_metric_name,Disk_Queue,win_disk field=\"Current_Disk_Queue_Length\"",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_metric_b",
+          "defaultValue": "win_system field=\"Processor_Queue_Length\"",
+          "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,win_system field=\"Processor_Queue_Length\"",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cpu_fields",
+          "defaultValue": "field=Percent_Idle_time instance=_Total | eval 100 - _value",
+          "values": "field=Percent_Idle_time instance=_Total | eval 100 - _value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tabular_metric",
+          "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "values": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/host metrics/host_top_N_telegraf_win_perf.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Host Metrics Telegraf Win",
+      "dashboardDescription": "",
+      "panelTitle": "Bottom Percent_Free_Space {{disk_metric}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel882E65948B2A1B48",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":100}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "N",
+          "defaultValue": "20",
+          "values": "10,20,25,30",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "host_metric",
+          "defaultValue": "host",
+          "values": "_sourcehost,host.name,host,_collector",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "host_value",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "filter_field",
+          "defaultValue": "_sourcecategory",
+          "values": "_sourcehost,_sourcecategory,application,service,location,environment,account",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "filter_value",
+          "defaultValue": "*",
+          "values": "a,*b*,c/d/e,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cpu_metric",
+          "defaultValue": "win_cpu",
+          "values": "cpu_total,win_cpu",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "mem_metric",
+          "defaultValue": "win_swap ",
+          "values": "Mem_UsedPercent,win_swap",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "disk_metric",
+          "defaultValue": "win_disk",
+          "values": "Disk_UsedPercent,win_disk",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "disk_name",
+          "defaultValue": "instance",
+          "values": "devname,what disk or volume tag name is,instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_metric_a",
+          "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "values": "any_other_metric_name,Disk_Queue,win_disk field=\"Current_Disk_Queue_Length\"",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_metric_b",
+          "defaultValue": "win_system field=\"Processor_Queue_Length\"",
+          "values": "any_other_metric_name,CPU_LoadAvg_1min,CPU_IOWait,win_system field=\"Processor_Queue_Length\"",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cpu_fields",
+          "defaultValue": "field=Percent_Idle_time instance=_Total | eval 100 - _value",
+          "values": "field=Percent_Idle_time instance=_Total | eval 100 - _value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tabular_metric",
+          "defaultValue": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "values": "win_disk field=\"Current_Disk_Queue_Length\"",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

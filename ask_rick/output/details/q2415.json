@@ -1,0 +1,65 @@
+{
+  "id": "q2415",
+  "hash": "a0800478f2df",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat  path://\"/Library/Users/YOURPATHHERE/ossec_level\" \n| where level >= {{min_level}}\n//| lookup Title as level_text from  on level = level\n | count by Level,Title,Description | sort level asc | fields -_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_level",
+      "description": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+      "dataType": "ANY",
+      "value": "7"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "lookups/ossec/ossec.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "OSSEC Rules",
+      "dashboardDescription": "",
+      "panelTitle": "Severity Guide",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2833A54CB4A0B84B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "min_level",
+          "defaultValue": "7",
+          "values": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "group_matches",
+          "defaultValue": ".*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "file_matches",
+          "defaultValue": ".*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "description_matches",
+          "defaultValue": ".*",
+          "values": ".*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

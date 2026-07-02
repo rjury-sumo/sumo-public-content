@@ -1,0 +1,115 @@
+{
+  "id": "q2369",
+  "hash": "6d29a249aec1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n//| concat(deployment,\"_\",org_id) as key\n//| lookup org_id,org_name,daily_gb_limit from /shared/lookups/master_orgs on key=key  \n| sum(gbytes) as gbytes by view,_timeslice\n| sum(gbytes) as gbytes by view,_timeslice\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",gbytes * ((100 - {{cse_pct}})  /100),0) as continuous\n| if (tier = \"continuous\",gbytes * ({{cse_pct}}  /100),0) as cse\n| if (tier = \"frequent\",gbytes,0) as frequent\n| if (tier = \"infrequent\",gbytes,0) as infrequent\n\n| concat(\"continuous:\",continuous,\"cse:\",cse,\"frequent:\",frequent,\"infrequent:\",infrequent) as transport\n| parse regex field = transport \"(?<type>[a-z_]+):(?<gbytes>[0-9]+)\" multi\n\n|  sum(gbytes) by type, _timeslice | transpose row _timeslice column type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,1d,15m",
+      "dataType": "ANY",
+      "value": "1d"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "_freq",
+      "dataType": "ANY",
+      "value": "_freq"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "infrequent|",
+      "dataType": "ANY",
+      "value": "infrequent"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cse_pct",
+      "description": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest By Tier (GB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-2F6D26D09EBDFA44",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"unit\":{\"value\":\"GB\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Estimate For Log Ingestion Credits"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

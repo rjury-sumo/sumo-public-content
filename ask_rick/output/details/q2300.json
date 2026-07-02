@@ -1,0 +1,36 @@
+{
+  "id": "q2300",
+  "hash": "196221ee27c3",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n//| where execution_duration_ms > 30000\n//not query_type = view*\nnot query_type = sumo*\n| where data_scanned_bytes > (100 * 1G)\n\n//| where scanned_partition_count >5\n| sum(data_scanned_bytes) as bytes by query_type,scanned_partition_count\n\n| toint(ceil(scanned_partition_count/5) * 5) as part_range\n| sum(bytes) as bytes by part_range,query_type\n| transpose row query_type column part_range",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Overview",
+      "dashboardDescription": "A dashboard for viewing search scan overview and trends",
+      "panelTitle": "Searches > 100G Scan. Distribution of Scanned Partition Band By Query Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel917FE145BAB7A94A",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"query_type\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"title\":\"total bytes scanned\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+      "rowContext": [
+        "High Scanners View"
+      ],
+      "variables": [
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

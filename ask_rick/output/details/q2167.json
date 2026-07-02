@@ -1,0 +1,65 @@
+{
+  "id": "q2167",
+  "hash": "72a1c09aa144",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}  \n| count by c_ip,x_forwarded_for,_source | concat (x_forwarded_for,\",\",c_ip) as xffi | parse regex field=xffi \"(?<i>[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})\" nodrop | sum(_count) as ip_count  by i ,_source| where IsPublicIp (i) | i as c_ip \n| lookup type, actor, raw, threatlevel as malicious_confidence from sumo://threat/cs on threat= c_ip \n| json field=raw \"labels[*].name\" as label_name \n| replace(label_name, \"\\\\/\",\"->\") as label_name\n| replace(label_name, \"\\\"\",\" \") as label_name\n| where  type=\"ip_address\" and !isNull(malicious_confidence)\n| if (isEmpty(actor), \"Unassigned\", actor) as Actor\n|sum (ip_count) as threat_count by Actor",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx  - Threat Intel",
+      "dashboardDescription": "The Nginx - Threat Intel Dashboard provides an at-a-glance view of threats to Nginx servers on your network. Dashboard panels display threat count over a selected time period, geographic locations where threats occurred, source breakdown, actors responsible for threats, severity, and a correlation of IP addresses, cs_method, and status code of threats.",
+      "panelTitle": "Threat by Actors",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8B276580AB752B40",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":90,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

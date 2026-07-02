@@ -1,27 +1,85 @@
 {
   "id": "q0943",
-  "hash": "f6af70fda83a",
+  "hash": "1f086828f768",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=collection (EphemeralCollectorDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName=\"EphemeralCollectorDeleted\"\n| count as Count by EventName\n| fillmissing values(\"EphemeralCollectorDeleted\") in EventName",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_audit_events _sourceCategory=content (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\"as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") AND AdminMode=\"false\"\n| json \"operator.email\", \"contentIdentity.type\" as UserEmail, ContentType nodrop\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n|count as Count by UserEmail\n| sort by Count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminMode",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Collector Management",
-      "dashboardName": "Enterprise Audit - Collector Management Overview",
-      "dashboardDescription": "Collector Management - Overview Dashboard provides a high-level view of trends related to collector and source activities, collector upgrade requests, upgrade successes and failures, the number of ephemeral collectors created and deleted, and the number of clobber collectors that were deleted.",
-      "panelTitle": "Ephemeral Collector Deleted",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
+      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Top Users - User Mode",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel19261fc492a0d84f",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
-      "rowContext": [],
-      "variables": []
+      "panelKey": "panel6bc6af059ee15942",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
+      "variables": [
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminMode",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

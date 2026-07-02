@@ -1,9 +1,9 @@
 {
   "id": "q0438",
-  "hash": "5e0c0d07283c",
+  "hash": "9a818a9c6c36",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| parse \"User * deleted * \\\"*\\\"\" as src_user,content_type,content_name\n| where action =\"DELETE\"\n| timeslice 1h\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by _timeslice\n| outlier _count",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity | where action in (\"MANAGE_PERMISSIONS\" , \"CREATE\", \"DELETE\", \"MOVE\", \"COPY\", \"UPDATE\", \"IMPORT\", \"EXPORT\",\"INSTALL\")\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = _sourceHost\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "map",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,15 +26,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
-      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
-      "panelTitle": "Outlier - Deleted Content",
+      "dashboardName": "Library Content - Overview",
+      "dashboardDescription": "See an overview of Audit Library content, including location of users, user activity, outliers by user, and breakdowns by action.",
+      "panelTitle": "Geo Location of Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel9cb541c49178ea43",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "panelKey": "panel14e220628c18594b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{}}}",
       "rowContext": [
-        "Content Created"
+        "Source User"
       ],
       "variables": [
         {

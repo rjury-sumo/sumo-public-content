@@ -1,49 +1,27 @@
 {
   "id": "q0571",
-  "hash": "bf8bbe729f8a",
+  "hash": "fb5b791eb991",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cse*) \nOR\n(_index=sumologic_system_events _sourcecategory=cse* )\n*rule*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" nodrop\n| json field=_raw \"to\" nodrop\n\n| json field=_raw \"templatedMatchRule\" as rulea nodrop\n| json field=_raw \"matchRule\" as ruleb nodrop\n| json field=_raw \"yaraRule\" as rulec nodrop\n| json field=_raw \"thresholdRule\" as ruled nodrop\n| json field=_raw \"chainRule\" as rulee nodrop\n| json field=_raw \"aggregationRule\" as rulef nodrop\n\n| rulea as rule\n| if(isempty(rule),ruleb,rule) as rule\n| if(isempty(rule),rulec,rule) as rule\n| if(isempty(rule),ruled,rule) as rule\n| if(isempty(rule),rulee,rule) as rule\n| if(isempty(rule),rulef,rule) as rule\n\n//| where isempty(rule)\n\n| json field=rule \"readableId\" as id\n| json field=rule \"name\"\n| json field=rule \"enabled\"\n| json field=rule \"expression\"\n| json field=rule \"severityMapping\"\n| json field=rule \"tuningExpressions\"\n| json field=rule \"isPrototype\"\n| json field=rule \"tags\"\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| sort _messagetime\n| first(time) as time,max(_messagetime) as _messagetime,first(enabled) as enabled, first(isPrototype) as isPrototype by id,name \n| where enabled = \"false\" or isprototype = \"true\" //,expression,tags //,from,to  // tuningexpressions\n| sort _messagetime  | fields -_messagetime //| where enabled = \"",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sec_record*\n| where !(metadata_vendor = \"UNKNOWN\") \n| where objectType = \"FailedRecord\"\n| timeslice 1h\n| count by _timeslice, metadata_vendor, metadata_product\n| transpose row _timeslice column metadata_vendor, metadata_product",
+  "queryParameters": [],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Cloud SIEM",
-      "dashboardName": "Cloud SIEM - Rules and Mapping Changes",
-      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
-      "panelTitle": "Prototype or Recently Enabled Rules",
+      "folder": "Cloud SIEM - Data Parsing & Mapping Monitoring",
+      "dashboardName": "Cloud SIEM - Record Parsing and Analysis",
+      "dashboardDescription": "This dashboard provides analysis on Records parsing.",
+      "panelTitle": "Sources Failing to Parse/Map - Trend",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelE4C509D1A4F4EA4D",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Rules Changes"
-      ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "keyword,*starword,",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel0682BCFFA8BDBA44",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

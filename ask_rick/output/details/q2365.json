@@ -1,0 +1,138 @@
+{
+  "id": "q2365",
+  "hash": "f71cb27aefad",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view\n\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| view as rename_for_report\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as rename_for_report\n| if (view matches \"*sumologic*\",\"sumologic_internal\",rename_for_report) as rename_for_report\n| 20 as cr_cont\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",cr_cont * gbytes,0) as ingest_credits_consumed\n| if (tier = \"frequent\",cr_freq * gbytes,ingest_credits_consumed) as ingest_credits_consumed\n| if (tier = \"infrequent\",cr_infreq * gbytes,ingest_credits_consumed) as ingest_credits_consumed\n| gbytes as gbytes\n| sort ingest_credits_consumed\n| fields -cr_cont,cr_freq,cr_infreq\n| ingest_credits_consumed / gbytes as CPGI",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "^freq_",
+      "dataType": "ANY",
+      "value": "^freq_"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "^inf",
+      "dataType": "ANY",
+      "value": "^inf"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_by_tier.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits By Tier",
+      "dashboardDescription": "A simple view of credits ingested by tier using pattern matching on the data volume _view (index) dimension.",
+      "panelTitle": "Partition Mappings",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-D51893298F18B845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"series\":{}}",
+      "rowContext": [
+        "Estimate For Log Ingestion Credits"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "^freq_",
+          "values": "^freq_",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "^inf",
+          "values": "^inf",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Partition Mappings",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-D51893298F18B845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"series\":{}}",
+      "rowContext": [
+        "Detail / Regex Param Debug Report - Ingest Credits Per Partition"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

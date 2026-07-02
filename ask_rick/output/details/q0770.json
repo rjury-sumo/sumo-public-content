@@ -1,9 +1,9 @@
 {
   "id": "q0770",
-  "hash": "32227d5bc838",
+  "hash": "7ce179330a36",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_notification\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(srcDevice_ip)\n| count by srcDevice_ip\n| sort by _count\n| limit 10",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"operator.email\" as ClosedBy\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by ClosedBy\n| fields ClosedBy",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,55 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_username",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "device_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "srcDevice_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "dstDevice_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "device_hostname",
+      "name": "insightid",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -73,42 +25,20 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Notification Records",
-      "dashboardDescription": "This dashboard provides analysis of Notification Records.",
-      "panelTitle": "Top 10 Notification Records by Source IP",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Insight Explorer",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "SOC analyst",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel73E477ABB3777B42",
+      "panelKey": "panelPANE-5F44033E935D584B",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
-      "rowContext": [],
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Insight Details"
+      ],
       "variables": [
         {
-          "name": "user_username",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "device_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "srcDevice_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "dstDevice_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "device_hostname",
+          "name": "insightid",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

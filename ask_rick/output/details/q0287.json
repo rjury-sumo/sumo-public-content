@@ -1,9 +1,9 @@
 {
   "id": "q0287",
-  "hash": "7abf01f2bcf2",
+  "hash": "83c9dbe4ef55",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*kubelet*  {{node}}\n| json \"MESSAGE\", \"_HOSTNAME\" as log, node\n| count by node,log,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "_index=sumologic_rum_errors service={{service}} application={{application}} %\"deployment.environment\"={{environment}}\n//| json field=_raw \"$['error.stack']\" as error_stack nodrop\n//| json field=_raw \"$['error.message']\" as error_message nodrop\n//| json field=_raw \"$['error.name']\" as error_name nodrop\n//| json field=_raw \"type\" as type nodrop\n//| json field=_raw \"log\" nodrop\n//| json field=_raw \"$['http.url']\" as http_url nodrop\n//| json field=_raw \"$['element.xpath']\" as xpath nodrop\n//| json field=_raw \"type\" nodrop\n//\n| timeslice \n| count by application, _timeslice | transpose row _timeslice column application",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,73 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
+      "name": "service",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "application",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/RUM/Rum_browser_errors.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Kubelet Logs (Latest 100 Logs)",
+      "folder": null,
+      "dashboardName": "RUM Browser Errors",
+      "dashboardDescription": "",
+      "panelTitle": "By Application Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelE7AB94928A6FA945",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
-      "rowContext": [
-        "Logs/Events"
-      ],
+      "panelKey": "panelAF8C57639739D84E",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "node",
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword(s),error,error*,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

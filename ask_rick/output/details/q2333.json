@@ -1,0 +1,79 @@
+{
+  "id": "q2333",
+  "hash": "75d95f477c7a",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n| timeslice by {{timeslice}}\n| \"F >10m\" as band\n| if (execution_duration_ms <= (1000 * 60 * 10),\"E 5-10m\",band) as band\n| if (execution_duration_ms <= (1000 * 60 * 5),\"D 1-5m\",band) as band\n| if (execution_duration_ms <= (1000 * 60 * 1),\"C 30-60s\",band) as band\n| if (execution_duration_ms <= (1000 * 30),\"B 10-30s\",band) as band\n| if (execution_duration_ms <= (1000 * 10),\"A <10s\",band) as band\n| count by band,_timeslice | transpose row _timeslice column band",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,15m,1d,10m,5m",
+      "dataType": "ANY",
+      "value": "15m"
+    }
+  ],
+  "viewerType": "area",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Query Performance By Runtime Band A-F",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelCEDFC956BB946A41",
+      "visualization": "area",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\",\"minimum\":0},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":15,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"area\",\"displayType\":\"stackedPercent\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "Overall Search Performance"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

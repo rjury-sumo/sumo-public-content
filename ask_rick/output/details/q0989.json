@@ -1,85 +1,27 @@
 {
   "id": "q0989",
-  "hash": "53a3a220ea31",
+  "hash": "c3238b9c24a4",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\" as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") AND AdminMode=\"true\"\n| json \"operator.email\", \"contentIdentity.type\" as UserEmail, ContentType nodrop\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n|count as Count by UserEmail\n| sort by Count\n| limit 10",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "*",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminMode",
-      "description": "*",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "pie",
+  "queryMode": "SavedSearch",
+  "query": "_index=sumologic_audit_events (_sourceCategory=userSessions or _sourceCategory=collection) (UserLoggedIn OR CollectorCreated OR CollectorUpdated OR CollectorDeleted OR EphemeralCollectorDeleted OR ClobberCollectorDeleted OR CollectorUpgradeRequested OR CollectorUpgradeCompleted)\n| json \"eventName\"  as EventName\n| where EventName in (\"UserLoggedIn\", \"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"EphemeralCollectorDeleted\", \"ClobberCollectorDeleted\", \"CollectorUpgradeRequested\", \"CollectorUpgradeCompleted\")\n| json \"userSession.sourceIp\" as srcIP  nodrop \n| json \"operator.sourceIp\" as  srcIp_1 nodrop\n| if (isNull(srcIp), srcIp_1, srcIp) as srcIp\n| lookup country_name from geo://location on ip=srcIp \n| where country_name in (\"Iran\", \"North Korea\", \"Myanmar\",\"Mali\")",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
-      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
-      "panelTitle": "Top Users - Admin Mode",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelb253977994f58a4d",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [
-        "Admin Mode"
-      ],
-      "variables": [
-        {
-          "name": "UserIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "AdminMode",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        }
-      ]
+      "objectType": "SavedSearch",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Australia embargoed countries",
+      "dashboardDescription": "User and Collector activities from Countries under targeted sanctions programs by United States",
+      "panelTitle": "Enterprise Audit - Australia embargoed countries",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-7d"
     }
   ]
 }

@@ -1,53 +1,29 @@
 {
   "id": "q1207",
-  "hash": "4a7567bd99c0",
+  "hash": "2743bd2c150a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| where _sourceCategory=\"sourcename_tracing_volume\"\n| parse regex \"\\\"(?<sourceName>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as %\"{{Unit}}\" by sourceName\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| %\"{{Unit}}\" / duration_in_min as % \"{{Unit}} per minute\"\n| top 5 sourceName by % \"{{Unit}} per minute\"",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
-    }
-  ],
-  "viewerType": "bar",
+  "query": "_index=sumologic_audit action=login status=SUCCESS\n_sourceCategory=\"user_activity\" | timeslice 1d\n| count by sourceuser, _timeslice  | count as users by _timeslice",
+  "queryParameters": [],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/usage_key_stats.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Tracing",
-      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
-      "panelTitle": "Top 5 source Name by {{Unit}}",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Users Per Day",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelF21DE641BE373841",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"sourceName\",\"hideLabels\":true},\"axisY\":{\"title\":\"billedBytes per minute\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel3D4E02D3BCEA5941",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+      "rowContext": [
+        "User Login Activity"
+      ],
+      "variables": []
     }
   ]
 }

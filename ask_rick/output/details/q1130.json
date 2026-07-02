@@ -1,50 +1,37 @@
 {
   "id": "q1130",
-  "hash": "ca7f0915d43d",
+  "hash": "bd19bed8880f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query\n| where query_type=\"Interactive Dashboard\" and user_name matches \"{{user_name}}\"\n| count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_name",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "svp",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory=\"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<sourcecategory>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints by sourcecategory\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| top 5 sourcecategory by %\"DPM\"",
+  "queryParameters": [],
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Search Overview",
-      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
-      "panelTitle": "Interactive Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Top 5 Source Categories",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panele34d65ddb054f846",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Interactive Dashboard\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#000000\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "panelKey": "panelPANE-4",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"sourcecategory\",\"hideLabels\":true},\"axisY\":{\"title\":\"DPM\"}},\"legend\":{\"enabled\":true},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
       "rowContext": [],
       "variables": [
         {
-          "name": "query_type",
-          "defaultValue": null,
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
-          "values": null,
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
           "allowMultiSelect": false
         }
       ]

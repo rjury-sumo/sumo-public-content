@@ -1,9 +1,9 @@
 {
   "id": "q1064",
-  "hash": "c0f0507335eb",
+  "hash": "bd738c1b755c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=roles (RoleCreated OR RoleUpdated OR RoleDeleted)\n| json \"eventName\", \"to.capabilities\", \"operator.email\", \"operator.sourceIp\"  as EventName, capabilities_updated, Admin, AdminIp nodrop\n| if(isEmpty(Admin) , \"SystemGenerated\", Admin) as Admin\n| where EventName in (\"RoleCreated\",\"RoleUpdated\",\"RoleDeleted\") AND EventName matches \"{{EventName}}\"\n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"|count by Admin, EventName\n| transpose row Admin column EventName as %\"RoleCreated\", %\"RoleUpdated\", %\"RoleDeleted\"\n| sort by RoleCreated, RoleUpdated, RoleDeleted\n| limit 5",
+  "query": "_index=sumologic_audit_events _sourceCategory=users UserPasswordReset\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\"  as EventName, Admin, AdminIp nodrop\n| where EventName=\"UserPasswordReset\"\n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|count as Count by EventName, Admin\n| sort by Count\n| fields - EventName\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -50,13 +50,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - Role Activities",
-      "dashboardDescription": "Role Activities DashBoard provides detailed information on activities by user role, such as top capabilities, admin role activities, and recent events.",
-      "panelTitle": "Active Admins",
+      "dashboardName": "Enterprise Audit - User(Email, Password) Activities",
+      "dashboardDescription": "User (Email, Password) Activities DashBoard provides detailed information on user password and email activities, such as password changes, password resets by admins, and user email change requests and changes.",
+      "panelTitle": "Active Admins Performing Password Resets",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel38fbff49a5f42941",
+      "panelKey": "panel7a174c128e49394c",
       "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {

@@ -1,27 +1,65 @@
 {
   "id": "q1053",
-  "hash": "c9146669fc7e",
+  "hash": "dba4423b379b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=multiFactorAuthentication UserMultiFactorAuthenticationEnabled\n| json \"eventName\", \"eventTime\", \"userIdentity.userEmail\" as EventName, EventTime, UserEmail nodrop\n| where EventName=\"UserMultiFactorAuthenticationEnabled\"\n| count as Count by UserEmail\n| sum(Count) as Total",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserLoggedIn\n| json \"eventName\", \"userSession.sourceIp\" as EventName,UserIp  nodrop \n| where EventName=\"UserLoggedIn\" \n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|where EventName matches \"*\"\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Security Management Overview",
-      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
-      "panelTitle": "Users Enabled MFA",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Geo Location Of User Sessions",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela162718986523b40",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "panelKey": "panelc5612488b8fd3b47",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q0988",
-  "hash": "d08948e25a54",
+  "hash": "d0242b2e0314",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"eventTime\", \"adminMode\", \"contentIdentity.name\", \"contentIdentity.type\", \"operator.email\", \"operator.id\", \"operator.sourceIp\" as EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp nodrop\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n|count by EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - _count, UserId\n| limit 10",
+  "query": "_index=sumologic_audit_events _SourceCategory=accessKeys (AccessKeyCreated OR AccessKeyDeleted OR AccessKeyUpdated)\n| json \"eventName\", \"eventTime\", \"accessId\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"accessKey.accessKeyLabel\", \"accessKey.enabled\", \"to\", \"from\", \"to.enabled\"  as EventName, EventTime, AccessId, User, UserId, UserIp, AccessKeyLabel, IsActive, CurrentValue, PreviousValue, IsActiveUpdated nodrop\n| where EventName in \n(\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\") AND EventName matches \"{{EventName}}\"\n| where EventName matches \"{{EventName}}\" and AccessId matches \"{{AccessId}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\" and AccessKeyLabel matches \"{{AccessKeyLabel}}\"\n|count by User, EventName\n| transpose row User column EventName as %\"AccessKeyCreated\", %\"AccessKeyUpdated\", %\"AccessKeyDeleted\"\n| sort by AccessKeyCreated, AccessKeyUpdated, AccessKeyDeleted\n| limit 5",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,31 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "*",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AccessId",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,47 +60,57 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "AdminMode",
-      "description": "*",
+      "name": "AccessKeyLabel",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
-      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
-      "panelTitle": "Recent - Content Created/Deleted/Exported/Imported",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Access Key Activities",
+      "dashboardDescription": "Access Key Activities DashBoard provides detailed information about access key activities, such as creation, deletion, and updates. You can also review trends, user activity, the number of active access keys, and one-day time comparisons.",
+      "panelTitle": "Active Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0b9bf0188b4d3a47",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Admin Mode"
-      ],
+      "panelKey": "panela3492375a6bee841",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "UserIp",
+          "name": "EventName",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "EventName",
+          "name": "User",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "AdminMode",
+          "name": "AccessId",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AccessKeyLabel",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

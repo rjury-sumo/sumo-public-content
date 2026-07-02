@@ -1,155 +1,93 @@
 {
   "id": "q0040",
-  "hash": "464312be70cc",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "#B as Requests",
-  "queryParameters": [],
+  "hash": "407f18db0548",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| tolong(time) as _messagetime\n| timeslice by 1d\n| timeToRemediation / 3600 as timeToRemediation\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| avg(timeToRemediation) as timeToRemediation by _timeslice,severity | transpose row _timeslice column severity",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{lookup",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
+    }
+  ],
   "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "CPU Usage vs Allocatable vs Requests (Cores)",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Average Minutes to Remediation",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-5A2B6ED18C6C9A41",
+      "panelKey": "panelAE0BC836ADD18A48",
       "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"fillOpacity\":\"0.5\",\"displayType\":\"default\",\"markerSize\":2,\"markerType\":\"circle\",\"lineThickness\":2},\"legend\":{\"verticalAlign\":\"bottom\",\"enabled\":true},\"axes\":{\"axisY\":{\"labelFontSize\":13,\"title\":\" Cores\"},\"axisX\":{}},\"color\":{\"family\":\"scheme9\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"title\":{\"fontSize\":16},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Allocatable - {{cluster}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{cluster}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Usage  - {{cluster}}\"}}]}",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Resource Utilization"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Memory Allocatable vs Requests vs Usage (MB)",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Average Minutes to Remediation",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3EA156CB8780A84C",
+      "panelKey": "panelAE0BC836ADD18A48",
       "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":2,\"markerType\":\"circle\",\"lineThickness\":2},\"color\":{\"family\":\"scheme9\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"labelFontSize\":13,\"title\":\"MB\"},\"axisX\":{}},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Allocatable - {{cluster}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{cluster}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Usage - {{cluster}}\"}}]}",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Resource Utilization"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Mem Requests vs Limits vs Usage (MB)",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-e322aa91abc3c941",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Light\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Usage - {{deployment}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{deployment}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Limits - {{deployment}}\"}}]}",
-      "rowContext": [
-        "Resource Utilization"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "‎Memory Requests vs Limits vs Usage (MB)",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-c32d3a96826cea4f",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Usage - {{namespace}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{namespace}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Limits - {{namespace}}\"}}]}",
-      "rowContext": [
-        "Resource Utilization"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Mem Requests vs Limits vs Usage (MB)",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-819a1277af6a9b44",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Usage - {{service}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{service}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Limits - {{service}}\"}}]}",
-      "rowContext": [
-        "Resource Utilization"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service",
-          "defaultValue": null,
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

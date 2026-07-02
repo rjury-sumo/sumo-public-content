@@ -1,9 +1,9 @@
 {
   "id": "q1178",
-  "hash": "584529e54e4e",
+  "hash": "3937404c57a9",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| sum(datapoints) as daily_ingest_datapoints by _timeslice\n| {{Subscribed_Metric_DPM_Ingest_Capacity}} as DPM_Capacity // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| DPM_Capacity * 60 * 24 as DataPoint_Capacity // Set this calculated value through gear icon for \"Colors by Value Range...\"\n| fields -DPM_Capacity",
+  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| data_scanned_bytes / 1Gi as sizeInGB\n| timeslice 1d\n|where if (\"{{user_name}}\" = \"*\", true, user_name matches \"{{user_name}}\") AND if (\"{{session_id}}\" = \"*\", true, session_id matches \"{{session_id}}\") AND if (\"{{is_aggregate}}\" = \"*\", true, toString(is_aggregate) matches \"{{is_aggregate}}\") AND if (\"{{status_message}}\" = \"*\", true, status_message matches \"{{status_message}}\") AND if (\"{{query}}\" = \"*\", true, query matches \"{{query}}\") AND if (\"{{query_type}}\" = \"*\", true, query_type matches \"{{query_type}}\")\n|sum (sizeInGB) as total_data_scanned_GB, count as query_count by _timeslice \n| where if (\"{{total_data_scanned_GB}}\" = \"0\", true, total_data_scanned_GB > {{total_data_scanned_GB}})\n| fillmissing timeslice (1d)\n| avg(total_data_scanned_GB) as avg_data_scanned_daily",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "MetricsSources",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "sourcecategory_metrics_volume"
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -24,41 +24,131 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-      "description": "20000",
+      "name": "session_id",
+      "description": "",
       "dataType": "ANY",
-      "value": "20000"
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "is_aggregate",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "status_message",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "total_data_scanned_GB",
+      "description": "0,1,5,10,100",
+      "dataType": "ANY",
+      "value": "0"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Metrics",
-      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
-      "panelTitle": "Daily Ingest Vs Average Daily Ingest Capacity",
+      "folder": "Infrequent Data Tier",
+      "dashboardName": "Infrequent Data Tier - Data Scanned Overview",
+      "dashboardDescription": "The Infrequent Data Tier - Data Scanned Overview dashboard provides visibility into the total amount of data scanned by infrequent queries. This allows you to monitor and control on-demand search costs for the Infrequent Tier.",
+      "panelTitle": "Avg Data Scanned/day",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-9",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "panelKey": "panel7c9bc7239e507a42",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"GB\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
       "rowContext": [
-        "Note: Daily Ingest Capacity"
+        "Data Scanned Summary"
       ],
       "variables": [
         {
-          "name": "MetricsSources",
-          "defaultValue": "sourcecategory_metrics_volume",
+          "name": "session_id",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "query",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "is_aggregate",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "status_message",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "total_data_scanned_GB",
+          "defaultValue": "0",
+          "values": "0,1,5,10,100",
           "allowMultiSelect": false
         }
       ]

@@ -1,29 +1,49 @@
 {
   "id": "q1075",
-  "hash": "3b1179a0689e",
+  "hash": "dfa330349cb5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"UserCreated\",\"UserUpdated\",\"UserDeleted\")\n| count as Count by EventName",
-  "queryParameters": [],
-  "viewerType": "pie",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}}\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m\n| sum(data_scanned_bytes) as total_scanned, sum(data_retrieved_bytes) as total_retrieved by _timeslice\n| int(total_scanned/1Gi) as total_scanned | int(total_retrieved/1Gi) as total_retrieved\n| order by _timeslice",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User & Role Management Overview",
-      "dashboardDescription": "User and Role Management - Overview DashBoard provides an at-a-glance view of user activities and sessions, email account requests, and trends over time. You can also review user role data, such as user activities by role.",
-      "panelTitle": "Distribution By User Activities",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
+      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
+      "panelTitle": "Total Scanned and Retrieved (GB)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelca65c09abe785b42",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "panelKey": "panelc3d461f1912d3a46",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"total_scanned\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"total_retrieved\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}}],\"series\":{}}",
       "rowContext": [
-        "User Session Activities"
+        "Monitoring Your Usage by Tier"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "tier",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

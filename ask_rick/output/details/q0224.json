@@ -1,9 +1,9 @@
 {
   "id": "q0224",
-  "hash": "8486a22e5607",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_memory_working_set_bytes cluster={{cluster}} namespace={{namespace}} pod=* container=* | eval _value / 1000000 | avg by container, pod | sum by pod | sum",
+  "hash": "63cf952670dd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| values(readableid) as ids,values(status) as statuses,values(entityName) as entities,count by name,description,source,severity ,confidence //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort name asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/insight-review.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Memory Usage (MB)",
+      "folder": null,
+      "dashboardName": "CSE Insights Review",
+      "dashboardDescription": "",
+      "panelTitle": "Insight Summary",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3D4BDD968CE09A4B",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"option\":\"Average\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}]},\"series\":{}}",
+      "panelKey": "panelB6D4F123BBDD4947",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "// INSIGHT-123",
+          "values": "//none",
           "allowMultiSelect": false
         }
       ]

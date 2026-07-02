@@ -1,67 +1,27 @@
 {
   "id": "q0861",
-  "hash": "273d98cf1582",
+  "hash": "d5cd367e0eb0",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.severity\" as severity\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n| count as events by insightid,name,entitytype,entityvalue,eventname ,status,_messagetime,severity\n| tolong(_messagetime) as _messagetime\n| timeslice by {{graph_by_timeslice}}\n//| severity as s\n//| \"OTHER\" as severity\n//| if (s=1,\"1-LOW\", severity) as severity\n//| if (s=2,\"2-MEDIUM\", severity) as severity\n//| if (s=3,\"3-HIGH\", severity) as severity\n| concat (eventname,\":\",status) as event\n| sum(events) as events by _timeslice,event | transpose row _timeslice column event",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "graph_by_timeslice",
-      "description": "15m,1h,3h,1d,1w",
-      "dataType": "ANY",
-      "value": "1d"
-    }
-  ],
-  "viewerType": "column",
+  "query": "_index=sec_signal \n| timeslice 1d\n| toLong(createdTimestamp) as created_timestamp\n| min(created_timestamp) as first_seen, max(created_timestamp) as last_seen, count_distinct(_timeslice) as distinct_days_seen by ruleName\n| now() - last_seen as days_since_last_signal\n| days_since_last_signal/1000/60/60/24 as days_since_last_signal\n| formatDate(toLong(first_seen), \"yyyy-MM-dd\") as first_seen\n| formatDate(toLong(last_seen), \"yyyy-MM-dd\") as last_seen\n| order by days_since_last_signal",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Security Operations Overview",
-      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
-      "panelTitle": "Inisght Events By Type",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Monitoring",
+      "dashboardDescription": "This dashboard provides times based metrics for CSE Signals.",
+      "panelTitle": "Time Based Metrics",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel63AE3EB18F63FB49",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
-      "rowContext": [
-        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
-      ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "graph_by_timeslice",
-          "defaultValue": "1d",
-          "values": "15m,1h,3h,1d,1w",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel2EB8AC339A0D6840",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"decimals\":2},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

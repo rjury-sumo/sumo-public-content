@@ -1,0 +1,79 @@
+{
+  "id": "q2349",
+  "hash": "3267440b4b5b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n| timeslice by {{timeslice}}\n|sum(execution_duration_ms) as execution_duration_ms   by user_name | replace (user_name,/@.+/,\"\") as user_name \n| sort execution_duration_ms | execution_duration_ms / (1000 * 60 * 60) as runtime_hours | fields -execution_duration_ms",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,15m,1d,10m,5m",
+      "dataType": "ANY",
+      "value": "15m"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Top Users By Total Runtime Hours",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4CF41B0388065B4E",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":10,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"mode\":\"distribution\",\"indexLabelFontSize\":10}}",
+      "rowContext": [
+        "Search Statistics"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

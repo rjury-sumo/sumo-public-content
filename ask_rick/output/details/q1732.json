@@ -1,0 +1,45 @@
+{
+  "id": "q1732",
+  "hash": "e1b0a342ba40",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json field=_raw \"$['log']['output_fields']['k8s.ns.name']\" as namespace\n//| where !isEmpty(namespace)\n| count as rules_triggered by namespace\n| sort rules_triggered, namespace",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Security Overview",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by Namespace",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-8f44143086755945",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Security Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by Namespace",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-8f44143086755945",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    }
+  ]
+}

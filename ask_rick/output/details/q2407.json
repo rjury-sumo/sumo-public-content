@@ -1,0 +1,85 @@
+{
+  "id": "q2407",
+  "hash": "d266bd850e64",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes\n _sourceCategory=\"{{dimension}}_volume\"\n| parse regex \"\\\"(?<dimension>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| where dimension matches \"{{filter}}\"\n| bytes/1024/1024/1024 as gbytes \n| timeslice {{timeslice}}\n| sum(gbytes) as gbytes by _timeslice, dimension\n| transpose row _timeslice column dimension",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "dimension",
+      "description": "sourcecategory,sourcehost,collector,view,sourcename",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "filter",
+      "description": "a,b,c*,*d*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "15m,1h,1d",
+      "dataType": "ANY",
+      "value": "15m"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/recent_logs_by_category.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Recent Log Ingest By Category",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest by {{dimension}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC16326DFB4712A4D",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "*",
+          "values": "a,b,c*,*d*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "15m,1h,1d",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dimension",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,sourcehost,collector,view,sourcename",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

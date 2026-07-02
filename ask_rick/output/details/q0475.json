@@ -1,27 +1,61 @@
 {
   "id": "q0475",
-  "hash": "2165ca9527db",
+  "hash": "9b10df38fde0",
   "queryType": "Logs",
-  "queryMode": "SavedSearch",
-  "query": "_index=sumologic_audit _sourceCategory=account_management _sourceName=VOLUME_QUOTA AND MetricIngest",
-  "queryParameters": [],
-  "viewerType": "table",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory=\"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as ingest_gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| ingest_gbytes / duration_in_day as %\"AvgLogIngestPerDay\"\n| fields %\"AvgLogIngestPerDay\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "SavedSearch",
-      "folder": "Audit",
-      "dashboardName": "Throttling events - Metrics Ingest",
-      "dashboardDescription": "Throttling events are reported when:  1.At least 15 minutes has elapsed since the last time a throttling event was reported. AND 2.At least 2 percent of collector sources experienced the effect of data throttling in the time interval.",
-      "panelTitle": "Throttling events - Metrics Ingest",
-      "panelType": "SavedSearch",
-      "panelKey": null,
-      "visualization": null,
-      "rowContext": [],
-      "variables": [],
-      "defaultTimeRange": "-24h"
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Capacity Utilization",
+      "dashboardDescription": "The Data Volume - Capacity Utilization dashboard provides views of subscribed, actual, and percentage capacity utilization for logs and metrics.",
+      "panelTitle": "Actual (Average) Log Ingested",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-7700C9DFAD327B40",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"GB/Day\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Log Ingest"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

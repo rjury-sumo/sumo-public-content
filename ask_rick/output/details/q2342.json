@@ -1,0 +1,79 @@
+{
+  "id": "q2342",
+  "hash": "a4f374f24dcc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n//( query_type=*view*)\n\n| if(execution_duration_ms < 1000 * {{slow_seconds}},1,0) as fast\n| sum(fast) as fast",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "slow_seconds",
+      "description": "30,60,90,300",
+      "dataType": "ANY",
+      "value": "30"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Fast Searches",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelBB9EAC609A5B7B46",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Fast Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+      "rowContext": [
+        "Benchmark < 30s runtime"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

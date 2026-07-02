@@ -1,0 +1,102 @@
+{
+  "id": "q1790",
+  "hash": "879c49c42180",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} statefulset={{statefulset}}\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by statefulset,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "statefulset",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - StatefulSets - Overview",
+      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
+      "panelTitle": "Logs  (Latest 100 Logs)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-AE4380C888A72942",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statefulset",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantization_interval",
+          "defaultValue": "1m",
+          "values": "1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
+      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
+      "panelTitle": "Logs  (Latest 100 Logs)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-AE4380C888A72942",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statefulset",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

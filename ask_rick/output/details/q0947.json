@@ -1,9 +1,9 @@
 {
   "id": "q0947",
-  "hash": "d7d03f472efe",
+  "hash": "7a04bbedc5a3",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted OR CollectorSourcesSynchronized)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceDetails, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\", \"CollectorSourcesSynchronized\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorName matches \"{{CollectorName}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\"as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") AND AdminMode=\"true\" | where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") in EventName\n| transpose row _timeslice column EventName",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,53 +36,31 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "CollectorName",
-      "description": "",
+      "name": "AdminMode",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "map",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Collector Management",
-      "dashboardName": "Enterprise Audit - Collector Sources Activities",
-      "dashboardDescription": "Collector Sources Activities DashBoard provides detailed information on created, updated and deleted sources, the top collectors where sources were added, active users, and one-day time comparisons. You can use pre-populated filters for a more granular view of selected data.",
-      "panelTitle": "Geo Location",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
+      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Trend - Admin Mode",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelc91fd76bb8754b48",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "paneld00526828b02eb41",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
       "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
         {
           "name": "UserIp",
           "defaultValue": "*",
@@ -90,9 +68,15 @@
           "allowMultiSelect": false
         },
         {
-          "name": "CollectorName",
+          "name": "EventName",
           "defaultValue": "*",
-          "values": null,
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminMode",
+          "defaultValue": "*",
+          "values": "*",
           "allowMultiSelect": false
         }
       ]

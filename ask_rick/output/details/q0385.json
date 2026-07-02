@@ -1,9 +1,9 @@
 {
   "id": "q0385",
-  "hash": "ac5b2eb61aa2",
+  "hash": "3f6388eae555",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} service={{service}} metric=kube_pod_container_status_ready | sum by pod, namespace, service | topk(500,max)",
+  "query": "service={{service}} deployment.environment = {{environment}} _contenttype=metricfromtrace metric=service_operation_errors operation={{operation}}\n | sum by operation",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,19 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
+      "name": "service",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -36,46 +24,76 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "service",
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "default"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "operation",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing errors - span details.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Pods Running (Top 500)",
+      "folder": null,
+      "dashboardName": "Tracing Errors - Span Details",
+      "dashboardDescription": "",
+      "panelTitle": "MetricFromTrace service_operation_errors by Operation",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-C4A6A0729D0E5941",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\" \"}}]}",
+      "panelKey": "panel629075D6B5070A42",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{operation}}\"}}]}",
       "rowContext": [
-        "Pods"
+        "Trace Metrics (metricfromtrace)"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "service",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "service",
-          "defaultValue": null,
+          "name": "environment",
+          "defaultValue": "default",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instance_url",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "url for your sumo instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "operation",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statusmessage",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

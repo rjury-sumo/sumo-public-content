@@ -1,93 +1,56 @@
 {
   "id": "q0088",
-  "hash": "5e4cf58f4602",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=up  | quantize  2m |  sum",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "svp",
+  "hash": "0ca7550d2c85",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\n//OR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated //)\n\n//| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n//| json field=_raw \"insight.status\" as status\n//| json field=_raw \"insight.name\" as name\n//| json field=_raw \"insight.entityType\" as entitytype\n//| json field=_raw \"insight.entityValue\" as entityvalue\n////| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.severityName\" as severityname\n//| json field=_raw \"insight.confidence\" as confidence\n| concat(severity,\"-\",severityname ) as severity\n\n//| where status=\"new\"\n| timeslice 1d\n| count by _timeslice , severity\n| transpose row _timeslice column severity",
+  "queryParameters": [],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/cloud_siem_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Kube-Controller-Manager",
+      "folder": null,
+      "dashboardName": "Cloud SIEM Overview",
+      "dashboardDescription": "",
+      "panelTitle": "New Insights Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2BF4A73092D37A4E",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Endpoints\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":1,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelAE55DAFAAE49AA4D",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
       "rowContext": [
-        "Untitled"
+        "Insights Overview"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Kube-Scheduler",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Cloud SIEM Overview (Tuning Pack)",
+      "dashboardDescription": "",
+      "panelTitle": "New Insights Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6273B2BBB06B5A4F",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Endpoints\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":1,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelAE55DAFAAE49AA4D",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
       "rowContext": [
-        "Untitled"
+        "Insights Overview"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]

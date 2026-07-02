@@ -1,10 +1,34 @@
 {
   "id": "q1036",
-  "hash": "630cc0f1200e",
+  "hash": "68258700a656",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=multiFactorAuthentication UserMultiFactorAuthenticationEnabled\n| json \"eventName\", \"eventTime\", \"userIdentity.userEmail\",\"operator.sourceIp\" as EventName, EventTime, UserEmail, AdminIp nodrop\n| where EventName=\"UserMultiFactorAuthenticationEnabled\"\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventTime, UserEmail\n| sort by EventTime\n| fields - _count, EventTime",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\" as EventName, Admin, AdminIp nodrop\n| if(isEmpty(Admin) , \"SystemGenerated\", Admin) as Admin\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\")\n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"|count by Admin, EventName\n| transpose row Admin column EventName as %\"UserCreated\", %\"UserUpdated\", %\"UserDeleted\"\n| sort by UserCreated, UserUpdated, UserDeleted\n| limit 5",
   "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Admin",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
     {
       "autoComplete": {
         "type": "SKIP_AUTOCOMPLETE",
@@ -18,23 +42,35 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
-      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
-      "panelTitle": "Recent Users Enabled MFA",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Activities",
+      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
+      "panelTitle": "Active Admins",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8eab3fa29ec9eb4d",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panelfa4660cdb7976a4c",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
       "rowContext": [],
       "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Admin",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
         {
           "name": "AdminIp",
           "defaultValue": "*",

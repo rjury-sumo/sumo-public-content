@@ -1,0 +1,29 @@
+{
+  "id": "q1264",
+  "hash": "9393891ef369",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection and (CollectorCreated OR CollectorUpdated OR CollectorDeleted OR CollectorUpgradeCompleted)\n| timeslice by 1h\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"CollectorUpgradeCompleted\") \n| count as Count by EventName,_timeslice\n//| fillmissing values() in EventName \n| fillmissing timeslice(1h)\n| transpose row _timeslice column eventname",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Collection Create, Delete or Upgrade",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDCCE5D6B8300BB4B",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

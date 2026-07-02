@@ -1,102 +1,44 @@
 {
   "id": "q0414",
-  "hash": "b1fcc0ce014f",
-  "queryType": "Traces",
-  "queryMode": "Traces",
-  "query": "",
-  "queryParameters": [],
-  "viewerType": "traceListTable",
+  "hash": "ff2614ef6d90",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| where action =\"DELETE\"\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by  sourceuser",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
   "metricsQueryData": null,
-  "tracesQueryData": {
-    "filters": [
-      {
-        "type": "FieldDescriptor",
-        "operator": "=",
-        "field": "service",
-        "value": "{{service}}",
-        "valueType": "StringTracingValue",
-        "target": "any span"
-      },
-      {
-        "type": "FieldDescriptor",
-        "operator": "=",
-        "field": "deployment.environment",
-        "value": "{{environment}}",
-        "valueType": "StringTracingValue",
-        "target": "any span"
-      },
-      {
-        "type": "NumericMetricDescriptor",
-        "operator": ">",
-        "metric": "numErrors",
-        "value": "0"
-      },
-      {
-        "type": "FieldDescriptor",
-        "operator": "=",
-        "field": "operation",
-        "value": "{{operation}}",
-        "valueType": "StringTracingValue",
-        "target": "any span"
-      },
-      {
-        "type": "FieldDescriptor",
-        "operator": "=",
-        "field": "status",
-        "value": "{{statusmessage}}",
-        "valueType": "StringTracingValue",
-        "target": "any span"
-      }
-    ]
-  },
+  "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/Tracing and Spans/tracing errors - span details.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": null,
-      "dashboardName": "Tracing Errors - Span Details",
-      "dashboardDescription": "",
-      "panelTitle": "Error Traces Matching Service and Environment",
-      "panelType": "TracesListPanel",
-      "panelKey": "panelPANE-F665F16BB527A94F",
-      "visualization": "traceListTable",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"traceList\",\"type\":\"traceListTable\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"displaySettings\":{\"chartType\":\"traceList\"},\"legend\":{\"enabled\":false}}",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
+      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
+      "panelTitle": "Content Deleted by Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3872d3e198bbeb4b",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true}}",
       "rowContext": [
-        "Trace Metrics (metricfromtrace)"
+        "Content Created"
       ],
       "variables": [
         {
-          "name": "service",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "environment",
-          "defaultValue": "default",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "any keyword string",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "instance_url",
-          "defaultValue": "live.us2.sumologic.com",
-          "values": "url for your sumo instance",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "operation",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statusmessage",
+          "name": "sourceuser",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

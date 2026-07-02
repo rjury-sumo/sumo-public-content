@@ -1,24 +1,11 @@
 {
   "id": "q0802",
-  "hash": "0e796cdd7262",
+  "hash": "4a7532c4cd0a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"insight.tags\" as Tags\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by Tags\n| fields Tags",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "insightid",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_sourceCategory=\"detectionlab/siem/insights\"\n| json field=_raw \"severity\"\n| parse regex \"stage\\\"\\:\\s+\\\"(?<stage>.*?)\\\"\\,\" multi\n| toLowerCase(severity) as severity\n| if(severity=\"low\",13,if(severity=\"medium\",15,if(severity=\"high\", 16,1))) as severity\n| timeslice 1d\n| avg(severity) by _timeslice, stage\n| transpose row _timeslice column stage",
+  "queryParameters": [],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Insight Explorer",
-      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
-      "panelTitle": "Signal Tags",
+      "dashboardName": "Cloud SIEM - SOC KRIs",
+      "dashboardDescription": "This dashboard provides SOC KRIs related metrics.",
+      "panelTitle": "Risk Score by Mitre Attack Stage",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-292326DCAE108940",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
-      "rowContext": [
-        "Signal Details"
-      ],
-      "variables": [
-        {
-          "name": "insightid",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelPANE-87F2623696614847",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

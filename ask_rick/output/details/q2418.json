@@ -1,0 +1,85 @@
+{
+  "id": "q2418",
+  "hash": "528871ec3f72",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat path://\"{{lookup_path}}\"\n| tourl(trim(link),concat(\"Open: \",trim(link))) as link\n| where tolowercase(title) matches tolowercase(\"{{search_title}}\")\n| where title matches /(?i){{regex_title}}/\n| parse regex field=title \"(?<word>\\w+)\" multi\n| count by word\n| where length(word) > 3\n//| where !(word in (\"Micro\",\"lesson\",\"Lesson\")) \n| 1 as i\n//| now() as _messagetime\n//| transactionize i (merge i takefirst, word join with \" \") \n| word as regex_title\n| sum(_count) by regex_title | sort _sum",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookup_path",
+      "description": "/Library/Users/rjury@sumologic.com/micro_lessons",
+      "dataType": "ANY",
+      "value": "/Library/Users/rjury@sumologic.com/micro_lessons"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "search_title",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "regex_title",
+      "description": ".+",
+      "dataType": "ANY",
+      "value": "(?i)."
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "lookups/sumo-micro-lessons/microlessons.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Micro Lessons",
+      "dashboardDescription": "",
+      "panelTitle": "Keywords Used",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF2846F60AB6E1B44",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":60,\"mode\":\"distribution\",\"indexLabelFontSize\":10},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"color\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "search_title",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "regex_title",
+          "defaultValue": "(?i).",
+          "values": ".+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_path",
+          "defaultValue": "/Library/Users/rjury@sumologic.com/micro_lessons",
+          "values": "/Library/Users/rjury@sumologic.com/micro_lessons",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

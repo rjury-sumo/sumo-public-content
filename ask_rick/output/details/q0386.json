@@ -1,9 +1,9 @@
 {
   "id": "q0386",
-  "hash": "44197a45cf57",
+  "hash": "ff9350cf5ab8",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "namespace={{namespace}} cluster={{cluster}}  service={{service}}  pod=* metric=container_cpu_usage_seconds_total | quantize 1m | rate  | sum by cluster,pod | topk(10,max)",
+  "query": "service={{service}} deployment.environment = {{environment}} _contenttype=metricfromtrace metric=service_operation_errors operation={{operation}}\n | sum by service",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
+      "name": "service",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "default"
     },
     {
       "autoComplete": {
@@ -36,46 +36,64 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "service",
+      "name": "operation",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     }
   ],
-  "viewerType": "honeyComb",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing errors - span details.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Top 10 CPU(%)/Memory(MB) consuming Pods",
+      "folder": null,
+      "dashboardName": "Tracing Errors - Span Details",
+      "dashboardDescription": "",
+      "panelTitle": "MetricFromTrace service_operation_errors by Service",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-A83CC73C8D114A46",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"metric\",\"value\":\"metric\"}],\"aggregationType\":\"avg\"},\"series\":{}}",
+      "panelKey": "panelD400FE3AA8FEF847",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"}}",
       "rowContext": [
-        "Pods"
+        "Trace Metrics (metricfromtrace)"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "service",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "service",
-          "defaultValue": null,
+          "name": "environment",
+          "defaultValue": "default",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instance_url",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "url for your sumo instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "operation",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statusmessage",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

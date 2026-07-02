@@ -1,0 +1,36 @@
+{
+  "id": "q2302",
+  "hash": "2ab69c1ebd98",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n//( query_type=*view*)\n| where data_scanned_bytes > 1000000000\n| sum(data_scanned_bytes) as bytes by query | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan | sum(tb_scan) as scan_tb by query | where scan_tb > 10 | count",
+  "queryParameters": [],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Overview",
+      "dashboardDescription": "A dashboard for viewing search scan overview and trends",
+      "panelTitle": "> 10 TB Total Scan",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel108B24BBA17F994E",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Searches\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#bf2121\"},{\"from\":1,\"to\":10000,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":0,\"color\":\"#16943e\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":100}},\"series\":{}}",
+      "rowContext": [
+        "Search Scan Overview and KPIs"
+      ],
+      "variables": [
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

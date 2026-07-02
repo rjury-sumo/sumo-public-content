@@ -1,27 +1,119 @@
 {
   "id": "q0887",
-  "hash": "b0bf0dc8fcb5",
+  "hash": "e2d068d8fb8d",
   "queryType": "Logs",
-  "queryMode": "SavedSearch",
-  "query": "//Use this query to create a new scheduled view for hyper-efficient queries over large time windows.  See https://help.sumologic.com/docs/manage/scheduled-views?ss360SearchTerm=view\n((_index=sec_record*))\n| where !dstDevice_ip_isInternal OR !srcDevice_ip_isInternal OR !isNull(http_url_fqdn) OR !isNull(dns_queryDomain) OR !isNull(http_url) or !isNull(file_hash_md5) or !isNull(file_hash_sha1) or !isNull(file_hash_sha256)\n| fields dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn\n|timeslice 1m\n| count by _timeslice,dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn",
-  "queryParameters": [],
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName, EventTime, UserEmail, UserId, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\")\n| json field=CurrentValue \"ephemeral\", \"sourceSyncMode\", \"collectorType\" as UpdatedIsEphermal, UpdatedSourceSyncMode, UpdatedCollectorType nodrop\n| if(isNull(IsEphemeral), if(isNull(UpdatedIsEphermal), \"-\", UpdatedIsEphermal) , IsEphemeral) as IsEphemeral\n| if(isNull(SourceSyncMode), if(isNull(UpdatedSourceSyncMode), \"-\", UpdatedSourceSyncMode) , SourceSyncMode) as SourceSyncMode\n| if(isNull(CollectorType), if(isNull(UpdatedCollectorType), \"-\", UpdatedCollectorType) , CollectorType) as CollectorType\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorType matches \"{{CollectorType}}\" and Interface matches \"{{Interface}}\"\n|count by EventName, EventTime, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, Interface, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - UserId, _count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "CollectorType",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Interface",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "SavedSearch",
-      "folder": "SOC Analysis",
-      "dashboardName": "Scheduled View Query for Threat Hunting",
-      "dashboardDescription": "Use this query to create a new scheduled view for hyper-efficient queries over large time windows.",
-      "panelTitle": "Scheduled View Query for Threat Hunting",
-      "panelType": "SavedSearch",
-      "panelKey": null,
-      "visualization": null,
+      "objectType": "Dashboard",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Activities",
+      "dashboardDescription": "Collector Activities DashBoard provides detailed information on collector activities, such as top users by activity and a one-day time comparison. You can also review data on recent collector activities and upgrades, and use pre-populated filters for a granular view of selected data.",
+      "panelTitle": "Recent - Collector Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel37b9d54498a2a94e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
-      "variables": [],
-      "defaultTimeRange": "-15m"
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "CollectorType",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Interface",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q0017",
-  "hash": "1721e398e8ab",
+  "hash": "4c0a4d590371",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_pod_status_phase phase=Running | quantize to 1m using max drop last | sum",
+  "query": "account={{account}}  metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average  | topk (20, avg) | avg by  instanceid,{{Table_GroupBy}}",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,143 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "account",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "region",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "instanceid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Table_GroupBy",
+      "description": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
+      "dataType": "ANY",
+      "value": "aws:cloudformation:stack-name"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "honeyComb",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Pods Running",
+      "folder": null,
+      "dashboardName": "99. AWS EC2 Cloudwatch Metrics - Custom Tags",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "cpuutilization top 20",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-e84550a3a40bc84b",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"green\"},{\"from\":null,\"to\":null,\"color\":\"yellow\"},{\"from\":null,\"to\":null,\"color\":\"red\"}],\"option\":\"Latest\",\"noDataString\":\"0\",\"label\":\"\",\"rounding\":\"0\"},\"series\":{}}",
+      "panelKey": "panelBB57B275A0823B45",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#98ECA9\"},{\"from\":85,\"to\":95,\"color\":\"#F2DA73\"},{\"from\":95,\"to\":1000,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\"},\"series\":{}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "account",
+          "defaultValue": "*",
           "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instanceid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Table_GroupBy",
+          "defaultValue": "aws:cloudformation:stack-name",
+          "values": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
           "allowMultiSelect": false
         }
       ]

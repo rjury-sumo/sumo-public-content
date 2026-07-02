@@ -1,0 +1,29 @@
+{
+  "id": "q1212",
+  "hash": "656f44dfc339",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory=sourcecategory_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value,_sourcecategory\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n| fields -_sourcecategory,_some_matched,bytes\n\n// remove long categories\n| if (length(value) > 35,concat(substring(value,0,35),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by dimension,value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value,datatier\n| tgbs / tgb as fraction\n\n// *** THIS LINE rolls up small sources into 'other' ***\n| if(( fraction * 100 )> .01,value,\"other\" ) as value\n| fraction * 100 as percent\n//| bytes / 1024/1024/1024 as gb\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n|sum(categories) as categories, sum(credits) as credits, sum(events) as events,sum(gbytes) as gbytes, sum(percent) as pct_GB by datatier,dimension,value\n| credits/gbytes as %\"cr/gb\"\n| sort credits\n| total credits as tc | 100 * (credits/tc) as pct_cr | fields -tc",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/audit/usage_key_stats.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Log Ingest Stats",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8559BCA7B8D8EA48",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [
+        "Log Ingestion"
+      ],
+      "variables": []
+    }
+  ]
+}

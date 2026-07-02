@@ -1,0 +1,73 @@
+{
+  "id": "q2074",
+  "hash": "30bd7c00bb0d",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} pod=* \n// quantize by max not avg \n//| quantize using  rate | topk(50,max) \n| quantize {{quantize_interval}} //using rate\n | rate counter | avg by container, pod \n| topk(10,sum) \n| sum by container, pod",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Top 10 Total Used CPU Seconds By Pod/Container",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA8172990BC13DA40",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"labelPlacement\":\"inside\",\"labelWrap\":false,\"labelMaxWidth\":250,\"title\":\"container\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"sum\",\"unit\":{\"value\":\"\",\"isCustom\":false}}},\"hiddenQueryKeys\":[\"D\",\"E\",\"B\"],\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}/{{container}}\"}}]}",
+      "rowContext": [
+        "Pod Status"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

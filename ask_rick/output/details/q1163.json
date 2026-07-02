@@ -1,11 +1,24 @@
 {
   "id": "q1163",
-  "hash": "03f09a88e934",
+  "hash": "7cc5e0d6e437",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by _timeslice, collector\n| compare with timeshift 1d\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, gbytes_1d, collector\n| if (!(isNull(gbytes_1d)), ((gbytes - gbytes_1d) / gbytes_1d) * 100, gbytes * 100) as percent_diff\n| if (isNull(gbytes_1d), 0, gbytes_1d) as gbytes_1d\n| where percent_diff > 0\n| sort percent_diff\n| limit 25\n| fields _timeslice, collector, percent_diff, gbytes, gbytes_1d",
-  "queryParameters": [],
-  "viewerType": "table",
+  "query": "_index=sumologic_volume \n| where _sourceCategory=\"collector_tracing_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as {{Unit}}\n|if(\"{{Unit}}\" matches \"spansCount\", 1000000, 1024*1024*1024) as denominator \n| {{Unit}}/denominator as  {{Unit}}\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| {{Unit}}/duration_in_min as {{Unit}}\n| fields {{Unit}}",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,17 +26,28 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Log Spikes",
-      "dashboardDescription": "The Log Spikes Dashboard helps to review details of your data ingested for logs.",
-      "panelTitle": "Top Ingest Spikes for Top 5 Collectors Per Day",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest {{Unit}} per minute",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-5",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [
-        "Top 5 Per Day"
-      ],
-      "variables": []
+      "panelKey": "panelPANE-4EBA2D949F075940",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Million/Gbytes per minute\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

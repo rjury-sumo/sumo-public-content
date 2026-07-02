@@ -1,9 +1,9 @@
 {
   "id": "q0001",
-  "hash": "aca3396b43f3",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _SourceCategory=accessKeys (AccessKeyCreated OR AccessKeyDeleted OR AccessKeyUpdated)\n| json field=_raw \"operator.email\" as user\n| where user matches \"{{user}}\"\n| json field=_raw \"operator.sourceIp\" as ip\n| json field=_raw \"operator.interface\" as interface\n| json \"eventName\", \"accessId\", \"accessKey.enabled\", \"to.enabled\" as EventName, AccessId, IsActive, IsActiveUpdated nodrop\n| if(isNull(IsActive), if(isNull(IsActiveUpdated), \"-\", IsActiveUpdated) ,IsActive) as IsActive\n| where EventName in \n(\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\") \n| concat(substring(AccessId,0,4),\"****\",substring(AccessId,8,13)) as id\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| count by _messagetime,eventname,id,isactive,user,interface,ip,asn_geo,location\n\n\n// summarize",
+  "hash": "5a4740c0dbc2",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "account={{account}} metric=cpuutilization region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| avg by  instanceid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user",
+      "name": "account",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "expected_asn_geo_regex",
-      "description": "regular expression for expected asn geo strings",
+      "name": "region",
+      "description": "",
       "dataType": "ANY",
-      "value": ".*"
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -36,10 +36,46 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "show_asn_geo",
-      "description": "exception,normal",
+      "name": "instanceid",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
     }
   ],
   "viewerType": "table",
@@ -47,36 +83,54 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/audit/sumologic_login_api_activity.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch-overview.json",
       "objectType": "Dashboard",
       "folder": null,
-      "dashboardName": "Sumo Logic Login and API Activity",
-      "dashboardDescription": "",
-      "panelTitle": "Access Key Changes: (\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\")",
+      "dashboardName": "98. AWS EC2 Cloudwatch Metrics Overview",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "CPU Utlization",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-75550DB790278A40",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "panelKey": "panelpane-b03ffbbdb0b59b4d",
+      "visualization": null,
+      "visualSettingsRaw": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"CPU By Instance\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
       "rowContext": [
-        "API Access Activity and Configuration Changes"
+        "About"
       ],
       "variables": [
         {
-          "name": "expected_asn_geo_regex",
-          "defaultValue": ".*",
-          "values": "regular expression for expected asn geo strings",
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user",
-          "defaultValue": "*",
-          "values": "",
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "show_asn_geo",
+          "name": "instanceid",
           "defaultValue": "*",
-          "values": "exception,normal",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "account",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

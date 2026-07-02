@@ -1,0 +1,85 @@
+{
+  "id": "q2282",
+  "hash": "21081c92b235",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n//not query_type = view*\nnot query_type = sumo*\n| where data_scanned_bytes > ({{min_scan_gb_per_search}} * 1G)\n\n//| where scanned_partition_count >5\n| sum(data_scanned_bytes) as bytes by query_type,scanned_partition_count\n\n| toint(ceil(scanned_partition_count/5) * 5) as part_range\n| sum(bytes) as bytes by part_range,query_type\n| transpose row query_type column part_range",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_scan_gb_per_search",
+      "description": "1,10,50,100,1000",
+      "dataType": "ANY",
+      "value": "1"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_optitmization.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Optimization",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs.",
+      "panelTitle": "Scan Bytes by Scanned Partition Band By Query Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel917FE145BAB7A94A",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"query_type\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"unit\":{\"value\":\"B\",\"isCustom\":false},\"title\":\"total bytes scanned\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+      "rowContext": [
+        "Partition Effectiveness Profile"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

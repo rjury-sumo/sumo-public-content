@@ -1,56 +1,94 @@
 {
   "id": "q0022",
-  "hash": "7ebf0a31764c",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "1 - #B / #C along cluster | avg | eval _value * 100 | quantize to 1m drop last",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "hash": "a17580de869d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_* //| limit 100\n{{raw_log_keywords}}\nmetadata_sourceCategory={{raw_log_sourcecategory}}\n//| ceil((metadata_parseTime - timestamp) / (1000)) as lag_s_time_to_parse\n//| formatdate(_receipttime,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as log_received \n//| formatdate(_messagetime,\"yyyy-MM-dd HH:mm:ss.SSS'Z'\",\"ETC/Utc\") as log_timestamp \n| ceil((_receipttime - _messagetime)  / (1000)) as lag_s_ingest\n\n|values(_view) as indexes,count as records,min(lag_s_ingest) as min_lag_receipt, avg(lag_s_ingest) as avg_lag_receipt,max(lag_s_ingest) as max_lag_receipt by metadata_vendor,metadata_product,metadata_sourceCategory,metadata_mapperName\n| \"1.OK\" as state\n| if(max_lag_receipt > {{max_lag_error_secs}},\"2.ERR: high lag\\nCheck ingest pipeline.\", state) as state\n| if(min_lag_receipt <0,\"3.TZERR: future time\\nCheck source TZ config.\",state) as state\n| sort state,max_lag_receipt",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "raw_log_keywords",
+      "description": "Any keywords in raw log or record fields,foo,bar*,(foo or bar)",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "raw_log_sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "max_lag_error_secs",
+      "description": "1200",
+      "dataType": "ANY",
+      "value": "1200"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSE_Lag_Analysis/cse_lag_analysis.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Memory Usage",
+      "folder": null,
+      "dashboardName": "CSE Lag Analysis",
+      "dashboardDescription": "",
+      "panelTitle": "sec_record_* metadata_sourceCategory={{raw_log_sourcecategory}} and raw (fullrecords) keywords: {{raw_log_keywords}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f3c2490c96691944",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"gauge\":{\"show\":true},\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"option\":\"Average\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"label\":\"%\"},\"series\":{},\"hiddenQueryKeys\":[\"B\",\"C\"]}",
+      "panelKey": "panelPANE-59CAA507A252A94F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1200},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":600}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"A:max_lag_receipt\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\"}}",
       "rowContext": [
-        "Overview"
+        "sec_record Ingestion Lag"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "raw_log_sourcecategory",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster Overview dashboard provides a high-level view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Memory Usage",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f3c2490c96691944",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"gauge\":{\"show\":true},\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"option\":\"Average\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"label\":\"%\"},\"series\":{},\"hiddenQueryKeys\":[\"B\",\"C\"]}",
-      "rowContext": [
-        "Note: Selecting cluster name is mandatory for dashboard to work"
-      ],
-      "variables": [
+        },
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "raw_log_keywords",
+          "defaultValue": "*",
+          "values": "Any keywords in raw log or record fields,foo,bar*,(foo or bar)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "signal_keywords",
+          "defaultValue": "*",
+          "values": "Any keyword(s) in signal payload. foo,bar*,( foo or bar)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cip_instance",
+          "defaultValue": "https://live.us2.sumologic.com",
+          "values": "https://service.sumologic.com",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_lag_error_secs",
+          "defaultValue": "1200",
+          "values": "1200",
           "allowMultiSelect": false
         }
       ]

@@ -1,24 +1,11 @@
 {
   "id": "q0803",
-  "hash": "7ce179330a36",
+  "hash": "5c25126d6042",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"operator.email\" as ClosedBy\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by ClosedBy\n| fields ClosedBy",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "insightid",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_sourceCategory=\"detectionlab/siem/insights\"\n| json field=_raw \"severity\"\n| json field=_raw \"entity.name\" as entity\n| toLowerCase(severity) as severity\n| if(severity=\"low\",13,if(severity=\"medium\",15,if(severity=\"high\", 16,1))) as severity\n| timeslice 6h\n| sum(severity) by _timeslice\n| outlier _sum",
+  "queryParameters": [],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Insight Explorer",
-      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
-      "panelTitle": "SOC analyst",
+      "dashboardName": "Cloud SIEM - SOC KRIs",
+      "dashboardDescription": "This dashboard provides SOC KRIs related metrics.",
+      "panelTitle": "Global Risk Outlier",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-5F44033E935D584B",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
-      "rowContext": [
-        "Insight Details"
-      ],
-      "variables": [
-        {
-          "name": "insightid",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelPANE-DDC7A8938F150843",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

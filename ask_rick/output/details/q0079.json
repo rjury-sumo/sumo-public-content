@@ -1,39 +1,56 @@
 {
   "id": "q0079",
-  "hash": "06cca1bdb9c0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "1 - #D / #C | max by cluster,node, metric |  topk(500,max) | eval _value *100",
+  "hash": "58805cdfb583",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "//(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\n//OR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated //)\n\nnew\n\n//| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n//| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.severityName\" as severityname\n//| json field=_raw \"insight.confidence\" as confidence\n\n| where status=\"new\"\n\n| count as insights //by severity,severityname //,insightid,entitytype,entityvalue,%\"insight.riskscore\",%\"insight.confidence\"\n| (queryendtime()-querystarttime())/( 1000 * 60 * 60 * 24) as days\n| round(insights / days) as insights_pd\n| concat(insights,\" / \",insights_pd) as i | fields i",
   "queryParameters": [],
-  "viewerType": "honeyComb",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/cloud_siem_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster Explorer v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster Explorer dashboard provides a high-level view of the health of the cluster services, along with details on the utilized.",
-      "panelTitle": "Nodes % Resource Usage",
+      "folder": null,
+      "dashboardName": "Cloud SIEM Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Insights Generated",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-83f37b639d77384b",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"honeyComb\"},\"honeyComb\":{\"groupBy\":[{\"label\":\"cluster\",\"value\":\"cluster\"},{\"label\":\"metric\",\"value\":\"metric\"}],\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"#69DB4A\"},{\"from\":75,\"to\":85,\"color\":\"#E1C60E\"},{\"from\":85,\"to\":101,\"color\":\"#C73A25\"}],\"aggregationType\":\"avg\"},\"series\":{},\"hiddenQueryKeys\":[\"C\",\"D\"]}",
+      "panelKey": "panel83AA1DEE84D9AB47",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Total / Daily\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
       "rowContext": [
-        "Note: Selecting cluster and pod name is mandatory for dashboard to work"
+        "KPIs"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": null,
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Cloud SIEM Overview (Tuning Pack)",
+      "dashboardDescription": "",
+      "panelTitle": "Insights Generated",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel83AA1DEE84D9AB47",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Total / Daily\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "KPIs"
+      ],
+      "variables": [
         {
-          "name": "pod",
-          "defaultValue": null,
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]

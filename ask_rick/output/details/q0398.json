@@ -1,9 +1,9 @@
 {
   "id": "q0398",
-  "hash": "edf57c011acc",
+  "hash": "1afd7f36fa39",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} statefulset={{statefulset}}  metric=kube_statefulset_replicas    | quantize 1m |  max",
+  "query": "application={{application}}\ndeployment.environment={{environment}} metric=service_errors  _contenttype = metricfromtrace \n| quantize using sum | sum by service | topk(10,sum)",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "application",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -24,40 +24,46 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "statefulset",
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "prod"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing.metrics.contentfromtrace.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
-      "panelTitle": "Desired vs Current Replicas",
+      "folder": null,
+      "dashboardName": "Tracing Metrics contentfromtrace",
+      "dashboardDescription": "",
+      "panelTitle": "Errors Top 10",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f01fb9b0b3f82844",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"fillOpacity\":\"0.6\",\"displayType\":\"default\"},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"type\":\"line\",\"color\":\"#00a0d6\",\"lineThickness\":6,\"lineDashType\":\"dash\",\"markerType\":\"circle\",\"name\":\"Desired\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"type\":\"column\",\"color\":\"#bff26c\",\"dataPointMaxWidth\":37,\"displayType\":\"default\",\"name\":\"Current\"}}]}",
+      "panelKey": "panelBB1B5902B86B0B4C",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
       "rowContext": [
-        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
+        "Top N All Services"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "application",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "statefulset",
-          "defaultValue": "",
+          "name": "environment",
+          "defaultValue": "prod",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

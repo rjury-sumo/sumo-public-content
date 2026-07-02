@@ -1,0 +1,51 @@
+{
+  "id": "q1736",
+  "hash": "9bc842a42061",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json \"log.rule\" as rule\n| json  \"$['log']['output_fields']['proc.cmdline']\" as proc_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.name']\" as proc_name nodrop\n| json  \"$['log']['output_fields']['proc.pcmdline']\" as proc_parent_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.pname']\" as proc_parent_name nodrop\n| if(isBlank(proc_parent_name), \"none\", proc_parent_name) as proc_parent_name\n| count by proc_parent_name",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": {
+    "metric": "",
+    "aggregationType": "None",
+    "groupBy": "",
+    "filters": [],
+    "operators": null
+  },
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Security Overview",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by Parent Process",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-1ecd81dca4e0e948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"column\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme1\"}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Security Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by Parent Process",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-1ecd81dca4e0e948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"column\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme1\"}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0033",
-  "hash": "cf15ee26c9b5",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_pod_status_phase !(phase=running or phase=pending) | quantize to 1m using max drop last | sum",
+  "hash": "3c9970ef63a4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status=\"closed\"\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| count by resolution,severity | transpose row resolution column severity",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Unscheduleable Pods",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insight Resolution Statuses",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-A4D69D2D9F9F2B4C",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Maximum\",\"label\":\"Pods\",\"thresholds\":[{\"from\":0,\"to\":1,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"#f2da73\"},{\"from\":1,\"to\":null,\"color\":\"#ffb5b5\"}],\"useBackgroundColor\":true,\"noDataString\":\"0\",\"rounding\":0},\"series\":{}}",
+      "panelKey": "panelDF37382E88D0694C",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stacked\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insight Resolution Statuses",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDF37382E88D0694C",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"stacked\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

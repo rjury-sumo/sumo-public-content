@@ -1,9 +1,9 @@
 {
   "id": "q0285",
-  "hash": "d5d2ec5d140b",
+  "hash": "2968f27be3a5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} node={{node}} (error or critical)\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by node,pod,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n\n| where entity matches \"{{entity}}\"\n| json field=_raw \"eventName\" nodrop\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue nodrop\n| json field=_raw \"insight.tags\" as tags nodrop\n| json field=_raw \"insight.severity\" as severity nodrop\n| json field=_raw \"insight.confidence\" as confidence nodrop\n| json field=_raw \"insight.signals\" as signals\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| replace (rule,\"\\\",\\\"\",\" \") as rule\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n////\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| parse regex field=signal \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\",\"name\",\"severity\",\"summary\",\"description\",\"ruleId\",\"ruleName\",\"tags\",\"suppressedReasons\",\"created\",\"entityId\" nodrop\n\n// squshdown\n| count by created,insightid,id,name,severity,summary,description,ruleid,rulename,tags,entityid | fields -_count \n// final aggregation to save to a lookup with only one row for most recent status of insight\n| concat(ruleid,\":\",rulename) as rule\n| avg(severity) as sev, count_distinct(insightid) as insights,values(entityid) as entities, count_distinct(id) as signals by rule  //,first(signals) as signals,\n| sort rule asc\n| sev * signals as total_sev",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,22 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "entity",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": "12345"
     }
   ],
   "viewerType": "table",
@@ -35,29 +23,23 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Pod Error Logs (Latest 100 Errors)",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Single Entity View (Tuning Pack)",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Rules In Insights Signals",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-F2C0A28A88F2084B",
+      "panelKey": "panelD6964474AE357948",
       "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Logs/Events"
+        "Timeline And Summary"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
         }

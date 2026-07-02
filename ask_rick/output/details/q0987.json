@@ -1,9 +1,9 @@
 {
   "id": "q0987",
-  "hash": "579630905b99",
+  "hash": "26b876a98a12",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"adminMode\", \"contentIdentity.type\",\"operator.sourceIp\" as EventName, AdminMode, ContentType, UserIp nodrop\n| where EventName in (\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") AND AdminMode=\"true\" | where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n| count as Count by ContentType, EventName\n| transpose row ContentType column EventName as %\"ContentCreated\", %\"ContentDeleted\", %\"ContentExported\", %\"ContentImported\"\n| sort by ContentCreated, ContentDeleted, ContentExported, ContentImported",
+  "query": "_index=sumologic_audit_events _SourceCategory=accessKeys (AccessKeyCreated OR AccessKeyDeleted OR AccessKeyUpdated)\n| json \"eventName\", \"eventTime\", \"accessId\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"accessKey.accessKeyLabel\", \"accessKey.enabled\", \"to\", \"from\", \"to.enabled\"  as EventName, EventTime, AccessId, User, UserId, UserIp, AccessKeyLabel, IsActive, CurrentValue, PreviousValue, IsActiveUpdated nodrop\n| where EventName in (\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\") \n| where EventName matches \"{{EventName}}\" and AccessId matches \"{{AccessId}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\" and AccessKeyLabel matches \"{{AccessKeyLabel}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"AccessKeyCreated\", \"AccessKeyUpdated\", \"AccessKeyDeleted\") in EventName\n| transpose row _timeslice column EventName",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,31 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "*",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AccessId",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,47 +60,57 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "AdminMode",
-      "description": "*",
+      "name": "AccessKeyLabel",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
-      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
-      "panelTitle": "Top Content Type - Admin Mode",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Access Key Activities",
+      "dashboardDescription": "Access Key Activities DashBoard provides detailed information about access key activities, such as creation, deletion, and updates. You can also review trends, user activity, the number of active access keys, and one-day time comparisons.",
+      "panelTitle": "Trend - Access Key Events",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel51caa8d58618084f",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
-      "rowContext": [
-        "Admin Mode"
-      ],
+      "panelKey": "panel2f51b2af93321942",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "UserIp",
+          "name": "EventName",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "EventName",
+          "name": "User",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "AdminMode",
+          "name": "AccessId",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AccessKeyLabel",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

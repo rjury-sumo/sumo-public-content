@@ -1,24 +1,11 @@
 {
   "id": "q1152",
-  "hash": "ad5cc5d894cb",
+  "hash": "6a8705332c1b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume dataPoints\n| where _sourceCategory=\"collector_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as dpm \n| {{Subscribed_Metric_DPM_Ingest_Capacity}} as %\"DPM_Capacity\" // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| fields -datapoints, duration_in_min, dpm",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-      "description": "20000",
-      "dataType": "ANY",
-      "value": "20000"
-    }
-  ],
-  "viewerType": "svp",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n| timeslice 1d\n| sum (sizeInGB) as total_data_scanned_GB by _timeslice",
+  "queryParameters": [],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,27 +13,33 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Capacity Utilization",
-      "dashboardDescription": "This dashboard displays the subscribed, actual, and percentage capacity utilization for logs and metrics",
-      "panelTitle": "Subscribed DPM Ingest Capacity",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Data Scanned  Trend",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-A492E59FB68E984C",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"DPM\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panel3C0B30E89621FA41",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Metric Ingest"
+        "Logs"
       ],
       "variables": [
         {
-          "name": "Subscribed_Log_Data_Scan_Capacity",
-          "defaultValue": "100",
-          "values": "100",
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

@@ -1,0 +1,73 @@
+{
+  "id": "q2281",
+  "hash": "458256d9d3d4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\nnot query_type=view* not query_type=monitors not query_type=sched* not query_type=Int* not query_type=*api* not query_type=*dash*\n\n| sum(data_scanned_bytes) as bytes by query_type | bytes / (1024 * 1024 * 1024 * 1024) as TB_Scan  | sum(tb_scan) as tb_scan by query_type | sort tb_scan",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_optitmization.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Optimization",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs.",
+      "panelTitle": "Scan Other",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel9C348F21BCFA1A4C",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+      "rowContext": [
+        "Search Scan Overview and KPIs"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

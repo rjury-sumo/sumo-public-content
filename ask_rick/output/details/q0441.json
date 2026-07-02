@@ -1,9 +1,9 @@
 {
   "id": "q0441",
-  "hash": "068db2ec431b",
+  "hash": "b038911a5b67",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| where action =\"EXPORT\"\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by sourceuser",
+  "query": "_view=sumologic_audit _sourceCategory=user_activity\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"User * updated the following permissions on * \\\"*\\\". \\nAdded: *\\nRemoved: *\" as user,content_type,content_name,added_permissions,removed_permissions nodrop\n| parse regex field=removed_permissions \"(?<removedperm>\\(.+?: .+?\\))\" multi\n| parse regex field=removedperm \"\\((?<removed_permission_from>.+)<(?<permission_target>.+)>: (?<removed_permissions>.+)\\)\" \n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{added_permissions}}\" = \"*\", true, added_permissions matches \"{{added_permissions}}\")\n|count by date_time, sourceuser,content_type,content_name, removed_permission_from, permission_target, removed_permissions",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,13 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "sourceuser",
+      "name": "added_permissions",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "pie",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,17 +26,19 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Imported/Exported/Installed/Shared Publicly",
-      "dashboardDescription": "See when content is shared, exported or imported. As well as count and trends in content that has been shared, exported or imported.",
-      "panelTitle": "Content Exported breakdown by Users",
+      "dashboardName": "Library Content - Updated Permission",
+      "dashboardDescription": "See when permission is added or removed. As well as a breakdown, and count of permission being added or deleted by type or content.",
+      "panelTitle": "Removed Permission",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela646dad8826deb48",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panel4fe319acb2c48a4a",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Added Permission"
+      ],
       "variables": [
         {
-          "name": "sourceuser",
+          "name": "added_permissions",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

@@ -1,9 +1,9 @@
 {
   "id": "q0615",
-  "hash": "179f1bff59e5",
+  "hash": "ce3a966d5d38",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{{Keyword}}}\n| count as Total by metadata_vendor, metadata_product\n| order by Total",
+  "query": "// id=@total_eligible_insights:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_count minimize=\"{{minimize}}\" \n| where insight_state=\"Eligible\"\n| fields count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,41 +12,53 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
-      "description": "",
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
       "dataType": "ANY",
-      "value": ""
+      "value": "False positive"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "Total Eligible Insights (prior to optimization)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel3E49D954A4FBCA4A",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "panelKey": "panelPANE-3952B0728757284A",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Label\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":36,\"labelFontSize\":14,\"thresholds\":[{\"id\":0,\"value\":null,\"color\":\"#00a0d6\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy) (Copy)"
+        "Recommendations Summary"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
           "allowMultiSelect": false
         },
         {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": null,
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
           "allowMultiSelect": false
         }
       ]

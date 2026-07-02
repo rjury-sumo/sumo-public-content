@@ -1,9 +1,9 @@
 {
   "id": "q0434",
-  "hash": "9e330cb50820",
+  "hash": "0d51a3c3439d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit   _sourceCategory=user_activity \"updated name/description\"\n| where action =\"UPDATE\"\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n| parse \"updated name/description of * \\\"*\\\" from (*,*) to (*,*)\" as content_type,content_name,old_name,old_desc,new_name,new_desc\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type,content_name,old_name,old_desc,new_name,new_desc",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity \n| where action in (\"MANAGE_PERMISSIONS\" , \"CREATE\", \"DELETE\", \"MOVE\", \"COPY\", \"UPDATE\", \"IMPORT\", \"EXPORT\",\"INSTALL\")\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by  action",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,15 +26,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
-      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
-      "panelTitle": "Content Updated",
+      "dashboardName": "Library Content - Overview",
+      "dashboardDescription": "See an overview of Audit Library content, including location of users, user activity, outliers by user, and breakdowns by action.",
+      "panelTitle": "Breakdown By Action",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel2ee2b6a1aab6d947",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panel188bc4359e0f484e",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true}}",
       "rowContext": [
-        "Content Created"
+        "Source User"
       ],
       "variables": [
         {

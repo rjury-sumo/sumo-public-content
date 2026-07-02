@@ -1,9 +1,9 @@
 {
   "id": "q0493",
-  "hash": "9b10df38fde0",
+  "hash": "43e1e03af06c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory=\"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as ingest_gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| ingest_gbytes / duration_in_day as %\"AvgLogIngestPerDay\"\n| fields %\"AvgLogIngestPerDay\"",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes\n| timeslice 1d\n| sum(gbytes) as gbytes by _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,15 +26,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Capacity Utilization",
-      "dashboardDescription": "The Data Volume - Capacity Utilization dashboard provides views of subscribed, actual, and percentage capacity utilization for logs and metrics.",
-      "panelTitle": "Actual (Average) Log Ingested",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Daily Ingest (GB)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7700C9DFAD327B40",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"GB/Day\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelPANE-2",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Log Ingest"
+        "Note: Daily Ingest Capacity"
       ],
       "variables": [
         {
@@ -47,12 +47,6 @@
           "name": "Daily_Log_Ingest_Capacity",
           "defaultValue": "100",
           "values": "100",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
           "allowMultiSelect": false
         }
       ]

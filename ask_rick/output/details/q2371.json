@@ -1,0 +1,115 @@
+{
+  "id": "q2371",
+  "hash": "bcdfa123bf5b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| timeslice by {{timeslice}} \n\n| sum(bytes) as size_in_bytes by view,_timeslice\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n\n| sum(gbytes) as gbytes by view,_timeslice\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| if (tier = \"continuous\",cr_cont * gbytes * ((100 - {{cse_pct}})  /100),0) as cr_continuous\n| if (tier = \"continuous\",cr_cse * gbytes * ({{cse_pct}}  /100),0) as cr_cse\n| if (tier = \"frequent\",cr_freq * gbytes,0) as cr_frequent\n| if (tier = \"infrequent\",cr_infreq * gbytes,0) as cr_infrequent\n\n| concat(\"cr_continuous:\",cr_continuous,\"cr_cse:\",cr_cse,\"cr_frequent:\",cr_frequent,\"cr_infrequent:\",cr_infrequent) as transport\n| parse regex field = transport \"(?<type>[a-z_]+):(?<credits>[0-9]+)\" multi\n| sum(credits) as credits by type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,1d,15m",
+      "dataType": "ANY",
+      "value": "1d"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "_freq",
+      "dataType": "ANY",
+      "value": "_freq"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "infrequent|",
+      "dataType": "ANY",
+      "value": "infrequent"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cse_pct",
+      "description": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest Credits By Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel807969999E849A42",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Estimate For Log Ingestion Credits"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

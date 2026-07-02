@@ -1,11 +1,11 @@
 {
   "id": "q0846",
-  "hash": "ffea1ff232c0",
+  "hash": "eff39788be1a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| where name matches \"*O365*\"\n| count",
+  "query": "_index=sec_record_authentication (fail* or challenge*) \n| timeslice 1d\n| count as login_failures by _timeslice\n| fillmissing timeslice(1h) with 0 for login_failures\n| outlier login_failures window=5, threshold=3",
   "queryParameters": [],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,17 +13,28 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "Office 365 Alerts",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "User Login Failures",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelC7AAFCCA88462846",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":4,\"color\":\"#16943E\"},{\"from\":5,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Sum\"}}",
-      "rowContext": [
-        "Daily Alert Breakdown Detailed"
-      ],
-      "variables": []
+      "panelKey": "panelPANE-93C40606BD76A84B",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

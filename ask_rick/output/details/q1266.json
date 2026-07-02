@@ -1,0 +1,29 @@
+{
+  "id": "q1266",
+  "hash": "6786ddfa25bb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes _sourcecategory=\"sourcecategory_volume\" \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n| timeslice 1h \n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by sourcecategory \n| where !(sourcecategory matches \"*_volume\") \n| compare timeshift -7d 2 avg \n| if(isNull(gbytes_14d_avg), 0, gbytes_14d_avg) as gbytes_14d_avg \n| if (isnull(gbytes),0,gbytes) as gbytes\n| ((gbytes - gbytes_14d_avg) / gbytes) * 100 as pct_increase\n| total gbytes  \n| (gbytes / _total) * 100 as ingest_weight\n| round(ingest_weight) as ingest_weight\n| round(pct_increase) as pct_increase\n| round(gbytes * 1024) as mb\n| round(gbytes_14d_avg * 1024) as mb_baseline\n// exclude removed \n| where (pct_increase >= 10 or pct_increase < -10) and ingest_weight > 1\n | fields -gbytes, gbytes_14d_avg,_total\n| sort pct_increase",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Categories Volume Changes (weight > 1%, abs pct increase > 10%)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB05488B2969B594D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0818",
-  "hash": "3b02a0f0fe56",
+  "hash": "54160b101f39",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| avg(insight_time_to_detection)\n| round(_avg / 3600) as _avg",
+  "query": "_index=sec_signal  Threat*\n| count by name",
   "queryParameters": [],
   "viewerType": "svp",
   "metricsQueryData": null,
@@ -13,14 +13,16 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC KPIs",
-      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
-      "panelTitle": "Average Hours to Detection",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "Threat Intelligence ( TAXII Feed ) Matches",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel237EE73894F29948",
+      "panelKey": "panel1C6D8759AAFCC941",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":24,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":96,\"to\":168,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":168},\"sparkline\":{\"show\":false},\"option\":\"Sum\"},\"series\":{}}",
-      "rowContext": [],
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":50,\"color\":\"#16943E\"},{\"from\":50,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":10000000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"rounding\":0,\"option\":\"Maximum\"}}",
+      "rowContext": [
+        "Daily Alert Breakdown Detailed"
+      ],
       "variables": []
     }
   ]

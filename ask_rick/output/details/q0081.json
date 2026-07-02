@@ -1,64 +1,56 @@
 {
   "id": "q0081",
-  "hash": "26a732a5cc69",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} pod={{pod}} | rate | max by node, pod  | topk(500,max)",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "honeyComb",
+  "hash": "b83b5b5f65c7",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_*\n| count as s | s/1000000 as s\n| (queryendtime()-querystarttime())/( 1000 * 60 * 60 * 24) as days\n| round(s / days) as spd \n| concat(round(s),\" / \",round(spd)) as sig | fields sig",
+  "queryParameters": [],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/cloud_siem_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster Explorer v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster Explorer dashboard provides a high-level view of the health of the cluster services, along with details on the utilized.",
-      "panelTitle": "Relative CPU Usage (Cores) by Pod",
+      "folder": null,
+      "dashboardName": "Cloud SIEM Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Events Ingested (x1M)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-b38cfa88aad2094f",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"honeyComb\"},\"honeyComb\":{\"groupBy\":[{\"label\":\"node\",\"value\":\"node\"}],\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#69DB4A\"},{\"from\":null,\"to\":null,\"color\":\"#E1C60E\"},{\"from\":null,\"to\":null,\"color\":\"#C73A25\"}]},\"series\":{}}",
+      "panelKey": "panel041A919586772943",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"x1M Total / Daily\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
       "rowContext": [
-        "Note: Selecting cluster and pod name is mandatory for dashboard to work"
+        "KPIs"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": null,
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Cloud SIEM Overview (Tuning Pack)",
+      "dashboardDescription": "",
+      "panelTitle": "Events Ingested (x1M)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel041A919586772943",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"x1M Total / Daily\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "KPIs"
+      ],
+      "variables": [
         {
-          "name": "pod",
-          "defaultValue": null,
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]

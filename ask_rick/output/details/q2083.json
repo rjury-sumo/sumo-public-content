@@ -1,0 +1,73 @@
+{
+  "id": "q2083",
+  "hash": "c8474744a8cb",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}}  metric=kube_pod_status_phase !phase=Running !phase=succeeded  | quantize {{quantize_interval}} | sum by phase",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Pods Not Running By Phase",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA565A7DC8DD03A4A",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"max\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{phase}}\"}}]}",
+      "rowContext": [
+        "Pod Status"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q1160",
-  "hash": "ceb995b49f1e",
+  "hash": "0cb2744367e6",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\"\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name, query_start_time, query_end_time\n| query_end_time - query_start_time as query_time_range_hrs\n| query_time_range_hrs / 3600000 as query_time_range_hrs\n|data_scanned_bytes / 1Gi as sizeInGB\n| count (query) as query_count, sum(sizeInGB) as total_data_scanned_GB by query, user_name\n| total_data_scanned_GB/query_count as %\"Average Data Scanned per Query\"\n| fields query, query_count, %\"Average Data Scanned per Query\", total_data_scanned_GB, user_name\n| format( \"%.2f\",%\"Average Data Scanned per Query\") as %\"Average Data Scanned per Query\"\n| format( \"%.2f\",total_data_scanned_GB) as total_data_scanned_GB\n| sort by total_data_scanned_GB\n| limit 50",
+  "query": "_index=sumologic_volume \n| where _sourceCategory=\"collector_tracing_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1h\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n| sort by _timeslice asc \n| smooth %\"{{Unit}}\"  as moving_avg | %\"{{Unit}}\"  as %\"curr_hrs_{{Unit}}\"\n| 70 as spikePercent\n| where %\"curr_hrs_{{Unit}}\" >= (1 + spikePercent / 100) * moving_avg\n| fields -spikePercent",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "query_type",
-      "description": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
       "dataType": "ANY",
-      "value": "*"
+      "value": "billedBytes"
     }
   ],
   "viewerType": "table",
@@ -26,27 +26,27 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Feature Level Scan Volume",
-      "dashboardDescription": "The Feature Level Scan Volume dashboard provides visibility into the scan volume at a feature level in order to monitor and control cost at a feature level.",
-      "panelTitle": "Top 50 Expensive Queries",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Spike (Moving Avg) of {{Unit}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0C956AB2AFE0C845",
+      "panelKey": "panelPANE-11",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Credits Conversion"
+        "Note for Ingest Spike Panels of {{Unit}}"
       ],
       "variables": [
         {
-          "name": "credits_conversion",
-          "defaultValue": "0.016",
-          "values": "0.016",
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
           "allowMultiSelect": false
         },
         {
-          "name": "query_type",
-          "defaultValue": "*",
-          "values": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

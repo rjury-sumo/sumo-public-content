@@ -1,11 +1,11 @@
 {
   "id": "q0472",
-  "hash": "41af80c25127",
+  "hash": "1d893aca134b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH (\"Scheduled search alert triggered\")\n| parse \"[StatusCode=*]\" as Status_Code\n| parse \"[Name=*]\" as SavedSearchName\n| parse \"[AlertType=*]\" as AlertType nodrop\n| where !(Status_Code matches \"2*\")\n| count by SavedSearchName, Status_Code\n| sort by _count",
+  "query": "_index=sumologic_audit class=scheduled_search action=SKIP\n| where _sourceCategory=\"scheduled_search\"\n| KV \"Name\", \"SchSearchId\", \"SchTime\"\n| count",
   "queryParameters": [],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,16 +13,14 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Scheduled Search - Search Triggered Summary",
-      "dashboardDescription": "See all webhook and scheduled search triggerings.",
-      "panelTitle": "Non-200 Status Codes by Name",
+      "dashboardName": "User Activity - Scheduled Search",
+      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
+      "panelTitle": "Skipped",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelbfb89b43a969f948",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Webhook Analysis"
-      ],
+      "panelKey": "panelceb718e1b0fee942",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [],
       "variables": []
     }
   ]

@@ -1,85 +1,27 @@
 {
   "id": "q1015",
-  "hash": "9a23ae3fb489",
+  "hash": "42cab37211f2",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content and ApplicationInstalled\n| json \"eventName\", \"operator.email\", \"contentIdentity.type\"  as EventName, UserEmail, ContentName  nodrop\n| where EventName=\"ApplicationInstalled\" \n| where EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\" and ContentName matches \"{{ContentName}}\"\n| _sourceHost as UserIp\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "ContentName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "map",
+  "query": "_index=sumologic_audit_events _sourceCategory=saml (SamlLockdownEnabled OR SamlLockdownDisabled)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"SamlLockdownEnabled\",\"SamlLockdownDisabled\")\n| count as Count by EventName",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Publicly Accessed, Application Installed",
-      "dashboardDescription": "Content - Publicly Accessed, Application DashBoard provides detailed information on installed applications, shared and publicly accessed content. The dashboard is organized according to installed applications and publicly accessed content. For a more granular view of the data, you can filter on Event Type, Content Type, Admin Mode, Visibility using the pre-populated filters.",
-      "panelTitle": "Geo Locations - Application Installed",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Security Management Overview",
+      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
+      "panelTitle": "Distribution - SAML Lockdown Activity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel221d377fa029aa4d",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
-      "rowContext": [
-        "Application Installed"
-      ],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "ContentName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel8e7c2f3184b59b45",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

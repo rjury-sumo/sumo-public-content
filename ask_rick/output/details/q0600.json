@@ -1,9 +1,9 @@
 {
   "id": "q0600",
-  "hash": "9bfea6e91787",
+  "hash": "f5e6a1560977",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_email objectType=Email {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
+  "query": "_index=sec_signal\n{{{rule}}}\n\n| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[*].metadata_vendor\" as vendors nodrop\n| json field=fullRecords \"[*].metadata_sourceCategory\" as sourceCategories nodrop\n//| json field=fullRecords \"[*].metadata_product\" as products nodrop\n//| json field=fullRecords \"[*].metadata_mapperName\" as mapperNames nodrop\n//| json field=fullRecords \"[*].metadata_deviceEventId\" as deviceEventIds nodrop\n\n//| concat (ruleid,\" \",rulename) as rule\n| parse regex field=sourceCategories \"(?<sourcecategory>[\\w\\d_\\/\\.-]+)\" multi\n| count_distinct(id) as signals by sourcecategory\n//\n| sort signals",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,13 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
+      "name": "{rule",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,26 +26,20 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "dashboardName": "Cloud SIEM - Rule Overview",
+      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
+      "panelTitle": "Source Categories",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel4D9987489589894D",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Email\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#005982\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#005982\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panel99C10AB59D369B49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy)"
+        "Signals"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
           "values": null,
           "allowMultiSelect": false
         }

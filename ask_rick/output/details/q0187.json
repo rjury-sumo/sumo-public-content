@@ -1,85 +1,27 @@
 {
   "id": "q0187",
-  "hash": "f50f2ba86425",
+  "hash": "18d7e31303bb",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "cluster={{cluster}} namespace={{namespace}} deployment={{deployment}} pod=*\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by deployment,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "queryMode": "SavedSearch",
+  "query": "_sourceCategory=asoc/*signal*  \n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\" nodrop\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"NO\",\"YES\") as suppressed\n| if (suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n//| json field=_raw \"description\"\n| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| count_distinct(entity_id) as entities,count_distinct(user_username) as usernames, sum(is_suppressed) as suppressed,sum(is_generated) as created,count as signals by rule_id,rule_name,severity,attack_stage,product,vendor,deviceEventId \n| sort rule_name asc",
+  "queryParameters": [],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Logs (Latest 100 Logs)",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel35DE85E38526EA48",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
-      "rowContext": [
-        "Logs"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
+      "objectType": "SavedSearch",
+      "folder": "Demo Searches",
+      "dashboardName": "Signals - Count",
+      "dashboardDescription": "Example signals search to count by common fields.",
+      "panelTitle": "Signals - Count",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "Last 60 Minutes"
     }
   ]
 }

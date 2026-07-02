@@ -1,9 +1,9 @@
 {
   "id": "q1128",
-  "hash": "0256f0d7e03e",
+  "hash": "178a8d834ca4",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query status_message=\"Query Failed\"\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| timeslice 15m\n| count by _timeslice,query_type\n| transpose row _timeslice column query_type",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1h\n| sum(datapoints) as datapoints by _timeslice\n| datapoints as %\"Data Points\" | fields -datapoints",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,39 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "query_type",
+      "name": "MetricsSources",
       "description": "",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_name",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory_metrics_volume"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Search Overview",
-      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
-      "panelTitle": "Failed Searches by Type",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Trend of {{MetricsSources}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panele7255597b2297b41",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
-      "rowContext": [
-        "Search Concepts"
-      ],
+      "panelKey": "panelPANE-2",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "query_type",
-          "defaultValue": null,
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
-          "values": null,
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
           "allowMultiSelect": false
         }
       ]

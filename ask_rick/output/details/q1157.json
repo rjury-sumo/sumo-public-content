@@ -1,9 +1,9 @@
 {
   "id": "q1157",
-  "hash": "90e0a1631918",
+  "hash": "93211ff71f96",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| timeslice 1d\n| sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)\n| avg(total_credits_consumed) as avg_credits_consumed",
+  "query": "_index=sumologic_volume \n| where _sourceCategory=\"source_tracing_volume\"\n| parse regex \"\\\"(?<source>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as %\"{{Unit}}\" by source\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| %\"{{Unit}}\" / duration_in_min as % \"{{Unit}} per minute\"\n| top 5 source by % \"{{Unit}} per minute\"",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,13 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "credits_conversion",
-      "description": "0.016",
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
       "dataType": "ANY",
-      "value": "0.016"
+      "value": "billedBytes"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,21 +26,25 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Credits Consumed",
-      "dashboardDescription": "The Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed. This allows you to monitor and control search costs.",
-      "panelTitle": "Avg Credits Consumed/day",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Top 5 Sources by {{Unit}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6182c3a6bf03ca4a",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credit\",\"useBackgroundColor\":false,\"useNoData\":true,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
-      "rowContext": [
-        "Credits Conversion"
-      ],
+      "panelKey": "panelPANE-6",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"source\",\"hideLabels\":true},\"axisY\":{\"title\":\"billedBytes per minute\"},\"axisY2\":{\"hideLabels\":true}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"horizontalAlign\":\"right\",\"maxWidth\":400,\"maxHeight\":50,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "credits_conversion",
-          "defaultValue": "0.016",
-          "values": "0.016",
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

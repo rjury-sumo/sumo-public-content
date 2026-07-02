@@ -1,9 +1,9 @@
 {
   "id": "q0998",
-  "hash": "87203056727b",
+  "hash": "6079c0641329",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"operator.email\" as EventName, User nodrop\n| where EventName in (\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") \n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n|count by User, EventName\n| transpose row User column EventName as %\"FieldExtractionRuleCreated\", %\"FieldExtractionRuleUpdated\", %\"FieldExtractionRuleDeleted\" \n| sort by FieldExtractionRuleCreated, FieldExtractionRuleUpdated, FieldExtractionRuleDeleted\n| limit 5",
+  "query": "_index=sumologic_audit_events _sourceCategory=serviceAllowlist (ServiceAllowlistPermissionsSet OR ServiceAllowlistUpdated)\n| json \"eventName\", \"operator.email\",\"operator.sourceIp\" as EventName, Admin, AdminIp nodrop\n| where EventName in (\"ServiceAllowlistPermissionsSet\", \"ServiceAllowlistUpdated\")\n| where AdminIp matches \"{{AdminIp}}\"|count as Count by Admin, EventName\n| transpose row Admin column EventName as %\"ServiceAllowlistPermissionsSet\", %\"ServiceAllowlistUpdated\"\n| sort by ServiceAllowlistPermissionsSet, ServiceAllowlistUpdated",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,19 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
-      "description": "*",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "User",
+      "name": "AdminIp",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -37,24 +25,18 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
-      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
-      "panelTitle": "Active Users",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Active Admins Updating Service AllowList",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel334b1046b42c2a4b",
+      "panelKey": "panel82c30840af3d4b48",
       "visualization": "bar",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "User",
+          "name": "AdminIp",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

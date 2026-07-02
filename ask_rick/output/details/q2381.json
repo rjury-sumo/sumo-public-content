@@ -1,0 +1,66 @@
+{
+  "id": "q2381",
+  "hash": "a4799a0bcf0f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=* not _sourcecategory=asoc/* not _sourcecategory=cse/* //AND (AND _messageid=*0 or _messageid=*5)\n| _view as index\n| if (isempty(_siemforward),\"CIP\",\"CSE\") as forwarding\n| sum(_size) as bytes, count_distinct(index) as partitions, count_distinct(_sourcecategory) as categories by forwarding\n| bytes / 1024 /1024 as mb | total mb as tmb | (mb / tmb) * 100  as percent \n| fields forwarding, mb,categories,percent \n| if (forwarding = \"CIP\",20,25) as %\"cr/gb\"\n| round(percent,1) as percent\n| round(mb) as mb",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "CIP vs CSE Routing %",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0F0DA71B810C494A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

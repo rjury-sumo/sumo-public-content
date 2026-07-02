@@ -1,9 +1,9 @@
 {
   "id": "q0015",
-  "hash": "eb263865c975",
+  "hash": "e3c4239a88e9",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}}  metric=kube_node_status_condition condition=Ready status=\"true\"| quantize 30s | sum by node | sum | timeshift -2m",
+  "query": "account={{account}} {{field}}={{{value}}} region={{region}} instanceid={{instanceid}} namespace={{namespace}} metric=DiskWriteBytes statistic=average| avg by  instanceid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,131 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "account",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "region",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "instanceid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "timeSeries",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Nodes Ready",
+      "folder": null,
+      "dashboardName": "99. AWS EC2 Cloudwatch Metrics - Custom Tags",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "Disk Write Bytes",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-28303e23942aeb4a",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"#f2da73\"},{\"from\":0,\"to\":0.99,\"color\":\"#ffb5b5\"}],\"label\":\"Nodes\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"useBackgroundColor\":true},\"series\":{}}",
+      "panelKey": "panelCEAE311C9FE1DA47",
+      "visualization": "timeSeries",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\"},\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Disk Write Bytes\",\"unit\":{\"value\":\"B\",\"isCustom\":false}},\"axisX\":{\"title\":\"\"}},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}]}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "account",
+          "defaultValue": "*",
           "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instanceid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Table_GroupBy",
+          "defaultValue": "aws:cloudformation:stack-name",
+          "values": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
           "allowMultiSelect": false
         }
       ]

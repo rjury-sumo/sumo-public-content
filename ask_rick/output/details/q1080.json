@@ -1,83 +1,29 @@
 {
   "id": "q1080",
-  "hash": "87db6f65c490",
+  "hash": "535a6d34f5c9",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\" as EventName, Admin, AdminIp nodrop\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\") \n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Admin",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "map",
+  "query": "_view=sumologic_search_usage_per_query query_type=\"Interactive Dashboard\"\n| sum(data_scanned_bytes) as scanned_bytes, sum(data_retrieved_bytes) as retrieved_bytes by user_name, query, session_id, execution_duration_ms \n| round(execution_duration_ms/1000) as duration_seconds \n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| replace(scope_section_raw,\" \",\"\") as scope_section \n| parse regex field=scope_section_raw \"_(?<meta>sourcecategory|sourcehost|collector|source|sourcename)\\s*=\"  nodrop\n| parse regex field=scope_section_raw \"_(?<idx>view|index)\\s*=\"  nodrop  \n| where ( isEmpty(idx) AND isEmpty(meta))\n| fields -queryLower,session_id,execution_duration_ms, scope_section_raw,_some_matched, scope_section,meta,idx",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Activities",
-      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
-      "panelTitle": "Geo Location",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Queries Characteristics and Opportunities to Improve",
+      "dashboardDescription": "The Enterprise Search Audit - Queries Characteristics and Opportunities to Improve dashboard provides information about which of your queries take and don’t take advantage of important optimization techniques and metadata to improve efficiency.",
+      "panelTitle": "Interactive Dashboard Queries without Metadata",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel94685f5f901fa946",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Admin",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "AdminIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelbe8859af9be10a4d",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Search Optimization Considerations"
+      ],
+      "variables": []
     }
   ]
 }

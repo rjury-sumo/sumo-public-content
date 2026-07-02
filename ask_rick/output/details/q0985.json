@@ -1,9 +1,9 @@
 {
   "id": "q0985",
-  "hash": "dfaf02487180",
+  "hash": "23cbfc7d3700",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\"as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentCreated\", \"ContentDeleted\", \"ContentExported\", \"ContentImported\") AND AdminMode=\"false\" \n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "query": "_index=sumologic_audit_events _SourceCategory=accessKeys (AccessKeyCreated OR AccessKeyDeleted OR AccessKeyUpdated)\n| json \"eventName\", \"eventTime\", \"accessId\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"accessKey.accessKeyLabel\", \"accessKey.enabled\", \"to\", \"from\", \"to.enabled\"  as EventName, EventTime, AccessId, User, UserId, UserIp, AccessKeyLabel, IsActive, CurrentValue, PreviousValue, IsActiveUpdated nodrop\n| where EventName in (\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\")\n| where EventName matches \"{{EventName}}\" and AccessId matches \"{{AccessId}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\" and AccessKeyLabel matches \"{{AccessKeyLabel}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,31 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "*",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AccessId",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,8 +60,8 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "AdminMode",
-      "description": "*",
+      "name": "AccessKeyLabel",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     }
@@ -49,34 +73,44 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
-      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
-      "panelTitle": "Geo Location - User Mode",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Access Key Activities",
+      "dashboardDescription": "Access Key Activities DashBoard provides detailed information about access key activities, such as creation, deletion, and updates. You can also review trends, user activity, the number of active access keys, and one-day time comparisons.",
+      "panelTitle": "Geo Location",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelbdacae2fa9fb9a4f",
+      "panelKey": "panelf04379309fd47846",
       "visualization": "map",
       "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
-      "rowContext": [
-        "Admin Mode"
-      ],
+      "rowContext": [],
       "variables": [
         {
-          "name": "UserIp",
+          "name": "EventName",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "EventName",
+          "name": "User",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "AdminMode",
+          "name": "AccessId",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AccessKeyLabel",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

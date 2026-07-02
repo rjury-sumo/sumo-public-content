@@ -1,9 +1,9 @@
 {
   "id": "q0530",
-  "hash": "e02562e91288",
+  "hash": "9ff9b8ac4d3f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory={{MetricsView}}_metrics_volume datapoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| fields - datapoints, duration_in_min",
+  "query": "_index=sumologic_volume _sourcecategory={{MetricsView}}_metrics_volume datapoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints\n| datapoints/1000 as ThousandDataPoints\n| fields ThousandDataPoints",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "sourcecategory"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,17 +26,29 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Metrics",
-      "dashboardDescription": "The Data Volume - Metrics dashboard allows you to view your metrics ingested, identifies ingest outliers/spikes as well as helps predict what ingestion is going to be.",
-      "panelTitle": "Ingest Trend - {{MetricsView}}",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Ingest {{MetricsView}}- Data Points",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\"},\"axisY\":{\"title\":\"\",\"hideLabels\":false},\"axisY2\":{\"hideLabels\":true}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelPANE-A52A1B26BEFB7844",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Thousand Data Points \",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Note"
+        "Metrics"
       ],
       "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
         {
           "name": "MetricsView",
           "defaultValue": "sourcecategory",
@@ -44,9 +56,9 @@
           "allowMultiSelect": false
         },
         {
-          "name": "Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

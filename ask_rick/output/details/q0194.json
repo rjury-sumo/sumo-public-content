@@ -1,9 +1,9 @@
 {
   "id": "q0194",
-  "hash": "f0c72e68ffcb",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} metric=kube_pod_container_info deployment={{deployment}} | quantize 1m using avg  | sum by cluster,pod | count",
+  "hash": "90658a02ac33",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n {{{keywords}}}\n\n| if (isempty(suppressedReasons),\"NO\",\"YES\") as suppressed\n| where suppressed = \"NO\"\n| if (suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| timeslice  | sum(is_generated) as generated  by _timeslice | compare with timeshift 7d",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,106 +12,81 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "area",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment Overview dashboard provides high-level insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Over Time",
+      "folder": "Signals",
+      "dashboardName": "Signals - Suppression",
+      "dashboardDescription": "A dashboard for reviewing mapping, parsers and suppression.",
+      "panelTitle": "Generated vs Last Week",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-a330eda9a4414b49",
-      "visualization": "area",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"area\",\"fillOpacity\":0.25},\"color\":{\"family\":\"scheme1\"},\"axes\":{\"axisY\":{\"title\":\"Pods\"}},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[\"metric=count(sum(kube_pod_container_info))\"],\"queries\":[],\"userProvidedChartType\":false,\"properties\":{\"type\":\"area\",\"name\":\"Pods\"}}],\"series\":{}}",
+      "panelKey": "panel658200C0A7212944",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name, namespace and deployment is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": null,
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment Overview dashboard provides high-level insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Running vs Restarts",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Signals - Suppression (Tuning Pack)",
+      "dashboardDescription": "A dashboard for reviewing mapping, parsers and suppression.",
+      "panelTitle": "Generated vs Last Week",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-3432a6259a7db840",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2},\"hiddenQueryKeys\":[\"B\",\"A\"],\"color\":{\"family\":\"scheme7\"},\"series\":{},\"axes\":{\"axisY\":{\"gridColor\":\"#e9ebf1\"}}}",
+      "panelKey": "panel658200C0A7212944",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name, namespace and deployment is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Signal Analysis",
+      "dashboardName": "Signal Analysis - Suppression",
+      "dashboardDescription": "This dashboard shows an overview and some detailed tabular views for reflected CSE Signal events, specifically mapping, parsers and suppression.",
+      "panelTitle": "Signals Generated vs Last Week",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel658200C0A7212944",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
         {
-          "name": "deployment",
-          "defaultValue": null,
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

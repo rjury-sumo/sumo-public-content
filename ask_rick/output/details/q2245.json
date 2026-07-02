@@ -1,0 +1,54 @@
+{
+  "id": "q2245",
+  "hash": "b18a2ec77a09",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory=view_and_tier_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count\n| where bytes>0\n//| where  \n| bytes / 1G as gb \n| sum(gb) as gb by datatier,index | round(gb,1) as gb\n| transpose row index column datatier",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Scan_flex_metering_estimate.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Scan - Flex Metering Estimate (Custom TAE)",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs. Uses flex metering tier data column.",
+      "panelTitle": "Total Ingest GB By Index and Metering Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel68A0A5D297C2F946",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":10,\"labelPlacement\":\"inside\",\"labelWrap\":false,\"labelMaxWidth\":250,\"title\":\"index\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"minimum\":0}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+      "rowContext": [
+        "Scan and Ingest Overview"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// search audit search term(s)",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

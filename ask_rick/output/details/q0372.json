@@ -1,9 +1,9 @@
 {
   "id": "q0372",
-  "hash": "c3130782c76a",
+  "hash": "0ece66f50285",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} namespace={{namespace}} service={{service}} pod=* error\n| count by service\n| limit 10",
+  "query": "_index=_trace_spans  \"db.system\" {{keywords}}\nservice={{service}}\n| json field=tags \"$['deployment.environment']\" as environment nodrop | where environment matches \"{{environment}}\"\n| json field=tags \"$['db.system']\" as db_system | where db_system matches \"{{db_system}}\"\n| json field=tags \"$['db.name']\" as db_name nodrop | where db_name matches \"{{db_name}}\"\n//| json field=tags \"$['db.sql.table']\" as db_sql_table nodrop\n//| json field=tags \"$['telemetry.sdk.version']\" as telemetry_sdk_version nodrop\n//| json field=tags \"$['telemetry.sdk.language']\" as telemetry_sdk_language nodrop\n//| json field=tags \"$['db.statement']\" as db_statement nodrop\n//| json field=tags \"$['db.connection_string']\" as db_connection_string nodrop\n| timeslice\n| duration / 1000000 as ms\n| avg(ms) as avg_ms by db_name,_timeslice \n | transpose row _timeslice column db_name",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,20 +12,8 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
+      "name": "keywords",
+      "description": "any keyword string",
       "dataType": "ANY",
       "value": "*"
     },
@@ -39,43 +27,91 @@
       "name": "service",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "prod"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_system",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
     }
   ],
-  "viewerType": "pie",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing - database operations.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Errors by Service",
+      "folder": null,
+      "dashboardName": "Tracing - Database Operations",
+      "dashboardDescription": "",
+      "panelTitle": "Average Duration By db_name",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-fc5364109898eb43",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"aggregationType\":\"avg\",\"innerRadius\":5},\"legend\":{\"enabled\":false},\"series\":{},\"color\":{\"family\":\"Diverging 2\"}}",
+      "panelKey": "panel1A18B82981560B46",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"unit\":{\"value\":\"ms\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Logs"
+        "Overall Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
+          "name": "environment",
+          "defaultValue": "prod",
           "values": null,
           "allowMultiSelect": false
         },
         {
           "name": "service",
-          "defaultValue": null,
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_system",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

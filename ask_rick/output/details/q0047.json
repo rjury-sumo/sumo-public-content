@@ -1,9 +1,9 @@
 {
   "id": "q0047",
-  "hash": "52ca124a10c7",
+  "hash": "5ab60119de71",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}}\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by cluster, node,pod,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n//| where status = \"new\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, severity\n| transpose row _timeslice column severity",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Cluster Logs (Latest 100 Logs)",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insights By Last Update And Severity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-6D7BC734B6CB6943",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "panelKey": "panel2D2A8463A4D7CB49",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
       "rowContext": [
-        "Logs/Events"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insights By Last Update And Severity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2D2A8463A4D7CB49",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

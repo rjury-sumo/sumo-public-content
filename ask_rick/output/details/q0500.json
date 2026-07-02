@@ -1,9 +1,9 @@
 {
   "id": "q0500",
-  "hash": "2fc3476610ba",
+  "hash": "b4eb0eff23a0",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| timeslice 1d\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by _timeslice, collector\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, collector\n| transpose row _timeslice column collector",
+  "query": "_index=sumologic_volume  _sourceCategory = \"sourcecategory_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes\n| sum(gbytes) as gbytes by sourcecategory\n| round(gbytes,2) as gbytes\n| total gbytes as tot_gbytes \n| round(tot_gbytes,2) as tot_gbytes\n| (gbytes*100/tot_gbytes) as pct_total \n| round(pct_total,2) as pct_total\n| 30 as threshold\n| where pct_total > threshold\n| sort pct_total",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,21 +26,27 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Log Spikes",
-      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
-      "panelTitle": "Top 5 Collectors",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Source Category (30%+) Vol",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-4",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelPANE-17",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[],\"decimals\":0},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Top 5 Per Day"
+        "Note: Daily Ingest Capacity"
       ],
       "variables": [
         {
           "name": "Tier",
           "defaultValue": "*",
           "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
           "allowMultiSelect": false
         }
       ]

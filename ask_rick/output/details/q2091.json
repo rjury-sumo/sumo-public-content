@@ -1,0 +1,103 @@
+{
+  "id": "q2091",
+  "hash": "cf706d1ec179",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| _view as index\n| count_distinct(_collector) as collectors, count_distinct(_source) as sources, count_distinct(_sourcename) as sourcenames,min(_messagetime) as f, max(_messagetime) as l, count by _sourcecategory,index\n| if(isempty(index),\"SumologicDefault\",index) as index\n| formatdate(tolong(f),\"yyyy/MM/dd HH:mm:ss ZZZ\") as first_event\n| formatdate(tolong(l),\"yyyy/MM/dd HH:mm:ss ZZZ\") as last_event\n| round((l-f) / (1000 * 60)) as range_min\n| toint(floor((now()-f ) / (1000 * 60))) as f_min_ago\n| toint(ceil((now()-l ) / (1000 * 60))) as l_min_ago\n| concat(f_min_ago,\"m \",l_min_ago,\"m\") as rel_expression\n| fields -f,l,f_min_ago,l_min_ago\n| sort _sourcecategory asc,index asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "category",
+      "description": "Labs*,prod*,test*,stage*,dev*",
+      "dataType": "ANY",
+      "value": "Labs*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "search_keywords",
+      "description": "rick",
+      "dataType": "ANY",
+      "value": "rick"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_explorer_2024.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Log Explorer - Find My Log Metadata",
+      "dashboardDescription": "",
+      "panelTitle": "Matching Log Metadata Values",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0ae8759fa9d6884f",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "category",
+          "defaultValue": "Labs*",
+          "values": "Labs*,prod*,test*,stage*,dev*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_keywords",
+          "defaultValue": "rick",
+          "values": "rick",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_index",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcecategory",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_collector",
+          "defaultValue": "no",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_source",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcename",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_org",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "live.us2.sumologic.com",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

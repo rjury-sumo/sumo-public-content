@@ -1,9 +1,9 @@
 {
   "id": "q0338",
-  "hash": "9857f4325a78",
+  "hash": "a468d9eb9fab",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "namespace={{namespace}} cluster={{cluster}} pod={{pod}}  metric=kube_pod_container_status_waiting_reason | quantize 5m using max | sum",
+  "query": "metric=service_latency_histogram metric.type=exphist _contentType=metricfromtrace  service={{Service}} deployment.environment={{Environment}} isremote={{IsRemote}} servicetype={{ServiceType}}  | quantize 1m using histogram | avg by service | outlier direction=+ window = 15 threshold = 4 | fillmissing empty",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
+      "name": "Service",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "Environment",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -36,45 +36,69 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "pod",
+      "name": "IsRemote",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ServiceType",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/APM_Overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Pod Status",
+      "folder": null,
+      "dashboardName": "APM -  Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Latency(avg) ms by Service",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7A5D1D8794926B4C",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"#f2da73\"},{\"from\":1,\"to\":null,\"color\":\"#ffb5b5\"}],\"useBackgroundColor\":true,\"noDataString\":\"0\",\"hideData\":true,\"hideLabel\":true},\"series\":{},\"hiddenQueryKeys\":[\"B\",\"A\",\"C\"]}",
+      "panelKey": "panel523B09A5B7C48A46",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":4,\"outlierBandColor\":\"#fdecf5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"Time\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"minimum\":0,\"unit\":{\"value\":\"ms\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"hiddenQueryKeys\":[\"A\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"{{service}}\"}}]}",
       "rowContext": [
-        "Overview"
+        "Untitled"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "Service",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "pod",
+          "name": "Environment",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "IsRemote",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "ServiceType",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Operation",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

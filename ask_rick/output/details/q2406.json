@@ -1,0 +1,49 @@
+{
+  "id": "q2406",
+  "hash": "f2e53db9d6ac",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice\n| sum(scan_inf)  as bytes by user_name, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by user_name  | sort credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "john.smith",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/infrequent-scans.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Infrequent Scans (TAM Custom Dashboard)",
+      "dashboardDescription": "",
+      "panelTitle": "Infrequent Scans Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel9CA7940A8880A848",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "john.smith",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

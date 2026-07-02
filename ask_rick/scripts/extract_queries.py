@@ -460,6 +460,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=os.getcwd(), help="repo root for relative paths / glob")
     ap.add_argument("--out", default=None, help="output dir (default: <root>/ask_rick/output)")
+    ap.add_argument("--tree", action="store_true",
+                    help="scan the WHOLE project tree for Sumo exports (dashboards, folders, "
+                         "saved searches, lookups), skipping .git/tmp/ask_rick/node_modules")
     ap.add_argument("files", nargs="*", help="explicit files (default: glob apps/**/*.json)")
     args = ap.parse_args()
 
@@ -467,8 +470,27 @@ def main():
     out_dir = args.out or os.path.join(root, "ask_rick", "output")
     os.makedirs(out_dir, exist_ok=True)
 
+    SUMO_TYPES = {"DashboardV2SyncDefinition", "FolderSyncDefinition",
+                  "SavedSearchWithScheduleSyncDefinition", "LookupTableSyncDefinition"}
+    SKIP_DIRS = {".git", "tmp", "ask_rick", "node_modules", ".venv", "venv"}
+
     if args.files:
         files = [os.path.abspath(f) for f in args.files]
+    elif args.tree:
+        files = []
+        for dp, dns, fns in os.walk(root):
+            dns[:] = [d for d in dns if d not in SKIP_DIRS]
+            for fn in fns:
+                if not fn.endswith(".json"):
+                    continue
+                p = os.path.join(dp, fn)
+                try:
+                    with open(p, encoding="utf-8") as fh:
+                        if (json.load(fh) or {}).get("type") in SUMO_TYPES:
+                            files.append(p)
+                except (json.JSONDecodeError, OSError, AttributeError):
+                    continue  # non-Sumo / unreadable JSON — skipped from the scan
+        files.sort()
     else:
         files = sorted(glob.glob(os.path.join(root, "apps", "**", "*.json"), recursive=True))
 

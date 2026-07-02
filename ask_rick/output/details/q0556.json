@@ -1,9 +1,9 @@
 {
   "id": "q0556",
-  "hash": "5b2ba9301073",
+  "hash": "b6b2fe1c68f6",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice, field_type\n| %\"{{Unit}}\"  as %\"{{Unit}} Count\"\n| fields -%\"{{Unit}}\"\n| transpose row _timeslice column field_type",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse*) \nOR\n(_index=sumologic_system_events _sourcecategory=cse* )\n*Rule*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"templatedMatchRule\" as rulea nodrop\n| json field=_raw \"matchRule\" as ruleb nodrop\n| json field=_raw \"yaraRule\" as rulec nodrop\n| json field=_raw \"thresholdRule\" as ruled nodrop\n| json field=_raw \"chainRule\" as rulee nodrop\n| json field=_raw \"aggregationRule\" as rulef nodrop\n\n| rulea as rule\n| if(isempty(rule),ruleb,rule) as rule\n| if(isempty(rule),rulec,rule) as rule\n| if(isempty(rule),ruled,rule) as rule\n| if(isempty(rule),rulee,rule) as rule\n| if(isempty(rule),rulef,rule) as rule\n\n//| where isempty(rule)\n\n| json field=rule \"readableId\" as id\n| json field=rule \"name\"\n| json field=rule \"enabled\"\n| json field=rule \"expression\"\n| json field=rule \"severityMapping\"\n| json field=rule \"tuningExpressions\"\n| json field=rule \"isPrototype\"\n| json field=rule \"tags\"\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,isPrototype,operator,expression,severitymapping,tuningexpressions,tags, old,new | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,51 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "TracingView",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "sourcecategory"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
+      "value": ""
     }
   ],
-  "viewerType": "column",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Volume",
-      "dashboardName": "Data Volume - Tracing",
-      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
-      "panelTitle": "Ingest Trend - {{TracingView}}",
+      "folder": "Enterprise Audit - Cloud SIEM",
+      "dashboardName": "Cloud SIEM - Rules and Mapping Changes",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Detailed Rule Events",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_Http Input\":{\"visible\":true},\"A_Unknown\":{\"visible\":true},\"A_nite-tracing-internal\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"aggregationType\":\"average\",\"groupBy\":[]},\"color\":{\"family\":\"Categorical Default\"}}",
-      "rowContext": [],
+      "panelKey": "panelB836BB5E8B3EBB43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Rules Changes"
+      ],
       "variables": [
         {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "TracingView",
-          "defaultValue": "sourcecategory",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

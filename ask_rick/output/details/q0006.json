@@ -1,9 +1,9 @@
 {
   "id": "q0006",
-  "hash": "7896b1da0685",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events accessId api\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"subsystem\"\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.email\" as user\n| where user matches \"{{user}}\"\n| json field=_raw \"operator.accessId\" as id\n| json field=_raw \"operator.sourceIp\" as ip\n| count by _messagetime, ip,interface,subsystem,eventname,user,id\n| sum(_count) as requests by ip,interface,subsystem,eventname,user,id\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| concat(substring(id,0,4),\"****\",substring(id,8,13)) as id\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| concat(user,\" \",asn_geo) as %\"user_asn_geo\"\n// summarize\n| sum(requests)  as requests by %\"user_asn_geo\"\n| compare with timeshift 7d 2 | sort %\"user_asn_geo\" asc",
+  "hash": "646e0279f2d0",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "account={{account}} metric=EBSByteBalance%  region={{region}} instanceid={{instanceid}} namespace={{namespace}} {{field}}={{{value}}}  statistic=average| sum by  instanceid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user",
+      "name": "account",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "expected_asn_geo_regex",
-      "description": "regular expression for expected asn geo strings",
+      "name": "region",
+      "description": "",
       "dataType": "ANY",
-      "value": ".*"
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -36,10 +36,46 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "show_asn_geo",
-      "description": "exception,normal",
+      "name": "instanceid",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
     }
   ],
   "viewerType": "table",
@@ -47,36 +83,54 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/audit/sumologic_login_api_activity.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch-overview.json",
       "objectType": "Dashboard",
       "folder": null,
-      "dashboardName": "Sumo Logic Login and API Activity",
-      "dashboardDescription": "",
-      "panelTitle": "API Configuration History: User asn_geo",
+      "dashboardName": "98. AWS EC2 Cloudwatch Metrics Overview",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "EBSByteBalance% (if applicable)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel42D60C1A8F95C946",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "panelKey": "panel7E5AA258915E494A",
+      "visualization": null,
+      "visualSettingsRaw": "{\"color\":{\"family\":\"scheme7\"},\"axes\":{\"axisY\":{\"title\":\"Credits\"},\"axisX\":{\"title\":\"\"}},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
       "rowContext": [
-        "API Access Activity and Configuration Changes"
+        "Credit Balances"
       ],
       "variables": [
         {
-          "name": "expected_asn_geo_regex",
-          "defaultValue": ".*",
-          "values": "regular expression for expected asn geo strings",
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user",
-          "defaultValue": "*",
-          "values": "",
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "show_asn_geo",
+          "name": "instanceid",
           "defaultValue": "*",
-          "values": "exception,normal",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "account",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

@@ -1,27 +1,27 @@
 {
   "id": "q0920",
-  "hash": "2ae850dbf944",
+  "hash": "b36abe4af5db",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| where vendor =  \"Sumo Logic\"\n| json field=entities \"[0].type\" as entity_type nodrop\n| count \n| sort by _count",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventName\", \"destinationIdentity.destinationId\", \"destination.enabled\", \"to.enabled\" as EventName, destinationId, CreatedEnabled,UpdatedEnabled nodrop\n| where EventName in (\"DataForwardingDestinationCreated\",\"DataForwardingDestinationUpdated\",\"DataForwardingDestinationDeleted\")\n| if(isNull(CreatedEnabled), if(isNull(UpdatedEnabled), \"-\",UpdatedEnabled), CreatedEnabled) as CurrentEnabled \n| withtime CurrentEnabled\n| most_recent(CurrentEnabled_withtime) as Enabled by destinationId\n| where Enabled!=\"-\"\n| if (Enabled matches \"true\", \"Active\", \"InActive\") as Status\n| count as Count by Status",
   "queryParameters": [],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Cloud SIEM - Signals by Product",
-      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
-      "panelTitle": "Sumo Logic",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Management Overview",
+      "dashboardDescription": "Data Forwarding Management - Overview DashBoard provides an at-a-glance view of trends for destination types and the distribution of destination types, such as  Amazon S3, hitachi, Syslog, and Generic REST. Visual representations for the distribution of data forwarding destinations and data forwarding indexes are also shown.",
+      "panelTitle": "Distribution Of Existing Status for Amazon S3 Data Forwarding",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelF23574A7A4B9DB45",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Signals\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelea563211a6dfab4e",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Sumo Logic CIP Search Alerts"
+        "Data Source Type / Format Type"
       ],
       "variables": []
     }

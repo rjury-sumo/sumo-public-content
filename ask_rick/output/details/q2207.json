@@ -1,0 +1,65 @@
+{
+  "id": "q2207",
+  "hash": "99be86a5bc83",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}   (\"Googlebot\" OR \"AskJeeves\" OR \"Digger\" OR \"Lycos\"\nOR \"msnbot\" OR \"Inktomi Slurp\" OR \"Yahoo\" OR \"Nutch\" OR \"bingbot\" OR\n\"BingPreview\" OR \"Mediapartners-Google\" OR \"proximic\" OR \"AhrefsBot\" OR\n\"AdsBot-Google\" OR \"Ezooms\" OR \"AddThis.com\" OR \"facebookexternalhit\" OR\n\"MetaURI\" OR \"Feedfetcher-Google\" OR \"PaperLiBot\" OR \"TweetmemeBot\" OR\n\"Sogou web spider\" OR \"GoogleProducer\" OR \"RockmeltEmbedder\" OR\n\"ShareThisFetcher\" OR \"YandexBot\" OR \"rogerbot-crawler\" OR \"ShowyouBot\" OR \"Baiduspider\" OR \"Sosospider\" OR \"Exabot\")\n \n| parse regex field=user_agent \"(?<bot_name>facebook)externalhit?\\W+\" nodrop\n| parse regex field=user_agent \"Feedfetcher-(?<bot_name>Google?)\\S+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>PaperLiBot?)/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>TweetmemeBot?)/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>msn?)bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Nutch?)-.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Google?)bot\\W\" nodrop\n| parse regex field=user_agent \"Feedfetcher-(?<bot_name>Google?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Yahoo?)!\\s+Slurp[;/].+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>bing?)bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Bing?)Preview\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Sogou?)\\s+web\\s\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Yandex?)Bot\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>rogerbot?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>AddThis\\.com?)\\s+robot\\s+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>ShareThis?)Fetcher/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Ahrefs?)Bot/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>MetaURI?)\\s+API/.+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Showyou?)Bot\\s+\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Google?)Producer;\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Ezooms?)\\W\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Rockmelt?)Embedder\\s+\" nodrop \n| parse regex field=user_agent \"(?<bot_name>Sosospider?)\\W\" nodrop \n| parse regex field=user_agent \"(?<bot_name>Baidu?)spider\" nodrop\n| parse regex field=user_agent \"(?<bot_name>Exabot?)\\W\"\n| where bot_name != \"\"\n| if (bot_name=\"bing\",\"Bing\",bot_name) as bot_name\n| count as count by bot_name\n| sort by count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx - Web cs_host Operations",
+      "dashboardDescription": "The Nginx - Web cs_host Operations Dashboard provides a high-level view combined with detailed information on the top ten bots, geographic locations and data for clients with high error rates, server errors over time, and non 200 response code status codes. Dashboard panels also show information on server error logs, error log levels, error responses by server, and the top URIs responsible for 404 responses.",
+      "panelTitle": "Top 10 Bots Observed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-3965BEA281E32946",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,24 +1,11 @@
 {
   "id": "q0464",
-  "hash": "0a7023dee89c",
+  "hash": "a5505df06ea6",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit _sourceCategory=user_activity\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"User * updated the following permissions on * \\\"*\\\". \\nAdded: *\\nRemoved: *\" as user,content_type,content_name,added_permissions,removed_permissions nodrop\n| parse regex field=added_permissions \"(?<addedperm>\\(.+?: .+?\\))\" multi\n| parse regex field=addedperm \"\\((?<added_permission_to>.+)<(?<permission_target>.+)>: (?<added_permissions>.+)\\)\" \n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{added_permissions}}\" = \"*\", true, added_permissions matches \"{{added_permissions}}\")\n|count by  date_time, sourceuser,content_type,content_name,added_permission_to, permission_target, added_permissions",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "added_permissions",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sumologic_audit class=scheduled_search action=FINISH status=FAILURE\n| where _sourceCategory=\"scheduled_search\" \n| KV \"Name\", \"SchSearchId\", \"SchTime\"\n| count",
+  "queryParameters": [],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Updated Permission",
-      "dashboardDescription": "See when permission is added or removed. As well as a breakdown, and count of permission being added or deleted by type or content.",
-      "panelTitle": "Added Permission",
+      "dashboardName": "User Activity - Scheduled Search",
+      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
+      "panelTitle": "Finished with Errors",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel5da338f987934b49",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Added Permission"
-      ],
-      "variables": [
-        {
-          "name": "added_permissions",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelef08ec96b7e4ca4a",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

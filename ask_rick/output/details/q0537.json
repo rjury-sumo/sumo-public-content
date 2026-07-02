@@ -1,9 +1,9 @@
 {
   "id": "q0537",
-  "hash": "9ac87c3598ac",
+  "hash": "3d21e8264f6d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory={{MetricsView}}_metrics_volume datapoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| sum(datapoints) as daily_ingest_datapoints by _timeslice\n| {{Metric_DPM_Ingest_Capacity}} as DPM_Capacity // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| DPM_Capacity * 60 * 24 as DataPoint_Capacity // Set this calculated value through gear icon for \"Colors by Value Range...\"\n| fields -DPM_Capacity",
+  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum(billedBytes) as billedBytes by collector",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,25 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "MetricsView",
+      "name": "TracingView",
       "description": "",
       "dataType": "ANY",
       "value": "sourcecategory"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Metric_DPM_Ingest_Capacity",
-      "description": "20000",
-      "dataType": "ANY",
-      "value": "20000"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -38,17 +26,29 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Metrics",
-      "dashboardDescription": "The Data Volume - Metrics dashboard allows you to view your metrics ingested, identifies ingest outliers/spikes as well as helps predict what ingestion is going to be.",
-      "panelTitle": "Daily Ingest Vs Average Daily Ingest Capacity",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Usage Percentage of {{TracingView}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-9",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "panelKey": "panel6F2836ED8343DB43",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Note"
+        "Tracing"
       ],
       "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
         {
           "name": "MetricsView",
           "defaultValue": "sourcecategory",
@@ -56,9 +56,9 @@
           "allowMultiSelect": false
         },
         {
-          "name": "Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

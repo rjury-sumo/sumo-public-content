@@ -1,0 +1,27 @@
+{
+  "id": "q2316",
+  "hash": "f9b0d1016f4c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \nquery_type=copilot\n// flex billable\n| max(scanned_partition_count) as p,count as searches, sum(data_scanned_bytes) as scan_bytes by query,user_name\n\n| round(scan_bytes / 1G,1) as scan_gb\n| parse regex field=query \"^(?<scope>[^\\|]*)\" \n| sum(searches) as searches, max(p) as max_partitions,sum(scan_gb) as scan_gb,avg(scan_gb) as avg_scan_gb, values(user_name) as users by scope | sort scope asc\n| round (scan_gb,2) as scan_gb | round(avg_scan_gb,2) as avg_scan_gb",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/copilot_use.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Copilot Use",
+      "dashboardDescription": "",
+      "panelTitle": "Scopes Used",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel26C36B52A4BBCA44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

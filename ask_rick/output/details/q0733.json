@@ -1,9 +1,9 @@
 {
   "id": "q0733",
-  "hash": "f6ab4e2b9e4a",
+  "hash": "442c74eb553d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_authentication\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(srcDevice_ip)\n| count by srcDevice_ip\n| sort by _count\n| limit 10",
+  "query": "_index=sec_record_notification\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| timeslice 1h\n| count by metadata_vendor, metadata_product, _timeslice\n| fillmissing timeslice\n| transpose row _timeslice column metadata_vendor, metadata_product",
   "queryParameters": [
     {
       "autoComplete": {
@@ -66,7 +66,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -74,13 +74,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Authentication Records",
-      "dashboardDescription": "This dashboard provides analysis of Authentication Records.",
-      "panelTitle": "Top 10 Authentication Records by Source IP",
+      "dashboardName": "Cloud SIEM - Record Analysis - Notification Records",
+      "dashboardDescription": "This dashboard provides analysis of Notification Records.",
+      "panelTitle": "Notification Records by Vendor and Product",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel73E477ABB3777B42",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "panelKey": "panelPANE-DA571FD3B4445A46",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [],
       "variables": [
         {

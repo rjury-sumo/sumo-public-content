@@ -1,9 +1,9 @@
 {
   "id": "q1171",
-  "hash": "178a8d834ca4",
+  "hash": "4a8b21cf646a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1h\n| sum(datapoints) as datapoints by _timeslice\n| datapoints as %\"Data Points\" | fields -datapoints",
+  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_consumed}} as credits_consumed\n| timeslice 1d\n| sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)\n| avg(total_credits_consumed) as avg_credits_consumed",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,77 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "MetricsSources",
-      "description": "",
+      "name": "credits_consumed",
+      "description": "0.016",
       "dataType": "ANY",
-      "value": "sourcecategory_metrics_volume"
+      "value": "0.016"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Metrics",
-      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Trend of {{MetricsSources}}",
+      "folder": "Infrequent Data Tier",
+      "dashboardName": "Infrequent Data Tier - Credits Consumed",
+      "dashboardDescription": "The Infrequent Data Tier - Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed with infrequent queries. This allows you to monitor and control on-demand search costs for the Infrequent Tier.",
+      "panelTitle": "Avg Credits Consumed/day",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panelbc2253c08c984a49",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credit\",\"useBackgroundColor\":false,\"useNoData\":true,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "Credits Conversation"
+      ],
       "variables": [
         {
-          "name": "MetricsSources",
-          "defaultValue": "sourcecategory_metrics_volume",
+          "name": "session_id",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "query",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "is_aggregate",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "status_message",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credits_consumed",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "remote_ip",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

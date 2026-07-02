@@ -1,46 +1,56 @@
 {
   "id": "q0060",
-  "hash": "43fad27344c3",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "_origin=kubernetes   cluster={{cluster}}  metric=kube_pod_container_status_ready  pod=* namespace=*| sum by pod, namespace | filter latest < 1",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "honeyComb",
+  "hash": "826450fee772",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n| where is_generated=1\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n| parse regex field=tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n//| count by attack_stage,tags | sort _count\n\n| where !(tagname matches \"_mitreAttack*\")\n\n| if(is_suppressed=1,0,severity) as s\n//|  sum(is_generated) as created by tagvalue,rule,product,vendor,entityid,severity,description| created * severity as total_sev | sort total_sev\n| sum(s) as total_severity,max(severity) as max_sev,count_distinct(entityid) as entities,count_distinct(rule) as rules by tagname,tagvalue \n| sort total_severity",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/cloud_siem_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Pods Not Ready",
+      "folder": null,
+      "dashboardName": "Cloud SIEM Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Signals: Other Or Custom Tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel876CCD0CA167E94C",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":0,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"cluster\",\"value\":\"cluster\"}],\"aggregationType\":\"latest\"},\"series\":{}}",
+      "panelKey": "panel6E8C1AC388418949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Pods"
+        "Signals"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Cloud SIEM Overview (Tuning Pack)",
+      "dashboardDescription": "",
+      "panelTitle": "Signals: Other Or Custom Tags",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6E8C1AC388418949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
+        {
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]

@@ -1,35 +1,67 @@
 {
   "id": "q0351",
-  "hash": "a9f6207a410e",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json \"log.rule\" as rule\n| json  \"$['log']['output_fields']['proc.cmdline']\" as proc_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.name']\" as proc_name nodrop\n| json  \"$['log']['output_fields']['proc.pcmdline']\" as proc_parent_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.pname']\" as proc_parent_name nodrop\n| if(isBlank(proc_name), \"none\", proc_name) as proc_name\n| count by proc_name",
-  "queryParameters": [],
-  "viewerType": "bar",
-  "metricsQueryData": {
-    "metric": "",
-    "aggregationType": "None",
-    "groupBy": "",
-    "filters": [],
-    "operators": null
-  },
+  "hash": "272b740e5341",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "namespace={{namespace}} cluster={{cluster}}\ndeployment=*traces-gateway   metric=kube_pod_status_phase not phase=running | where _value > 0\n| max by cluster,service,deployment,pod,node",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*sumo*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/otelcol-k8s-containers.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
-      "panelTitle": "Rules Triggered  by Process",
+      "folder": null,
+      "dashboardName": "Kubernetes Otelcol State",
+      "dashboardDescription": "",
+      "panelTitle": "traces-gateway NOT Running",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-9d0f1ed7824b6947",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme3\"}}",
+      "panelKey": "panelB78D2277BD0F094B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"latest\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Rule Priorities"
+        "traces-gateway - collector responsible for traces load balancing"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*sumo*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

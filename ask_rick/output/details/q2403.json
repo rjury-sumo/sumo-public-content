@@ -1,0 +1,49 @@
+{
+  "id": "q2403",
+  "hash": "19a07818914b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice by 1d\n\n| sum(scan_inf)  as bytes by user_name, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | fields -bytes\n| transpose row _timeslice column user_name",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "john.smith",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/infrequent-scans.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Infrequent Scans (TAM Custom Dashboard)",
+      "dashboardDescription": "",
+      "panelTitle": "Infrequent Scans Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB9E9198F8C62AB4E",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "john.smith",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

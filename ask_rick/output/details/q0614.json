@@ -1,9 +1,9 @@
 {
   "id": "q0614",
-  "hash": "34f5b7873a94",
+  "hash": "17a94715ad40",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{{Keyword}}}\n\n| timeslice 1h\n\n| count as Total by _timeslice, metadata_vendor, metadata_product\n| transpose row _timeslice column metadata_vendor, metadata_product\n| order by _timeslice",
+  "query": "// id=@funnel_insights:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_count minimize=\"{{minimize}}\" \n| where (insight_state = \"Current\" or insight_state = \"Eligible\")\n| if (insight_state matches \"Current\", \"All_insights\", insight_state) as insight_state\n| max(count) by insight_state\n| sort by _max desc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,41 +12,53 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
-      "description": "",
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
       "dataType": "ANY",
-      "value": ""
+      "value": "False positive"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "funnel",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel65FDB16DB39EF843",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"maxWidth\":350},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelPANE-1540B2599772FA42",
+      "visualization": "funnel",
+      "visualSettingsRaw": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"funnel\",\"displayType\":\"default\",\"maxNumOfSlices\":10,\"indexLabelFontSize\":14,\"orientation\":\"default\",\"valueRepresents\":\"height\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false,\"showAsTable\":false},\"title\":{\"fontSize\":18}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy) (Copy)"
+        "## Eligible Algorithmic Insights\n\nThe funnel depicts Algorithmic insights that remain after filtering insights based on\n* date range\n* insights containing dynamic severity rules\n* non-algorithmic dete"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
           "allowMultiSelect": false
         },
         {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": null,
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
           "allowMultiSelect": false
         }
       ]

@@ -1,27 +1,61 @@
 {
   "id": "q1148",
-  "hash": "09e57c551eeb",
+  "hash": "b55750a71006",
   "queryType": "Logs",
-  "queryMode": "SavedSearch",
-  "query": "_view=sumologic_search_usage_per_query \n| \"dummy\" as dummy // this field is only used to artificially link the parent query and subquery\n| where [subquery from=(-30d) to=(-1d):\n              // this subquery saves the average daily ingest for the org to a lookup table\n              _index=sumologic_volume _sourceCategory=view_and_tier_volume \n              | parse regex \"\\\"field\\\":\\\"(?<field>.*?)\\\",\\\"dataTier\\\":\\\"(?<tier>.*?)\\\",\\\"sizeInBytes\\\":(?<size>.*?),\" multi\n              | where tier in (\"Continuous\", \"Infrequent\", \"Frequent\", \"Flex\")  \n              | timeslice 1d \n              | where (queryStartTime() < _timeslice and queryEndTime() > __timeslice_end) // this eliminates partial time slices\n              | sum(size) as dailyIngest by _timeslice\n              | avg(dailyIngest) as avgDailyIngest\n              | round(avgDailyIngest,0) as avgDailyIngest\n              // create artificial primary key for later use as lookup in parent query\n              | 0 as pkey\n              // save the avgDailyIngest and primary key to legacy lookup table\n              | save /avgDailyIngest2\n              // create dummy field to link to parent query\n              | \"dummy\" as dummy\n              | compose dummy]\n// break out the scan volume for each query by tier\n| parse regex field=scanned_bytes_breakdown \"\\\"(?<tier>[a-zA-Z]+)\\\" \\: (?<tier_scanned_bytes>[0-9]+)\" multi nodrop\n| sum(tier_scanned_bytes) as avgDailyScanned by tier, query_type, content_name, content_identifier\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| 0 as pkey\n| lookup avgDailyIngest from /avgDailyIngest2 on  pkey=pkey\n| fields -pkey\n// calculate the scan of each query to the overall ingest\n| round(100*avgDailyScanned/avgDailyIngest,0) as percent_scan_of_ingest\n| where percent_scan_of_ingest > 1000\n| sort percent_scan_of_ingest",
-  "queryParameters": [],
-  "viewerType": "table",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| sum(billedBytes) as %\"billedBytes\"\n| billedBytes/1024/1024/1024 AS BilledGBytes\n| fields BilledGBytes",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tracingsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_tracing_volume"
+    }
+  ],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "SavedSearch",
+      "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Content items with scan volume > 10x of avg daily ingest of last 30 days",
-      "dashboardDescription": "This search helps in monitoring all content items (scheduled search, monitors, dashboards)  for whom daily average volume of data scanned is > 10x of average daily ingest of last 30 days.",
-      "panelTitle": "Content items with scan volume > 10x of avg daily ingest of last 30 days",
-      "panelType": "SavedSearch",
-      "panelKey": null,
-      "visualization": null,
-      "rowContext": [],
-      "variables": [],
-      "defaultTimeRange": "Last 24 Hours"
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Ingest {{Tracingsources}}- Billed Bytes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelCBDF7760A792E947",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Billed GBytes\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Tracing"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

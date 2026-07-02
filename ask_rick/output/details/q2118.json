@@ -1,0 +1,151 @@
+{
+  "id": "q2118",
+  "hash": "cc2cc87cceea",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events by index,sourcecategory,collector,source,sourcename \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n| concat(index,\"- \",datatier) as Partition\n| values(collector) as collectors,values(Partition) as partitions, values(sourcecategory) as sourcecategories,values(sourcename) as sourcenames, sum(events) as events by {{metadata_values_by}}\n| sort {{metadata_values_by}} asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookup_datamap",
+      "description": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+      "dataType": "ANY",
+      "value": "/shared/lookups/log_datamap"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "index",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "any_meta_regex",
+      "description": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "metadata_values_by",
+      "description": "collector,source,sourcename,sourcecategory,index",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/metadata_explorer_2025.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metadata Explorer",
+      "dashboardDescription": "",
+      "panelTitle": "Metadata Values Per metadata_values_by: {{metadata_values_by}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC487ED60A3F1C946",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [
+        "What Metadata Values Occur Per Sourcecategory,  Collector or Source"
+      ],
+      "variables": [
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "index",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "any_meta_regex",
+          "defaultValue": ".*",
+          "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_partitions",
+          "defaultValue": "/shared/lookups/partitions",
+          "values": "/shared/lookups/partitions",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_datamap",
+          "defaultValue": "/shared/lookups/log_datamap",
+          "values": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "service.us2",
+          "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "metadata_values_by",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcename,sourcecategory,index",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

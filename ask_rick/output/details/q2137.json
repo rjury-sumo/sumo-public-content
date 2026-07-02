@@ -1,0 +1,29 @@
+{
+  "id": "q2137",
+  "hash": "21d62981a486",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorPath\" as path\n| parse regex field=path \"\\/Monitor\\/(?<folder>.+)\\/[^\\/]+\" \n| json field=_raw \"details.monitorInfo.monitorName\" as monitor_name\n| json field=_raw \"eventTime\"\n| json field=_raw \"details.alertingGroup.currentState\" as monitor_current_status\n| json field=_raw \"details.monitorInfo.monitorId\" as monitor_id\n| json field=_raw \"resourceIdentity.id\" as alert_id\n| concat(\"https://service.sumologic.com/ui/#/alert/\", alert_id) as alert_url\n| tourl(alert_url, alert_id) as alert\n| first(monitor_current_status) as monitor_latest_status by monitor_id, monitor_name, folder, eventTime, alert\n| where !(monitor_latest_status matches \"Normal\")",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/Alert Tuning - Monitor or Schedule Search.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alert Tuning - Monitor and Scheduled Searches",
+      "dashboardDescription": "",
+      "panelTitle": "Active Monitors",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-AE5D5DCC866A1A4F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "(Copy)"
+      ],
+      "variables": []
+    }
+  ]
+}

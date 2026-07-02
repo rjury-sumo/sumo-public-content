@@ -1,9 +1,9 @@
 {
   "id": "q0257",
-  "hash": "84702a7c28e5",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=node_cpu_seconds_total cluster={{cluster}} node={{node}} | quantize 1m using avg | count by node, cpu | sum",
+  "hash": "45495cbfdb1b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * {{days}}))\n| tolong(createdtime) as _messagetime | timeslice 1w\n| if( status= \"closed\",1,0) as closed\n| count as insights, sum(closed) as closed by _timeslice | 100 * closed/insights as close_ratio | avg(close_ratio) by _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,41 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
-      "description": "",
+      "name": "days",
+      "description": "30,60,90,180,365,1000",
       "dataType": "ANY",
-      "value": "*"
+      "value": "365"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "CPUs",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "Closeout Rate By Create Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-774d751db375b849",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"CPU(s)\",\"option\":\"Maximum\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"valueFontSize\":28},\"series\":{}}",
+      "panelKey": "panelBE5F9A0483E09948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
       "rowContext": [
-        "Overview"
+        "Tuning Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

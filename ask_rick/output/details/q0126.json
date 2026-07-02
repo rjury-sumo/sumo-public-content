@@ -1,9 +1,9 @@
 {
   "id": "q0126",
-  "hash": "c0dc71419c89",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} namespace={{namespace}} container={{container}} pod={{pod}} | quantize 1m | rate | max",
+  "hash": "df20ff20d1f5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n  {{{entity}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n|  sum(is_suppressed) as suppressed,sum(is_generated) as created by rule,product,vendor,sourceCategory,parser,mapperName,deviceEventId| sort created",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,88 +12,80 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{entity",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "container",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "Percent of CPU Limit",
+      "folder": "Entity",
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Ingestion Mapping and Suppression",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0dbf46fcb9cd9941",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"%\",\"option\":\"Latest\",\"valueFontSize\":20,\"labelFontSize\":11,\"gauge\":{\"show\":true},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":31,\"to\":70,\"color\":\"#DFBE2E\"},{\"from\":71,\"to\":100,\"color\":\"#BF2121\"}]},\"hiddenQueryKeys\":[],\"series\":{}}",
+      "panelKey": "panelD33237CAB543384A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Overview"
+        "Signals"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/cse_reflected_data/dash_single_entity_view.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Ingestion Mapping and Suppression",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD33237CAB543384A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Single Entity View (Tuning Pack)",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Signals Ingestion Mapping and Suppression",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD33237CAB543384A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
         {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
         }

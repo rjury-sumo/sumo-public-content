@@ -1,9 +1,9 @@
 {
   "id": "q0726",
-  "hash": "6ba47209dfeb",
+  "hash": "0ae0d458c8a5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_audit\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isNull(description)\n| count by description\n| top 10 description by _count\n| order by _count",
+  "query": "_index=sec_record_network\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(srcDevice_ip)\n| count by srcDevice_ip\n| sort by _count\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -74,13 +74,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Audit Records",
-      "dashboardDescription": "This dashboard provides analysis of Audit Records.",
-      "panelTitle": "Top 10 Descriptions",
+      "dashboardName": "Cloud SIEM - Record Analysis - Network Records",
+      "dashboardDescription": "This dashboard provides analysis of Network Records.",
+      "panelTitle": "Top 10 Network Records by Source IP",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD559EFB996638B45",
+      "panelKey": "panel73E477ABB3777B42",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \"}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [],
       "variables": [
         {

@@ -1,9 +1,9 @@
 {
   "id": "q0094",
-  "hash": "a3fce8058d17",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=up cluster={{cluster}} | quantize 2m | sum by job, endpoint| topk(500,max)",
+  "hash": "cb98c71f8328",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events \"Health-Change\" unhealthy\n\n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId\n \n| json field=_raw \"status\" \n| json field=_raw \"details.error\" as error\n//| json field=_raw \"details.trackerId\" as trackerid\n//| json field=_raw \"resourceIdentity.name\" as name\n//| concat(name,\" \",trackerid ) as key \n| 1 as failed\n| timeslice {{timeslice}} \n| count by _timeslice,error | transpose row _timeslice column error",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,47 +12,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
+      "name": "timeslice",
+      "description": "15m,1h,6h,1d,100 buckets",
       "dataType": "ANY",
-      "value": ""
+      "value": "6h"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Up Status",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Unhealthy Collection Events Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-4D53F2948D761A48",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "panelKey": "panel92597A67AA23EB4A",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
       "rowContext": [
-        "Untitled"
+        "Collection Health Events"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

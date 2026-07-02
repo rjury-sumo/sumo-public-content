@@ -1,29 +1,67 @@
 {
   "id": "q0354",
-  "hash": "54e7564349a4",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| timeslice 5m\n| count by _timeslice",
-  "queryParameters": [],
-  "viewerType": "area",
+  "hash": "1366599c0e00",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "namespace={{namespace}} cluster={{cluster}}\nstatefulset=collection-sumologic-otelcol-instrumentation   metric=otelcol_exporter_queue_size \n| avg by cluster,pod,node",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*sumo*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/otelcol-k8s-containers.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
-      "panelTitle": "Events Timeline",
+      "folder": null,
+      "dashboardName": "Kubernetes Otelcol State",
+      "dashboardDescription": "",
+      "panelTitle": "exporter buffer used pct",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0a7ab25599d8eb45",
-      "visualization": "area",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme2\"}}",
+      "panelKey": "panelC4310FC58DA4AA41",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"unit\":{\"value\":\"%100\",\"isCustom\":false},\"minimum\":0,\"maximum\":110}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"hiddenQueryKeys\":[\"B\",\"A\"],\"overrides\":[]}",
       "rowContext": [
-        "Rule Priorities"
+        "otelcol-instrumentation - collector responsible for data collection and tagging"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*sumo*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,51 @@
+{
+  "id": "q1734",
+  "hash": "971fd251b486",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json  \"$['log']['output_fields']['user.name']\" as User nodrop\n| if(isBlank(User), \"unknown\", User) as User\n| count by User",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": {
+    "metric": "",
+    "aggregationType": "None",
+    "groupBy": "",
+    "filters": [],
+    "operators": null
+  },
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Security Overview",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by User",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-ea48d2ca8185f84c",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Security Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered by User",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-ea48d2ca8185f84c",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q1100",
-  "hash": "a994eae65e7f",
+  "hash": "999ddf8a5a08",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserUnlocked\n| json \"eventName\", \"eventTime\", \"accountId\", \"operator\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, operator, UserIp nodrop\n| where EventName=\"UserUnlocked\"\n| json field=operator \"email\", \"interface\" as UnlockedBy , Interface nodrop\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count as Unlock_Count by UnlockedBy\n| sort by Unlock_Count\n| limit 5",
+  "query": "_view=sumologic_search_usage_per_query\n|where user_name matches \"{{user_name}}\" AND analytics_tier matches \"{{analytics_tier}}\"\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|count as queries by user_name | order by queries | limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,38 +24,38 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "analytics_tier",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "pie",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Session Activities",
-      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
-      "panelTitle": "Active Admins performing Account Unlock",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - User Insights",
+      "dashboardDescription": "The Enterprise Search Audit - User Insights dashboard provides a high-level view to understand who are the key users of  search in your account. The dashboard panels provide details about search usage of top users in terms of search query count, data scanned and retrieved by tiers.",
+      "panelTitle": "Top 10 Users by Query Count",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8d354f879dd5eb4f",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "panelKey": "panela1ace5deae17e84a",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Sequential 2\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
+          "name": "analytics_tier",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
-          "defaultValue": "*",
+          "name": "user_name",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         }

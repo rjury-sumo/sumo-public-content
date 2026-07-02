@@ -1,9 +1,9 @@
 {
   "id": "q0049",
-  "hash": "66a6bff90de1",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_daemonset_status_current_number_scheduled  | quantize to 1m using max drop last  | max by cluster | sum",
+  "hash": "57329412def6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status = \"closed\"\n| tolong(time) as _messagetime\n| timeslice by 1w \n| timeToDetection / 3600 as timeToDetection\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n| tolong(time) as _messagetime  | timeslice 1d\n| count by _timeslice, resolution\n| transpose row _timeslice column resolution",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Daemonsets",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insights Closed By Resolution Status",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-F4E578F8B0A3FA48",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"gauge\":{}},\"series\":{}}",
+      "panelKey": "panelC48233C3A497DB46",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Insights Closed By Resolution Status",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC48233C3A497DB46",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

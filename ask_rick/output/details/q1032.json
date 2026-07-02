@@ -1,27 +1,29 @@
 {
   "id": "q1032",
-  "hash": "c3238b9c24a4",
+  "hash": "3b1179a0689e",
   "queryType": "Logs",
-  "queryMode": "SavedSearch",
-  "query": "_index=sumologic_audit_events (_sourceCategory=userSessions or _sourceCategory=collection) (UserLoggedIn OR CollectorCreated OR CollectorUpdated OR CollectorDeleted OR EphemeralCollectorDeleted OR ClobberCollectorDeleted OR CollectorUpgradeRequested OR CollectorUpgradeCompleted)\n| json \"eventName\"  as EventName\n| where EventName in (\"UserLoggedIn\", \"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"EphemeralCollectorDeleted\", \"ClobberCollectorDeleted\", \"CollectorUpgradeRequested\", \"CollectorUpgradeCompleted\")\n| json \"userSession.sourceIp\" as srcIP  nodrop \n| json \"operator.sourceIp\" as  srcIp_1 nodrop\n| if (isNull(srcIp), srcIp_1, srcIp) as srcIp\n| lookup country_name from geo://location on ip=srcIp \n| where country_name in (\"Iran\", \"North Korea\", \"Myanmar\",\"Mali\")",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"UserCreated\",\"UserUpdated\",\"UserDeleted\")\n| count as Count by EventName",
   "queryParameters": [],
-  "viewerType": "table",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "SavedSearch",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Australia embargoed countries",
-      "dashboardDescription": "User and Collector activities from Countries under targeted sanctions programs by United States",
-      "panelTitle": "Enterprise Audit - Australia embargoed countries",
-      "panelType": "SavedSearch",
-      "panelKey": null,
-      "visualization": null,
-      "rowContext": [],
-      "variables": [],
-      "defaultTimeRange": "-7d"
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User & Role Management Overview",
+      "dashboardDescription": "User and Role Management - Overview DashBoard provides an at-a-glance view of user activities and sessions, email account requests, and trends over time. You can also review user role data, such as user activities by role.",
+      "panelTitle": "Distribution By User Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelca65c09abe785b42",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [
+        "User Session Activities"
+      ],
+      "variables": []
     }
   ]
 }

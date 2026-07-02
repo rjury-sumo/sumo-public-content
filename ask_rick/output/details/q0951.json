@@ -1,9 +1,9 @@
 {
   "id": "q0951",
-  "hash": "e1a01564b57f",
+  "hash": "d8d5f8305cfe",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventTime\", \"eventName\", \"operator.id\", \"operator.email\", \"operator.sourceIp\", \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"destination.destinationType\",\"destination.enabled\",\"destination.encrypted\", \"from\", \"to\" as EventTime, eventName, UserId, User, UserIp, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, PreviousValue, CurrentValue nodrop\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\") AND EventName matches \"{{EventName}}\"\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and User matches \"{{User}}\"\n|count as Count by EventName, User\n| sort by Count\n| transpose row User column EventName as %\"DataForwardingDestinationCreated\", %\"DataForwardingDestinationUpdated\", %\"DataForwardingDestinationDeleted\"\n| sort by DataForwardingDestinationCreated, DataForwardingDestinationUpdated, DataForwardingDestinationDeleted \n| limit 10",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"fieldExtractionRuleIdentity.fieldExtractionRuleId\", \"fieldExtractionRuleIdentity.fieldExtractionRuleName\", \"fieldExtractionRule.enabled\", \"fieldExtractionRule.fieldNames\", \"to\", \"from\" as EventName, EventTime, User, UserId, UserIp, FieldExtractionRuleId, FieldExtractionRuleName, IsActive, createdfieldnames, CurrentValue, PreviousValue nodrop\n| json field=CurrentValue \"enabled\", \"fieldNames\" as ActiveUpdated, fieldNamesUpdated nodrop\n| if(isNull(IsActive), if(isNull(ActiveUpdated), \"-\", ActiveUpdated), IsActive) as IsActive\n| if(isNull(createdfieldnames), if(isNull(fieldNamesUpdated), \"-\", fieldNamesUpdated), createdfieldnames) as FieldNames\n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n|count by EventName, EventTime, FieldExtractionRuleId, FieldExtractionRuleName, IsActive, FieldNames, User, UserId, UserIp\n| sort by EventTime\n| fields - _count, UserId, FieldExtractionRuleId",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,19 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserIp",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -42,33 +30,27 @@
       "value": "*"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Forwarding Management",
-      "dashboardName": "Enterprise Audit - Data Forwarding Destination Activities",
-      "dashboardDescription": "Data Forwarding Destination Activities DashBoard provides detailed information on data forwarding destination activities. You can review trends for activities, their geographical locations, one-day times shift comparisons, user activity, and recent destination activities.",
-      "panelTitle": "Active Users",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "Recent Events - Field Extraction Rule Events",
       "panelType": "SumoSearchPanel",
-      "panelKey": "paneld3bb33f4a909b844",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panel8f9496b0be0c9847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
         {
           "name": "EventName",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserIp",
-          "defaultValue": "*",
-          "values": null,
+          "values": "*",
           "allowMultiSelect": false
         },
         {

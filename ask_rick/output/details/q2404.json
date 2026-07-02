@@ -1,0 +1,49 @@
+{
+  "id": "q2404",
+  "hash": "c12ef24db2bc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| replace(status_message,/,.*/,\"\") as status_message\n| round(range_days,1) as range_days\n| min(query_start_time) as f,max(query_start_time) as l,count_distinct(query_start_time) as start_times,count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,values(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf,values(status_message) as statuses, values(query_type) as types by user_name,query,datatier  //,session_id\n\n//| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| ( l -f) / (1000 * 60) as start_time_spread_min\n| fields -scan_inf,l,f\n| sort credits | limit 100",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "john.smith",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/infrequent-scans.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Infrequent Scans (TAM Custom Dashboard)",
+      "dashboardDescription": "",
+      "panelTitle": "Queries Detail Top 100 by credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF9D17532A93D0846",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Detailed Top 100 Searches By Total Scan"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "john.smith",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

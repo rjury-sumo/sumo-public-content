@@ -1,9 +1,9 @@
 {
   "id": "q0122",
-  "hash": "754356e7a006",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_resource_limits cluster={{cluster}} namespace={{namespace}} container={{container}} resource=memory pod={{pod}} | quantize 1m | max",
+  "hash": "34cf0f96f82f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*Rule* or *Mapping*)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\" or eventname matches \"*Mapping*\"\n| timeslice | count by _timeslice, eventname | transpose row _timeslice column eventname",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,89 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "container",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "Percent of Memory Limit",
+      "folder": "Content",
+      "dashboardName": "CSE Rules And Mapping Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Events Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-daf179fca69f6840",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"%\",\"option\":\"Latest\",\"valueFontSize\":17,\"labelFontSize\":12,\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":31,\"to\":70,\"color\":\"#DFBE2E\"},{\"from\":71,\"to\":100,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true},\"sparkline\":{\"show\":false}},\"hiddenQueryKeys\":[\"B\",\"A\"],\"series\":{}}",
+      "panelKey": "panel82AFBE9A9529B94C",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

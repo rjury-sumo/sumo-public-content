@@ -1,9 +1,9 @@
 {
   "id": "q1043",
-  "hash": "bda2afb6162b",
+  "hash": "d9726c3bdfda",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=saml\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\", \"SamlLockdownEnabled\", \"SamlLockdownDisabled\", \"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\") AND EventName matches \"{{EventName}}\"\n| count as Count by EventName\n| fillmissing values(\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\" , \"SamlLockdownEnabled\", \"SamlLockdownDisabled\", \"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\") in EventName \n| compare timeshift 1d as Shift_1d",
+  "query": "_index=sumologic_audit_events _sourceCategory=users RolesAssignedToUserUpdated\n| json \"eventName\", \"eventTime\", \"operator.email\",\"operator.id\",\"operator.sourceIp\", \"userIdentity.userId\",\"userIdentity.userEmail\", \"rolesAdded[*].roleName\", \"rolesDeleted[*].roleName\" as EventName, EventTime, Admin, AdminId, AdminIp, TargetUserId, TargetUserEmail, RolesAdded, RolesRemoved nodrop\n| where EventName=\"RolesAssignedToUserUpdated\"\n| parse field=RolesAdded \"[*]\" as RolesAdded nodrop\n| replace(RolesAdded, \"\\\"\", \"\") as RolesAdded\n| replace(RolesAdded, \"[]\", \"-\") as RolesAdded\n| parse field=RolesRemoved \"[*]\" as RolesRemoved nodrop\n| replace(RolesRemoved, \"\\\"\", \"\") as RolesRemoved\n| replace(RolesRemoved, \"[]\", \"-\") as RolesRemoved\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, Admin, AdminId, AdminIp, TargetUserId, TargetUserEmail, RolesAdded, RolesRemoved\n| sort by EventTime\n| fields - _count, EventTime, EventName, AdminId, TargetUserId",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,31 +12,31 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "AdminIp",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - SAML Activities",
-      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
-      "panelTitle": "One Day Time Shift Comparison",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Recent - Roles Assigned/Removed from User",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel27793c3dbc2d894c",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panel4cf63483b8ed194b",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
+          "name": "AdminIp",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

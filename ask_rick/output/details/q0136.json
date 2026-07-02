@@ -1,9 +1,9 @@
 {
   "id": "q0136",
-  "hash": "2a38eed0ff80",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=coredns_cache_misses_total cluster={{cluster}} | quantize 1m | rate  | sum by cluster",
+  "hash": "59943fbd3572",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n\n{{entity}}\n\n| json field=_raw \"insight.entityValue\" as entity\n\n| where entity matches \"{{entity}}\"\n| json field=_raw \"eventName\" nodrop\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, max(severity) as severity,first(confidence) as confidence,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n//// lets squash down size of the signals field so we don't generate a massive lookup\n//| replace (rule,\"\\\",\\\"\",\" \") as rule\n//| replace (rule,\"\\\"\",\"\") as rule\n//| replace (rule,\"ruleName\",\"\") as rule\n////\n//| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| parse regex field=signal \"\\\"severity\\\":\\\"(?<severity>[0-9]+)\" \n| json field=signal \"id\",\"name\",\"severity\",\"summary\",\"description\",\"ruleId\",\"ruleName\",\"tags\",\"suppressedReasons\",\"created\",\"entityId\" nodrop\n\n// squshdown\n| count by created,insightid,id,name,severity,summary,description,ruleid,rulename,tags,entityid | fields -_count \n// final aggregation to save to a lookup with only one row for most recent status of insight\n| concat(ruleid,\":\",rulename) as rule\n| avg(severity) as sev, count_distinct(insightid) as insights,values(entityid) as entities, count_distinct(id) as signals by rule  //,first(signals) as signals,\n| sort rule asc\n| sev * signals as total_sev",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,57 +12,57 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "entity",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "12345"
     }
   ],
-  "viewerType": "area",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - CoreDNS v4.6",
-      "dashboardDescription": "The Kubernetes - CoreDNS provides insights into CoreDNS status including Cache details, Resource Usage.",
-      "panelTitle": "Cache Hit Percentage",
+      "folder": "Entity",
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Rules In Insights Signals",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-ce9743c2a3eff94a",
-      "visualization": "area",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"area\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"fillOpacity\":0.25,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme7\"},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"C\"],\"userProvidedChartType\":false,\"properties\":{\"lineThickness\":3,\"lineDashType\":\"solid\",\"type\":\"area\",\"name\":\"cluster={{cluster}} Cache Hit Percentage\"}},{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"area\",\"name\":\"cluster={{cluster}} Cache Hits\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"area\",\"name\":\"cluster={{cluster}} Cache Misses\"}}]}",
+      "panelKey": "panelD6964474AE357948",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Cache"
+        "Timeline And Summary"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": null,
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/dash_single_entity_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - CoreDNS v4.6",
-      "dashboardDescription": "The Kubernetes - CoreDNS provides insights into CoreDNS status including Cache details, Resource Usage.",
-      "panelTitle": "Cache Hits Vs Misses",
+      "folder": null,
+      "dashboardName": "Single Entity View",
+      "dashboardDescription": "A dashboard for reviewing reflected entity data from CSE.",
+      "panelTitle": "Rules In Insights Signals",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-76FEFAFD99177B4E",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"‎cluster={{cluster}} Cache Hits\"}},{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"cluster={{cluster}} Cache Misses\"}}]}",
+      "panelKey": "panelD6964474AE357948",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Cache"
+        "Timeline And Summary"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": null,
+          "name": "entity",
+          "defaultValue": "12345",
           "values": null,
           "allowMultiSelect": false
         }

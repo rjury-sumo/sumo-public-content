@@ -1,0 +1,65 @@
+{
+  "id": "q2191",
+  "hash": "37b2f741ce2d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| if (user_agent matches \"*iPad*\" OR user_agent matches \"*iPhone*\" OR user_agent matches \"*Android*\" OR user_agent matches \"*BlackBerry*\" OR user_agent matches \"*Galaxy*\" OR user_agent matches \"LGE-*\" OR user_agent matches \"SCH-*\" OR user_agent matches \"*HUAWEI-*\" OR user_agent matches \"*SAMSUNG*\" OR user_agent matches \"*samsung*\" OR user_agent matches \"Dalvik/*\" OR user_agent matches \"Nokia*\" OR user_agent matches \"LG-*\" OR user_agent matches \"*CFNetwork*\"  OR user_agent matches \"*UP.Browser/*\" OR user_agent matches \"*QQ*rowser*\" OR user_agent matches \"*NetFront/*\" OR user_agent matches \"*Windows Phone*\" OR user_agent matches \"*Mobile Safari*\" OR user_agent matches \"*iemobile*\",\"Mobile\",\"\") as type\n| if (user_agent matches \"*Windows*\" OR user_agent matches \"*Win64*\" OR user_agent matches \"*Win32*\" OR user_agent matches \"*i686*\" OR user_agent matches \"*x86*\",\"PC\",type) as type\n| if (user_agent matches \"*Macintosh*\" OR user_agent matches \"*Mac OS*\",\"Mac\",type) as type\n| if (type = \"\",\"bots/unknown\",type) as type\n| count type\n| sort by _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx - Visitor Access Types",
+      "dashboardDescription": "The Nginx - Visitor Access Types Dashboard provides insights into visitor platform types, browsers, and operating systems, as well as the most popular mobile devices, PC and Mac versions used.",
+      "panelTitle": "Visitor Platforms",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-DCC0B87EB3D3CB43",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0522",
-  "hash": "a7777c903772",
+  "hash": "9467cb97b554",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\" \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| timeslice 24h\n| sum(gbytes) as daily_ingest_gbytes by _timeslice\n| where daily_ingest_gbytes>{{Daily_Log_Ingest_Capacity}}\n| count",
+  "query": "_index=sumologic_volume  _sourcecategory={{MetricsView}}_metrics_volume datapoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 6h\n| sum(datapoints) as daily_ingest_datapoints by _timeslice\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| daily_ingest_datapoints / duration_in_min as %\"DPM\" \n| compare timeshift 1d\n| fields - daily_ingest_datapoints, daily_ingest_datapoints_1d, duration_in_min, duration_in_min_1d",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,25 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Tier",
-      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "name": "MetricsView",
+      "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Daily_Log_Ingest_Capacity",
-      "description": "100",
-      "dataType": "ANY",
-      "value": "100"
+      "value": "sourcecategory"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -38,27 +26,27 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Logs",
-      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
-      "panelTitle": "Days when Ingestion Exceeded Capacity",
+      "dashboardName": "Data Volume - Metrics",
+      "dashboardDescription": "The Data Volume - Metrics dashboard allows you to view your metrics ingested, identifies ingest outliers/spikes as well as helps predict what ingestion is going to be.",
+      "panelTitle": "Ingest Today Vs Yesterday - {{MetricsView}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel94311792B5130B4F",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"days\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":15,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panel1DA48C4FB4F9B94C",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisY\":{\"title\":\"DPM\"}},\"legend\":{},\"hiddenQueryKeys\":[\"B\"],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[\"DPM\"],\"queries\":[],\"properties\":{\"name\":\"Today\"}},{\"series\":[\"DPM_1d\"],\"queries\":[],\"properties\":{\"name\":\"Yesterday\"}}]}",
       "rowContext": [
-        "Note: Daily Ingest Capacity"
+        "Note"
       ],
       "variables": [
         {
-          "name": "Tier",
-          "defaultValue": "*",
-          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Daily_Log_Ingest_Capacity",
-          "defaultValue": "100",
-          "values": "100",
+          "name": "Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
           "allowMultiSelect": false
         }
       ]

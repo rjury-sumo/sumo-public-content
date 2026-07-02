@@ -1,10 +1,47 @@
 {
   "id": "q0962",
-  "hash": "cd287c783ee3",
+  "hash": "e70bac2aebe3",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\")\n| count as Count by EventName",
-  "queryParameters": [],
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentSynchronizationRequested\n| json \"eventName\", \"syncRequest.requestBy.userEmail\", \"contentIdentity.name\" as EventName, UserEmail, ContentName  nodrop\n| where EventName=\"ContentSynchronizationRequested\"\n| where  ContentName matches \"{{ContentName}}\" and EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\"|count as Count by UserEmail\n| sort by Count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
   "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -12,18 +49,37 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Forwarding Management",
-      "dashboardName": "Enterprise Audit - Data Forwarding Management Overview",
-      "dashboardDescription": "Data Forwarding Management - Overview DashBoard provides an at-a-glance view of trends for destination types and the distribution of destination types, such as  Amazon S3, hitachi, Syslog, and Generic REST. Visual representations for the distribution of data forwarding destinations and data forwarding indexes are also shown.",
-      "panelTitle": "Distribution Of Data Forwarding Destination",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Permission Updated, Synchronized",
+      "dashboardDescription": "Content - Permission Updated, Synchronized DashBoard provides detailed information on content permissions that have been added or deleted, as well as content that has been synchronized. The dashboard is organized according to Content Synchronization and Content Permissions.",
+      "panelTitle": "Top Users to Request for Synchronization",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelbd0db83585f53b45",
+      "panelKey": "panel36edf79281f56a4d",
       "visualization": "pie",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
       "rowContext": [
-        "Data Source Type / Format Type"
+        "Content Permission"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

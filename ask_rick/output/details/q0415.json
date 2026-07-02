@@ -1,9 +1,9 @@
 {
   "id": "q0415",
-  "hash": "3f6388eae555",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "service={{service}} deployment.environment = {{environment}} _contenttype=metricfromtrace metric=service_operation_errors operation={{operation}}\n | sum by operation",
+  "hash": "0f731850bb65",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| parse \"created * \\\"*\\\" into folder \\\"*\\\"\" as content_type,content_name,folder_location\n| where action =\"CREATE\"\n| timeslice 1h\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by _timeslice\n| outlier _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,87 +12,33 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "service",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "environment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "default"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "operation",
+      "name": "sourceuser",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/Tracing and Spans/tracing errors - span details.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": null,
-      "dashboardName": "Tracing Errors - Span Details",
-      "dashboardDescription": "",
-      "panelTitle": "MetricFromTrace service_operation_errors by Operation",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
+      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
+      "panelTitle": "Outlier - Content Created",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel629075D6B5070A42",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"aggregationType\":\"sum\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{operation}}\"}}]}",
+      "panelKey": "panelf0791482ab931a40",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Trace Metrics (metricfromtrace)"
+        "Content Created"
       ],
       "variables": [
         {
-          "name": "service",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "environment",
-          "defaultValue": "default",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "any keyword string",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "instance_url",
-          "defaultValue": "live.us2.sumologic.com",
-          "values": "url for your sumo instance",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "operation",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statusmessage",
+          "name": "sourceuser",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

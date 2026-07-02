@@ -1,9 +1,9 @@
 {
   "id": "q0728",
-  "hash": "970671adb5a3",
+  "hash": "6d47c127026c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_audit\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isNull(action)\n| count by action\n| top 10 action by _count\n| order by _count",
+  "query": "_index=sec_record_network\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(description)\n| count by description\n| order by _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -66,7 +66,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -74,13 +74,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Audit Records",
-      "dashboardDescription": "This dashboard provides analysis of Audit Records.",
-      "panelTitle": "Top 10 Actions",
+      "dashboardName": "Cloud SIEM - Record Analysis - Network Records",
+      "dashboardDescription": "This dashboard provides analysis of Network Records.",
+      "panelTitle": "Descriptions",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel7F02C0568CE90A42",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \",\"hideLabels\":true},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \"}},\"series\":{},\"overrides\":[],\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false,\"wrap\":true},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "panelKey": "panelD559EFB996638B45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"overrides\":[],\"series\":{}}",
       "rowContext": [],
       "variables": [
         {

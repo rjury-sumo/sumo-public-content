@@ -1,9 +1,9 @@
 {
   "id": "q0239",
-  "hash": "2f765dbd51d0",
+  "hash": "434c4ecad0e4",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} namespace={{namespace}} pod=*\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by namespace,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * 90)) and  createdtime < (now () - (1000 * 60 * 60 * 24 * 60)) \n\n| count as insights by resolution\n| if(resolution  IN (\"False Positive\",\"Duplicate\"),insights,0) as fp\n| sum(fp) as fp, sum(insights) as insights | 100 * (fp/insights) as fp_ratio | fields fp_ratio",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Logs (Latest 100 Logs)",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "False Positive Ratio: 60-90 Days",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-D3F486A0B355194E",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "panelKey": "panelCC58438FAA89994A",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":30,\"to\":60,\"color\":\"#DFBE2E\"},{\"from\":50,\"to\":1000,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":100}},\"series\":{}}",
       "rowContext": [
-        "Logs/Events"
+        "Tuning Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

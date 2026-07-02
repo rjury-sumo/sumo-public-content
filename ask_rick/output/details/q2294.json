@@ -1,0 +1,49 @@
+{
+  "id": "q2294",
+  "hash": "777921b897d6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n| timeslice by {{timeslice}}\n|sum(data_scanned_bytes) as bytes   by _timeslice,user_name\n| total bytes as tb by _timeslice\n | bytes / tb as f | if (f <.05,\"other\",user_name) as user_name\n| bytes / 1G as gb\n| sum(gb) as gb_scan by _timeslice,user_name | replace (user_name,/@.+/,\"\") as user_name  \n| fillmissing timeslice({{timeslice}}) with 0 for\tgb_scan | transpose row _timeslice column user_name",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,15m,1d,10m,5m",
+      "dataType": "ANY",
+      "value": "1d"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Overview",
+      "dashboardDescription": "A dashboard for viewing search scan overview and trends",
+      "panelTitle": "Gb Scan Top Users Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel19F1D9069144BB41",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"GB\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":35,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Search Scan Overview and KPIs"
+      ],
+      "variables": [
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "id": "q2367",
+  "hash": "4872fbd8bc2c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| min(_messagetime) as s, max(_messagetime) as e , sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,s,e\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| sum(gbytes) as gbytes by tier\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n| cr_cont * gbytes * ((100 - {{cse_pct}} ) /100) as cr_cont\n| cr_cse * gbytes * ({{cse_pct}} /100)  as cr_cse\n| if (tier = \"continuous\", cr_cont+cr_cse ,0) as credits\n| if (tier = \"frequent\",cr_freq * gbytes,credits) as credits\n| if (tier = \"infrequent\",cr_infreq * gbytes,credits) as credits\n\n\n| if(tier  = \"frequent\",gbytes,0) as frequent\n| if (tier = \"continuous\",gbytes,0) as continuous\n| if(tier = \"infrequent\",gbytes,0) as infrequent\n| sum(continuous) as continuous,sum(frequent) as frequent, sum(infrequent) as infrequent\n\n| 20 as cr_cont\n| 25 as cr_cse\n| cr_cont * continuous * ((100 - {{cse_pct}} ) /100) as cr_cont\n| cr_cse * continuous * ({{cse_pct}} /100)  as cr_cse\n\n| ( cr_cont + cr_cse  + (frequent * 9) +  (infrequent * .4)  ) / (continuous + frequent + infrequent) as CPGI | avg(CPGI) as CPGI",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "^freq_",
+      "dataType": "ANY",
+      "value": "^freq_"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "^inf",
+      "dataType": "ANY",
+      "value": "^inf"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cse_pct",
+      "description": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_by_tier.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits By Tier",
+      "dashboardDescription": "A simple view of credits ingested by tier using pattern matching on the data volume _view (index) dimension.",
+      "panelTitle": "Credits Per GB Ingested",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelFD4EFA759646AB4C",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"CPGI\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":18,\"color\":\"#DFBE2E\"},{\"from\":18,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"min\":0,\"max\":25}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "^freq_",
+          "values": "^freq_",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "^inf",
+          "values": "^inf",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Credits Per GB Ingested",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelFD4EFA759646AB4C",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"CPGI\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":18,\"color\":\"#DFBE2E\"},{\"from\":18,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"min\":0,\"max\":25}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

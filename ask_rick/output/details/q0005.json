@@ -1,9 +1,9 @@
 {
   "id": "q0005",
-  "hash": "ab75605c8099",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query  user_name=*sumosupport*\n| geoip remote_ip\n| lookup asn,organization from asn://default on ip=remote_ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (country_name matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n\n| count_distinct(query) as distinct,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events by query_type,asn_geo\n| bytes_scanned / 1024/1024/1024 as scan_gb | fields -bytes_scanned\n| sort searches",
+  "hash": "d0f3d313158c",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "account={{account}} metric=StatusCheckFailed_System  region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}}| max by instanceid,region",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,47 +12,184 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "expected_asn_geo_regex",
-      "description": "regular expression for expected asn geo strings",
+      "name": "account",
+      "description": "",
       "dataType": "ANY",
-      "value": ".*"
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "region",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "instanceid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "aws/ec2"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+      "dataType": "ANY",
+      "value": "_collector"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{value",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/audit/sumologic_login_api_activity.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch-overview.json",
       "objectType": "Dashboard",
       "folder": null,
-      "dashboardName": "Sumo Logic Login and API Activity",
-      "dashboardDescription": "",
-      "panelTitle": "Sumosupport User Search Activity",
+      "dashboardName": "98. AWS EC2 Cloudwatch Metrics Overview",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "Status Check Failed: Instance System",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8F6CCF5AA77A6B47",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "panelKey": "panel3A96142ABC76FA46",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Failed Instances\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
       "rowContext": [
-        "Sumologic support account activity (No filters apply to these panels)"
+        "Status Checks"
       ],
       "variables": [
         {
-          "name": "expected_asn_geo_regex",
-          "defaultValue": ".*",
-          "values": "regular expression for expected asn geo strings",
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user",
-          "defaultValue": "*",
-          "values": "",
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "show_asn_geo",
+          "name": "instanceid",
           "defaultValue": "*",
-          "values": "exception,normal",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "account",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "99. AWS EC2 Cloudwatch Metrics - Custom Tags",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "Status Check Failed: Instance System",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3A96142ABC76FA46",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"Failed Instances\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{instanceid}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "account",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "region",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instanceid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Table_GroupBy",
+          "defaultValue": "aws:cloudformation:stack-name",
+          "values": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
           "allowMultiSelect": false
         }
       ]

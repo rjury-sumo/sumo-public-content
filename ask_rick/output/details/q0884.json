@@ -1,9 +1,9 @@
 {
   "id": "q0884",
-  "hash": "c3d8da0fa7f1",
+  "hash": "a700d41e94ae",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\" AND !(isBlank(device_hostname))\n| count by device_hostname | fields -_count",
+  "query": "_index=sec_signal\n  {{{keywords}}}\n\n| json field=entities \"[0].value\" as entityid\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n| where suppressed=\"YES\"\n| parse regex field=fullrecords \"\\\"active\\\":true,\\\"id\\\":\\\"[a-z0-9]*\\\",\\\"listId\\\":\\\"(?<listname>[^\\\"]*)\\\"\" multi nodrop \n\n| concat (ruleid,\" \",rulename) as rule\n| parse regex field=suppressedreasons \"\\\"(?<suppress_by>[^\\\":\\[\\]]+)\" multi\n| count_distinct(id) as suppressed_signals,values(suppress_by) as reasons, values(listname) as listname by entityid,rule | sort suppressed_signals",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_username",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
   "viewerType": "table",
@@ -25,26 +25,22 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - User Telemetry",
-      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
-      "panelTitle": "Distinct Hosts",
+      "folder": "Signal Analysis",
+      "dashboardName": "Signal Analysis - Suppression",
+      "dashboardDescription": "This dashboard shows an overview and some detailed tabular views for reflected CSE Signal events, specifically mapping, parsers and suppression.",
+      "panelTitle": "Suppression Reasons",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelBBDFD7F68D72A845",
+      "panelKey": "panelE80F7825AE3D8B44",
       "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"table\"},\"series\":{},\"svp\":{\"hideLabel\":false,\"label\":\"Host(s)\"}}",
-      "rowContext": [],
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "About"
+      ],
       "variables": [
         {
-          "name": "user_username",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

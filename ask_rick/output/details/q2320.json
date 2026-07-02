@@ -1,0 +1,85 @@
+{
+  "id": "q2320",
+  "hash": "1c129d50ecca",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_view=sumologic_search_usage_per_query) \nquery_type=copilot not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| parse regex field=scanned_bytes_breakdown_by_metering_type \"(?<tier>[^\\\",:]+)\\\" *: *(?<bytes>\\d+)\" multi\n| bytes /1G as gb\n| sum(gb) as gb by user_name , tier | transpose row user_name column tier",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "jane.doe*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_pattern",
+      "description": "*mycategory*,*_datatier*,*_index*,*ategory*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_regex",
+      "description": ".*,^.,a|b|c",
+      "dataType": "ANY",
+      "value": "^."
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/copilot_use_v2.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Copilot or Mobot Usage",
+      "dashboardDescription": "Dashboard uses search audit data to show queries run by copilot or mobot.",
+      "panelTitle": "Scan By Metering Tier",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel27EF02E38D55B941",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "jane.doe*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_regex",
+          "defaultValue": "^.",
+          "values": ".*,^.,a|b|c",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_pattern",
+          "defaultValue": "*",
+          "values": "*mycategory*,*_datatier*,*_index*,*ategory*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

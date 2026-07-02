@@ -1,0 +1,91 @@
+{
+  "id": "q2132",
+  "hash": "91cc1ec470bd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) \n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| where metric matches /{{metric_matches}}/\n| sum(dp) as totalDp by metric\n| (queryendtime() - querystarttime())/(1000 * 60) as query_min\n| round(totalDp / query_min, 0) as dpm //| fields -query_min\n| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| sum(totaldp) as %\"Total Data Points\",sum(dpm) as %\"Est. DPM\", count as metrics by metric\n| sort %\"Est. DPM\" //| limit 100\n| compare with timeshift {{compare_with}} | sort %\"Total Data Points\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "metric_matches",
+      "description": "metrics matches regex,foo,bar.*,foo|bar",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_dpm_other",
+      "description": "1000,3000,5000,10000,50000",
+      "dataType": "ANY",
+      "value": "3000"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "compare_with",
+      "description": "7d,14d,21d,28d",
+      "dataType": "ANY",
+      "value": "14d"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/metrics/metric_dpm_dv_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metrics DPM Data Volume Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Data Points vs 28d Ago For metrics matching: {{metric_matches}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel38DCBB28B0A1FA48",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Dimension and Cardinality Details"
+      ],
+      "variables": [
+        {
+          "name": "metric_matches",
+          "defaultValue": ".*",
+          "values": "metrics matches regex,foo,bar.*,foo|bar",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_dpm_other",
+          "defaultValue": "3000",
+          "values": "1000,3000,5000,10000,50000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1h",
+          "values": "1h,2h,6h,1d",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "compare_with",
+          "defaultValue": "14d",
+          "values": "7d,14d,21d,28d",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

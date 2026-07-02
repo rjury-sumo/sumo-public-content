@@ -1,9 +1,9 @@
 {
   "id": "q1135",
-  "hash": "d2b5ace9f26d",
+  "hash": "584529e54e4e",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query \n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| count_distinct(user_name)",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1d\n| sum(datapoints) as daily_ingest_datapoints by _timeslice\n| {{Subscribed_Metric_DPM_Ingest_Capacity}} as DPM_Capacity // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| DPM_Capacity * 60 * 24 as DataPoint_Capacity // Set this calculated value through gear icon for \"Colors by Value Range...\"\n| fields -DPM_Capacity",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "query_type",
+      "name": "MetricsSources",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory_metrics_volume"
     },
     {
       "autoComplete": {
@@ -24,39 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_name",
-      "description": "",
+      "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+      "description": "20000",
       "dataType": "ANY",
-      "value": ""
+      "value": "20000"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Search Overview",
-      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
-      "panelTitle": "Users",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Daily Ingest Vs Average Daily Ingest Capacity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelfe31096887f6ca4c",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Users\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#000000\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panelPANE-9",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note: Daily Ingest Capacity"
+      ],
       "variables": [
         {
-          "name": "query_type",
-          "defaultValue": null,
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
-          "values": null,
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
           "allowMultiSelect": false
         }
       ]

@@ -1,37 +1,172 @@
 {
   "id": "q1173",
-  "hash": "bd19bed8880f",
+  "hash": "34dd125219cd",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory=\"sourcecategory_metrics_volume\"\n| parse regex \"\\\"(?<sourcecategory>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints by sourcecategory\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| top 5 sourcecategory by %\"DPM\"",
-  "queryParameters": [],
-  "viewerType": "bar",
+  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_consumed}} as credits_consumed\n| timeslice 1d\n|where if (\"{{user_name}}\" = \"*\", true, user_name matches \"{{user_name}}\") AND if (\"{{session_id}}\" = \"*\", true, session_id matches \"{{session_id}}\") AND if (\"{{remote_ip}}\" = \"*\", true, remote_ip matches \"{{remote_ip}}\") AND if (\"{{is_aggregate}}\" = \"*\", true, toString(is_aggregate) matches \"{{is_aggregate}}\") AND if (\"{{status_message}}\" = \"*\", true, status_message matches \"{{status_message}}\") AND if (\"{{query}}\" = \"*\", true, query matches \"{{query}}\") AND if (\"{{query_type}}\" = \"*\", true, query_type matches \"{{query_type}}\")\n|sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credits_consumed",
+      "description": "0.016",
+      "dataType": "ANY",
+      "value": "0.016"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "session_id",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "remote_ip",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "is_aggregate",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "status_message",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Metrics",
-      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
-      "panelTitle": "Top 5 Source Categories",
+      "folder": "Infrequent Data Tier",
+      "dashboardName": "Infrequent Data Tier - Credits Consumed",
+      "dashboardDescription": "The Infrequent Data Tier - Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed with infrequent queries. This allows you to monitor and control on-demand search costs for the Infrequent Tier.",
+      "panelTitle": "Credits Consumed Over Time (Previous Month)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-4",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"sourcecategory\",\"hideLabels\":true},\"axisY\":{\"title\":\"DPM\"}},\"legend\":{\"enabled\":true},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panel89e1ba0886c7c847",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false},\"color\":{\"family\":\"Diverging 1\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true},\"overrides\":[{\"series\":[\"query_count\"],\"queries\":[],\"properties\":{\"axisYType\":\"secondary\",\"type\":\"line\"}}],\"series\":{}}",
+      "rowContext": [
+        "Credits Conversation"
+      ],
       "variables": [
         {
-          "name": "MetricsSources",
-          "defaultValue": "sourcecategory_metrics_volume",
+          "name": "session_id",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
+          "name": "query",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "is_aggregate",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "status_message",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credits_consumed",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "remote_ip",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

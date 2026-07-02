@@ -1,49 +1,27 @@
 {
   "id": "q0927",
-  "hash": "90658a02ac33",
+  "hash": "ba1f3c317872",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n {{{keywords}}}\n\n| if (isempty(suppressedReasons),\"NO\",\"YES\") as suppressed\n| where suppressed = \"NO\"\n| if (suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| timeslice  | sum(is_generated) as generated  by _timeslice | compare with timeshift 7d",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "line",
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPermissionsUpdated\n| json \"eventName\", \"contentIdentity.name\",\"permissionsAdded\" as EventName, ContentName, permissionsAdded nodrop\n| where EventName=\"ContentPermissionsUpdated\"\n| parse regex field=permissionsAdded \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi nodrop\n| json field=json_added_blob \"permissionSourceType\" as TargetPermissionSourceType\n| count as Count by ContentName\n| sort by Count\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Signal Analysis - Suppression",
-      "dashboardDescription": "This dashboard shows an overview and some detailed tabular views for reflected CSE Signal events, specifically mapping, parsers and suppression.",
-      "panelTitle": "Signals Generated vs Last Week",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Content Management Overview",
+      "dashboardDescription": "Content - Overview Dashboard provides a high-level view of system activities with data on content activities over time, top applications, top content, publicly accessed content, and exported content. You can also view data on user activity and top content on which permission are added and deleted.",
+      "panelTitle": "Content by Permission Added",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel658200C0A7212944",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"generated\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"minimum\":0},\"axisY2\":{\"minimum\":0,\"title\":\"Suppressed\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-      "rowContext": [
-        "About"
-      ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "keyword,wildcarded*,// any sumo syntax",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel77934c5ebe779948",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q0032",
-  "hash": "3775cb68b4d6",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=node_memory_MemTotal_bytes  | eval _value / 1000000 | quantize to 1m using max drop last | sum",
+  "hash": "78912bd9d833",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 14))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n// severity used to be numeric but now it's not\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|LOW/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|HIGH/,3,s) as s\n| if (sev_string matches /4|CRITICAL/,4,s) as s\n| s as severity\n| if(s = 1,\"LOW\",\"OTHER\") as severity\n| if(s = 2,\"MEDIUM\",severity) as severity\n| if(s = 3,\"HIGH\",severity) as severity\n| if(s = 4,\"CRITICAL\",severity) as severity\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| count by date,insightid,confidence,severity,name,status,resolution,entityvalue,assignee,timeToDetection,timeToRemediation,timeToResponse,s\n| sort s,severity,confidence | limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,58 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.exec.view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Total Memory",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Top 10 Insights By Severity / Confidence Last 14d",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-df00a2869e459a47",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"MB\",\"option\":\"Latest\",\"valueFontSize\":24,\"labelFontSize\":18},\"series\":{}}",
+      "panelKey": "panel9EC56DB8A2257A42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Top 10 Insights By Severity / Confidence Last 14d",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel9EC56DB8A2257A42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

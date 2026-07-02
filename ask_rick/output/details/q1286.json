@@ -1,0 +1,179 @@
+{
+  "id": "q1286",
+  "hash": "d49e9e6d3c9d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum(billedBytes) as %\"billedBytes\" by _timeslice, field_type\n| %\"billedBytes\"  as %\"billedBytes Count\"\n\n| %\"billedBytes\" / 1024/1024/1024 as gb\n| gb * 14 as credits\n| sum(credits) as credits  //by field_type //,_timeslice\n\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "1234567"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits/Credits Daily Burn Rate.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA8C3148EBAD4EB47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "1234567",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA8C3148EBAD4EB47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/examples/dashboard.burn.rate.raw.dv.logs.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA8C3148EBAD4EB47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

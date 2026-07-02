@@ -1,9 +1,9 @@
 {
   "id": "q0245",
-  "hash": "bd77253610b0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=node_memory_MemTotal_bytes cluster={{cluster}}  node={{node}}",
+  "hash": "7b7d48b7c639",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * 60)) and  createdtime < (now () - (1000 * 60 * 60 * 24 * 30)) \n\n| count as insights by resolution\n| if(resolution  IN (\"No Action\"),insights,0) as fp\n| sum(fp) as fp, sum(insights) as insights | 100 * (fp/insights) as fp_ratio | fields fp_ratio",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,82 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "line",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Memory Usage (%)",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "No Action Ratio: 30-60 Days",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-74e95038aecd2949",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme2\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"%\"}},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{node}}\"}}],\"series\":{},\"hiddenQueryKeys\":[\"C\",\"D\"]}",
-      "rowContext": [
-        "Resource Utilization"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes Overview dashboard provides high-level information on the health and performance of the cluster nodes.",
-      "panelTitle": "Avg Node Memory Utilization",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-DE1B69E5BB2BDB45",
+      "panelKey": "panelE22291A48F7B7B44",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"gauge\":{\"show\":true},\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":101,\"color\":\"red\"}],\"option\":\"Average\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"label\":\"%\"},\"series\":{},\"hiddenQueryKeys\":[\"C\",\"D\"]}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":50,\"color\":\"#16943E\"},{\"from\":50,\"to\":60,\"color\":\"#DFBE2E\"},{\"from\":60,\"to\":1000,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":100}},\"series\":{}}",
       "rowContext": [
-        "Note: Selecting cluster name and node is mandatory for dashboard to work"
+        "Tuning Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

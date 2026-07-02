@@ -1,0 +1,97 @@
+{
+  "id": "q2386",
+  "hash": "d27fc290a4be",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "( _view=data_volume_custom_* )\ndimension ={{view}}\nitem={{value_filter}}\ndatatier = {{tier_filter}}\n// remove long categories\n\n| sum(gbytes) as gbytes, sum(credits) as credits\n| credits/gbytes as %\"cr/gb\"\n| avg(%\"cr/gb\") as %\"cr/gb\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "view",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_filter",
+      "description": "filter_value",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier_filter",
+      "description": "Continuous,Frequent,Infrequent",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/data-tiers-viewbased-dashboard/Data Tiers Console - Custom Views.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Data Tiers Console - Custom Views",
+      "dashboardDescription": "",
+      "panelTitle": "Credits Per GB Ingested",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel45AB81FF925DA842",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credits Per GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":17,\"color\":\"#DFBE2E\"},{\"from\":17,\"to\":50,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":30}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "view",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "30m",
+          "values": "5m,15m,30m,1h,6h,24h",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_filter",
+          "defaultValue": "*",
+          "values": "filter_value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier_filter",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_chrs",
+          "defaultValue": "35",
+          "values": "25,2530,35,45,50",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0954",
-  "hash": "25d501c9fef2",
+  "hash": "7637dd3f7b2b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventTime\", \"eventName\", \"operator.id\", \"operator.email\", \"operator.sourceIp\", \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"destination.destinationType\",\"destination.enabled\",\"destination.encrypted\", \"from\", \"to\" as EventTime, eventName, UserId, User, UserIp, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, PreviousValue, CurrentValue nodrop\n| json field=CurrentValue \"destinationType\", \"enabled\", \"encrypted\" as DestinationTypeUpdated, enabledUpdated, EncryptedUpdated nodrop\n| if(isNull(DestinationType), if(isNull(DestinationTypeUpdated), \"-\",DestinationTypeUpdated), DestinationType) as DestinationType\n| if(isNull(Enabled), if(isNull(enabledUpdated), \"-\",enabledUpdated), Enabled) as Enabled\n| if(isNull(Encrypted), if(isNull(EncryptedUpdated), \"-\",EncryptedUpdated), Encrypted) as Encrypted\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\") \n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and User matches \"{{User}}\"\n|count by EventTime, eventName, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, UserId, User, UserIp, PreviousValue, CurrentValue\n| sort by EventTime\n| fields - _count, UserId, PreviousValue, CurrentValue",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"operator.email\" as EventName, User nodrop\n| where EventName in (\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") \n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") in EventName\n| transpose row _timeslice column EventName",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,19 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserIp",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -42,33 +30,27 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Forwarding Management",
-      "dashboardName": "Enterprise Audit - Data Forwarding Destination Activities",
-      "dashboardDescription": "Data Forwarding Destination Activities DashBoard provides detailed information on data forwarding destination activities. You can review trends for activities, their geographical locations, one-day times shift comparisons, user activity, and recent destination activities.",
-      "panelTitle": "Recent - Destination Activities",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "Trend - Field Extraction Rules",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelc561ab428fdb8b4a",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panelf53bff748800eb4d",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
       "rowContext": [],
       "variables": [
         {
           "name": "EventName",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserIp",
-          "defaultValue": "*",
-          "values": null,
+          "values": "*",
           "allowMultiSelect": false
         },
         {

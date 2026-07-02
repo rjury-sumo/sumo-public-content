@@ -1,24 +1,11 @@
 {
   "id": "q0505",
-  "hash": "85cd6d50bcac",
+  "hash": "23c2e661eb10",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"sourcehost_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcehost, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| timeslice 1d\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by _timeslice, sourcehost\n| compare with timeshift 1d\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, gbytes_1d, sourcehost\n| if (!(isNull(gbytes_1d)), ((gbytes - gbytes_1d) / gbytes_1d) * 100, gbytes * 100) as percent_diff\n| if (isNull(gbytes_1d), 0, gbytes_1d) as gbytes_1d\n| where percent_diff > 0\n| sort percent_diff\n| limit 5\n| fields _timeslice, sourcehost, gbytes, gbytes_1d,percent_diff",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Tier",
-      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| timeslice 1m\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by _timeslice\n// predict for next 15 days using auto-regressive model\n| predict gbytes by 1m model=ar, forecast=1440m \n| sum (gbytes_predicted)",
+  "queryParameters": [],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,21 +13,27 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Log Spikes",
-      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
-      "panelTitle": "Ingest Spikes for Top 5 Source Hosts",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Predicted Ingest Tomorrow",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-9",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[],\"decimals\":0},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "panelKey": "panelCC46954D9D9DAB4F",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Gbytes\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":15,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Top 5 Per Day"
+        "Note: Daily Ingest Capacity"
       ],
       "variables": [
         {
           "name": "Tier",
           "defaultValue": "*",
           "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
           "allowMultiSelect": false
         }
       ]

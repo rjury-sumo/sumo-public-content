@@ -1,27 +1,101 @@
 {
   "id": "q0781",
-  "hash": "0a383a4a4ab8",
+  "hash": "1100fa3b3c84",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_failure*\n| count as today by metadata_sourceCategory, %\"fields.reason\"\n| compare with timeshift 1d 1 as vs_yesterday\n| fields metadata_sourceCategory, %\"fields.reason\", today, today_vs_yesterday\n| sort today",
-  "queryParameters": [],
-  "viewerType": "table",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) {{Filter}}\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| insight_severity as s\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n\n| where (severity matches \"{{Severity}}\")\n| where (insight_resolution matches \"{{Resolution}}\")\n| where (insight_assignee matches \"{{Assignee}}\")\n| count by insight_resolution",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Filter",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Severity",
+      "description": "3. LOW,2. MEDIUM,1. HIGH",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Resolution",
+      "description": "Resolved, False Positive, No Action",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Assignee",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Failed Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Failed Records",
-      "dashboardDescription": "This dashboard provides Analysis of Failed Records",
-      "panelTitle": "Failed Records by _sourceCategory",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - SOC Insights",
+      "dashboardDescription": "This dashboard provides SOC Insights related metrics.",
+      "panelTitle": "Insights by Resolution",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B48D54628D7C7B42",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelPANE-61B4E227ADB91940",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "Filter",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Severity",
+          "defaultValue": "*",
+          "values": "3. LOW,2. MEDIUM,1. HIGH",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Resolution",
+          "defaultValue": "*",
+          "values": "Resolved, False Positive, No Action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Assignee",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

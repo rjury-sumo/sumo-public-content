@@ -1,55 +1,29 @@
 {
   "id": "q1204",
-  "hash": "802bd5825f2f",
+  "hash": "3df6fccecb61",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| where _sourceCategory=\"collector_tracing_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1h\n|sum({{Unit}}) as %\"curr_hrs_{{Unit}}\" by _timeslice\n| sort by _timeslice asc \n| diff %\"curr_hrs_{{Unit}}\"\n| where !isNull(_diff)\n| (_diff+%\"curr_hrs_{{Unit}}\") as %\"prev_hrs_{{Unit}}\"\n| ((_diff / %\"curr_hrs_{{Unit}}\") * 100) as pct_incr\n| 50 as spikePercent\n| where (-1 * pct_incr) > spikePercent\n| abs(pct_incr) as pct_incr\n| fields _timeslice, %\"curr_hrs_{{Unit}}\", %\"prev_hrs_{{Unit}}\", pct_incr",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_view=sumologic_search_usage_per_query \n| count as queries by query_type | order by queries",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/usage_key_stats.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Tracing",
-      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Spike  of Last {{Unit}}",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Searches By Type",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-12",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "panelKey": "panel11EF91679524AB49",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
       "rowContext": [
-        "Note for Ingest Spike Panels of {{Unit}}"
+        "Log Search"
       ],
-      "variables": [
-        {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

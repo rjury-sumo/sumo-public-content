@@ -1,11 +1,36 @@
 {
   "id": "q0980",
-  "hash": "e11af61d1b8f",
+  "hash": "81b7bc4dd379",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPermissionsUpdated\n| json \"eventName\", \"contentIdentity.name\",\"permissionsDeleted\" as EventName, ContentName, permissionsDeleted nodrop\n| where EventName=\"ContentPermissionsUpdated\"\n| parse regex field=permissionsDeleted \"(?<json_deleted_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi nodrop\n| json field=json_deleted_blob \"permissionSourceType\" as TargetPermissionSourceType\n| count as Count by ContentName\n| sort by Count\n| limit 10",
-  "queryParameters": [],
-  "viewerType": "pie",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentUpdated OR ContentMoved OR ContentCopied)\n| json \"eventName\", \"eventTime\", \"adminMode\", \"contentIdentity.name\", \"contentIdentity.type\", \"operator.email\", \"operator.id\", \"operator.sourceIp\" as EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp nodrop\n| where EventName in (\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\")\n| json \"copiedTo.contentIdentity.name\" as TargetContentName nodrop\n| json \"origin.name\", \"destination.name\" as SourceFolder, TargetFolder nodrop\n| if(isNull(TargetContentName), \"-\", TargetContentName) as CopiedContentName\n| if(isNull(SourceFolder), \"-\", SourceFolder) as OriginFolderName\n| if(isNull(TargetFolder), \"-\", TargetFolder) as DestinationFolderName\n| where  UserIp matches \"{{UserIp}}\" and  EventName matches \"{{EventName}}\"\n|count by EventName, EventTime, AdminMode, ContentName, ContentType,UserEmail, UserId, UserIp, CopiedContentName, OriginFolderName, DestinationFolderName\n| sort by EventTime\n| fields - _count, UserId\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,15 +38,30 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Content Management Overview",
-      "dashboardDescription": "Content - Overview Dashboard provides a high-level view of system activities with data on content activities over time, top applications, top content, publicly accessed content, and exported content. You can also view data on user activity and top content on which permission are added and deleted.",
-      "panelTitle": "Content by Permission Deleted",
+      "dashboardName": "Enterprise Audit - Updated, Moved, Copied Content",
+      "dashboardDescription": "Content - Updated, Moved, Copied DashBoard provides detailed information about content that is updated, moved and copied. The dashboard is organized according to activities performed  by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Recent - Content Updated/Moved/Copied",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelf367547584fd4b4b",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [],
-      "variables": []
+      "panelKey": "panel2ba774c489ba694e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

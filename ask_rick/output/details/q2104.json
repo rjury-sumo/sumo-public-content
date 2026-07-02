@@ -1,0 +1,27 @@
+{
+  "id": "q2104",
+  "hash": "d3be322c4668",
+  "queryType": "Logs",
+  "queryMode": "SavedSearch",
+  "query": "_datatier=infrequent\n| timeslice 15m\n| count as events,sum(_size) as bytes  by _timeslice,_collector,_sourcecategory,_source,_sourcehost,_view // ,_siemforward\n| \"infrequent\" as tier  // fixed attirbution\n//| if(_siemforward=\"true\",\"flex\",\"cse\") as tier // dynamic based on field\n| _view as index | fields -_view  \n| if (isempty(index),\"sumologic_default\",index) as index\n\n// lowercase everything to simplify filtering and reduce cardinality\n| tolowercase(_collector) as collector\n| tolowercase(_source) as source\n| tolowercase(_sourcecategory) as sourcecategory\n| tolowercase(_sourcehost) as sourcehost\n\n// final aggregation to view\n| sum(events) as events,sum(bytes) as bytes  by _timeslice,collector,sourcecategory,source,sourcehost,index,tier\n| save view metadata_infrequent_v1",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_portal/schedules.examples/saved.schedule.15m.infreq.json",
+      "objectType": "SavedSearch",
+      "folder": null,
+      "dashboardName": "metadata_infrequent_v1 view",
+      "dashboardDescription": "Save a 15m view of ingested metadata in infrequent tier scope",
+      "panelTitle": "metadata_infrequent_v1 view",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-1h to -15m"
+    }
+  ]
+}

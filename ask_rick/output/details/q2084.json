@@ -1,0 +1,73 @@
+{
+  "id": "q2084",
+  "hash": "9985c2a7a33d",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} metric=kube_pod_container_status_waiting_reason reason=crashloopbackoff | quantize {{quantize_interval}} using max | filter max >0 | sum by pod",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Pods CrashLoopBackoff",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel299F9AA09B53E844",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"unit\":{\"value\":\"\",\"isCustom\":false}}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":540,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"sum\"]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":true,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":900},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":1000}},\"rangeNumericThresholds\":[{\"color\":\"#B4D6EB\",\"value\":null,\"id\":0}],\"conditionalThresholds\":[{\"color\":\"#B4D6EB\",\"condition\":null,\"id\":0}],\"column\":\"\",\"formattingOption\":\"Numeric\",\"thresholdDisplay\":\"lineAndFillArea\",\"thresholdDisplayOption\":\"rowBackground\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Pod Status"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

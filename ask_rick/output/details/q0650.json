@@ -1,24 +1,11 @@
 {
   "id": "q0650",
-  "hash": "45cd55b1008f",
+  "hash": "8432bfab51a3",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "// id=@opt_labeled_insights:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_count minimize=\"{{minimize}}\" \n| where insight_state=\"Optimized\"\n| fields count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "minimize",
-      "description": "False positive,False positive & No action",
-      "dataType": "ANY",
-      "value": "False positive"
-    }
-  ],
-  "viewerType": "svp",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| json field=_raw \"insight.signals.length()\" as signal_count\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| count by insight_source\n| sort by _count",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,42 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Insight Analysis",
-      "dashboardName": "Cloud SIEM - Insight Trainer",
-      "dashboardDescription": "CSE Rule Severity Recommendations",
-      "panelTitle": "Optimized Labeled Insights",
+      "dashboardName": "Cloud SIEM - Insights Created",
+      "dashboardDescription": "This dashboard provides Insights Created related metrics.",
+      "panelTitle": "Insights by Source",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel887A164C89AB4846",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"OLI\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":36,\"labelFontSize\":14,\"thresholds\":[{\"id\":0,\"value\":null,\"color\":\"#00a0d6\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Recommendations Summary"
-      ],
-      "variables": [
-        {
-          "name": "minimize",
-          "defaultValue": "False positive",
-          "values": "False positive,False positive & No action",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "show_rules",
-          "defaultValue": "Rules with severity recommendations",
-          "values": "All rules,Rules with severity recommendations",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "prod",
-          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "domain",
-          "defaultValue": "service",
-          "values": "service",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel1DD95B48B2F35B43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

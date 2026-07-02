@@ -1,9 +1,9 @@
 {
   "id": "q0166",
-  "hash": "52ba52c5c4f0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} metric=kube_pod_container_info deployment={{deployment}} | quantize 1m using avg  | sum by cluster,pod | count by cluster",
+  "hash": "6bc47d034af7",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| count as events, max(_messagetime) as _messagetime,first(status) as status,first(tags) as tags, min(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue \n\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]+\\\")\" multi\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n\n// final aggregation to save to a lookup with only one row for most recent status of insight\n| values(insightid) as insights,values(tag) as tags,values(rule) as rules by entityvalue \n| sort entityvalue asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,106 +12,70 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "area",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Over Time",
+      "folder": "Insights",
+      "dashboardName": "Insights Console (audit events) - 20220830",
+      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
+      "panelTitle": "Entities To Insights, Rules and Tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-a330eda9a4414b49",
-      "visualization": "area",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"area\",\"fillOpacity\":0.25},\"color\":{\"family\":\"scheme1\"},\"axes\":{\"axisY\":{\"title\":\"Pods\"}},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"area\",\"name\":\"{{cluster}}\"}}],\"series\":{}}",
+      "panelKey": "panel3BF28BAA8CF58B46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Pods"
+        "B. Mappings and Tags"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_by_timeslice",
+          "defaultValue": "1d",
+          "values": "15m,1h,3h,1d,1w",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Running vs Restarts",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Insights Console (Tuning Pack)",
+      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
+      "panelTitle": "Entities To Insights, Rules and Tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-3432a6259a7db840",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2},\"hiddenQueryKeys\":[\"B\",\"A\"],\"color\":{\"family\":\"scheme7\"},\"series\":{},\"axes\":{\"axisY\":{\"labelFontSize\":12,\"gridColor\":\"#e2e7eb\"}}}",
+      "panelKey": "panel3BF28BAA8CF58B46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Pods"
+        "B. Mappings and Tags"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_by_timeslice",
+          "defaultValue": "1d",
+          "values": "15m,1h,3h,1d,1w",
           "allowMultiSelect": false
         }
       ]

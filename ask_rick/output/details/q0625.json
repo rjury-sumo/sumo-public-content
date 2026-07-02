@@ -1,49 +1,27 @@
 {
   "id": "q0625",
-  "hash": "7fe72a4f765b",
+  "hash": "5353e88d630a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal\n{{{rule}}}\n\n_index=sec_signal\n{{{rule}}}\n| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[*].metadata_vendor\" as vendors nodrop\n//| json field=fullRecords \"[*].metadata_sourceCategory\" as sourceCategories nodrop\n//| json field=fullRecords \"[*].metadata_product\" as products nodrop\n| json field=fullRecords \"[*].metadata_mapperName\" as mapperNames nodrop\n//| json field=fullRecords \"[*].metadata_parser\" as parsers nodrop\n//\n////| concat (ruleid,\" \",rulename) as rule\n////| parse regex field=vendors \"(?<vendor>[\\w\\d_ -]+)\" multi\n////| count_distinct(id) as signals by vendor,sourcecategories,products //,deviceEventIds\n////\n////| parse regex field=products \"(?<product>[\\w\\d_ -]+)\" multi\n////| max(signals) as signals by vendor,product,sourcecategories //,deviceEventIds\n////\n//| parse regex field=deviceEventIds \"(?<deviceEventId>[^\\r\\n\\\"\\[\\]\\{\\},]+)\" multi\n| parse regex field=mappernames \"(?<mappername>[\\w\\d_ -]+)\" multi\n|  count_distinct(id) as signals by  mappername //,parsers\n\n//| parse regex field=parsers \"(?<parser>[\\w\\d_\\/ -]+)\" multi\n//| max(signals) as signals by mappername,parser",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{rule",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "table",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where insight_status = \"closed\"\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| avg(insight_time_to_response) as insight_time_to_response\n\n\n\n| floor(insight_time_to_response/60/60/24) as insight_time_to_response_days\n| insight_time_to_response - (insight_time_to_response_days*24*60*60) as insight_time_to_response\n\n| floor(insight_time_to_response/60/60) as insight_time_to_response_hours\n| insight_time_to_response - (insight_time_to_response_hours*60*60) as insight_time_to_response\n\n| floor(insight_time_to_response/60) as insight_time_to_response_minutes\n| insight_time_to_response - (insight_time_to_response_minutes*60) as insight_time_to_response\n\n| floor(insight_time_to_response) as insight_time_to_response_seconds\n\n| format(\"%s Days, %s Hrs, %s Min, %s Sec\", ToInt(insight_time_to_response_days), ToInt(insight_time_to_response_hours), ToInt(insight_time_to_response_minutes), ToInt(insight_time_to_response_seconds)) as insight_time_to_response\n| fields insight_time_to_response",
+  "queryParameters": [],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Rule Overview",
-      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
-      "panelTitle": "Mappers",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Closed",
+      "dashboardDescription": "This dashboard provides metrics around closed insights.",
+      "panelTitle": "Average Time to Respond",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD2E361DAA32CCB4A",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Signals"
-      ],
-      "variables": [
-        {
-          "name": "rule",
-          "defaultValue": "THRESHOLD-S00096",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelPANE-D4972274A76F1842",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":3,\"color\":\"#16943E\"},{\"from\":3,\"to\":12,\"color\":\"#DFBE2E\"},{\"from\":12,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":24}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

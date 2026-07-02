@@ -1,11 +1,11 @@
 {
   "id": "q0808",
-  "hash": "b1b7eca749e0",
+  "hash": "e2793e54816c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| timeslice 1d \n| count by _timeslice \n| order by _timeslice asc",
+  "query": "_index=sec_signal \n| count by ruleName\n| where _count < 5\n| sort by _count asc",
   "queryParameters": [],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,52 +13,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Insights",
-      "dashboardDescription": "This dashboard provides SOC Insights related metrics.",
-      "panelTitle": "Insights and Signals",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "Alerts Breakdown - Infrequent",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2DA25109A8CD5A42",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"axisYType\":\"primary\",\"color\":\"#bf2121\",\"name\":\"Insights\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"axisYType\":\"secondary\",\"color\":\"#007ca6\",\"name\":\"Signals\"}}]}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "Filter",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Severity",
-          "defaultValue": "*",
-          "values": "3. LOW,2. MEDIUM,1. HIGH",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Resolution",
-          "defaultValue": "*",
-          "values": "Resolved, False Positive, No Action",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Assignee",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC KPIs",
-      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
-      "panelTitle": "Insights and Signals",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-C42CD53DB0006B4C",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":3},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#bf2121\",\"name\":\"Insights\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"axisYType\":\"secondary\",\"color\":\"#00a0d6\",\"name\":\"Signals\"}}]}",
+      "panelKey": "panel0D03219CA689594B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"color\":{\"family\":\"Categorical Dark\"},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [],
       "variables": []
     }

@@ -1,51 +1,69 @@
 {
   "id": "q0124",
-  "hash": "974f655dd783",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "(#B / #A) * 100",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "hash": "90509a82d5bc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n\n*Mapping*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Mapping*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"logMapping\"\n\n//\n| json field=logMapping \"id\" \n| json field=logMapping \"name\"\n| json field=logMapping \"source\"\n| json field=logMapping \"recordType\"\n| json field=logMapping \"enabled\"\n| json field=logMapping \"vendor\"\n| json field=logMapping \"product\"\n| json field=logMapping \"fields\" nodrop\n\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,source,recordtype,vendor,product,fields | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "Percent of Memory Limit",
+      "folder": "Content",
+      "dashboardName": "CSE Rules And Mapping Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Log Mapping Change Details",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-daf179fca69f6840",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\"%\",\"option\":\"Latest\",\"valueFontSize\":17,\"labelFontSize\":12,\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":31,\"to\":70,\"color\":\"#DFBE2E\"},{\"from\":71,\"to\":100,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true},\"sparkline\":{\"show\":false}},\"hiddenQueryKeys\":[\"B\",\"A\"],\"series\":{}}",
+      "panelKey": "panelDAC9736494B82B4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Overview"
+        "Log Mappings"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Rules and Mapping Changes (Tuning Pack)",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Log Mapping Change Details",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDAC9736494B82B4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Log Mappings"
+      ],
+      "variables": [
         {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

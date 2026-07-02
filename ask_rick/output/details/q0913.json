@@ -1,10 +1,47 @@
 {
   "id": "q0913",
-  "hash": "001a5fc324fc",
+  "hash": "f2616b76968e",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| where vendor = \"CrowdStrike\"\n| count by  contentType, name, matchExpression, severity,vendor,product, entity_type\n| sort by _count,name,severity",
-  "queryParameters": [],
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingForIndexEnabled OR DataForwardingForIndexUpdated OR DataForwardingForIndexDisabled)\n| json \"eventName\", \"eventTime\", \"indexName\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"dataForwarding\", \"from\", \"to\" as EventName, EventTime, IndexName, User, UserId, UserIp, dataForwarding, PreviousValue, CurrentValue nodrop\n| json field=dataForwarding \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"format\" as NameCreated, SourceCreated, formatCreated nodrop\n| json field=CurrentValue \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"format\" as NameUpdated, SourceUpdated, formatUpdated nodrop\n| if(isNull(NameCreated), if(isNull(NameUpdated), \"-\", NameUpdated), NameCreated) as DestinationName\n| if(isNull(SourceCreated), if(isNull(SourceUpdated), \"-\", SourceUpdated), SourceCreated) as DataSourceType\n| if(isNull(formatCreated), if(isNull(formatUpdated), \"-\", formatUpdated), formatCreated) as FormatType\n| where EventName in (\"DataForwardingForIndexEnabled\", \"DataForwardingForIndexUpdated\", \"DataForwardingForIndexDisabled\")\n| where  EventName matches \"{{EventName}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\"\n|count by EventTime, EventName, IndexName, DestinationName, DataSourceType, FormatType, User, UserId, UserIp, dataForwarding, PreviousValue, CurrentValue\n| sort by EventTime\n| fields - _count, PreviousValue, CurrentValue, UserId,dataForwarding",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -12,18 +49,35 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Cloud SIEM - Signals by Product",
-      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
-      "panelTitle": "CrowdStrike Signals Summary",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Index Activities",
+      "dashboardDescription": "Data Forwarding Index Activities DashBoard provides detailed information about data forwarding indexes that were created using partitions and scheduled views. You can review trends, geographical locations for data forwarding index activities, one-day time shift comparisons, user activities, as well as data on disabled indexes and recent index activities.",
+      "panelTitle": "Recent - Index Activities",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-427D4A20BEB75B43",
+      "panelKey": "panelff682c419904cb4a",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "CrowdStrike"
-      ],
-      "variables": []
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

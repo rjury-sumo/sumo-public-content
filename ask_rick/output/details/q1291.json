@@ -1,0 +1,67 @@
+{
+  "id": "q1291",
+  "hash": "6f6ac8755937",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=credits_usage_hourly*\n| timeslice 1d\n| count_distinct(_timeslice) as days, sum(units) as units,sum(credits) as credits by uom,rate,unit\n| days -1  as query_days\n\n| max(days) as days,sum(credits) as credits\n| credits / days as %\"cr/day\"\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n\n| avg(pct_plan) as prediction",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "21900"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Credits View (credits_usage_hourly)",
+      "dashboardDescription": "A dashboard of high level credits consumption using the hourly credits view.",
+      "panelTitle": "Prediction Based On Period",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1D15ABABB654C84D",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"%\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":3,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":85,\"color\":\"#16943E\"},{\"from\":85,\"to\":95,\"color\":\"#DFBE2E\"},{\"from\":95,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

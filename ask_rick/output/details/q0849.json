@@ -1,28 +1,26 @@
 {
   "id": "q0849",
-  "hash": "55d49df5c7cf",
+  "hash": "95493dfc7ed7",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal  CrowdStrike*\n| count",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| count by ruleName, ruleId, vendor, product, severity, matchExpression,entity_type\n| sort by _count",
   "queryParameters": [],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "CrowdStrike EDR Alerts",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Analysis",
+      "dashboardDescription": "This dashboard provides CSE Signals analysis by Rules, destination, user, and IP.",
+      "panelTitle": "Top 10 Signals Summary",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel43D8BFA487EC7A40",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":4,\"color\":\"#16943E\"},{\"from\":5,\"to\":40,\"color\":\"#DFBE2E\"},{\"from\":41,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
-      "rowContext": [
-        "Daily Alert Breakdown Detailed"
-      ],
+      "panelKey": "panel7876BE4E9A98B94A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
       "variables": []
     }
   ]

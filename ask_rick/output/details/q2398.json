@@ -1,0 +1,145 @@
+{
+  "id": "q2398",
+  "hash": "48849f9b5a6a",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume) _sourcecategory={{view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n| where tolowercase(value) matches tolowercase(\"{{value_filter}}\")\n| where datatier matches \"{{tier_filter}}\"\n| sum(count) as events,sum(sizeinbytes) as bytes by datatier, value\n| bytes /1024/1024/1024 as gb | sort gb\n\n| if (length(value) > {{max_chrs}},concat(substring(value,0,{{max_chrs}}),\"...\"),value) as value \n| sum(events) as events,sum(gb) as gbytes by value,dataTier\n| total gbytes as tgb \n| total gbytes as tgbs by value\n| tgbs / tgb as fraction\n\n| if(( fraction * 100 )> {{other_pct}},value,\"other\" ) as value\n| fraction * 100 as percent\n| if (datatier=\"Frequent\",gbytes * 9,gbytes * 20) as credits\n| if (datatier=\"Infrequent\",gbytes * .4,credits) as credits\n| if (datatier=\"CSE\",gbytes * 25,credits) as credits\n\n|sum(credits) as credits,count as rows, sum(gbytes) as gbytes by datatier,value\n\n| sum({{graphs_by}}) as total by value | sort total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "view",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_filter",
+      "description": "filter_value",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier_filter",
+      "description": "Continuous,Frequent,Infrequent,CSE",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "max_chrs",
+      "description": "30,35,45,50,55",
+      "dataType": "ANY",
+      "value": "40"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "other_pct",
+      "description": ".0,1,.5,1,2,3,5",
+      "dataType": "ANY",
+      "value": ".3"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "graphs_by",
+      "description": "gbytes,credits",
+      "dataType": "ANY",
+      "value": "credits"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/datavolume-with-tier/data-volume-tiers-investigation-console.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Data Volume With Tiers Console",
+      "dashboardDescription": "",
+      "panelTitle": "Total {{graphs_by}} By {{view}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel98BD121FB45F6943",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9,\"title\":\"value\"},\"axisY\":{\"title\":\"total\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":9,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#6D8DA6\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#6D8DA6\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":9,\"tickColor\":\"#E6EAED\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#E6EAED\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "view",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "5m",
+          "values": "5m,15m,1h,6h,24h",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "other_pct",
+          "defaultValue": ".3",
+          "values": ".0,1,.5,1,2,3,5",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_filter",
+          "defaultValue": "*",
+          "values": "filter_value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier_filter",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_chrs",
+          "defaultValue": "40",
+          "values": "30,35,45,50,55",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "graphs_by",
+          "defaultValue": "credits",
+          "values": "gbytes,credits",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

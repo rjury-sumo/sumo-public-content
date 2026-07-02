@@ -1,0 +1,55 @@
+{
+  "id": "q2153",
+  "hash": "b3df8b5ab563",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events  MonitorsLibraryItemUpdated {{{filter}}}\n| json field=_raw \"to.isDisabled\" as isDisabled\n| json field=_raw \"to.name\" as name\n| json field=_raw \"from.isDisabled\" as wasDisabled\n| json field=_raw \"operator.email\" as user\n| json field=_raw \"operator.sourceIp\" as src_ip\n| json field=_raw \"from.monitorType\" as monitortype\n| where isdisabled !=wasdisabled\n| _messagetime as time\n| count by time,isDisabled,wasDisabled,name,user,src_ip,monitortype | fields -_count\n| sort time\n| formatdate(tolong(time),\"YYYY-MM-dd hh:mm:ss ZZZZ\") as time",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/alerts-investigation-console.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alerts Investigation Console",
+      "dashboardDescription": "",
+      "panelTitle": "Disabled or Enabled",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0E39546D99858A4A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Monitor Changes"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// to disable or enter search",
+          "values": "//anything,(drop or \"new relic\" or availability)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sumo_url",
+          "defaultValue": "service.us2",
+          "values": "live.us2,service.us2,service,service.au,service.mum,service.fra",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

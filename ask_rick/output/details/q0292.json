@@ -1,9 +1,9 @@
 {
   "id": "q0292",
-  "hash": "3ab6901b2d49",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_node_info cluster={{cluster}}  | quantize 1m | sum by cluster",
+  "hash": "9c7c60e6e2e0",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_rum_errors service={{service}} application={{application}} %\"deployment.environment\"={{environment}}\n//| json field=_raw \"$['error.stack']\" as error_stack nodrop\n//| json field=_raw \"$['error.message']\" as error_message nodrop\n//| json field=_raw \"$['error.name']\" as error_name nodrop\n//| json field=_raw \"type\" as type nodrop\n//| json field=_raw \"log\" nodrop\n//| json field=_raw \"$['http.url']\" as http_url nodrop\n//| json field=_raw \"$['element.xpath']\" as xpath nodrop\n//| json field=_raw \"type\" nodrop\n//\n| timeslice \n| count by errorType, _timeslice | transpose row _timeslice column errorType",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,73 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "service",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "application",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/RUM/Rum_browser_errors.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes Overview dashboard provides high-level information on the health and performance of the cluster nodes.",
-      "panelTitle": "Nodes Over Time",
+      "folder": null,
+      "dashboardName": "RUM Browser Errors",
+      "dashboardDescription": "",
+      "panelTitle": "By Type Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-ED61DB079FDD5A4B",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Nodes\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Dark\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"cluster={{cluster}}\"}}],\"series\":{}}",
-      "rowContext": [
-        "Note: Selecting cluster name and node is mandatory for dashboard to work"
-      ],
+      "panelKey": "panel38064E1CB3925949",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "node",
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword(s),error,error*,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

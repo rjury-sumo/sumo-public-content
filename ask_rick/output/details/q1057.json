@@ -1,10 +1,35 @@
 {
   "id": "q1057",
-  "hash": "5fa7aaa1abc2",
+  "hash": "a994eae65e7f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=accessKeys\n| json \"eventName\" as EventName nodrop\n| count as Count by EventName",
-  "queryParameters": [],
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserUnlocked\n| json \"eventName\", \"eventTime\", \"accountId\", \"operator\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, operator, UserIp nodrop\n| where EventName=\"UserUnlocked\"\n| json field=operator \"email\", \"interface\" as UnlockedBy , Interface nodrop\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count as Unlock_Count by UnlockedBy\n| sort by Unlock_Count\n| limit 5",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
   "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -12,16 +37,29 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Security Management Overview",
-      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
-      "panelTitle": "Distribution - Access Keys",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Active Admins performing Account Unlock",
       "panelType": "SumoSearchPanel",
-      "panelKey": "paneld2cb4a8fa6d37941",
+      "panelKey": "panel8d354f879dd5eb4f",
       "visualization": "pie",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

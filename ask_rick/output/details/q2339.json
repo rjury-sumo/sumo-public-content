@@ -1,0 +1,79 @@
+{
+  "id": "q2339",
+  "hash": "c0996a90699d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(execution_duration_ms > 1000 * {{slow_seconds}},1,0) as slow\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events, pct(duration_s,50) as median_run_s , sum(slow) as %\"slow > 30s\", sum(fail) as %\"fail/cancelled\" by query_type\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "slow_seconds",
+      "description": "30,60,90,300",
+      "dataType": "ANY",
+      "value": "30"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Search Total Stats",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel55606FEC9E703A4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Search Statistics"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

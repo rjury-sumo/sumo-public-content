@@ -1,0 +1,109 @@
+{
+  "id": "q2383",
+  "hash": "ba8055c1c97c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "( _view=data_volume_custom_* )\ndimension ={{view}}\nitem={{value_filter}}\ndatatier = {{tier_filter}}\n| timeslice by {{timeslice}}\n//| sum(sizeinbytes) as bytes by datatier, value\n|  sum(credits) as credits by  datatier //,_timeslice\n//| sum(events) as events, sum(credits) as credits,sum(gbytes) as gbytes by datatier, item,_timeslice\n| sort credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "view",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "value_filter",
+      "description": "filter_value",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier_filter",
+      "description": "Continuous,Frequent,Infrequent",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "5m,15m,30m,1h,6h,24h",
+      "dataType": "ANY",
+      "value": "30m"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/data-tiers-viewbased-dashboard/Data Tiers Console - Custom Views.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Data Tiers Console - Custom Views",
+      "dashboardDescription": "",
+      "panelTitle": "Total Credits By Tier",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE81B48D8A9AA6844",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"color\":{\"family\":\"Categorical Light\"}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "view",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "30m",
+          "values": "5m,15m,30m,1h,6h,24h",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_filter",
+          "defaultValue": "*",
+          "values": "filter_value",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier_filter",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_chrs",
+          "defaultValue": "35",
+          "values": "25,2530,35,45,50",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

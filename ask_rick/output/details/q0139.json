@@ -1,49 +1,27 @@
 {
   "id": "q0139",
-  "hash": "adf45529ff22",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=coredns_forward_requests_total | quantize 1m | max by to",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "pie",
+  "hash": "f69106fe8b7c",
+  "queryType": "Logs",
+  "queryMode": "SavedSearch",
+  "query": "// This query demonstrates how to work with closed insights to produce a useful table with status, times and operators.\n\n_index=sumologic_audit_events _sourcecategory=cseinsight closed insightupdated\n//OR\n//_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation) as timeToRemediation\n\n//| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| json field=signal \"tags\" as signal_tags\n//| parse regex field=signal_tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n////\n| json field=_raw \"insight.closed\" as time_closed nodrop\n|substring(time_closed,0,23) as time_closed\n\n| json field=_raw \"insight.created\" as time_created nodrop\n|substring(time_created,0,23) as time_created\n\n\n| json field=_raw \"operator.sourceIp\" as op_ip nodrop\n| json field=_raw \"operator.email\" as op_email nodrop\n| sort _messagetime\n//// ensure we only store the most recent result and remove duplicate exploded events\n| count as events, max(_messagetime) as _messagetime,first(status) as status, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation, first(op_ip) as closed_ip,first(op_email) as closed_by,first(time_created) as time_created,first(time_closed) as time_closed by insightid,name,entitytype,entityvalue \n\n| where status = \"closed\"\n| parsedate(time_created,\"yyyy-MM-dd'T'HH:mm:ss.SSS\") as created_epoc\n\n// timeToResponse = seconds between created time and first status update\n// timeToRemediation = seconds between created and closed epoc times in the close event\n\n// this would give you the save number as timeToRemediation already has\n// | parsedate(time_closed,\"yyyy-MM-dd'T'HH:mm:ss.SSS\") as closed_epoc\n// | (closed_epoc - created_epoc) / 1000 as duration_s\n\n// set your time you want to measure start and end shift times here\n| \"Pacific/Auckland\" as shift_TZ\n| formatDate(toLong(created_epoc), \"yyyy-MM-dd HH:mm:ss ZZZ\", shift_TZ) as created_local_time\n| formatDate(toLong(created_epoc ), \"E\", shift_TZ) as created_day\n| formatDate(toLong(created_epoc ), \"HH\", shift_TZ) as created_hour\n\n| formatDate(toLong(created_epoc + timeToRemediation), \"yyyy-MM-dd'T'HH:mm:ss.SSS ZZZ\", shift_TZ) as closed_local_time\n| formatDate(toLong(created_epoc + timeToRemediation), \"E\", shift_TZ) as closed_day\n| formatDate(toLong(created_epoc + timeToRemediation), \"HH\", shift_TZ) as closed_hour\n\n// enter shift rules here \n| if(created_day matches /Sat|Sun/,\"weekend\",\"weekday\") as weekday\n| if(weekday = \"weekday\" and (num(created_hour) >= 7 and num(created_hour) < 19),\"inside\",\"outside\") as working_hours\n\n// from here you could report on them as bands for example:\n| timeToRemediation - timetoresponse as timeToRemediation\n\n// reporting in minutes is easier for humans\n| timeToDetection / 60 as timeToDetection\n| timeToResponse / 60 as timeToResponse\n| timeToRemediation / 60 as timeToRemediation\n| avg(timeToDetection) as timeToDetection, avg(timeToResponse) as timeToResponse, avg(timeToRemediation) as timeToRemediation by insightid,working_hours,closed_by,created_local_time,resolution,severity,confidence,created_day,created_hour | sort timetoRemediation",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - CoreDNS v4.6",
-      "dashboardDescription": "The Kubernetes - CoreDNS provides insights into CoreDNS status including Cache details, Resource Usage.",
-      "panelTitle": "Requests forwarded by CoreDNS to upstream DNS servers",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel6F8518D49EF95946",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
-      "rowContext": [
-        "Cache"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": null,
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
+      "objectType": "SavedSearch",
+      "folder": "Demo Searches",
+      "dashboardName": "Insights - Work Hours Response Table By Highest Remediation Time",
+      "dashboardDescription": "Produces a tablular list of key insight fields for closed insights showing how to split reporting by on and off work hour schedule.",
+      "panelTitle": "Insights - Work Hours Response Table By Highest Remediation Time",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-7d"
     }
   ]
 }

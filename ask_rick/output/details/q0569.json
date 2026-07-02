@@ -1,53 +1,27 @@
 {
   "id": "q0569",
-  "hash": "1cbe40d700f0",
+  "hash": "a086acf912ff",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory=sourcecategory_tracing_volume\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1m\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n| predict %\"{{Unit}}\" by 1m model=ar, forecast=1440\n| sum  ({{Unit}}_predicted) as {{Unit}}_predicted\n|if(\"{{Unit}}\" matches \"spansCount\", 1000000, 1Gi) as denominator \n| {{Unit}}_predicted/denominator as {{Unit}}_predicted\n| fields - denominator",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
-    }
-  ],
-  "viewerType": "svp",
+  "query": "!(_siemforward = \"true\" )\n\n| count by _sourceCategory \n | sort by _count desc",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Volume",
-      "dashboardName": "Data Volume - Tracing",
-      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
-      "panelTitle": "Ingest Predictions - {{Unit}} for Next Day",
+      "folder": "Cloud SIEM - Data Parsing & Mapping Monitoring",
+      "dashboardName": "Cloud SIEM - Record Parsing and Analysis",
+      "dashboardDescription": "This dashboard provides analysis on Records parsing.",
+      "panelTitle": "Messages - NOT Forwarding to CSE",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelFDF93645B7412A42",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Gbytes/Million\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelA24C506F80DD1A48",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
       "rowContext": [],
-      "variables": [
-        {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "TracingView",
-          "defaultValue": "sourcecategory",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

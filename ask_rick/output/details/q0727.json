@@ -1,9 +1,9 @@
 {
   "id": "q0727",
-  "hash": "544d76786784",
+  "hash": "ed293a06d9b9",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_audit\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isNull(changeType)\n| count by changeType\n| top 10 changeType by _count\n| order by _count",
+  "query": "_index=sec_record_network\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(dstDevice_ip)\n| count by dstDevice_ip\n| sort by _count\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -66,7 +66,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -74,13 +74,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Audit Records",
-      "dashboardDescription": "This dashboard provides analysis of Audit Records.",
-      "panelTitle": "Top 10 Change Types",
+      "dashboardName": "Cloud SIEM - Record Analysis - Network Records",
+      "dashboardDescription": "This dashboard provides analysis of Network Records.",
+      "panelTitle": "Top 10 Network Records by Destination IP",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel15D9677C978F0A46",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\" \"}},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "panelKey": "panelB0FF54DBB0343A47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [],
       "variables": [
         {

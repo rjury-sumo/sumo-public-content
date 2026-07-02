@@ -1,9 +1,9 @@
 {
   "id": "q0193",
-  "hash": "5a9aa70f1f3c",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} metric=kube_pod_status_phase phase=Failed deployment={{deployment}} | quantize 30s | sum by cluster,pod | sum",
+  "hash": "c56cb90afb10",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n  {{{keywords}}}\n\n| json field=entities \"[0].value\" as entityid\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n| where suppressed=\"YES\"\n\n| concat (ruleid,\" \",rulename) as rule\n| parse regex field=suppressedreasons \"\\\"(?<suppress_by>[^\\\":\\[\\]]+)\" multi\n| count_distinct(id) as suppressed_signals,values(suppress_by) as reasons by entityid,rule | sort suppressed_signals",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,58 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment Overview dashboard provides high-level insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Failed",
+      "folder": "Signals",
+      "dashboardName": "Signals - Suppression",
+      "dashboardDescription": "A dashboard for reviewing mapping, parsers and suppression.",
+      "panelTitle": "Suppression Reasons",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-016c912787289847",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Average\",\"label\":\"Pods\",\"rounding\":\"0\",\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"yellow\"},{\"from\":1,\"to\":null,\"color\":\"red\"}],\"useBackgroundColor\":true},\"hiddenQueryKeys\":[\"A\"],\"series\":{}}",
+      "panelKey": "panelE80F7825AE3D8B44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Note: Selecting cluster name, namespace and deployment is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Signals - Suppression (Tuning Pack)",
+      "dashboardDescription": "A dashboard for reviewing mapping, parsers and suppression.",
+      "panelTitle": "Suppression Reasons",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE80F7825AE3D8B44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
         {
-          "name": "deployment",
-          "defaultValue": null,
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0199",
-  "hash": "435f99c77040",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} metric=kube_pod_container_info deployment={{deployment}} | quantize 30s | count by cluster, deployment | sum | timeshift -2m",
+  "hash": "5a3578d030b6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n  {{{keywords}}}\n\n| where (isempty(suppressedreasons))\n\n//| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n//| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n//| json field=fullRecords \"[0].metadata_product\" as product nodrop\n//| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n| timeslice \n|  count by deviceEventId,_timeslice| transpose row _timeslice column deviceeventid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,58 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment Overview dashboard provides high-level insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Deployments",
+      "folder": "Signals",
+      "dashboardName": "Signals Console (sec_signal)",
+      "dashboardDescription": "",
+      "panelTitle": "Device Event Id",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel41188F80836F2B47",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"rounding\":\"0\",\"label\":\"\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}]},\"series\":{}}",
+      "panelKey": "panel96A9C7808143C846",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name, namespace and deployment is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Signals Console sec_signal (Tuning Pack)",
+      "dashboardDescription": "Detailed review of sec_signal events matching a keyword expresison.",
+      "panelTitle": "Device Event Id",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel96A9C7808143C846",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
         {
-          "name": "deployment",
-          "defaultValue": null,
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

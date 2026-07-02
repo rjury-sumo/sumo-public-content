@@ -1,82 +1,80 @@
 {
   "id": "q0100",
-  "hash": "a52356c11fe5",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} statefulset=*{{sumologic_override}}-otelcol-logs* metric=container_cpu_cfs_throttled_seconds_total | rate increasing",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sumologic_override",
-      "description": "sumo,sumologic",
-      "dataType": "ANY",
-      "value": "sumologic"
-    }
-  ],
-  "viewerType": "line",
+  "hash": "e35fc45cea51",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(\n_view=sec_record_audit  OR _view=sec_record_authentication  OR _view=sec_record_email  OR _view=sec_record_endpoint  OR _view=sec_record_failure  OR _view=sec_record_network  OR _view=sec_record_notification \n)\n| count by metadata_vendor,metadata_product\n\n| sort metadata_vendor asc, metadata_product asc",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "CPU Throttling",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Normalized Records Created By Product and Vendor",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel1A237C0EB577A84F",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+      "panelKey": "panelE86F4B27BC60C944",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
       "rowContext": [
-        "Opentelemetry Logs Collection Monitoring"
+        "Cloud SIEM Ingestion Pipeline"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Normalized Records Created By Product and Vendor (Last Week)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0009D813B5E5C842",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+      "rowContext": [
+        "Cloud SIEM Ingestion Pipeline"
+      ],
+      "variables": [
+        {
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

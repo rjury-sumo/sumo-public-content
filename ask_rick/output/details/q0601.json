@@ -1,9 +1,9 @@
 {
   "id": "q0601",
-  "hash": "e4ea6fa0ac95",
+  "hash": "42a7e3fccdc8",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_endpoint objectType=Endpoint {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.status\" as status nodrop\n\n| toUpperCase(status) as status\n\n| count as Total status\n| status as Total",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
+      "name": "ID",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "INSIGHT-50"
     }
   ],
   "viewerType": "svp",
@@ -25,27 +25,21 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "STATUS",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelC250F940BAA2D849",
+      "panelKey": "panelPANE-8A1FFA929DA3AB4C",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Endpoint\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#005982\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#005982\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"status\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"-\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy)"
+        "Untitled"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
           "values": null,
           "allowMultiSelect": false
         }

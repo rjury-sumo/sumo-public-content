@@ -1,9 +1,9 @@
 {
   "id": "q0429",
-  "hash": "315544499e14",
+  "hash": "8e9d3e2cf1c2",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit _sourceCategory=user_activity \"updated visibility\" \"AdminMode=true\" (World or Whitelist)\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"updated visibility of * \\\"*\\\" to *\" as content_type,content_name,visibility_level\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type,content_name,visibility_level\n| sort by visibility_level\n| fields - _count",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| where action =\"INSTALL\"\n| parse \"installed application (*, *) into folder \\\"*\\\" as \\\"*\\\"\" as app_name,app_id,target_folder_location,app_name2\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time,sourceuser, app_name",
   "queryParameters": [
     {
       "autoComplete": {
@@ -26,11 +26,11 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Admin Mode",
-      "dashboardDescription": "See when content is deleted, moved, whitelisted, and shared. As well as when permission is added or removed.",
-      "panelTitle": "Content Whitelisted and Shared with World",
+      "dashboardName": "Library Content - Imported/Exported/Installed/Shared Publicly",
+      "dashboardDescription": "See when content is shared, exported or imported. As well as count and trends in content that has been shared, exported or imported.",
+      "panelTitle": "Application Installed by Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6a2c4103bbc87844",
+      "panelKey": "panelf1870fae9ae84b4c",
       "visualization": "table",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],

@@ -1,0 +1,49 @@
+{
+  "id": "q1273",
+  "hash": "b658675fcbf9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management \"Budget\" \"last reset\" \n {{{keywords}}}\n//\"Approaching\"\n| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action nodrop\n| parse \"Budget * with \" as budget nodrop\n| parse \"consumed *% of capacity since last reset.\" as usage_pct nodrop\n\n| timeslice \n| max(usage_pct) by _timeslice, budget\n| transpose row _timeslice column budget",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collectionIssues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Issues",
+      "dashboardDescription": "",
+      "panelTitle": "Budget Consumed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel279B57A1AE00AB40",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":1,\"lineDashType\":\"solid\",\"markerType\":\"square\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Budgets"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "*,// any search keywords,not installed* not filecollection*,budget",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

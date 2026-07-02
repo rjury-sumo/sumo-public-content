@@ -1,0 +1,49 @@
+{
+  "id": "q1275",
+  "hash": "692a477bb3b9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events \"IngestBudget\"  {{{keywords}}}\n| json field=_raw \"status\"\n| json field=_raw \"resourceIdentity.name\" as budget\n| json \"eventType\",\"severityLevel\", \"resourceIdentity.type\" as eventType , severity, resourceType \n| where eventType = \"Health-Change\" AND resourceType = \"IngestBudget\" and severity=\"Error\" | count by budget | count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collectionIssues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Issues",
+      "dashboardDescription": "",
+      "panelTitle": "Budgets Exceeded",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2876F03E8A88A947",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":0.1,\"color\":\"#98ECA9\"},{\"from\":1,\"to\":null,\"color\":\"#bf2121\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "*,// any search keywords,not installed* not filecollection*,budget",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

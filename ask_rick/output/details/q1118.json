@@ -1,23 +1,10 @@
 {
   "id": "q1118",
-  "hash": "dfa330349cb5",
+  "hash": "0548ec5c4cba",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}}\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m\n| sum(data_scanned_bytes) as total_scanned, sum(data_retrieved_bytes) as total_retrieved by _timeslice\n| int(total_scanned/1Gi) as total_scanned | int(total_retrieved/1Gi) as total_retrieved\n| order by _timeslice",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "tier",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by _timeslice\n| outlier gbytes",
+  "queryParameters": [],
   "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -25,25 +12,16 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
-      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
-      "panelTitle": "Total Scanned and Retrieved (GB)",
+      "folder": "Flex",
+      "dashboardName": "Flex - Log Spikes",
+      "dashboardDescription": "The Log Spikes Dashboard helps to review details of your data ingested for logs.",
+      "panelTitle": "Data Volume Outlier",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelc3d461f1912d3a46",
+      "panelKey": "panelPANE-0",
       "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"total_scanned\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"total_retrieved\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}}],\"series\":{}}",
-      "rowContext": [
-        "Monitoring Your Usage by Tier"
-      ],
-      "variables": [
-        {
-          "name": "tier",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

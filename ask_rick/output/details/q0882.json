@@ -1,23 +1,10 @@
 {
   "id": "q0882",
-  "hash": "7ad42414c30a",
+  "hash": "acecc22639aa",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{user_username}}\n\n| count as Total by metadata_vendor, metadata_product, objectType\n| total(Total) by metadata_vendor, metadata_product\n| transpose row metadata_vendor, metadata_product, _total column objectType\n| order by _total\n| ToInt(_total) as Total\n| fields -_total",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_username",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| where vendor =  \"Sumo Logic\"\n| count by  contentType, name, matchExpression, severity,vendor,product, entity_type\n| sort by _count,name,severity",
+  "queryParameters": [],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -25,29 +12,18 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - User Telemetry",
-      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
-      "panelTitle": "Data Source Telemetry",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signals by Product",
+      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
+      "panelTitle": "Sumo Logic Summary",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-BB9B4FB0A51E7A40",
+      "panelKey": "panel86D53817BF7C1940",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "user_username",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
-          "allowMultiSelect": false
-        }
-      ]
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Sumo Logic CIP Search Alerts"
+      ],
+      "variables": []
     }
   ]
 }

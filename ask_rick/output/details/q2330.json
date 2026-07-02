@@ -1,0 +1,121 @@
+{
+  "id": "q2330",
+  "hash": "2c89a3e66b03",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_view=sumologic_search_usage_per_query) \nnot query_type=sumo* not user_name=*sumosupport*\nuser_name={{user_name}} query={{query_pattern}} query_type={{query_type}} analytics_tier={{tier}}\n| where query matches /{{query_regex}}/\n//| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Frequent\" as f_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Continuous\" as c_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(f_scan_bytes),0,f_scan_bytes) as f_scan_bytes\n| if (isnull(c_scan_bytes),0,c_scan_bytes) as c_scan_bytes\n\n| count as searches,  sum(inf_scan_bytes) as inf_scan_bytes,sum(c_scan_bytes) as c_scan_bytes, sum(f_scan_bytes) as f_scan_bytes by user_name,query_type\n| round((inf_scan_bytes /1024/1024/1024) * 10 )/10 as inf_scan_gb\n| round((f_scan_bytes /1024/1024/1024) * 10 )/10 as f_scan_gb\n| round((c_scan_bytes /1024/1024/1024) * 10 )/10 as c_scan_gb\n\n| count_distinct(user_name) as users, sum(searches) as searches, sum(c_scan_gb) as c_scan_gb, sum(inf_scan_gb) as inf_scan_gb, sum(f_scan_gb) as f_scan_gb\n| inf_scan_gb * .016 as inf_scan_credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "jane.doe*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_pattern",
+      "description": "*mycategory*,*_datatier*,*_index*,*ategory*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "scheduled*,*dashboard*,interactive search,monitor,view*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier",
+      "description": "*continuous*,*frequent*,*infrequent*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_regex",
+      "description": ".*,^.,a|b|c",
+      "dataType": "ANY",
+      "value": "^."
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_audit_meta_searched.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Audit Metadata Searched (20220603)",
+      "dashboardDescription": "",
+      "panelTitle": "Total Stats",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5AA9489D957F784F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "jane.doe*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_regex",
+          "defaultValue": "^.",
+          "values": ".*,^.,a|b|c",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_pattern",
+          "defaultValue": "*",
+          "values": "*mycategory*,*_datatier*,*_index*,*ategory*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": "scheduled*,*dashboard*,interactive search,monitor,view*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "tier",
+          "defaultValue": "*",
+          "values": "*continuous*,*frequent*,*infrequent*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

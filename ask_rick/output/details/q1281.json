@@ -1,0 +1,179 @@
+{
+  "id": "q1281",
+  "hash": "d258c38374b7",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory=view_and_tier_volume\n| parse regex \"(?<row>\\{\\\"[^\\}]+\\})\" multi\n// too slow: parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n// slower | json field=row \"field\",\"dataTier\",\"sizeInBytes\"  as value,datatier,sizeinbytes \n| parse field=row \"{\\\"field\\\":\\\"*\\\",\\\"dataTier\\\":\\\"*\\\",\\\"sizeInBytes\\\":*,\\\"count\\\":*}\" as value,datatier,sizeinbytes,count\n| where sizeinbytes > 0\n\n//| sum(sizeinbytes) as bytes by datatier, value\n| sizeInBytes / 1024/1024/1024 as gb\n| sum(gb) as gb by datatier //,_timeslice\n\n| if (datatier=\"Frequent\",gb * 9,gb * 20) as credits\n| if (datatier=\"Infrequent\",gb * .4,credits) as credits\n| if (datatier=\"CSE\",gb * 25,credits) as credits\n| if (datatier=\"Security\",gb * 0,credits) as credits\n| sum(credits) as credits by datatier\n\n// these will estimate storage credits over lifetime so we get a storage estimate\n//\n| 390 as retention_days\n| 390 as infr_retention_days\n| 0.0067 as cr_storage\n|  0.0015 as cr_infreq_storage\n| if (datatier=\"Infrequent\", (credits / .4) *  infr_retention_days * cr_infreq_storage ,0 ) as credits_storage\n| if (datatier=\"Continuous\", (credits / 20) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"Frequent\", (credits / 20) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n| if (datatier=\"CSE\", (credits / 25) *  retention_days * cr_storage ,credits_storage ) as credits_storage\n\n// it's unlikely to ever fully use retention container over long term due to growth\n// if you ingest is very flat or shorter retention use a flatter ratio number\n| credits_storage * .55 as credits_storage\n\n// now we need to repack the columsn to support final graph output\n| if(datatier=\"Continuous\",credits,0) as cr_cont\n| if(datatier=\"Frequent\",credits,0) as cr_frequent\n| if(datatier=\"Infrequent\",credits,0) as cr_infrequent\n| if(datatier=\"CSE\",credits,0) as cr_CSE\n\n| sum(credits) as credits, sum(credits_storage) as %\"storage (estimate)\"  // by _timeslice\n| credits + %\"storage (estimate)\" as daily_credits_estimate | sum(daily_credits_estimate) as credits\n| ( queryendtime() - querystarttime() ) / ( 1000 * 60 * 60 * 24) as query_days\n| credits / query_days as %\"cr/day\" // \n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n| fields -plan,query_days",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "1234567"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits/Credits Daily Burn Rate.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest and Storage Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel605249409A547949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "1234567",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest and Storage Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel605249409A547949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/examples/dashboard.burn.rate.raw.dv.logs.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Ingest and Storage Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel605249409A547949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

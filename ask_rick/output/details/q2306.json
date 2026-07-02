@@ -1,0 +1,36 @@
+{
+  "id": "q2306",
+  "hash": "39851b00f4d4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n\nanalytics_tier=*infrequent*\n\n//| parse field=\"scanned_bytes_breakdown -> *)\" as scanned_bytes_breakdown \n| json field =scanned_bytes_breakdown \"Continuous\" as  scan_c nodrop\n| json field =scanned_bytes_breakdown \"Frequent\" as  scan_f nodrop\n| json field =scanned_bytes_breakdown \"Infrequent\" as  scan_inf nodrop\n\n// AGGREGATE TO GET STATS\n///| parse \" query -> *, scanned_partition_count -> \" as the_real_query\n//| sort execution_duration_ms\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)(?<scope>(?:_datatier|_index|_view) *= *[a-zA-Z_]+)\" nodrop\n//| if (isempty(datatier),\"index\",datatier) as datatier\n\n| count as queries,count as searches, sum(data_scanned_bytes) as total_bytes,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_c) as cont_scan,sum(scan_f) as freq_scan,sum(scan_inf) as infreq_scan, values(status_message) as statuses,values(query_type) as types by user_name,scope,query | limit 100 //,session_id\n\n| round(cont_scan/1G,2) as cont_scan_gb\n| round(freq_scan/1G,2) as freq_scan_gb\n| round(infreq_scan/1G,2) as inf_scan_gb\n| total_bytes / 1G as total_scan_gb\n| round(inf_scan_gb * 0.016,2) as scan_credits //| fields -bytes\n\n| fields -cont_scan,freq_scan,infreq_scan,total_bytes\n| sort scan_credits\n\n| scan_credits/queries as cr_per_query",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Overview",
+      "dashboardDescription": "A dashboard for viewing search scan overview and trends",
+      "panelTitle": "Infrequent Queries Sorted By Scan Credits Estimate (@.016/scan GB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1114182587E9194B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2}}",
+      "rowContext": [
+        "Infrequent Tier Scanners"
+      ],
+      "variables": [
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

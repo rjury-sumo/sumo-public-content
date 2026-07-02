@@ -1,0 +1,67 @@
+{
+  "id": "q1375",
+  "hash": "ffaf077f3245",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=*otelcol* cluster={{cluster}} namespace={{namespace}}//not unmarshal\n(\"No more retries\" or \"sender failed\" or \"Dropping data\" or \"max elapsed time expired\" or \"sending_queue is full\")\n| json field=_raw \"log\" \n| parse field=log \"*\\t*\\t*:*\\t*\\t*\" as datetime,level,file,line,error_type,details nodrop\t\n| where level matches /warn|error|fatal/\n//| parse regex field=log \"(?<some_json>\\{.+\\})\" nodrop\n//| json field=some_json \"action\" nodrop\n//| json field=some_json \"error\" nodrop\n//| json field=some_json \"data_type\" nodrop\n//| json field=some_json \"name\" nodrop\n//| json field=some_json \"kind\" nodrop\n//| json field=some_json \"pipeline\" nodrop\n| timeslice | count by _timeslice,error_type | transpose row _timeslice column error_type\n//| count by cluster,namespace,level,file,error_type,error,action,data_type,name,kind,pipeline | sort level asc,_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sumologic"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes-collection-healthcheck-otelcol.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes - Collection Healthcheck (otelcol)",
+      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
+      "panelTitle": "Pod Logs: Queue Retries Exceeded, Queue Full Etc",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7D2B9E9EBEBCFA44",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+      "rowContext": [
+        "Error and Warn Logs for Log *otelcol* pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "sumologic",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

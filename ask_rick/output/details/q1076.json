@@ -1,9 +1,9 @@
 {
   "id": "q1076",
-  "hash": "cba3fdf0dd2c",
+  "hash": "db4019bd74a6",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"userIdentity.userId\", \"userIdentity.userEmail\", \"user.firstName\", \"user.lastName\", \"user.active\", \"to\", \"from\" as EventName, EventTime, Admin, AdminId, AdminIp, UserId, TargetUserEmail, TargetUserFirstName, TargetUserLastName, IsTargetUserActive, CurrentValue, PreviousValue nodrop\n| json field=CurrentValue \"firstName\", \"lastName\", \"active\" as UpdatedFirstName, UpdatedLastName, UpdatedIsActive nodrop\n| if(isNull(TargetUserFirstName), if(isNull(UpdatedFirstName),\"-\",UpdatedFirstName) ,TargetUserFirstName) as TargetUserFirstName\n| if(isNull(TargetUserLastName), if(isNull(UpdatedLastName),\"-\",UpdatedLastName) ,TargetUserLastName) as TargetUserLastName\n| if(isNull(IsTargetUserActive), if(isNull(UpdatedIsActive),\"-\",UpdatedIsActive) ,IsTargetUserActive) as IsTargetUserActive\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\") \n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, Admin, AdminId, AdminIp, UserId, TargetUserEmail, TargetUserFirstName, TargetUserLastName, IsTargetUserActive\n| sort by EventTime\n| fields - _count, AdminId, UserId",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}} \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m \n| sum(data_retrieved_bytes) as data_retrieved_bytes by query_type, _timeslice \n| int(data_retrieved_bytes/1Gi) as data_retrieved_bytes\n| transpose row _timeslice column query_type",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,67 +12,33 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Admin",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminIp",
+      "name": "tier",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Activities",
-      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
-      "panelTitle": "Recent - User Activities",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
+      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
+      "panelTitle": "Retrieved Bytes Used (GB) by Query Type",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0bd7e57b85f2884e",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [],
+      "panelKey": "panel0cb3da50bfdcfa43",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"Interactive Dashboard\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Interactive Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Scheduled Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Search API\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Unknown\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}}],\"series\":{}}",
+      "rowContext": [
+        "Monitoring Your Usage by Tier"
+      ],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Admin",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "AdminIp",
+          "name": "tier",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

@@ -1,9 +1,9 @@
 {
   "id": "q0273",
-  "hash": "a20352154535",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_node_status_capacity cluster={{cluster}} node={{node}} resource=memory | quantize 2m | avg",
+  "hash": "063091d576c1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n//(*ruleUpdated or *rulecreated or *ruledeleted))\n*ruledeleted\n{{{keywords}}}\n\n\n//not  \"\\\"source\\\": \\\"sumo\\\",\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n\n| count by rule_type,operator | transpose row rule_type column operator",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "line",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Memory Limits vs Memory Requests vs Node Memory",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Rules and Mapping Changes (Tuning Pack)",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Rules Deleted",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelE6DEAD6AB0760948",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme3\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Requests\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Capacity\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Limits\"}}],\"title\":{\"fontSize\":16}}",
+      "panelKey": "panel61E2D790BACF7A4B",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
       "rowContext": [
-        "Resource Utilization"
+        "Rules Changes"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

@@ -1,28 +1,26 @@
 {
   "id": "q0922",
-  "hash": "acecc22639aa",
+  "hash": "afd5ffa8e78d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| where vendor =  \"Sumo Logic\"\n| count by  contentType, name, matchExpression, severity,vendor,product, entity_type\n| sort by _count,name,severity",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding DataForwardingDestinationCreated\n| json \"eventName\", \"destination.destinationType\" as EventName, DestinationType nodrop\n| where EventName=\"DataForwardingDestinationCreated\"\n| timeslice 1d\n| count as Count by _timeslice, DestinationType\n| fillmissing timeslice(1d), values(\"Amazon S3\",\"Syslog\",\"Hitachi\", \"Rest\") in DestinationType\n| transpose row _timeslice column DestinationType",
   "queryParameters": [],
-  "viewerType": "table",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Cloud SIEM - Signals by Product",
-      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
-      "panelTitle": "Sumo Logic Summary",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Management Overview",
+      "dashboardDescription": "Data Forwarding Management - Overview DashBoard provides an at-a-glance view of trends for destination types and the distribution of destination types, such as  Amazon S3, hitachi, Syslog, and Generic REST. Visual representations for the distribution of data forwarding destinations and data forwarding indexes are also shown.",
+      "panelTitle": "Trend - Destination Type",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel86D53817BF7C1940",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Sumo Logic CIP Search Alerts"
-      ],
+      "panelKey": "panel3ea119d58d326844",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"Amazon S3\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"Hitachi\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"Rest\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"Syslog\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}}]}",
+      "rowContext": [],
       "variables": []
     }
   ]

@@ -1,9 +1,9 @@
 {
   "id": "q0370",
-  "hash": "ac5fc14b5dc0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} service={{service}} metric=kube_pod_status_phase phase=Running | quantize 30s | sum by cluster,pod | sum | timeshift -2m",
+  "hash": "8ec900f451ec",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=_trace_spans  \"db.system\" {{keywords}}\nservice={{service}}\n| json field=tags \"$['deployment.environment']\" as environment nodrop | where environment matches \"{{environment}}\"\n| json field=tags \"$['db.system']\" as db_system | where db_system matches \"{{db_system}}\"\n| json field=tags \"$['db.name']\" as db_name nodrop | where db_name matches \"{{db_name}}\"\n| json field=tags \"$['db.sql.table']\" as db_sql_table nodrop\n//| json field=tags \"$['telemetry.sdk.version']\" as telemetry_sdk_version nodrop\n//| json field=tags \"$['telemetry.sdk.language']\" as telemetry_sdk_language nodrop\n//| json field=tags \"$['db.statement']\" as db_statement nodrop\n//| json field=tags \"$['db.connection_string']\" as db_connection_string nodrop\n| timeslice | count by _timeslice,db_name | transpose row _timeslice column db_name",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,20 +12,8 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
+      "name": "keywords",
+      "description": "any keyword string",
       "dataType": "ANY",
       "value": "*"
     },
@@ -39,43 +27,91 @@
       "name": "service",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "prod"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_system",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "db_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing - database operations.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Pods Running",
+      "folder": null,
+      "dashboardName": "Tracing - Database Operations",
+      "dashboardDescription": "",
+      "panelTitle": "Spans By Db_name",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0757976195c6fa44",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Pods\",\"rounding\":\"0\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}]},\"series\":{}}",
+      "panelKey": "panelA19503A8AC5B284E",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"}}",
       "rowContext": [
-        "Pods"
+        "Overall Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
+          "name": "environment",
+          "defaultValue": "prod",
           "values": null,
           "allowMultiSelect": false
         },
         {
           "name": "service",
-          "defaultValue": null,
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "db_system",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

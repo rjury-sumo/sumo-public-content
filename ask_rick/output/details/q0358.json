@@ -1,10 +1,22 @@
 {
   "id": "q0358",
-  "hash": "e83ece0ab480",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "*falco* cluster={{cluster}} output_fields rule priority output \n | json  \"log.priority\" as priority \n| json  \"log.rule\" as rule\n| where rule=\"Non sudo setuid\"\n| count",
+  "hash": "0e8ff14bbf13",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "namespace={{namespace}} cluster={{cluster}}\ndeployment =collection-sumologic-traces-gateway  metric=otelcol_exporter_queue_capacity \n| avg by cluster,pod,node",
   "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*sumo*"
+    },
     {
       "autoComplete": {
         "type": "SKIP_AUTOCOMPLETE",
@@ -15,31 +27,37 @@
       "name": "cluster",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/otelcol-k8s-containers.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Rules Triggered v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides detailed information of anomalous activity, in addition it also provides details of the OOB Falco rules triggered by the activity on your infrastructure.",
-      "panelTitle": "Non sudo setuid",
+      "folder": null,
+      "dashboardName": "Kubernetes Otelcol State",
+      "dashboardDescription": "",
+      "panelTitle": "exporter buffer used pct",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-9c3e54f1ba0c5942",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\" \",\"noDataString\":\"0\"}}",
+      "panelKey": "panelDDD15895906F884B",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"unit\":{\"value\":\"%100\",\"isCustom\":false},\"minimum\":0,\"maximum\":110,\"title\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"hiddenQueryKeys\":[\"B\",\"A\"],\"overrides\":[]}",
       "rowContext": [
-        "Untitled"
+        "traces-gateway - collector responsible for traces load balancing"
       ],
       "variables": [
         {
           "name": "cluster",
-          "defaultValue": null,
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*sumo*",
           "values": null,
           "allowMultiSelect": false
         }

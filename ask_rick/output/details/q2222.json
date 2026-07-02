@@ -1,0 +1,91 @@
+{
+  "id": "q2222",
+  "hash": "160ef75d2a25",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{INGEST_DIMENSION}}_and_tier_volume\n\n| parse regex \"\\{\\\"field\\\":\\\"(?<{{INGEST_DIMENSION}}>[^\\\"]*)\\\",\\\"dataTier\\\":\\\"(?<tier>[^\\\"]*)\\\",\\\"sizeInBytes\\\":(?<bytes>\\d*),\\\"count\\\":(?<events>\\d*)}\" multi nodrop\n| where tier = \"CSE\"\n\n| sum(bytes) as bytes by {{INGEST_DIMENSION}}\n| bytes/1Gi as GBytes\n\n| {{INGEST_CSE}} as credit_cost\n\n| round(GBytes*credit_cost) as credits\n| round(GBytes,1) as GBytes\n\n| fields -bytes, credit_cost\n\n| order by credits desc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "INGEST_DIMENSION",
+      "description": "collector,source,sourcecategory,sourcehost,sourcename",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "INGEST_CSE",
+      "description": "5.63",
+      "dataType": "ANY",
+      "value": "5.63"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Flex.Credits.v3.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Flex Credits (V3)",
+      "dashboardDescription": "",
+      "panelTitle": "By {{INGEST_DIMENSION}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel292896AE82E4F94C",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "CSE"
+      ],
+      "variables": [
+        {
+          "name": "INGEST_CSE",
+          "defaultValue": "5.63",
+          "values": "5.63",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_METRICS",
+          "defaultValue": "0.68",
+          "values": "0.68",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_TRACING",
+          "defaultValue": "3.85",
+          "values": "3.85",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_DIMENSION",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcecategory,sourcehost,sourcename",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN",
+          "defaultValue": "2.70",
+          "values": "2.70",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN_DIMENSION",
+          "defaultValue": "query_type",
+          "values": "content_name,query_type,query,scanned_partition_count,user_name",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

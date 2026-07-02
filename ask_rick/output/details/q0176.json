@@ -1,45 +1,93 @@
 {
   "id": "q0176",
-  "hash": "4c4348a46f0b",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "#G as Usage",
-  "queryParameters": [],
+  "hash": "28aa5491af68",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice,metadata_deviceeventid\n| transpose row _timeslice column metadata_deviceeventid",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "any source category",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{search_term",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
   "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "CPU Usage vs Requests vs Limits (Cores)",
+      "folder": "Records",
+      "dashboardName": "CSIEM Failed To Map",
+      "dashboardDescription": "",
+      "panelTitle": "Map Fail By metadata_deviceeventid",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-44a223c1916df94a",
+      "panelKey": "panel9729929189C28847",
       "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\" Cores\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme5\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\",\"G\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{deployment}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Limits - {{deployment}}\"}},{\"series\":[],\"queries\":[\"H\"],\"properties\":{\"name\":\"Usage - {{cluster}}\"}}]}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Resource Utilization"
+        "Help"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
+          "name": "search_term",
+          "defaultValue": "metadata_sourcecategory=*",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/deprecated/failed_to_map.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Failed To Map Review",
+      "dashboardDescription": "",
+      "panelTitle": "Map Fail By metadata_deviceeventid",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel9729929189C28847",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Help"
+      ],
+      "variables": [
+        {
+          "name": "sourcecategory",
           "defaultValue": "*",
-          "values": null,
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "search_term",
+          "defaultValue": "// no search term",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
           "allowMultiSelect": false
         }
       ]

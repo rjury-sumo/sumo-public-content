@@ -1,11 +1,24 @@
 {
   "id": "q0842",
-  "hash": "885745d0bf4d",
+  "hash": "7ad42414c30a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n| timeslice 1d\n| fillmissing timeslice(1h)\n| where !isBlank(name)\n| count by ruleName, _timeslice\n| transpose row _timeslice column ruleName",
-  "queryParameters": [],
-  "viewerType": "column",
+  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{user_username}}\n\n| count as Total by metadata_vendor, metadata_product, objectType\n| total(Total) by metadata_vendor, metadata_product\n| transpose row metadata_vendor, metadata_product, _total column objectType\n| order by _total\n| ToInt(_total) as Total\n| fields -_total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,15 +26,28 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "Trending Alerts Breakdown",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "Data Source Telemetry",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel45B4B9D9B4B0B942",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Dark\"},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelPANE-BB9B4FB0A51E7A40",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
       "rowContext": [],
-      "variables": []
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q0148",
-  "hash": "f9e8f956a4dc",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} daemonset={{daemonset}}  metric=kube_daemonset_status_desired_number_scheduled  | quantize to 5m | max by cluster| sum",
+  "hash": "99bb5d28709d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "// This query demonstrates how to work with closed insights to produce a useful table with status, times and operators.\n\n_index=sumologic_audit_events _sourcecategory=cseinsight closed insightupdated\n//OR\n//_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation) as timeToRemediation\n\n//| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| json field=signal \"tags\" as signal_tags\n//| parse regex field=signal_tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n////\n| json field=_raw \"insight.closed\" as time_closed nodrop\n|substring(time_closed,0,23) as time_closed\n\n| json field=_raw \"insight.created\" as time_created nodrop\n|substring(time_created,0,23) as time_created\n\n\n| json field=_raw \"operator.sourceIp\" as op_ip nodrop\n| json field=_raw \"operator.email\" as op_email nodrop\n| sort _messagetime\n//// ensure we only store the most recent result and remove duplicate exploded events\n| count as events, max(_messagetime) as _messagetime,first(status) as status, max(severity) as severity,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation, first(op_ip) as closed_ip,first(op_email) as closed_by,first(time_created) as time_created,first(time_closed) as time_closed by insightid,name,entitytype,entityvalue \n\n| where status = \"closed\"\n| parsedate(time_created,\"yyyy-MM-dd'T'HH:mm:ss.SSS\") as created_epoc\n\n// timeToResponse = seconds between created time and first status update\n// timeToRemediation = seconds between created and closed epoc times in the close event\n\n// this would give you the save number as timeToRemediation already has\n// | parsedate(time_closed,\"yyyy-MM-dd'T'HH:mm:ss.SSS\") as closed_epoc\n// | (closed_epoc - created_epoc) / 1000 as duration_s\n\n// set your time you want to measure start and end shift times here\n| \"Pacific/Auckland\" as shift_TZ\n| formatDate(toLong(created_epoc), \"yyyy-MM-dd'T'HH:mm:ss.SSS ZZZ\", shift_TZ) as created_local_time\n| formatDate(toLong(created_epoc ), \"E\", shift_TZ) as created_day\n| formatDate(toLong(created_epoc ), \"HH\", shift_TZ) as created_hour\n\n| formatDate(toLong(created_epoc + timeToRemediation), \"yyyy-MM-dd'T'HH:mm:ss.SSS ZZZ\", shift_TZ) as closed_local_time\n| formatDate(toLong(created_epoc + timeToRemediation), \"E\", shift_TZ) as closed_day\n| formatDate(toLong(created_epoc + timeToRemediation), \"HH\", shift_TZ) as closed_hour\n\n// enter shift rules here \n| if(created_day matches /{{{weekend_days}}}/,\"weekend\",\"weekday\") as weekday\n| if(weekday = \"weekday\" and (num(created_hour) >= {{workday_starts_hour}} and num(created_hour) < {{workday_ends_hour}}),\"inside\",\"outside\") as working_hours\n\n// from here you could report on them as bands for example:\n| timeToRemediation - timetoresponse as timeToRemediation\n\n// reporting in minutes is easier for humans\n| timeToDetection / 60 as timeToDetection\n| timeToResponse / 60 as timeToResponse\n| timeToRemediation / 60 as timeToRemediation\n\n| toLong(created_epoc) as _messagetime\n| timeslice 1d\n// avg(timeToResponse) as timeToResponse, avg(timeToRemediation) as timeToRemediation \n| where working_hours = \"outside\"\n| avg(timeToResponse) as timeToResponse by insightid,created_hour ,created_day,working_hours",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{weekend_days",
       "description": "",
       "dataType": "ANY",
       "value": ""
@@ -24,41 +24,65 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "daemonset",
-      "description": "",
+      "name": "workday_starts_hour",
+      "description": "7",
       "dataType": "ANY",
-      "value": "*"
+      "value": "7"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "workday_ends_hour",
+      "description": "19",
+      "dataType": "ANY",
+      "value": "19"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "scatter",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Daemonsets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Daemonsets Overview dashboard provides a high-level view of the health of the Daemonsets.",
-      "panelTitle": "Desired Daemonsets",
+      "folder": "Insights",
+      "dashboardName": "Insights - Working Hours Response KPI",
+      "dashboardDescription": "",
+      "panelTitle": "Response Distribution Outside Hours",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-cf553d4e914c0a4e",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"sparkline\":{\"show\":false,\"color\":\"\"},\"gauge\":{}},\"series\":{}}",
+      "panelKey": "panel78773D2FB5C4594D",
+      "visualization": "scatter",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Hour Local Time\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"timeToResponse\",\"minimum\":0}},\"series\":{},\"general\":{\"type\":\"scatter\",\"displayType\":\"default\",\"markerSize\":8,\"markerType\":\"circle\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"xy\":{\"xDimension\":[],\"yDimension\":[]},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Note: Selecting cluster name and daemonset  is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "shift_timezone",
+          "defaultValue": "Pacific/Auckland",
+          "values": "Pacific/Auckland",
           "allowMultiSelect": false
         },
         {
-          "name": "daemonset",
-          "defaultValue": "*",
-          "values": null,
+          "name": "workday_starts_hour",
+          "defaultValue": "7",
+          "values": "7",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "workday_ends_hour",
+          "defaultValue": "19",
+          "values": "19",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "weekend_days",
+          "defaultValue": "Sat|Sun",
+          "values": "Sat|Sun",
           "allowMultiSelect": false
         }
       ]

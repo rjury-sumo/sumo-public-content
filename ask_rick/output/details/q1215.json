@@ -1,175 +1,29 @@
 {
   "id": "q1215",
-  "hash": "7381c4eb29c2",
+  "hash": "a4ccd94b4f25",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_consumed}} as credits_consumed\n|where if (\"{{user_name}}\" = \"*\", true, user_name matches \"{{user_name}}\") AND if (\"{{session_id}}\" = \"*\", true, session_id matches \"{{session_id}}\") AND if (\"{{remote_ip}}\" = \"*\", true, remote_ip matches \"{{remote_ip}}\") AND if (\"{{is_aggregate}}\" = \"*\", true, toString(is_aggregate) matches \"{{is_aggregate}}\") AND if (\"{{status_message}}\" = \"*\", true, status_message matches \"{{status_message}}\") AND if (\"{{query}}\" = \"*\", true, query matches \"{{query}}\") AND if (\"{{query_type}}\" = \"*\", true, query_type matches \"{{query_type}}\")\n|sum (credits_consumed) as total_credits_consumed by query_type \n| sort by total_credits_consumed",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "credits_consumed",
-      "description": "0.016",
-      "dataType": "ANY",
-      "value": "0.016"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_name",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "session_id",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "remote_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "is_aggregate",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "status_message",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "query",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "query_type",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "pie",
+  "query": "(_view=sumologic_search_usage_per_query) not query_type=sumo*\n//user_name=* query=* query_type=* analytics_tier=*\n//| where query matches /^./\n| if( query matches \"*_source*\" OR query matches \"*_collector*\" OR \"*_sourceCategory*\" OR query matches \"*_sourceName*\"  OR query matches \"*_sourceHost*\" OR query matches \"*_view*|*\" OR query matches \"*_index*\", 1, 0 ) as metadata_usage\n| if( query matches \"*parse*\" OR query matches \"*json*\" OR query matches \"*keyvalue*\" OR query matches \"*kv*\" OR query matches \"*extract*\" OR query matches \"*csv*\", 1, 0 ) as parsing\n| if( query matches \"*_timeslice*\", 1, 0 ) as trending\n| if( query matches \"*summarize*\" OR query matches \"*logreduce*\" OR query matches \"*logcompare*\", 1, 0 ) as signature_recognition\n| if( query matches \"*backshift*\" OR query matches \"*| compare*\" OR query matches \"*|compare*\", 1, 0 ) as time_series_analyses\n| if( query matches \"*| transaction*\" OR query matches \"*|transaction*\" OR query matches \"*sessionize*\" OR query matches \"*merge*\"  OR query matches \"*| join*\" OR query matches \"*|join*\", 1, 0 ) as event_correlation\n| if( query matches \"*outlier*\" OR query matches \"*predict*\", 1, 0 ) as outlier_detection\n| if( query matches \"*sumo://threat/cs*\" or query matches \"*threatip*\", 1, 0 ) as threat_intel \n| count as searches, sum(metadata_usage) as metadata_usage, sum(parsing) as parsing,   sum(trending) as trending, sum(signature_recognition) as signature_recognition, sum(time_series_analyses) as time_series_analyses, sum(event_correlation) as event_correlation, sum(outlier_detection) as outlier_detection, sum(threat_intel) as threat_intel by user_name \n| sort searches",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/usage_key_stats.json",
       "objectType": "Dashboard",
-      "folder": "Infrequent Data Tier",
-      "dashboardName": "Infrequent Data Tier - Credits Consumed",
-      "dashboardDescription": "The Infrequent Data Tier - Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed with infrequent queries. This allows you to monitor and control on-demand search costs for the Infrequent Tier.",
-      "panelTitle": "Credits Consumed by Caller Module",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "Search Operator Usage",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela60608e398d15a47",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"SET3\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false},\"series\":{}}",
+      "panelKey": "panelFD5442DC81F3B847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
       "rowContext": [
-        "Credits Conversation"
+        "Log Search"
       ],
-      "variables": [
-        {
-          "name": "session_id",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "query",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "is_aggregate",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "status_message",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "query_type",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "credits_consumed",
-          "defaultValue": "0.016",
-          "values": "0.016",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "user_name",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "remote_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

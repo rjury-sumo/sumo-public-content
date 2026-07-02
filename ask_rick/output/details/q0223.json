@@ -1,9 +1,9 @@
 {
   "id": "q0223",
-  "hash": "8a8d9f39eaae",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} namespace={{namespace}} pod=* container=* | rate | avg by container, pod | sum by pod | sum",
+  "hash": "601ee50525ac",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=asoc/INSIGHT*   \"\\\"name\\\": \\\"closed\\\",\"  {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by _messagetime,time,name,readableid,description,source,status,severity,confidence,assignee,entityType,entityName,created,closed //, tags,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort _messagetime | fields -_messagetime | fields -_count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/insight-review.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "CPU Usage",
+      "folder": null,
+      "dashboardName": "CSE Insights Review",
+      "dashboardDescription": "",
+      "panelTitle": "Closed Insights",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-E0F64FF383D76948",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"label\":\" \",\"option\":\"Average\",\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":31,\"to\":70,\"color\":\"#DFBE2E\"},{\"from\":71,\"to\":100,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true},\"sparkline\":{\"show\":false}},\"series\":{}}",
+      "panelKey": "panel3396E12CA5CE7B4B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "// INSIGHT-123",
+          "values": "//none",
           "allowMultiSelect": false
         }
       ]

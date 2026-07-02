@@ -1,9 +1,9 @@
 {
   "id": "q0288",
-  "hash": "744a4f02d6e0",
+  "hash": "2d30274b3c0c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*events* cluster={{cluster}}\n| json  \"object.metadata.namespace\" as namespace\n| json  \"object.involvedObject.name\" as name\n| json  \"object.lastTimestamp\" as lastTimestamp\n| json  \"object.message\" as message\n| count by name, lastTimestamp, message, namespace\n| sort by lastTimestamp desc\n| fields - _count\n| limit 100",
+  "query": "_index=sumologic_rum_errors service={{service}} application={{application}} %\"deployment.environment\"={{environment}}\n//| json field=_raw \"$['error.stack']\" as error_stack nodrop\n//| json field=_raw \"$['error.message']\" as error_message nodrop\n//| json field=_raw \"$['error.name']\" as error_name nodrop\n//| json field=_raw \"type\" as type nodrop\n//| json field=_raw \"log\" nodrop\n//| json field=_raw \"$['http.url']\" as http_url nodrop\n//| json field=_raw \"$['element.xpath']\" as xpath nodrop\n//| json field=_raw \"type\" nodrop\n//\n| timeslice \n| count by  _timeslice | compare with timeshift 7d 2",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,73 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "service",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "application",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/RUM/Rum_browser_errors.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Pod Events (Latest 100)",
+      "folder": null,
+      "dashboardName": "RUM Browser Errors",
+      "dashboardDescription": "",
+      "panelTitle": "Errors Vs Last Weeks",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel58AD96139C8BD84A",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
-      "rowContext": [
-        "Logs/Events"
-      ],
+      "panelKey": "panel3CE726C793D9E94C",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"_count_07d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\",\"lineThickness\":2}},{\"series\":[\"_count_14d\"],\"queries\":[],\"properties\":{\"lineDashType\":\"dot\",\"lineThickness\":2}}]}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "node",
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword(s),error,error*,etc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

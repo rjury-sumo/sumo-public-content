@@ -1,0 +1,67 @@
+{
+  "id": "q2123",
+  "hash": "3e2afbc670ae",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) \n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| where metric matches /{{metric_matches}}/\n| sum(dp) as totalDp group by metric\n| order by totaldp desc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "metric_matches",
+      "description": "metrics matches regex,foo,bar.*,foo|bar",
+      "dataType": "ANY",
+      "value": ".*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/metrics/metric_dpm_dv_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metrics DPM Data Volume Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Total Data Points Overall By Metric Name",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-4812862E82189944",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":25,\"indexLabelFontSize\":10},\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"horizontalAlign\":\"right\",\"maxWidth\":400,\"maxHeight\":289,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Metric Spike Troubleshooting Guide"
+      ],
+      "variables": [
+        {
+          "name": "metric_matches",
+          "defaultValue": ".*",
+          "values": "metrics matches regex,foo,bar.*,foo|bar",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_dpm_other",
+          "defaultValue": "3000",
+          "values": "1000,3000,5000,10000,50000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1h",
+          "values": "1h,2h,6h,1d",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "compare_with",
+          "defaultValue": "14d",
+          "values": "7d,14d,21d,28d",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

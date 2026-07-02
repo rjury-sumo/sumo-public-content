@@ -1,11 +1,24 @@
 {
   "id": "q0839",
-  "hash": "c009c0a04aa3",
+  "hash": "dc4f6f5f5ff7",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal  2+*\n| count",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (action, description) as description\n| concat (device_hostname, device_ip) as device\n| concat (description,\" from user \",user_username,\" on \",device) as activity\n| where user_username matches \"{{user_username}}\"\n| count by activity,today\n| sort by today asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,17 +26,28 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "Impossible Travel - Authentication from Multiple Geolocations",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "User Activity Timeline Details",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel86EA3CF2A10ACB43",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false},\"sparkline\":{\"show\":false,\"color\":\"\"},\"thresholds\":[{\"from\":1,\"to\":4,\"color\":\"#16943E\"},{\"from\":5,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":200,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
-      "rowContext": [
-        "Daily Alert Breakdown Detailed"
-      ],
-      "variables": []
+      "panelKey": "panel1DC1A3C2ABE1BA45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

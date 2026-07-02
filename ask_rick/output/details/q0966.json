@@ -1,29 +1,83 @@
 {
   "id": "q0966",
-  "hash": "52667a05de18",
+  "hash": "90737fa53927",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingForIndexEnabled OR DataForwardingForIndexUpdated OR DataForwardingForIndexDisabled)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"DataForwardingForIndexEnabled\" ,\"DataForwardingForIndexUpdated\" ,\"DataForwardingForIndexDisabled\")\n| count as Count by EventName",
-  "queryParameters": [],
-  "viewerType": "pie",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentPublicVisibilityUpdated OR ContentPubliclyAccessed OR ApplicationInstalled)\n| json \"eventName\", \"operator.email\", \"contentIdentity.type\"  as EventName, UserEmail, ContentName  nodrop\n| where EventName in (\"ContentPublicVisibilityUpdated\",\"ContentPubliclyAccessed\",\"ApplicationInstalled\") \n| where EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\" and ContentName matches \"{{ContentName}}\"\n| count as Count by EventName\n| fillmissing values(\"ContentPublicVisibilityUpdated\",\"ContentPubliclyAccessed\",\"ApplicationInstalled\") in EventName\n| compare with timeshift 1d as Shift_1d",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Forwarding Management",
-      "dashboardName": "Enterprise Audit - Data Forwarding Management Overview",
-      "dashboardDescription": "Data Forwarding Management - Overview DashBoard provides an at-a-glance view of trends for destination types and the distribution of destination types, such as  Amazon S3, hitachi, Syslog, and Generic REST. Visual representations for the distribution of data forwarding destinations and data forwarding indexes are also shown.",
-      "panelTitle": "Distribution Of Data Forwarding Index",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Publicly Accessed, Application Installed",
+      "dashboardDescription": "Content - Publicly Accessed, Application DashBoard provides detailed information on installed applications, shared and publicly accessed content. The dashboard is organized according to installed applications and publicly accessed content. For a more granular view of the data, you can filter on Event Type, Content Type, Admin Mode, Visibility using the pre-populated filters.",
+      "panelTitle": "One Day Time Shift Comparison",
       "panelType": "SumoSearchPanel",
-      "panelKey": "paneleb2bc0f39073284f",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [
-        "Data Source Type / Format Type"
-      ],
-      "variables": []
+      "panelKey": "panel63901927b03dc94e",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

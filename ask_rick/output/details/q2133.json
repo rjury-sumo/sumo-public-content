@@ -1,0 +1,65 @@
+{
+  "id": "q2133",
+  "hash": "d7bb3ba5dade",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory=\"source_metrics_volume\" datapoints\n| parse regex \"\\\"(?<source>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice {{timeslice}}\n| sum(datapoints) as datapoints by source,_timeslice \n| if (datapoints<{{other_datapoints}},\"Others\",source) as source\n| sum(datapoints) as datapoints by source,_timeslice \n| transpose row _timeslice column source",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "15m,1h,1d",
+      "dataType": "ANY",
+      "value": "1h"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "other_datapoints",
+      "description": "50000,100000,200000",
+      "dataType": "ANY",
+      "value": "50000"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/metrics/metrics_dv_over_time.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metric Datapoints (Data Volume)",
+      "dashboardDescription": "",
+      "panelTitle": "Datapoints By Source",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5CAAC0939284B942",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\"},\"settings\":{\"line\":{\"chartType\":\"line\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"area\":{\"chartType\":\"area\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"bar\":{\"chartType\":\"bar\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"column\":{\"chartType\":\"column\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"pie\":{\"chartType\":\"pie\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"table\":{\"chartType\":\"table\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"map\":{\"chartType\":\"map\",\"version\":2,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}},\"sankey\":{\"chartType\":\"sankey\",\"version\":1,\"configuration\":{\"legend\":{\"position\":\"bottom\",\"enabled\":true},\"xAxis\":{\"title\":\"source\",\"label\":{\"truncationMode\":\"middle\"},\"minorTickInterval\":null},\"yAxis\":[{\"title\":\"DPM\",\"logScale\":false,\"bands\":null,\"minorTickInterval\":null}],\"plotOptions\":{\"stacking\":null,\"lineToArea\":false},\"seriesInfo\":{\"DPM\":{\"yAxis\":0,\"color\":\"#1677B6\"}}}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "other_datapoints",
+          "defaultValue": "50000",
+          "values": "50000,100000,200000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1h",
+          "values": "15m,1h,1d",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

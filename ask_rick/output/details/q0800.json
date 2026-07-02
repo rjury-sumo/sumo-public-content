@@ -1,23 +1,10 @@
 {
   "id": "q0800",
-  "hash": "9506e0affd1f",
+  "hash": "dc8869f2b481",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"to.closed\" as ClosedDate\n| json field=_raw \"to.timeToRemediation\" as TimeToRemediate\n| json field=_raw \"to.resolution\" as Resolution\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| (TimeToRemediate/3600) as TimeToRemediateHours\n| round(TimeToRemediateHours,0) as TimeToRemediateHours\n| count_distinct(insight_id) by TimeToRemediateHours\n|fields TimeToRemediateHours",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "insightid",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight) or (_index=sumologic_system_events _sourcecategory=cseinsight)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where entity_type = \"_username\"\n| tostring(insight_severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = \"1\",\"HIGH\",\"OTHER\") as severity\n| if(s = \"2\",\"MEDIUM\",severity) as severity\n| if(s =\"3\",\"LOW\",severity) as severity\n| if(s = \"0\",\"OTHER\",severity) as severity\n\n| toLowerCase(severity) as severity\n| if(severity=\"low\",13,if(severity=\"medium\",15,if(severity=\"high\", 16,1))) as risk_score\n| avg(risk_score) by entity_value\n| sort -_avg\n| limit 10",
+  "queryParameters": [],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Insight Explorer",
-      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
-      "panelTitle": "Remediation Time (Hours)",
+      "dashboardName": "Cloud SIEM - SOC KRIs",
+      "dashboardDescription": "This dashboard provides SOC KRIs related metrics.",
+      "panelTitle": "Top 10 Risk by Username",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B03C3C9B9F551B4F",
+      "panelKey": "panelPANE-BD7FD5219FFF7B4B",
       "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{}}",
-      "rowContext": [
-        "Insight Details"
-      ],
-      "variables": [
-        {
-          "name": "insightid",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

@@ -1,0 +1,139 @@
+{
+  "id": "q2093",
+  "hash": "ba148bb49831",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(bytes) as bytes, sum(events) as events, first(collector) as collector, first(source) as source, first(sourcehost) as sourcehost,count_distinct(collector) as collectors, count_distinct(source) as sources, count_distinct(sourcehost) as hosts by index,sourcecategory,%\"Search Scope\", tier  | round(bytes / 1G,3) as gb\n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",replace(sourcecategory,\" \",\"?\")) as sc\n| concat(\"\\n _index=\",replace(index,\" \",\"?\")) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcehost=\",replace(sourcehost,\" \",\"?\")) as sh\n| urlencode(concat(i,sc,c,s,sh)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search,\"&startTime=-1h\"),\"Search\") as  %\"Search\"\n\n| fields -dp,sc,i,c,sh,s,the_search, collector,source,bytes,sourcehost\n| sort index asc,sourcecategory asc | fields -percent",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "index",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcehost",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "global_regex_search",
+      "description": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_instance_name",
+      "description": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+      "dataType": "ANY",
+      "value": "rick.au"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_portal/demo.portal.dash.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Log Portal Demo",
+      "dashboardDescription": "A demo of a log discovery portal using a scheduled view to summarize ingested logs.",
+      "panelTitle": "Search by index and sourcecategory",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7FEEC01C8044F942",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+      "rowContext": [
+        "Open a New Search Window - Use Clickable Links To Start a Log Search"
+      ],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "index",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcehost",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "global_regex_search",
+          "defaultValue": ".*",
+          "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "rick.au",
+          "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

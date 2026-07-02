@@ -1,9 +1,9 @@
 {
   "id": "q0212",
-  "hash": "9fa1c6f2c416",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}}  metric=kube_pod_status_phase phase=Running | quantize 30s | sum by cluster,pod | sum | timeshift -2m",
+  "hash": "9d774c906863",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n| json field=_raw \"severity\"\n| json field=_raw \"description\"\n| json field=_raw \"id\"\n//| json field=_raw \"objectClassification\"\n| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n| json field=_raw \"full_records[0].fields\" as fields \n| max(_messagetime) as latest,count by rule_id,rule_name,severity,entity_id,attack_stage,metadata_parser,product,vendor, user_username,deviceEventId,mapperName ,suppressed\n| sort latest | formatdate(tolong(latest),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as latest",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
@@ -24,41 +24,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
-      "description": "",
+      "name": "suppressed",
+      "description": "YES,NO,*",
       "dataType": "ANY",
-      "value": "*"
+      "value": "NO"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/CSE_Signals.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Pods Running",
+      "folder": null,
+      "dashboardName": "CSE Signals",
+      "dashboardDescription": "",
+      "panelTitle": "Signals - Detailed View",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-0757976195c6fa44",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Pods\",\"rounding\":\"0\",\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}]},\"hiddenQueryKeys\":[],\"series\":{}}",
+      "panelKey": "panelPANE-4B8B50EE83C95B42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Pods"
+        "B - Signals - Review Tabular Views"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_by",
+          "defaultValue": "rule_name",
+          "values": "rule_name,severity,user_username,entity_id,metadta_parser,product,vendor,mappername,attack_stage",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "suppressed",
+          "defaultValue": "NO",
+          "values": "YES,NO,*",
           "allowMultiSelect": false
         }
       ]

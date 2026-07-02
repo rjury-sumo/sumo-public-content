@@ -1,47 +1,10 @@
 {
   "id": "q1014",
-  "hash": "fa7489ddf70a",
+  "hash": "5fa7aaa1abc2",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPublicVisibilityUpdated\n| json \"eventName\", \"adminMode\", \"operator.email\", \"contentIdentity.type\", \"to\",  \"contentIdentity.name\" as EventName, AdminMode, UserEmail, ContentType, VisibleTo, ContentName nodrop\n| where EventName=\"ContentPublicVisibilityUpdated\" \n| where EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\" and ContentName matches \"{{ContentName}}\"|count as Count by UserEmail\n| sort by Count\n| limit 10",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "ContentName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "query": "_index=sumologic_audit_events _sourceCategory=accessKeys\n| json \"eventName\" as EventName nodrop\n| count as Count by EventName",
+  "queryParameters": [],
   "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -49,37 +12,16 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Publicly Accessed, Application Installed",
-      "dashboardDescription": "Content - Publicly Accessed, Application DashBoard provides detailed information on installed applications, shared and publicly accessed content. The dashboard is organized according to installed applications and publicly accessed content. For a more granular view of the data, you can filter on Event Type, Content Type, Admin Mode, Visibility using the pre-populated filters.",
-      "panelTitle": "Top Users Updating Content Visibility",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Security Management Overview",
+      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
+      "panelTitle": "Distribution - Access Keys",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel61f9956393444842",
+      "panelKey": "paneld2cb4a8fa6d37941",
       "visualization": "pie",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [
-        "Application Installed"
-      ],
-      "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "ContentName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

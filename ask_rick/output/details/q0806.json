@@ -1,59 +1,10 @@
 {
   "id": "q0806",
-  "hash": "bce8efc71ec7",
+  "hash": "c009c0a04aa3",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) {{Filter}}\n (_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) {{Filter}}\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n\n| insight_severity as s\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n\n| where (severity matches \"{{Severity}}\")\n| where (insight_resolution matches \"{{Resolution}}\")\n| where (insight_assignee matches \"{{Assignee}}\")\n| avg(insight_time_to_remediation)\n| round(_avg / 3600) as _avg",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Filter",
-      "description": "*",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Severity",
-      "description": "3. LOW,2. MEDIUM,1. HIGH",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Resolution",
-      "description": "Resolved, False Positive, No Action",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Assignee",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
+  "query": "_index=sec_signal  2+*\n| count",
+  "queryParameters": [],
   "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
@@ -62,40 +13,17 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Insights",
-      "dashboardDescription": "This dashboard provides SOC Insights related metrics.",
-      "panelTitle": "Average Time to Remediate (Hours)",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "Impossible Travel - Authentication from Multiple Geolocations",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-10B6750E9C4D9A4A",
+      "panelKey": "panel86EA3CF2A10ACB43",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":3,\"color\":\"#16943E\"},{\"from\":3,\"to\":12,\"color\":\"#DFBE2E\"},{\"from\":12,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"max\":24}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "Filter",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Severity",
-          "defaultValue": "*",
-          "values": "3. LOW,2. MEDIUM,1. HIGH",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Resolution",
-          "defaultValue": "*",
-          "values": "Resolved, False Positive, No Action",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Assignee",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false},\"sparkline\":{\"show\":false,\"color\":\"\"},\"thresholds\":[{\"from\":1,\"to\":4,\"color\":\"#16943E\"},{\"from\":5,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":200,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
+      "rowContext": [
+        "Daily Alert Breakdown Detailed"
+      ],
+      "variables": []
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q0096",
-  "hash": "6f57056ded1b",
+  "hash": "c349b6d895bf",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(cluster={{cluster}} _source=events )\n| where %\"object.message\" matches /.*Liveness probe failed.*/\n| where %\"object.involvedobject.name\" matches /.*{{sumologic_override}}-otelcol-logs.*/\n| where !(%\"object.involvedobject.name\" matches /.*{{sumologic_override}}-otelcol-logs-collector.*/)\n| timeslice 1m | count by _timeslice | fillmissing timeslice",
+  "query": "(_index=sumologic_volume) _sourcecategory={{data_volume_view}}_and_tier_volume\n| parse regex \"\\{\\\"field\\\":\\\"(?<value>[^\\\"]+)\\\",\\\"dataTier\\\":\\\"(?<dataTier>[^\\\"]+)\\\",\\\"sizeInBytes\\\":(?<sizeInBytes>[^\\\"]+),\\\"count\\\":(?<count>[^\\\"]+)\\}\" multi\n\n| sum(count) as events,sum(sizeinbytes) as bytes by  value,_sourcecategory // datatier\n//| sum(sizeinbytes) as bytes by datatier, value,_timeslice\n| bytes /1024/1024/1024 as gb | sort gb\n//| parse field=_sourcecategory \"*_and_tier_volume\" as dimension \n\n\n// remove long categories\n| if (length(value) > {{value_max_chr}},concat(substring(value,0,{{value_max_chr}}),\"...\"),value) as value \n| count as categories,sum(events) as events,sum(gb) as gbytes by value //,dataTier\n\n|  sum(gbytes) as gbytes by value //datatier\n// compare with previous 3 time periods at same time\n| compare timeshift 7d 3 avg\n\n// this handles nulls for new or removed categories\n| if(isNull(gbytes), \"GONE\", \"\") as state \n| if(isNull(gbytes), 0, gbytes) as gbytes \n\n| if(isNull(gbytes_21d_avg), 0, gbytes_21d_avg) as gbytes_21d_avg \n\n// what is the change delta as a percentage vs baseline\n| if(gbytes = 0,0,100 * (gbytes/gbytes_21d_avg)) as pct_change\n\n// this line is for your thresholds to get notified\n// consider tuning the  min size clause for your environment.\n| if (pct_change < 50,\"Ingest Drop\",state) as state\n| if(gbytes = 0, \"NO DATA\", state) as state \n| where ( state = \"NO DATA\" or state = \"Ingest Drop\") and ( gbytes > 1)\n\n| sort pct_change asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
+      "name": "data_volume_view",
+      "description": "sourcecategory,collector,view",
       "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory"
     },
     {
       "autoComplete": {
@@ -24,47 +24,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "sumologic_override",
-      "description": "sumo,sumologic",
+      "name": "value_max_chr",
+      "description": "35,50,70,250",
       "dataType": "ANY",
-      "value": "sumologic"
+      "value": "50"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Liveliness Probe Violations",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Ingest drop or gone vs 3 week avg by {{data_volume_view}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel47D9D686B3B05B4D",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"Liveliness Probe Violations for otel logs\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelEDCA9070BCD3F943",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
       "rowContext": [
-        "Opentelemetry Logs Collection Monitoring"
+        "Data Volume Log Ingestion - Sourcecategory"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

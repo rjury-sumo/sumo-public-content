@@ -1,9 +1,9 @@
 {
   "id": "q1134",
-  "hash": "cb4345bd6d93",
+  "hash": "ff36787824b4",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query analytics_tier=Continuous \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| toLowerCase(query) as queryLower\n| parse regex field=queryLower \"(?<aggregation>sum|avg|count|count_distinct|count_frequent|max|min|avg|first|last|most_recent|least_recent|pct|stddev|fillmissing|compose)\" nodrop\n| if (isempty(aggregation),\"non-aggregate\",\"aggregate\") as query_type\n| count by query_type",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 6h\n| sum(datapoints) as datapoints by _timeslice\n| predict datapoints by 6h model=ar, forecast=20",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,39 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "query_type",
+      "name": "MetricsSources",
       "description": "",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_name",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory_metrics_volume"
     }
   ],
-  "viewerType": "pie",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Search Overview",
-      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
-      "panelTitle": "Aggregate vs Non-Aggregate Searches",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Prediction of {{MetricsSources}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelfae0fb4ca0f49946",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"},\"series\":{}}",
-      "rowContext": [
-        "Search Concepts"
-      ],
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "query_type",
-          "defaultValue": null,
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
-          "values": null,
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
           "allowMultiSelect": false
         }
       ]

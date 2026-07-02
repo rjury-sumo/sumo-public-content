@@ -1,0 +1,79 @@
+{
+  "id": "q2223",
+  "hash": "909b80c473d0",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory=sourcecategory_metrics_volume\n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// Parsing events \n| parse regex \"\\\"(?<sourcecategory>[^\\\"]*)\\\":\\{\\\"dataPoints\\\":(?<datapoints>\\d+)\\}\" multi nodrop\n\n// Aggregating per day - sum of DPM\n| timeslice 1d\n| sum(datapoints) as datapoints by _timeslice\n| datapoints / 24 / 60 / 1000 as DPM\n\n// Calculating credit cost per DPM\n| {{INGEST_METRICS}} as credit_cost\n\n// Calculating the sum of credits used per day\n| (DPM*credit_cost) as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "INGEST_METRICS",
+      "description": "0.68",
+      "dataType": "ANY",
+      "value": "0.68"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Flex.Credits.v3.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Flex Credits (V3)",
+      "dashboardDescription": "",
+      "panelTitle": "",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD59B9EEFA9A9CA45",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "METRICS"
+      ],
+      "variables": [
+        {
+          "name": "INGEST_CSE",
+          "defaultValue": "5.63",
+          "values": "5.63",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_METRICS",
+          "defaultValue": "0.68",
+          "values": "0.68",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_TRACING",
+          "defaultValue": "3.85",
+          "values": "3.85",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_DIMENSION",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcecategory,sourcehost,sourcename",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN",
+          "defaultValue": "2.70",
+          "values": "2.70",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN_DIMENSION",
+          "defaultValue": "query_type",
+          "values": "content_name,query_type,query,scanned_partition_count,user_name",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

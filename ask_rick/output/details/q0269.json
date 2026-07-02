@@ -1,9 +1,9 @@
 {
   "id": "q0269",
-  "hash": "5b509b470fc0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} node={{node}} metric=kube_pod_info | sum by node | sum",
+  "hash": "e59cedcce7b8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\" or eventname matches \"*Mapping*\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n\n| timeslice | count by _timeslice, operator | transpose row _timeslice column operator",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Pods",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Rules and Mapping Changes (Tuning Pack)",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Rule Changes By Operator Over Time",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7484CE0785E94B4B",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"svp\":{\"option\":\"Latest\",\"label\":\" \",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"title\":{\"fontSize\":16}}",
+      "panelKey": "panelB385C1DA9D89AA4C",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
       "rowContext": [
-        "Pods"
+        "Rules Changes"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

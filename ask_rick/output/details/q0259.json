@@ -1,9 +1,9 @@
 {
   "id": "q0259",
-  "hash": "c81d7d63ec12",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} node={{node}} (metric=node_network_receive_drop_total OR metric=node_network_transmit_drop_total) !device=veth* | quantize using sum | rate",
+  "hash": "9ef11e7dc000",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * {{days}}))\n//| formatdate(tolong(createdtime),\"yyyy-MM\") as month\n| concat(severity,\":\",severityname,\" - \",resolution) as state \n| if(isnull(confidence),0,confidence) as confidence\n| count as insights,count_distinct(entityvalue) as entities,pct(timetoresponse,50) as MTTResponse,pct(timetoremediation,50) as MTTResolution,pct(timetodetection,50) as MTTDetection by state | sort state asc\n//| round(avg_riskscore,1) as avg_riskscore | round(avg_confidence,2) as avg_confidence\n|round(MTTResponse/60) as MTTResponse | round(MTTResolution/60) as  MTTResolution | round(MTTDetection/60) as MTTDetection",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,41 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
-      "description": "",
+      "name": "days",
+      "description": "30,60,90,180,365,1000",
       "dataType": "ANY",
-      "value": "*"
+      "value": "365"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Dropped Network Traffic",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "Insight Stats : Last {{days}} days (MTTX in Minutes)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-92429cc7a874fb48",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"%\",\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"yellow\"},{\"from\":85,\"to\":101,\"color\":\"red\"}],\"gauge\":{\"show\":true}},\"series\":{},\"hiddenQueryKeys\":[\"D\", \"E\"]}",
+      "panelKey": "panel626F7A2C912F5A45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Overview"
+        "Detection, Response and Resolution Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

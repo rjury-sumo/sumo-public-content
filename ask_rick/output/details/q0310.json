@@ -1,9 +1,9 @@
 {
   "id": "q0310",
-  "hash": "f0fd54b0da3b",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "namespace={{namespace}} cluster={{cluster}} pod={{pod}}  metric=kube_pod_container_status_waiting_reason reason=crashloopbackoff | quantize 5m using max | sum",
+  "hash": "399fc669f79e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n// \n| count as events by _messagetime,eventname,subsystem,item_name,type,identity_json,details\n| sort _messagetime | fields -events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_event_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Crashloopbackoff?",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Events Overview",
+      "dashboardDescription": "sumologic_system_events from automation service or SOAR",
+      "panelTitle": "Event Log All Types With JSON Payloads",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-131d6ed0bbd21b46",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"#f2da73\"},{\"from\":1,\"to\":null,\"color\":\"#ffb5b5\"}],\"sparkline\":{\"show\":false,\"color\":\"\"},\"noDataString\":\"\",\"label\":\"\",\"useBackgroundColor\":true,\"option\":\"Maximum\",\"rounding\":\"0\"},\"series\":{}}",
+      "panelKey": "panelPANE-B54E3F6DBE164A4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Overview"
+        "Event Breakdown"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_timeslice",
+          "defaultValue": "1h",
+          "values": "5m,15m,1h,3h,1d",
           "allowMultiSelect": false
         }
       ]

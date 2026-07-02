@@ -1,35 +1,42 @@
 {
   "id": "q0349",
-  "hash": "2d073fb703c6",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| count as rules_triggered by Pod\n| sort rules_triggered, pod",
+  "hash": "308f25909804",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "statefulset=collection-sumologic-otelcol-instrumentation   metric=kube_pod_status_phase not phase=running | where _value > 0\n| max by cluster,service,statefulset,pod,node",
   "queryParameters": [],
-  "viewerType": "table",
-  "metricsQueryData": {
-    "metric": "",
-    "aggregationType": "None",
-    "groupBy": "",
-    "filters": [],
-    "operators": null
-  },
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/otelcol-k8s-containers.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
-      "panelTitle": "Rules Triggered by Pod",
+      "folder": null,
+      "dashboardName": "Kubernetes Otelcol State",
+      "dashboardDescription": "",
+      "panelTitle": "otelcol-instrumentation NOT Running",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-eace60679dee4b42",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+      "panelKey": "panel6C201CE186FEA84F",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"latest\",\"noDataMessage\":\"\"},\"series\":{}}",
       "rowContext": [
-        "Rule Priorities"
+        "otelcol-instrumentation - collector responsible for data collection and tagging"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*sumo*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

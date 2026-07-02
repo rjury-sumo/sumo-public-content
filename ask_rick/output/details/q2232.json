@@ -1,0 +1,91 @@
+{
+  "id": "q2232",
+  "hash": "ae8ec20aae9c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{INGEST_DIMENSION}}_tracing_volume\n\n// Parsing events \n| parse regex \"\\\"(?<{{INGEST_DIMENSION}}>[^\\\"]*)\\\":\\{\\\"billedBytes\\\":(?<bytes>\\d+)\" multi nodrop\n\n| sum(bytes) as bytes by {{INGEST_DIMENSION}}\n| bytes/1Gi as GBytes\n\n| {{INGEST_TRACING}} as credit_cost\n\n| round(GBytes*credit_cost) as credits\n| round(GBytes,1) as GBytes\n\n| fields -credit_cost, bytes\n\n| order by credits desc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "INGEST_DIMENSION",
+      "description": "collector,source,sourcecategory,sourcehost,sourcename",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "INGEST_TRACING",
+      "description": "3.85",
+      "dataType": "ANY",
+      "value": "3.85"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Flex.Credits.v3.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Flex Credits (V3)",
+      "dashboardDescription": "",
+      "panelTitle": "By {{INGEST_DIMENSION}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5EF8D4BD928F2A47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "TRACING"
+      ],
+      "variables": [
+        {
+          "name": "INGEST_CSE",
+          "defaultValue": "5.63",
+          "values": "5.63",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_METRICS",
+          "defaultValue": "0.68",
+          "values": "0.68",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_TRACING",
+          "defaultValue": "3.85",
+          "values": "3.85",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_DIMENSION",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcecategory,sourcehost,sourcename",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN",
+          "defaultValue": "2.70",
+          "values": "2.70",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN_DIMENSION",
+          "defaultValue": "query_type",
+          "values": "content_name,query_type,query,scanned_partition_count,user_name",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

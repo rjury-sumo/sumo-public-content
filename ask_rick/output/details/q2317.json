@@ -1,0 +1,27 @@
+{
+  "id": "q2317",
+  "hash": "4b7a5591084b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \nquery_type=copilot\n// flex billable\n| max(scanned_partition_count) as p,count as searches, sum(data_scanned_bytes) as scan_bytes by query,user_name\n\n| parse regex field=query \"(?i)\\b(?<op>avg|count|count_distinct|count_frequent|fillmissing|first|last|min|max|most_recent|least_recent|pct|stddev|sum|abs|acos|asin|atan|atan2|cbrt|ceil|cos|cosh|exp|expm1|floor|hypot|log|log10|log1p|max|min|round|sin|sinh|sqrt|tan|tanh|toDegrees|toRadians|csv|JSON|keyvalue|parse|parse regex|split|xml|accum|backshift|base64Decode|base64Encode|bin|CIDR|concat|contains|decToHex|diff|fields|filter|format|formatDate|geo lookup|haversine|hexToDec|if|in|ipv4ToNumber|isBlank|isEmpty|isNull|isNumeric|isPrivateIP|isPublicIP|isValidIP|join|length|limit|logcompare|logreduce|lookup|luhn|matches|median|merge|now|num|outlier|parseHex|predict|replace|rollingstd|save|sessionize|smooth|sort|substring|timeslice|toLowerCase|toUpperCase|top|total|trace|transaction|transactionize|transpose|urldecode|urlencode|where|nodrop|regex|matches|row|column|values|threatip|geoip|threatlookup|queryendtime|querystarttime)\" multi\n| count_distinct(user_name) as users, count as instances by op | sort op asc",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/copilot_use.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Copilot Use",
+      "dashboardDescription": "",
+      "panelTitle": "Operators Used",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD9B6D33C8EFB4A44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

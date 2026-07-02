@@ -1,9 +1,9 @@
 {
   "id": "q1047",
-  "hash": "3bdccfd2653f",
+  "hash": "49577fba0df0",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events  _sourceCategory=saml (SamlConfigurationCreated OR SamlConfigurationUpdated OR SamlConfigurationDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\") \n| where  EventName matches \"{{EventName}}\"  \n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\") in EventName\n| transpose row _timeslice column EventName",
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserUnlocked\n| json \"eventName\", \"eventTime\", \"accountId\", \"userIdentity\", \"operator\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, userIdentity, operator, UserIp nodrop\n| where EventName=\"UserUnlocked\"\n| json field=userIdentity \"userEmail\", \"userId\" as User, UserId nodrop\n| json field=operator \"email\", \"sourceIp\", \"interface\" as UnlockedBy, UnlockedByIp , Interface nodrop\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by EventName, EventTime, AccountId, User, UserId, UnlockedBy, UnlockedByIp, Interface\n| sort by EventTime\n| fields - _count, EventName, AccountId, UserId",
   "queryParameters": [
     {
       "autoComplete": {
@@ -16,27 +16,45 @@
       "description": "",
       "dataType": "ANY",
       "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - SAML Activities",
-      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
-      "panelTitle": "Trend - SAML Configuration",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Users Unlocked Activity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel413cde7fbb3cd946",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "panelKey": "panel43eec43bbee3e948",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
         {
           "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

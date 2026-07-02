@@ -1,11 +1,24 @@
 {
   "id": "q1165",
-  "hash": "6f5d7272bb7e",
+  "hash": "abefa6baa9bf",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as index, dataTier, bytes, count\n| where _sourceCategory=\"view_and_tier_volume\" and dataTier=\"Flex\"\n| where index not in (\"sumologic_volume\", \"sumologic_audit\")\n| bytes/1024/1024/1024 as gbytes\n| sum(gbytes) as gbytes by index\n| top 5 index by gbytes",
-  "queryParameters": [],
-  "viewerType": "table",
+  "query": "_index=sumologic_volume \n| where _sourceCategory=\"service_tracing_volume\"\n| parse regex \"\\\"(?<source>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as %\"{{Unit}}\" by source\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| %\"{{Unit}}\" / duration_in_min as % \"{{Unit}} per minute\"\n| top 5 source by % \"{{Unit}} per minute\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,21 +26,25 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Logs",
-      "dashboardDescription": "The Logs dashboard helps you see your log ingest volume between default and non-default indexes along with the predicted growth. This dashboard also provides predicted growth for scan volume.",
-      "panelTitle": "Top 5 Indexes (Non-Default)",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Top 5 Service by {{Unit}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-13",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[],\"decimals\":2},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [
-        "Log Ingest"
-      ],
+      "panelKey": "panel03735D44B13D784D",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"source\",\"hideLabels\":true},\"axisY\":{\"title\":\"billedBytes per minute\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "Subscribed_Average_Daily_Log_Ingest_Capacity",
-          "defaultValue": "100",
-          "values": "100",
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

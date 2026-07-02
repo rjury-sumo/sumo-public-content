@@ -1,0 +1,49 @@
+{
+  "id": "q1277",
+  "hash": "4ddfe78d41ee",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events \"Health-Change\"  {{{keywords}}}\n| json field=_raw \"status\" \n//| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"severityLevel\" as severity\n| sort _messagetime | count as events, first(_messagetime) as latest, first(status) as status by trackerid,name,error,severity\n| sort latest | formatdate(latest,\"yyyy/MM/dd HH:mm:ss ZZZ\") as latest",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collectionIssues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Issues",
+      "dashboardDescription": "",
+      "panelTitle": "Latest Health Failure Summary",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelCC5582D0A3CB8842",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "*,// any search keywords,not installed* not filecollection*,budget",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

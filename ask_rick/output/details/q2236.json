@@ -1,0 +1,79 @@
+{
+  "id": "q2236",
+  "hash": "e9badb1fec25",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| order by _timeslice\n\n// Prediction\n| predict credits by 1d forecast=30\n| credits_predicted as predicted\n\n\n| fields _timeslice, predicted",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "SCAN",
+      "description": "2.70",
+      "dataType": "ANY",
+      "value": "2.70"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Flex.Credits.v3.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Flex Credits (V3)",
+      "dashboardDescription": "",
+      "panelTitle": "",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1937A3EA8A664A4C",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"smooth\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"TIMELINE\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"CREDITS\",\"minimum\":0,\"maximum\":150}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":14,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":false,\"maxWidth\":500},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[\"credits\"],\"queries\":[],\"properties\":{\"color\":\"#00a0d6\",\"markerType\":\"square\",\"markerSize\":3,\"name\":\"Credits Consumed\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"color\":\"#8ecc1b\",\"name\":\"Trending\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#8d79e8\",\"name\":\"Predicted\"}}],\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":true,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":120},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":130}},\"highlightViolations\":false}}",
+      "rowContext": [
+        "SEARCH/SCAN CREDITS"
+      ],
+      "variables": [
+        {
+          "name": "INGEST_CSE",
+          "defaultValue": "5.63",
+          "values": "5.63",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_METRICS",
+          "defaultValue": "0.68",
+          "values": "0.68",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_TRACING",
+          "defaultValue": "3.85",
+          "values": "3.85",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_DIMENSION",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcecategory,sourcehost,sourcename",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN",
+          "defaultValue": "2.70",
+          "values": "2.70",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN_DIMENSION",
+          "defaultValue": "query_type",
+          "values": "content_name,query_type,query,scanned_partition_count,user_name",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

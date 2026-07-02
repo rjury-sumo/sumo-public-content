@@ -1,0 +1,65 @@
+{
+  "id": "q2204",
+  "hash": "1379dc105149",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}   (google OR bing OR aol OR ask OR yahoo) (\"p=\" OR \"q=\" OR \"wd=\" OR \"searchfor=\")\n \n| parse regex field=referrer \"(?:\\?|&)(?:p|q|wd|searchfor)=(?<search_term>[^=]+?)(?:&|$)\" nodrop \n| where search_term != \"\"\n| urldecode(search_term)\n| if(referrer matches \"*google.*\", \"Google\", \"\") as engine\n| if(referrer matches \"*bing.*\", \"Bing\", engine) as engine\n| if(referrer matches \"*ask.com*\", \"Ask.com\", engine) as engine\n| if(referrer matches \"*aol.*\", \"AOL\", engine) as engine\n| if(referrer matches \"*yahoo.*\", \"Yahoo\", engine) as engine\n| where engine !=\"\" \n| count as count by search_term\n| sort count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx - Visitor Traffic Insight",
+      "dashboardDescription": "The Nginx - Visitor Traffic Insight Dashboard provides detailed information on the top documents accessed, top referrers, top search terms from popular search engines, and the media types served.",
+      "panelTitle": "Top 10 Search Terms from Popular Search Engines",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-5FC578689E6C594E",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"50%\",\"maxNumOfSlices\":10},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme2\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

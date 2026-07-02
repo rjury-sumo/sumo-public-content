@@ -1,10 +1,34 @@
 {
   "id": "q1033",
-  "hash": "2c11cdcefb7c",
+  "hash": "cba3fdf0dd2c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=serviceAllowlist ServiceAllowlistUpdated\n| json \"eventName\", \"addedCIDRs[*].cidr\",\"operator.sourceIp\" as EventName, AllowListUsers,AdminIp nodrop\n| where EventName=\"ServiceAllowlistUpdated\"\n| where AdminIp matches \"{{AdminIp}}\"\n| extract field=AllowListUsers \"\\\"(?<IP>.*?)\\\"\" multi\n| count_distinct(IP) as Count by IP\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = IP\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"userIdentity.userId\", \"userIdentity.userEmail\", \"user.firstName\", \"user.lastName\", \"user.active\", \"to\", \"from\" as EventName, EventTime, Admin, AdminId, AdminIp, UserId, TargetUserEmail, TargetUserFirstName, TargetUserLastName, IsTargetUserActive, CurrentValue, PreviousValue nodrop\n| json field=CurrentValue \"firstName\", \"lastName\", \"active\" as UpdatedFirstName, UpdatedLastName, UpdatedIsActive nodrop\n| if(isNull(TargetUserFirstName), if(isNull(UpdatedFirstName),\"-\",UpdatedFirstName) ,TargetUserFirstName) as TargetUserFirstName\n| if(isNull(TargetUserLastName), if(isNull(UpdatedLastName),\"-\",UpdatedLastName) ,TargetUserLastName) as TargetUserLastName\n| if(isNull(IsTargetUserActive), if(isNull(UpdatedIsActive),\"-\",UpdatedIsActive) ,IsTargetUserActive) as IsTargetUserActive\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\") \n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, Admin, AdminId, AdminIp, UserId, TargetUserEmail, TargetUserFirstName, TargetUserLastName, IsTargetUserActive\n| sort by EventTime\n| fields - _count, AdminId, UserId",
   "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Admin",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
     {
       "autoComplete": {
         "type": "SKIP_AUTOCOMPLETE",
@@ -18,23 +42,35 @@
       "value": "*"
     }
   ],
-  "viewerType": "map",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
-      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
-      "panelTitle": "Geo Location Of AllowList Users",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Activities",
+      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
+      "panelTitle": "Recent - User Activities",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6e11e070b1ea4945",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "panelKey": "panel0bd7e57b85f2884e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Admin",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
         {
           "name": "AdminIp",
           "defaultValue": "*",

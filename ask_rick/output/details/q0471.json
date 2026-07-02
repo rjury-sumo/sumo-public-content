@@ -1,11 +1,11 @@
 {
   "id": "q0471",
-  "hash": "5083de873081",
+  "hash": "e5691aa2498f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH (\"Scheduled search alert triggered\")\n| parse \"[StatusCode=*]\" as Status_Code\n| parse \"[Name=*]\" as SavedSearchName\n| parse \"[AlertType=*]\" as AlertType nodrop\n| count by Status_Code\n| sort by _count",
+  "query": "_index=sumologic_audit class=scheduled_search action=FINISH\n| where _sourceCategory=\"scheduled_search\"\n| KV \"Name\", \"SchSearchId\", \"SchTime\"\n| timeslice 1h\n| count as count by _timeslice,status\n| transpose row _timeslice column status",
   "queryParameters": [],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,16 +13,14 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Scheduled Search - Search Triggered Summary",
-      "dashboardDescription": "See all webhook and scheduled search triggerings.",
-      "panelTitle": "Count Of Status Codes For Webhooks",
+      "dashboardName": "User Activity - Scheduled Search",
+      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
+      "panelTitle": "Schd Search Completed",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel02417d0ea777c94e",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Webhook Analysis"
-      ],
+      "panelKey": "panela7fb66dfafba094f",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "rowContext": [],
       "variables": []
     }
   ]

@@ -1,9 +1,9 @@
 {
   "id": "q0046",
-  "hash": "45d0a3a8b2bf",
+  "hash": "ed2964512878",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*events*  cluster={{cluster}} | timeslice 1d| count by _timeslice",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| where status=\"closed\"\n// severity used to be numeric but now it's not\n//| tostring(severity) as sev_string\n//| 0 as s\n//| if (sev_string matches /1|LOW/,1,s) as s\n//| if (sev_string matches /2|MEDIUM/,2,s) as s\n//| if (sev_string matches /3|HIGH/,3,s) as s\n//| if (sev_string matches /4|CRITICAL/,4,s) as s\n//| s as severity\n//| if(s = 1,\"LOW\",\"OTHER\") as severity\n//| if(s = 2,\"MEDIUM\",severity) as severity\n//| if(s = 3,\"HIGH\",severity) as severity\n//| if(s = 4,\"CRITICAL\",severity) as severity\n| toint(ceil(timeToDetection / 3600)) as timeToDetection\n| toint(ceil(timeToRemediation / 3600)) as timeToRemediation\n| toint(ceil(timeToResponse / 3600)) as timeToResponse\n| avg(timeToRemediation) as timeToRemediation, avg(timeToResponse) as timeToResponse, avg(timeToDetection) as timeToDetection by assignee\n//| timeToResponse-timeToDetection as timeToResponse\n| timeToRemediation-timeToResponse as timeToRemediation\n//| transpose row severity column timeToDetection,timeToResponse,timeToRemediation",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Events over Time",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Analyst Performance",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-16B131B7BF710B4C",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Sequential 1\"},\"series\":{},\"overrides\":[{\"series\":[\"_count\"],\"queries\":[],\"properties\":{\"visible\":true,\"name\":\" Count\"}}]}",
+      "panelKey": "panel511EA13D9586294F",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"scheme1\"}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Analyst Performance",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel511EA13D9586294F",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"series\":{},\"overrides\":[],\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"scheme1\"}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

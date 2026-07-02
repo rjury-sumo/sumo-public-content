@@ -1,29 +1,67 @@
 {
   "id": "q0348",
-  "hash": "e1b0a342ba40",
-  "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json field=_raw \"$['log']['output_fields']['k8s.ns.name']\" as namespace\n//| where !isEmpty(namespace)\n| count as rules_triggered by namespace\n| sort rules_triggered, namespace",
-  "queryParameters": [],
+  "hash": "2abf02b578b1",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "namespace={{namespace}} cluster={{cluster}}\nstatefulset=collection-sumologic-otelcol-instrumentation   metric=kube_pod_status_phase phase=running | where _value > 0\n| max by cluster,service,statefulset,pod,node",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*sumo*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
   "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/otelcol-k8s-containers.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Security Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
-      "panelTitle": "Rules Triggered by Namespace",
+      "folder": null,
+      "dashboardName": "Kubernetes Otelcol State",
+      "dashboardDescription": "",
+      "panelTitle": "otelcol-instrumentation Running",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-8f44143086755945",
+      "panelKey": "panelPANE-B0EF6BE7B94ECB4B",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"aggregationType\":\"latest\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Rule Priorities"
+        "otelcol-instrumentation - collector responsible for data collection and tagging"
       ],
-      "variables": []
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*sumo*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,67 @@
+{
+  "id": "q1376",
+  "hash": "30f316e3b484",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} namespace={{namespace}}\n _sourceCategory=*events \nnot \"\\\"type\\\":\\\"Normal\\\"\"\n(otelcol or prometheus or falco or otelagent or otelgateway)\n// exclude any annoying messages here\ninvolvedObject\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.involvedObject.kind\" as type\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n| json field=_raw \"object.message\" as message\n| json field=_raw \"object.metadata.namespace\" as namespace\n| count by cluster,reason,type,level,namespace,name,message\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sumologic"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes-collection-healthcheck-otelcol.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes - Collection Healthcheck (otelcol)",
+      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
+      "panelTitle": "Kubernetes Events Not Normal State",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel05615CD798A14B49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"pivotBy\":[],\"sortBy\":\"_value\",\"aggregationType\":\"sum\",\"sortDir\":\"DESC\",\"decimals\":0}}",
+      "rowContext": [
+        "Kubernetes Events For Collection Containers: otelcol, fluentd, prometheus, falco"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "sumologic",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

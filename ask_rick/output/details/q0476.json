@@ -1,27 +1,73 @@
 {
   "id": "q0476",
-  "hash": "4c5d35eda1a6",
+  "hash": "d1014c41ba75",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit action=login status=SUCCESS\n| where _sourceCategory=\"user_activity\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = _sourceHost \n| count by latitude, longitude, country_code, country_name, region, city, postal_code \n| sort _count",
-  "queryParameters": [],
-  "viewerType": "map",
+  "query": "_index=sumologic_volume _sourcecategory=\"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as ingest_gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| ingest_gbytes / duration_in_day as %\"AvgLogIngestPerDay\"\n| {{Daily_Log_Ingest_Capacity}} as %\"DailyLogIngestCapacity\" // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| (%\"AvgLogIngestPerDay\"/%\"DailyLogIngestCapacity\")*100 as %\"LogIngest_Capacity_Utilization\"\n| fields %\"LogIngest_Capacity_Utilization\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Daily_Log_Ingest_Capacity",
+      "description": "100",
+      "dataType": "ANY",
+      "value": "100"
+    }
+  ],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Audit",
-      "dashboardName": "User Activity - Login and Credentials",
-      "dashboardDescription": "See logins, location of logged in users, and count of login attempts, password changes, and password resets",
-      "panelTitle": "Logged-In User Locations",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Capacity Utilization",
+      "dashboardDescription": "The Data Volume - Capacity Utilization dashboard provides views of subscribed, actual, and percentage capacity utilization for logs and metrics.",
+      "panelTitle": "Log Ingest Capacity Utilization",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel363a9a9ba049eb49",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{}}}",
-      "rowContext": [],
-      "variables": []
+      "panelKey": "panelPANE-3030B79099692A46",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Log Ingest"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

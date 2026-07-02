@@ -1,9 +1,9 @@
 {
   "id": "q0470",
-  "hash": "ff41d5577dbe",
+  "hash": "871f711c724f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH (\"Scheduled search alert triggered\")\n| parse \"[Destination=*]\" as Destination\n| parse \"[StatusCode=*]\" as Status_Code\n| parse \"[Name=*]\" as SavedSearchName\n| parse \"[AlertType=*]\" as AlertType nodrop\n| count by Destination\n| sort by _count",
+  "query": "_index=sumologic_audit class=scheduled_search action=SUSPEND\n| where _sourceCategory=\"scheduled_search\"\n| KV \"Name\", \"SchSearchId\"\n| count as count by _messagetime, Name, SchSearchId, sourceuser\n| sort by _messagetime\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss.SSS\", \"UTC\") as time\n| fields -count,_messagetime\n| fields time,name,SchSearchId, sourceuser",
   "queryParameters": [],
   "viewerType": "table",
   "metricsQueryData": null,
@@ -13,16 +13,14 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Scheduled Search - Search Triggered Summary",
-      "dashboardDescription": "See all webhook and scheduled search triggerings.",
-      "panelTitle": "Top Webhook Destinations",
+      "dashboardName": "User Activity - Scheduled Search",
+      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
+      "panelTitle": "Suspended Searches",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelec070aa1b9303841",
+      "panelKey": "panel6c9d0676b82f2b4e",
       "visualization": "table",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Webhook Analysis"
-      ],
+      "rowContext": [],
       "variables": []
     }
   ]

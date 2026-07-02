@@ -1,0 +1,65 @@
+{
+  "id": "q2192",
+  "hash": "61005362dd1d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory={{sourcecategory}} {{keywords}}  \n \n| if (user_agent matches \"*Windows *\" OR user_agent matches \"*Win32*\" OR user_agent matches \"*Win64*\",\"Windows\",\"\") as OS \n| if (user_agent matches \"*Macintosh*\" OR user_agent matches \"*Darwin/*\" OR user_agent matches \"*Mac OS*\",\"MacOS\",OS) as OS \n| if (user_agent matches \"* CrOS *\",\"Chrome OS\",OS) as OS\n| if (user_agent matches \"*Linux*\",\"Linux\",OS) as OS \n| if (user_agent matches \"*iPad*\",\"iPad\",OS) as OS \n| if (user_agent matches \"*iPhone*\",\"iPhone\",OS) as OS \n| if (user_agent matches \"*Android*\",\"Android\",OS) as OS \n| if (user_agent matches \"*Windows Phone*\",\"Windows Phone\",OS) as OS \n| if (OS == \"\",\"Other\",OS) as OS \n| if (user_agent matches \"Mozilla/*; rv:*)*\",\"Mozilla\",\"\") as Browser\n| if (user_agent matches \"*MSIE*\",\"Internet Explorer\",Browser) as Browser \n| if (user_agent matches \"*Firefox*\",\"Firefox\",Browser) as Browser \n| if (user_agent matches \"*Safari*\",\"Safari\",Browser) as Browser \n| if (OS==\"Android\" AND user_agent matches \"*WebKit*\",\"WebKit\",Browser) as Browser\n| if ((OS==\"iPhone\" OR OS==\"iPad\") AND (user_agent matches \"*Mobile/*\" OR user_agent matches \"*AppleWebKit*(KHTML*Gecko)*\"),\"Mobile Safari\",Browser) as Browser\n| if (browser == \"\" AND OS==\"MacOS\" AND user_agent matches \"Mozilla/* (Macintosh;*(KHTML, like Gecko)*\",\"Safari\",Browser) as Browser \n| if (user_agent matches \"*MobileSafari/*\",\"Mobile Safari\",Browser) as Browser\n| if (user_agent matches \"*Chrome*\",\"Chrome\",Browser) as Browser \n| if (user_agent matches \"Opera*\",\"Opera\",Browser) as Browser \n| if (user_agent matches \"Dolphin*\",\"Dolphin\",Browser) as Browser \n| if (Browser == \"\",\"Other\",Browser) as Browser  \n| count by OS,browser\n| transpose row Browser column OS",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*nginx*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "a,b*,*c*,( a or d)",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/nginx-logs-only/nginx-logs-only.json",
+      "objectType": "Dashboard",
+      "folder": "nginx logs custom (FER)",
+      "dashboardName": "Nginx - Visitor Access Types",
+      "dashboardDescription": "The Nginx - Visitor Access Types Dashboard provides insights into visitor platform types, browsers, and operating systems, as well as the most popular mobile devices, PC and Mac versions used.",
+      "panelTitle": "Browsers and Operating Systems",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-82D4DBFE8791A84E",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"series\",\"value\":\"series\"}],\"aggregationType\":\"avg\"},\"series\":{},\"title\":{\"fontSize\":14}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*nginx*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "a,b*,*c*,( a or d)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

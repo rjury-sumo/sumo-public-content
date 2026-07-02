@@ -1,9 +1,9 @@
 {
   "id": "q0311",
-  "hash": "f63cd494151b",
+  "hash": "865c6e899ba3",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} namespace={{namespace}} pod={{pod}} (error or critical)\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "_sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n\n// \n| count as events by eventname \n| sort events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_event_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Error Logs (Latest 100 Errors)",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Events Overview",
+      "dashboardDescription": "sumologic_system_events from automation service or SOAR",
+      "panelTitle": "By Eventname",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f738640581662b4e",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "panelKey": "panel205CD2B98E34A844",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Logs/Events"
+        "Event Breakdown"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_timeslice",
+          "defaultValue": "1h",
+          "values": "5m,15m,1h,3h,1d",
           "allowMultiSelect": false
         }
       ]

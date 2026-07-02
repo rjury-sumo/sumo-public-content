@@ -1,9 +1,9 @@
 {
   "id": "q0051",
-  "hash": "9d38e58a881b",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_daemonset_status_desired_number_scheduled | max by cluster",
+  "hash": "ef79cc1e6d7b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * {{lookback}}))\n| formatdate(tolong(time),\"yyyy-MM\") as month\n//| where severity=3 and confidence > .5\n| formatdate(tolong(time),\"yyyy-MM-dd\") as date\n\n| parse regex field=tags \"_mitreAttackTactic:(?<tactic>[^\\\":\\r\\n]+)\" multi\n| parse regex field=tags \"_mitreAttackTechnique:(?<technique>[^\\\":\\r\\n]+)\" multi\n\n| \"\" as stage\n| if(tactic = \"TA0043\",\"a.Reconnaissance\",stage) as stage\n| if(tactic = \"TA0042\",\"b.Resource Development\",stage) as stage\n| if(tactic = \"TA0001\",\"c.Initial Access\",stage) as stage\n| if(tactic = \"TA0002\",\"d.Execution\",stage) as stage\n| if(tactic = \"TA0003\",\"e.Persistence\",stage) as stage\n| if(tactic = \"TA0004\",\"f.Privilege Escalation\",stage) as stage\n| if(tactic = \"TA0005\",\"g.Defense Evasion\",stage) as stage\n| if(tactic = \"TA0006\",\"h.Credential Access\",stage) as stage\n| if(tactic = \"TA0007\",\"i.Discovery\",stage) as stage\n| if(tactic = \"TA0008\",\"j.Lateral Movement\",stage) as stage\n| if(tactic = \"TA0009\",\"k.Collection\",stage) as stage\n| if(tactic = \"TA0011\",\"l.Command and Control\",stage) as stage\n| if(tactic = \"TA0010\",\"m.Exfiltration\",stage) as stage\n| if(tactic = \"TA0040\",\"n.Impact\",stage) as stage\n\n//// techniques per stage\n| count by insightid,stage,technique //,entitytype,entityvalue\n//| concat(\"https://attack.mitre.org/techniques/\",replace (technique,\".\",\"/\")) as mitre_url\n//| tourl(mitre_url,technique) as technique\n| sort stage asc, technique asc\n| now() as _messagetime\n| transactionize stage (merge stage takeFirst,technique takeDistinct)\n//| values (technique)  as techniques by stage\n| 1 as r\n| max(r) as r by stage,technique  \n| values(technique) as techniques by stage,r\n| transpose row r column stage | fields -r\n//",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookback",
+      "description": "7,14,30,90",
+      "dataType": "ANY",
+      "value": "90"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.only.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Desired vs Current Daemonsets",
+      "folder": null,
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Mitre Technqiues Observed Map",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7C677D81BD7A3B4F",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"cluster={{cluster}} Current\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"{{cluster}} Desired\"}}]}",
+      "panelKey": "panelF6100EDFABC5EB41",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Daemonsets"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
+      "objectType": "Dashboard",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights (v2) - 20220830",
+      "dashboardDescription": "",
+      "panelTitle": "Mitre Technqiues Observed Map",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF6100EDFABC5EB41",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "lookback",
+          "defaultValue": "90",
+          "values": "7,14,30,90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

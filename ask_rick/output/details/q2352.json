@@ -1,0 +1,79 @@
+{
+  "id": "q2352",
+  "hash": "438d0fd79d74",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\nstatus_message=\"Query Failed\"\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| round(range_s/60/60,1) as range_hour\n//| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n| substring(query,0,{{search_max_chrs}}) as query\n| values(range_hour) as ranges_hours, values(range_day) as ranges_days,sum(duration_s) as total_s,count as searches, sum(data_scanned_bytes) as bytes_scanned,  avg(duration_s) as avg_duration_s by query_type,user_name,query,status_message,analytics_tier\n| sort  bytes_scanned\n| bytes_scanned / 1G as gb_scan\n| fields -bytes_scanned",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "search_max_chrs",
+      "description": "100,200,300,400,500,1000,10000",
+      "dataType": "ANY",
+      "value": "400"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/search_performance.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Search Performance (search audit)",
+      "dashboardDescription": "",
+      "panelTitle": "Searches That Failed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel948F4BE284BC194D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Problem Searches - Failed"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "400",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

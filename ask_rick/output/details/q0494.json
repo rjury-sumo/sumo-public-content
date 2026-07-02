@@ -1,9 +1,9 @@
 {
   "id": "q0494",
-  "hash": "d1014c41ba75",
+  "hash": "8f022398f9a9",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory=\"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as ingest_gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| ingest_gbytes / duration_in_day as %\"AvgLogIngestPerDay\"\n| {{Daily_Log_Ingest_Capacity}} as %\"DailyLogIngestCapacity\" // This is account contract based value. Customize this value. Can be found in Administration > Account > Account Overview\n| (%\"AvgLogIngestPerDay\"/%\"DailyLogIngestCapacity\")*100 as %\"LogIngest_Capacity_Utilization\"\n| fields %\"LogIngest_Capacity_Utilization\"",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Mi as mbytes\n| timeslice 1d\n| sum(mbytes) as mbytes by _timeslice\n| outlier mbytes",
   "queryParameters": [
     {
       "autoComplete": {
@@ -16,21 +16,9 @@
       "description": "Continuous,Frequent,Infrequent,CSE,Flex",
       "dataType": "ANY",
       "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Daily_Log_Ingest_Capacity",
-      "description": "100",
-      "dataType": "ANY",
-      "value": "100"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -38,15 +26,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Capacity Utilization",
-      "dashboardDescription": "The Data Volume - Capacity Utilization dashboard provides views of subscribed, actual, and percentage capacity utilization for logs and metrics.",
-      "panelTitle": "Log Ingest Capacity Utilization",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Data Ingest Outlier",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3030B79099692A46",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelPANE-4",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
       "rowContext": [
-        "Log Ingest"
+        "Note: Daily Ingest Capacity"
       ],
       "variables": [
         {
@@ -59,12 +47,6 @@
           "name": "Daily_Log_Ingest_Capacity",
           "defaultValue": "100",
           "values": "100",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Metric_DPM_Ingest_Capacity",
-          "defaultValue": "20000",
-          "values": "20000",
           "allowMultiSelect": false
         }
       ]

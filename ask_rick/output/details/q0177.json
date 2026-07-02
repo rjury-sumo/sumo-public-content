@@ -1,9 +1,9 @@
 {
   "id": "q0177",
-  "hash": "4aa3beded4b0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}}  metric=container_memory_working_set_bytes deployment={{deployment}}   | quantize 1m | eval _value / 1000000  | sum by cluster, deployment |topk(100,max)",
+  "hash": "ec61d429ee7e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| metadata_sourcecategory as sourcecategory\n| metadata_vendor as vendor\n| metadata_product as product\n| metadata_deviceeventid as eventid\n| metadata_parser as parser\n| count by sourcecategory,vendor,product,eventid,parser //,reason \n| sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,53 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "sourcecategory",
+      "description": "any source category",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{search_term",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Mem Requests vs Limits vs Usage (MB)",
+      "folder": "Records",
+      "dashboardName": "CSIEM Failed To Map",
+      "dashboardDescription": "",
+      "panelTitle": "Table View",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-e322aa91abc3c941",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"MB\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Light\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Usage - {{deployment}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Requests - {{deployment}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Limits - {{deployment}}\"}}]}",
+      "panelKey": "panelF33C2015BA492949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Resource Utilization"
+        "Help"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "search_term",
+          "defaultValue": "metadata_sourcecategory=*",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
           "allowMultiSelect": false
         }
       ]

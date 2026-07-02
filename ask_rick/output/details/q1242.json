@@ -1,0 +1,83 @@
+{
+  "id": "q1242",
+  "hash": "0782fd0c33f8",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "accountid = {{accountid}} account = {{account}} functionname={{functionname}}\nNamespace=aws/lambda metric=Duration statistic=average   | quantize to 15m using avg | avg by functionname | topk (10,avg)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "accountid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "account",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*prod*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "functionname",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/aws/lambda_key_indicators_errors.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Lambda - Key Signals and Errors",
+      "dashboardDescription": "",
+      "panelTitle": "Top 10 Average Duration",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1783C546BB8B194D",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\",\"sortBy\":\"_value\",\"sortDir\":\"DESC\",\"aggregationType\":\"avg\"},\"legend\":{\"enabled\":false},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "account",
+          "defaultValue": "*prod*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "accountid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "functionname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

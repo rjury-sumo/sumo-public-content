@@ -1,9 +1,9 @@
 {
   "id": "q1159",
-  "hash": "152ef039fb9b",
+  "hash": "b4da267251b2",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\"\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| timeslice 1d\n| sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)\n| avg(total_credits_consumed) as avg_credits_consumed",
+  "query": "_index=sumologic_volume \n| where _sourceCategory matches\"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 6h\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n| predict %\"{{Unit}}\" by 6h model=ar, forecast=20",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "query_type",
-      "description": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+      "name": "Tracingsources",
+      "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": "sourcecategory_tracing_volume"
     },
     {
       "autoComplete": {
@@ -24,13 +24,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "credits_conversion",
-      "description": "0.016",
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
       "dataType": "ANY",
-      "value": "0.016"
+      "value": "billedBytes"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -38,27 +38,25 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Flex",
-      "dashboardName": "Flex - Feature Level Scan Volume",
-      "dashboardDescription": "The Feature Level Scan Volume dashboard provides visibility into the scan volume at a feature level in order to monitor and control cost at a feature level.",
-      "panelTitle": "Avg Credits Consumed/day",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Prediction of {{Tracingsources}} by {{Unit}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6182c3a6bf03ca4a",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credit\",\"useBackgroundColor\":false,\"useNoData\":true,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
-      "rowContext": [
-        "Credits Conversion"
-      ],
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "credits_conversion",
-          "defaultValue": "0.016",
-          "values": "0.016",
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
           "allowMultiSelect": false
         },
         {
-          "name": "query_type",
-          "defaultValue": "*",
-          "values": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

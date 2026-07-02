@@ -1,9 +1,9 @@
 {
   "id": "q0171",
-  "hash": "9e917dbef19a",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}}  deployment={{deployment}} namespace={{namespace}} metric=kube_deployment_status_replicas_available | max by deployment| sum",
+  "hash": "e4bd28008b33",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| timeslice\n| count by _timeslice, metadata_sourcecategory\n| transpose row _timeslice column metadata_sourcecategory",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,106 +12,82 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "sourcecategory",
+      "description": "any source category",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{search_term",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Replicas Available",
+      "folder": "Records",
+      "dashboardName": "CSIEM Failed To Map",
+      "dashboardDescription": "",
+      "panelTitle": "Map Fail By Original Sourcecategory",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-59100b08a3ce3a40",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"title\":{\"fontSize\":\"Replicas Available\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Replicas\"}}",
+      "panelKey": "panel123163CF998B794A",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Overview"
+        "Help"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "search_term",
+          "defaultValue": "metadata_sourcecategory=*",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/failed_to_map.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment Overview dashboard provides high-level insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Replicas Available",
+      "folder": null,
+      "dashboardName": "Failed To Map Review",
+      "dashboardDescription": "",
+      "panelTitle": "Map Fail By Original Sourcecategory",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-59100b08a3ce3a40",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"title\":{\"fontSize\":\"Replicas Available\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Replicas\"}}",
+      "panelKey": "panel123163CF998B794A",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"title\":\"\",\"titleFontSize\":9,\"labelFontSize\":9,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":9,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
       "rowContext": [
-        "Note: Selecting cluster name, namespace and deployment is mandatory for dashboard to work"
+        "Help"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "sourcecategory",
           "defaultValue": "*",
-          "values": null,
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "deployment",
-          "defaultValue": null,
-          "values": null,
+          "name": "search_term",
+          "defaultValue": "// no search term",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0406",
-  "hash": "879c49c42180",
+  "hash": "e8715ae818d7",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} statefulset={{statefulset}}\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by statefulset,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "query": "_view=sumologic_audit _sourceCategory=user_activity \"AdminMode=true\"\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"User * updated the following permissions on * \\\"*\\\". \\nAdded: *\\nRemoved: *\" as user,content_type,content_name,added_permissions,removed_permissions nodrop\n| parse regex field=removed_permissions \"(?<removedperm>\\(.+?: .+?\\))\" multi\n| parse regex field=removedperm \"\\((?<removed_permission_from>.+)<(?<permission_target>.+)>: (?<removed_permissions>.+)\\)\" \n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser,content_type,content_name, removed_permission_from, permission_target, removed_permissions",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,22 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "sourceuser",
       "description": "",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "statefulset",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
+      "value": "*"
     }
   ],
   "viewerType": "table",
@@ -35,29 +23,21 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
-      "panelTitle": "Logs  (Latest 100 Logs)",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Admin Mode",
+      "dashboardDescription": "See when content is deleted, moved, whitelisted, and shared. As well as when permission is added or removed.",
+      "panelTitle": "Removed Permission",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-AE4380C888A72942",
+      "panelKey": "panel51ad66a2aaf0d94a",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
-      "rowContext": [
-        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
-      ],
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statefulset",
-          "defaultValue": "",
+          "name": "sourceuser",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

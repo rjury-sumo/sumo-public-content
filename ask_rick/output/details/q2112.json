@@ -1,0 +1,151 @@
+{
+  "id": "q2112",
+  "hash": "4c3dfd3cc151",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{lookup_datamap}}\n| where collector matches \"{{collector}}\"\n| where tolowercase(index) matches tolowercase(\"{{index}}\")\n| where sourcecategory matches \"{{sourcecategory}}\"\n| concat(collector,index,source,sourcecategory,sourcename) as blob | where blob matches /(?i){{any_meta_regex}}/\n| concat(index,\" \",sourcecategory) as index_category\n| concat(\"_index=\",index,\" _sourcecategory=\",sourcecategory ) as %\"Search Scope\"\n| sum(events) as events, first(collector) as collector, first(source) as source, first(sourcename) as sourcename by index,sourcecategory,%\"Search Scope\" \n| total events as te | 100 * ( events/te) as percent | fields -te\n\n// tiers\n| tolowercase(index) as index\n| lookup datatier from /shared/lookups/partitions on index=index\n\n// this might change per sumo instance!  \n| \"https://{{my_instance_name}}.sumologic.com/ui/#/search/create?query=\" as dp\n\n// prepare the category strings\n| concat(\" _sourcecategory=\",sourcecategory) as sc\n| concat(\"\\n _index=\",index) as i\n| concat(\"\\n// _collector=\",replace(collector,\" \",\"?\")) as c\n| concat(\"\\n// _source=\",replace(source,\" \",\"?\")) as s\n| concat(\"\\n// _sourcename=\",replace(sourcename,\" \",\"?\")) as sn\n| urlencode(concat(i,sc,c,s,sn)) as the_search\n\n// make final url columns\n| tourl(concat(dp,the_search),\"New Search\") as  %\"Search By Sourcecategory\"\n\n| fields -dp,sc,i,c,sn,s,the_search, collector,source,sourcename\n| sort index asc,sourcecategory asc | fields -percent",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "lookup_datamap",
+      "description": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+      "dataType": "ANY",
+      "value": "/shared/lookups/log_datamap"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "index",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "any_meta_regex",
+      "description": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_instance_name",
+      "description": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+      "dataType": "ANY",
+      "value": "service.us2"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/metadata_explorer_2025.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metadata Explorer",
+      "dashboardDescription": "",
+      "panelTitle": "Search by index and sourcecategory",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7FEEC01C8044F942",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Open a New Search Window"
+      ],
+      "variables": [
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "index",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "any_meta_regex",
+          "defaultValue": ".*",
+          "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_partitions",
+          "defaultValue": "/shared/lookups/partitions",
+          "values": "/shared/lookups/partitions",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup_datamap",
+          "defaultValue": "/shared/lookups/log_datamap",
+          "values": "path://\"/Library/Admin Recommended/lookups/log_datamap\",/shared/lookups/log_datamap",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "service.us2",
+          "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "metadata_values_by",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcename,sourcecategory,index",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

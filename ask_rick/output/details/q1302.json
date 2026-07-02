@@ -1,0 +1,121 @@
+{
+  "id": "q1302",
+  "hash": "957abe2d37fd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where _timeslice > ( now() - ({{days}} * 1000 * 60 * 60 * 24))\n| sum(credits) as credits by _timeslice\n| avg(credits) as %\"cr/day\"\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| ( %\"cr/day\"/plan ) * 100 as pct_plan\n\n// anniversary could be this year or next year\n| now() as today\n| formatdate(today,\"MM\") as current_month\n| formatdate(today,\"dd\") as current_day\n| formatdate(today,\"yyyy\") as current_year\n\n| \"{{anniversary}}\" as end_date\n| {{credit_term_days}} as term_days\n| parsedate (end_date,\"yyyy/MM/dd\") as contract_end\n\n| formatdate(contract_end,\"MM\") as contract_month\n| formatdate(contract_end,\"dd\") as contract_day\n| formatdate(contract_end,\"yyyy\") as contract_year\n| concat (round(contract_year + 1),\"/\",contract_month,\"/\",contract_day) as end_date_b\n| parsedate (end_date_b,\"yyyy/MM/dd\") as contract_end_b\n\n| if(contract_end - today  < 0,contract_end_b,contract_end) as adjusted_end_date\n| floor((adjusted_end_date - today ) / (1000 * 60 * 60 * 24)) as days_left\n| ceil(term_days - days_left) as days_used\n| round( %\"cr/day\" * days_left) as cr_needed\n| concat(\"Using:\",round(%\"cr/day\",2) ,\" cr/day. Estimate: \",round(cr_needed),\" will be used at current burn rate in: \", toint(days_left),\" days until: \", formatdate(adjusted_end_date,\"yyyy/MM/dd\")) as string\n| first (string) as estimate_credits_to_term | concat(estimate_credits_to_term,\" You can compare this number of credits with the used/remaining number on your account page to determine how you are tracking to plan at current burn rate.\") as estimate_credits_to_term",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{lookup",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "days",
+      "description": "90",
+      "dataType": "ANY",
+      "value": "90"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "21900"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "anniversary",
+      "description": "yyyy/MM/dd,2023/03/11",
+      "dataType": "ANY",
+      "value": "2023/03/11"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Long Term Credits Report (credits_report lookup)",
+      "dashboardDescription": "Uses the credits_report lookup table to show long term credits consumption.",
+      "panelTitle": "Credits Needed To Term At Current Rate",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel47FFE8D4B60CEB46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":18,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "lookup",
+          "defaultValue": "/shared/lookups/credits_report",
+          "values": "/shared/lookups/credits_report",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "days",
+          "defaultValue": "90",
+          "values": "90",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "anniversary",
+          "defaultValue": "2023/03/11",
+          "values": "yyyy/MM/dd,2023/03/11",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

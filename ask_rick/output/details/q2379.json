@@ -1,0 +1,91 @@
+{
+  "id": "q2379",
+  "hash": "5aabc273d38b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| min(_messagetime) as s, max(_messagetime) as e , sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| min(s) as s, max(e) as e ,sum(gbytes) as gbytes by view,s,e\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| min(s) as s, max(e) as e ,sum(gbytes) as gbytes by tier\n| if(tier  = \"frequent\",gbytes,0) as frequent\n| if (tier = \"continuous\",gbytes,0) as continuous\n| if(tier = \"infrequent\",gbytes,0) as infrequent\n| min(s) as s, max(e) as e ,sum(continuous) as continuous,sum(frequent) as frequent, sum(infrequent) as infrequent\n| (e - s) / ( 1000 * 60 * 60 * 24) as range_days\n| ((( frequent + infrequent) * 20 - ((frequent * 9) + (infrequent * .4))) /range_days) * 365 as annual_ingest_credits_saved | fields annual_ingest_credits_saved",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "_freq",
+      "dataType": "ANY",
+      "value": "_freq"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "infrequent|",
+      "dataType": "ANY",
+      "value": "infrequent"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "A) Annual ingest saved",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel01F2578696E9D944",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":12,\"color\":\"#16943E\"},{\"from\":12,\"to\":18,\"color\":\"#DFBE2E\"},{\"from\":18,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":false,\"min\":0,\"max\":25}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0412",
-  "hash": "41b3960815d5",
+  "hash": "37308ee9c84f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=_trace_spans  error {{keywords}}\nservice={{service}}\n{{environment}}\noperation={{operation}}\nstatusmessage={{statusmessage}}\n| json field=tags \"$['deployment.environment']\" as environment\n| where environment matches \"{{environment}}\"\n\n//| json field=tags \"application\"\n//| json field=tags \"$['http.url']\" as http_url\n| timeslice \n| count by environment,_timeslice | transpose row _timeslice column environment",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| parse \"created * \\\"*\\\" into folder \\\"*\\\"\" as content_type,content_name,folder_location\n| where action =\"CREATE\"\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by  sourceuser",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,111 +12,33 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "keywords",
-      "description": "any keyword string",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "service",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "environment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "default"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "operation",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "statusmessage",
+      "name": "sourceuser",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/Tracing and Spans/tracing errors - span details.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": null,
-      "dashboardName": "Tracing Errors - Span Details",
-      "dashboardDescription": "",
-      "panelTitle": "Span Errors By environment",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
+      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
+      "panelTitle": "Content Created by Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0CD575A3A45B0840",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+      "panelKey": "panel2e0613e88c8b094a",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true}}",
       "rowContext": [
-        "Spans Analytics Panels (_index=_trace_spans)"
+        "Content Created"
       ],
       "variables": [
         {
-          "name": "service",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "environment",
-          "defaultValue": "default",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "any keyword string",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "instance_url",
-          "defaultValue": "live.us2.sumologic.com",
-          "values": "url for your sumo instance",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "operation",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statusmessage",
+          "name": "sourceuser",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

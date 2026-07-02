@@ -1,45 +1,82 @@
 {
   "id": "q1194",
-  "hash": "00fd81066879",
+  "hash": "c2d54ad68b39",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where _sourceCategory matches \"sourcecategory_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes\n| sum(gbytes) by _timeslice",
-  "queryParameters": [],
-  "viewerType": "line",
+  "query": "_view=sumologic_search_usage_per_query query_type=\"Search API\" user_name={{user}}\n| geoip remote_ip\n| lookup asn,organization from asn://default on ip=remote_ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events by user_name,asn_geo,location\n| bytes_scanned / 1024/1024/1024 as scan_gb | fields -bytes_scanned\n| sort searches",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "expected_asn_geo_regex",
+      "description": "regular expression for expected asn geo strings",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "show_asn_geo",
+      "description": "exception,normal",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/sumologic_login_api_activity.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Overview",
-      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
-      "panelTitle": "Ingest Volume Trend",
+      "folder": null,
+      "dashboardName": "Sumo Logic Login and API Activity",
+      "dashboardDescription": "",
+      "panelTitle": "Search Job API Summary - Users And GeoLocation",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7A16249DBE8F194A",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelC7CC531DA4738B4C",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
       "rowContext": [
-        "Logs"
+        "API Access Activity and Configuration Changes"
       ],
       "variables": [
         {
-          "name": "Logsources",
-          "defaultValue": "sourcecategory_and_tier_volume",
-          "values": null,
+          "name": "expected_asn_geo_regex",
+          "defaultValue": ".*",
+          "values": "regular expression for expected asn geo strings",
           "allowMultiSelect": false
         },
         {
-          "name": "Metricsources",
-          "defaultValue": "sourcecategory_metrics_volume",
-          "values": null,
+          "name": "user",
+          "defaultValue": "*",
+          "values": "",
           "allowMultiSelect": false
         },
         {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
+          "name": "show_asn_geo",
+          "defaultValue": "*",
+          "values": "exception,normal",
           "allowMultiSelect": false
         }
       ]

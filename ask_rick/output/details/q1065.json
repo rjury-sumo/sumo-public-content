@@ -1,9 +1,9 @@
 {
   "id": "q1065",
-  "hash": "57495168da40",
+  "hash": "829eef512ebc",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=roles (RoleCreated OR RoleUpdated OR RoleDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"roleIdentity.roleId\", \"roleIdentity.roleName\", \"role.systemDefined\", \"to\", \"from\" as EventName, EventTime, Admin, AdminId, AdminIp, RoleId, RoleName, SystemDefined, CurrentValue, PreviousValue nodrop\n| json field=CurrentValue \"systemDefined\", \"capabilities[*]\" as SystemDefinedUpdated, Capabilities nodrop\n| parse field=Capabilities \"[*]\" as Capabilities nodrop\n| replace(Capabilities, \"\\\"\", \"\") as Capabilities\n| if(isNull(SystemDefined), if(isNull(SystemDefinedUpdated), \"-\", SystemDefinedUpdated) , SystemDefined) as SystemDefined\n| if(isNull(Capabilities), \"-\" , Capabilities) as Capabilities\n| where EventName in (\"RoleCreated\",\"RoleUpdated\",\"RoleDeleted\") \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, Admin, AdminId, AdminIp, RoleId, RoleName, SystemDefined, Capabilities\n| sort by EventTime\n| fields - _count, AdminId, RoleId",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserEmailChangeRequested OR UserEmailChanged OR UserPasswordReset OR UserPasswordChanged)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\"  as EventName, Admin, AdminIp nodrop\n| where EventName in (\"UserEmailChangeRequested\", \"UserEmailChanged\", \"UserPasswordReset\", \"UserPasswordChanged\") \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -42,7 +42,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "map",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -50,13 +50,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - Role Activities",
-      "dashboardDescription": "Role Activities DashBoard provides detailed information on activities by user role, such as top capabilities, admin role activities, and recent events.",
-      "panelTitle": "Recent - Role Activities",
+      "dashboardName": "Enterprise Audit - User(Email, Password) Activities",
+      "dashboardDescription": "User (Email, Password) Activities DashBoard provides detailed information on user password and email activities, such as password changes, password resets by admins, and user email change requests and changes.",
+      "panelTitle": "Geo Location",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel4a9bff0290df684d",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panel1c2135f1ab428b4b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {

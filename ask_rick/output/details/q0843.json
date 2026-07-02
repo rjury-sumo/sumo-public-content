@@ -1,11 +1,24 @@
 {
   "id": "q0843",
-  "hash": "a2d7329a0ec6",
+  "hash": "bbfd8b1f7099",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal  GIS\n| count",
-  "queryParameters": [],
-  "viewerType": "svp",
+  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\" AND !(isBlank(device_ip))\n| count by device_ip | fields -_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,17 +26,28 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "Sumo GIS Alerts",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "Distinct Addresses List",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel201FBF72B5FB5B4A",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":50,\"color\":\"#16943E\"},{\"from\":50,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":200,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
-      "rowContext": [
-        "Daily Alert Breakdown Detailed"
-      ],
-      "variables": []
+      "panelKey": "panelB9BD0501BCE26B4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
     }
   ]
 }

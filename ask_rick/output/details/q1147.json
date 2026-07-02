@@ -1,9 +1,9 @@
 {
   "id": "q1147",
-  "hash": "aa770d23eedb",
+  "hash": "7e4ead4e1ddc",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query\n|where user_name matches \"{{user_name}}\" AND analytics_tier matches \"{{analytics_tier}}\"\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|sum(data_scanned_bytes) as scanned by user_name, query_type\n| int(scanned/1Gi) as scanned \n| topk(10,user_name) by query_type | fields -_rank\n| transpose row query_type column user_name | order by query_type",
+  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum(billedBytes) as %\"billedBytes\"\n| billedBytes/1024/1024/1024 AS BilledGBytes\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| BilledGBytes / duration_in_min as %\"Billed GBytes per min\" \n| fields %\"Billed GBytes per min\"",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,50 +12,46 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_name",
+      "name": "Tracingsources",
       "description": "",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "analytics_tier",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
+      "value": "sourcecategory_tracing_volume"
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - User Insights",
-      "dashboardDescription": "The Enterprise Search Audit - User Insights dashboard provides a high-level view to understand who are the key users of  search in your account. The dashboard panels provide details about search usage of top users in terms of search query count, data scanned and retrieved by tiers.",
-      "panelTitle": "Data Scanned (GB) by Top 10 Users per Query Type",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Ingest {{Tracingsources}}- Billed GBytes per min",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela170a9f9ad814a45",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panel20800083B830AA42",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"GBytes per min\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Tracing"
+      ],
       "variables": [
         {
-          "name": "analytics_tier",
-          "defaultValue": null,
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "user_name",
-          "defaultValue": null,
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
           "values": null,
           "allowMultiSelect": false
         }

@@ -1,9 +1,9 @@
 {
   "id": "q0165",
-  "hash": "a8139da3ea79",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} deployment={{deployment}} metric=kube_pod_container_status_ready | sum by pod, namespace, deployment | topk(500,max)",
+  "hash": "55f6acf9f413",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n| json field=_raw \"to\" as updates nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm:ss\") as time\n// ensure we only store the most recent result\n| count by time,insightid,name,eventname,entitytype,entityvalue,status,severity,confidence,assignee,resolution,updates,_messagetime\n| sort _messagetime\n| first(status) as status,first(time) as time,first(assignee) as assignee by insightid,name,eventname,entitytype,entityvalue,status,resolution,severity,confidence | sort insightid",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,34 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
   "viewerType": "table",
@@ -47,36 +23,59 @@
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Running",
+      "folder": "Insights",
+      "dashboardName": "Insights Console (audit events) - 20220830",
+      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
+      "panelTitle": "Last Status Per Insight",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-62796a9481319b4f",
+      "panelKey": "panelF978D2629106484A",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Pods"
+        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
+          "name": "graph_by_timeslice",
+          "defaultValue": "1d",
+          "values": "15m,1h,3h,1d,1w",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Security Operations Overview",
+      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
+      "panelTitle": "Last Status Per Insight",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF978D2629106484A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
           "allowMultiSelect": false
         },
         {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_by_timeslice",
+          "defaultValue": "1d",
+          "values": "15m,1h,3h,1d,1w",
           "allowMultiSelect": false
         }
       ]

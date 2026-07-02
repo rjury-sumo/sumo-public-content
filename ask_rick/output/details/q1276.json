@@ -1,0 +1,49 @@
+{
+  "id": "q1276",
+  "hash": "87d9a9763e0e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events \"Health-Change\"  {{{keywords}}} unhealthy\n| json \"eventType\", \"resourceIdentity.id\" as eventType , resourceId \n| json field=_raw \"details.error\" as error\n| json field=_raw \"details.trackerId\" as trackerid\n| json field=_raw \"resourceIdentity.name\" as name\n| count by name | count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collectionIssues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Issues",
+      "dashboardDescription": "",
+      "panelTitle": "Error Health Events",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA1C2E1A585000B44",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Average\",\"label\":\"Resources\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#16943E\"},{\"from\":0,\"to\":5,\"color\":\"#DFBE2E\"},{\"from\":5,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "*,// any search keywords,not installed* not filecollection*,budget",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "id": "q2283",
+  "hash": "4b4c2402790b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query {{{filter}}}\n//| where execution_duration_ms > 30000\n//not query_type = view*\nnot query_type = sumo*\n| where scanned_partition_count >3 \n| where data_scanned_bytes > ({{min_scan_gb_per_search}} * 1G)\n\n| sum(data_scanned_bytes) as bytes,count as searches by user_name,scanned_partition_count //,query_type\n| where bytes > 10000000000\n| bytes /1024/1024/1024 as scan_gb | fields -bytes\n| ceil(scanned_partition_count/5) * 5 as part_range\n| total searches as total_searches by user_name,part_range\n| concat(toint(part_range),\": \",toint(total_searches)) as range_searches\n| sort user_name,part_range\n| values(range_searches) as %\"range: num_searches\",sum(scan_gb) as total_scan_gb,sum(searches) as total_searches by user_name\n| replace(%\"range: num_searches\",\"\\n\",\"  \") as %\"range: num_searches\"\n| sort total_scan_gb\n| round(total_scan_gb / 1024,2) as total_scan_tb\n| round(total_scan_gb) as total_scan_gb\n| round(total_scan_gb / total_searches,1) as gb_per_search",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_scan_gb_per_search",
+      "description": "1,10,50,100,1000",
+      "dataType": "ANY",
+      "value": "1"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_optitmization.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Optimization",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs.",
+      "panelTitle": "Users Scanning > 3 Partitions and > 10GB. Could benefit from training to add index",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel87D86E3CBA458947",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+      "rowContext": [
+        "Partition Effectiveness Profile"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// any search term",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "slow_seconds",
+          "defaultValue": "30",
+          "values": "30,60,90,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

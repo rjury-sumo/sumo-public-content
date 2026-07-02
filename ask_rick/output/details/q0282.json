@@ -1,67 +1,27 @@
 {
   "id": "q0282",
-  "hash": "0eb1fce93e8a",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_node_status_condition node={{node}} cluster={{cluster}} status=\"true\" condition=\"Ready\" | sum by node,condition | filter latest > 0",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "line",
+  "hash": "9a01f3b19fbe",
+  "queryType": "Logs",
+  "queryMode": "SavedSearch",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated\n)\n\n| json field=_raw \"insight.description\" as description  nodrop\n| json field=_raw \"insight.riskScore\" as riskscore  nodrop\n| json field=_raw \"insight.severityName\" as severityname  nodrop\n| json field=_raw \"eventName\"  nodrop\n| json field=_raw \"insightIdentity.id\" as id  nodrop\n| json field=_raw \"insightIdentity.readableId\" as insightid nodrop\n| json field=_raw \"insight.status\" as status  nodrop\n| json field=_raw \"insight.name\" as name  nodrop\n| json field=_raw \"insight.entityType\" as entitytype  nodrop\n| json field=_raw \"insight.entityValue\" as entityvalue  nodrop\n| json field=_raw \"insight.tags\" as tags  nodrop\n| json field=_raw \"insight.severity\" as severity  nodrop\n| json field=_raw \"insight.confidence\" as confidence  nodrop\n| json field=_raw \"insight.signals\" as signals  nodrop\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as updates nodrop\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,round(timeToDetection/3600)) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n\n// ensure we only store the most recent result\n| first(_messagetime) as _messagetime, first(status) as status,first(severity) as severity,first(severityname) as severityname, \n  first(confidence) as confidence, first(riskscore) as riskscore,first(description) as description, first(signals) as signals,\n  first(tags) as tags,max(timeToDetection) as timeToDetection,\n  max(timeToResponse) as timeToResponse,max(timeToRemediation) as timeToRemediation,\n  first(assignee) as assignee, first(resolution) as resolution\n   by insightid,name,eventname,entitytype,entityvalue \n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm:ss\") as time\n\n\n// ***************************************************************************************************************\n// **** This code explodes out the embedded json arrays of tags and signals then will will squash down after *****\n// lets squash down size of the signals field so we don't generate a massive lookup\n| parse regex field=signals \"\\\"ruleId\\\":\\\"(?<rule>[^\\\"]+\\\",\\\"ruleName\\\":\\\"[^\\\"]*\\\")\" multi\n| replace (rule,\"\\\"\",\"\") as rule\n| replace (rule,\"ruleName\",\"\") as rule\n| parse regex field=tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n| replace(tag,\"_mitreAttack\",\"\") as tag\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\":\\\"[^\\}]+\\})\" multi\n//| json field=signal \"tags\" as signal_tags\n//| parse regex field=signal_tags \"\\\"(?<tag>[^\\\":,]+:[^\\\",:]+)\\\"\" multi\n\n| json field=signal \"id\" as signal_id nodrop\n| json field=signal \"created\" as signal_created nodrop\n| json field=signal \"name\" as signal_name nodrop\n| json field=signal \"summary\" as signal_summary nodrop\n| json field=signal \"severity\" as signal_severity nodrop\n| json field=signal \"ruleId\" as ruleid nodrop\n| json field=signal \"ruleName\" as rulename nodrop\n//| json field=signal \"description\" as sig_description nodrop\n//| substring(sig_description,0,250) as sig_description\n\n\n//| concat(\"{\\\"time\\\":\\\"\",signal_created,\"\\\",\\\"name\\\":\\\"\",signal_name,\"\\\",\\\"sev\\\":\",signal_severity,\",\\\"summary\\\":\\\"\",signal_summary,\"\\\",\\\"rule\\\":\\\"\",rulename,\"\\\"}\") as sig_blob\n| if(isempty(signal_summary),signal_name,signal_summary) as signal_summary\n| concat(signal_created,\"\\t\",signal_summary) as sig_blob\n\n| sort insightid asc, signal_created asc\n\n// ***************************************************************************************************************\n\n|  values(sig_blob) as signal_timeline,values(tag) as tags,values(rule) as rules, count as rows by insightid,name,eventName,entitytype,entityvalue,_messagetime,status,severity,severityname,confidence,riskscore,description,timeToDetection,timeToResponse,timeToRemediation,assignee,resolution,time\n\n| sort _messagetime asc | fields -rows",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
-      "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Node Status over Time",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel8415DC048950CA44",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"condition={{condition}} node={{node}}\"}}],\"title\":{\"fontSize\":16}}",
-      "rowContext": [
-        "Overview"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "SavedSearch",
+      "folder": "Searches",
+      "dashboardName": "Insight Latest State Summary",
+      "dashboardDescription": "A query with output fields useful for summary of new insight to webhook, email to external systems.",
+      "panelTitle": "Insight Latest State Summary",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "Last 24 Hours"
     }
   ]
 }

@@ -1,0 +1,79 @@
+{
+  "id": "q2131",
+  "hash": "20e8a8840897",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_volume _sourceCategory=byMetricDataPoints) \n| parse \"intervalStart: *\\n\" as interval\n| parse regex \"\\n(?<singleRecord>.*)\" multi\n| split singleRecord delim=';' extract 1 as metric, 2 as dp\n| where metric matches /{{metric_matches}}/\n| timeslice {{timeslice}}\n| (__timeslice_end - _timeslice)/ (1000 * 60) as ts_min\n| max(ts_min) as ts_min,sum(dp) as totalDp group by metric,_timeslice\n| round(totalDp / ts_min, 0) as dpm\n//| if (dpm < {{min_dpm_other}},\"others\",metric) as metric\n| fields -totalDp,ts_min \n| topk (25,dpm) by metric,_timeslice | fields -_rank\n| transpose row _timeslice column metric",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "metric_matches",
+      "description": "metrics matches regex,foo,bar.*,foo|bar",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "timeslice",
+      "description": "1h,2h,6h,1d",
+      "dataType": "ANY",
+      "value": "1h"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/metrics/metric_dpm_dv_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metrics DPM Data Volume Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Top 25 DPM by Metric Series Names Over Time: {{timeslice}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5E89A8EEBCD19948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":null,\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Metric Spike Troubleshooting Guide"
+      ],
+      "variables": [
+        {
+          "name": "metric_matches",
+          "defaultValue": ".*",
+          "values": "metrics matches regex,foo,bar.*,foo|bar",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_dpm_other",
+          "defaultValue": "3000",
+          "values": "1000,3000,5000,10000,50000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1h",
+          "values": "1h,2h,6h,1d",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "compare_with",
+          "defaultValue": "14d",
+          "values": "7d,14d,21d,28d",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

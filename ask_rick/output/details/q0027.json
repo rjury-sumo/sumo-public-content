@@ -1,9 +1,9 @@
 {
   "id": "q0027",
-  "hash": "aed56d42931d",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=node_filesystem_size_bytes !fstype=tmpfs node=* | sum by node",
+  "hash": "e621f04ed0c7",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where time > (now () - (1000 * 60 * 60 * 24 * 35))\n\n| formatDate(tolong(time),\"MM\") as month\n|  formatDate(tolong(time),\"HH\") as hour\n| count by month,hour\n\n| num(formatDate(now(),\"MM\")) as this_month\n| if(this_month = 1, 12, this_month - 1) as last_month\n| if(this_month = 1, 11,if(this_month = 2, 10, this_month - 2)) as two_months_ago\n\n| \"this_month\" as period\n| if (month = last_month,\"last_month\",period) as period\n| if (month = two_months_ago,\"two_months_ago\",period) as period\n| where period = \"this_month\"\n| sum(_count) as this_month by hour\n| fillmissing values(\"00\", \"01\", \"02\", \"03\", \"04\", \"05\", \"06\", \"07\", \"08\", \"09\", \"10\", \"11\", \"12\", \"13\", \"14\", \"15\", \"16\", \"17\", \"18\", \"19\", \"20\", \"21\", \"22\", \"23\") in hour with 0 for this_month\n| order by hour asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,58 +12,58 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/content-items/dash.insights.exec.view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Disk Space Usage",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Insights by Hour",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f042c901b8daea4f",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"hiddenQueryKeys\":[\"B\",\"C\"],\"svp\":{\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"sparkline\":{\"show\":false,\"color\":\"\"},\"gauge\":{\"show\":true},\"label\":\"%\",\"rounding\":1},\"series\":{}}",
+      "panelKey": "panel1A24A38788909948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"overrides\":[{\"series\":[\"two_months_ago\"],\"queries\":[],\"properties\":{\"displayType\":\"smooth\",\"name\":\"Two Months Ago\"}}],\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
       "rowContext": [
-        "Overview"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]
     },
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM Insight KPI/import/insight.kpi.app.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Cluster - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - Cluster Overview dashboard provides a high-level view of the cluster health, along with details on all the components and resources.",
-      "panelTitle": "Disk Space Usage",
+      "folder": "Insights KPI - cse_insights_status",
+      "dashboardName": "Insights - Executive View (v2)",
+      "dashboardDescription": "",
+      "panelTitle": "Insights by Hour",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-f042c901b8daea4f",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"hiddenQueryKeys\":[\"B\",\"C\"],\"svp\":{\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#fcb900\"},{\"from\":85,\"to\":100,\"color\":\"red\"}],\"sparkline\":{\"show\":false,\"color\":\"\"},\"gauge\":{\"show\":true},\"label\":\"%\",\"rounding\":1},\"series\":{}}",
+      "panelKey": "panel1A24A38788909948",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"overrides\":[{\"series\":[\"two_months_ago\"],\"queries\":[],\"properties\":{\"displayType\":\"smooth\",\"name\":\"Two Months Ago\"}}],\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
       "rowContext": [
-        "Note: Selecting cluster name is mandatory for dashboard to work"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
+          "values": "path://\"/Library/Admin Recommended/CSIEM/Lookups/cse_insights_status\" ",
           "allowMultiSelect": false
         }
       ]

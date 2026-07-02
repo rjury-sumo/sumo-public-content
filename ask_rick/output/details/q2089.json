@@ -1,0 +1,103 @@
+{
+  "id": "q2089",
+  "hash": "11e571cbb185",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory={{sourcecategory}} _collector={{collector}} \n{{keywords}}\n| _sourcecategory as sourcecategory\n| timeslice | count by _timeslice, sourcecategory | transpose row _timeslice column sourcecategory",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "prod/*,beta/*,qa/*,dev/*,kubernetes/*,*demo*",
+      "dataType": "ANY",
+      "value": "*sedemo*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "collectorname",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "JDBCConnectionException,error,exception",
+      "dataType": "ANY",
+      "value": "JDBCConnectionException"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/keyword_drilldown_explorer-DEPRECATED.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Keyword Drilldown Explorer",
+      "dashboardDescription": "",
+      "panelTitle": "Events Matching By Sourcecategory",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8D6BA9A79A18D94E",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "Selected Settings"
+      ],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*sedemo*",
+          "values": "prod/*,beta/*,qa/*,dev/*,kubernetes/*,*demo*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": "collectorname",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "JDBCConnectionException",
+          "values": "JDBCConnectionException,error,exception",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "plus_minus_seconds",
+          "defaultValue": "15",
+          "values": "5,10,15,20,30,60,120,300",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "max_events",
+          "defaultValue": "25",
+          "values": "5,10,15,20,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "limit",
+          "defaultValue": "1000",
+          "values": "1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

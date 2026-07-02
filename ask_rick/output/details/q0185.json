@@ -1,81 +1,71 @@
 {
   "id": "q0185",
-  "hash": "8d57562c5bab",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "namespace={{namespace}} cluster={{cluster}}  deployment={{deployment}}  pod=* metric=container_cpu_usage_seconds_total | quantize 1m | rate  | sum by cluster,pod | topk(10,max)",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "honeyComb",
+  "hash": "fea2fe6f5c28",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure*\n| count by %\"fields.reason\"\n| sort _count",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Top 10 CPU(%)/Memory(MB) consuming Pods",
+      "folder": "Records",
+      "dashboardName": "SE Collection, Mapping, and Parsing Health Check",
+      "dashboardDescription": "",
+      "panelTitle": "Failed Reasons",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-EB21782B9E7A5A42",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"metric\",\"value\":\"metric\"}],\"aggregationType\":\"avg\"},\"series\":{}}",
+      "panelKey": "panel3041D84F8AA22841",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false,\"wrap\":true,\"fontSize\":12}}",
       "rowContext": [
-        "Pods"
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
+      ],
+      "variables": []
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Collection, Mapping, and Parsing Health Check (Tuning Pack)",
+      "dashboardDescription": "Review and investigate mapping and parsing failures.",
+      "panelTitle": "Failed Reasons",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3041D84F8AA22841",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false,\"wrap\":true,\"fontSize\":12}}",
+      "rowContext": [
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the result in errors with "
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Parsing and Mapping Troubleshooting",
+      "dashboardDescription": "This dashboard provides analysis on Records failed to parse or map.",
+      "panelTitle": "Failed Reasons",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3041D84F8AA22841",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false,\"wrap\":true,\"fontSize\":12},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
           "values": null,
           "allowMultiSelect": false
         }

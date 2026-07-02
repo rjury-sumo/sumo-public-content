@@ -1,9 +1,9 @@
 {
   "id": "q1196",
-  "hash": "9d49d2e1392c",
+  "hash": "ab75605c8099",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1h\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice, field_type\n| %\"{{Unit}}\"  as %\"{{Unit}} Count\"\n| fields -%\"{{Unit}}\"\n| transpose row _timeslice column field_type",
+  "query": "_view=sumologic_search_usage_per_query  user_name=*sumosupport*\n| geoip remote_ip\n| lookup asn,organization from asn://default on ip=remote_ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (country_name matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n\n| count_distinct(query) as distinct,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events by query_type,asn_geo\n| bytes_scanned / 1024/1024/1024 as scan_gb | fields -bytes_scanned\n| sort searches",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,51 +12,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Tracingsources",
-      "description": "",
+      "name": "expected_asn_geo_regex",
+      "description": "regular expression for expected asn geo strings",
       "dataType": "ANY",
-      "value": "sourcecategory_tracing_volume"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
+      "value": ".*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/sumologic_login_api_activity.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Tracing",
-      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Trend of {{Tracingsources}}",
+      "folder": null,
+      "dashboardName": "Sumo Logic Login and API Activity",
+      "dashboardDescription": "",
+      "panelTitle": "Sumosupport User Search Activity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-2",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_Http Input\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"aggregationType\":\"average\",\"groupBy\":[]},\"color\":{\"family\":\"Categorical Default\"}}",
-      "rowContext": [],
+      "panelKey": "panel8F6CCF5AA77A6B47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Sumologic support account activity (No filters apply to these panels)"
+      ],
       "variables": [
         {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
+          "name": "expected_asn_geo_regex",
+          "defaultValue": ".*",
+          "values": "regular expression for expected asn geo strings",
           "allowMultiSelect": false
         },
         {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
+          "name": "user",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_asn_geo",
+          "defaultValue": "*",
+          "values": "exception,normal",
           "allowMultiSelect": false
         }
       ]

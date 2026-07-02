@@ -1,9 +1,9 @@
 {
   "id": "q1117",
-  "hash": "ba3d0473ff55",
+  "hash": "ceb995b49f1e",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}} \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m \n| sum(data_scanned_bytes) as data_scanned_bytes by query_type, _timeslice \n| int(data_scanned_bytes/1Gi) as data_scanned_bytes\n| transpose row _timeslice column query_type",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\"\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name, query_start_time, query_end_time\n| query_end_time - query_start_time as query_time_range_hrs\n| query_time_range_hrs / 3600000 as query_time_range_hrs\n|data_scanned_bytes / 1Gi as sizeInGB\n| count (query) as query_count, sum(sizeInGB) as total_data_scanned_GB by query, user_name\n| total_data_scanned_GB/query_count as %\"Average Data Scanned per Query\"\n| fields query, query_count, %\"Average Data Scanned per Query\", total_data_scanned_GB, user_name\n| format( \"%.2f\",%\"Average Data Scanned per Query\") as %\"Average Data Scanned per Query\"\n| format( \"%.2f\",total_data_scanned_GB) as total_data_scanned_GB\n| sort by total_data_scanned_GB\n| limit 50",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "tier",
-      "description": "",
+      "name": "query_type",
+      "description": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "column",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Search Audit",
-      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
-      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
-      "panelTitle": "Scanned Bytes Used (GB) by Query Type",
+      "folder": "Flex",
+      "dashboardName": "Flex - Feature Level Scan Volume",
+      "dashboardDescription": "The Feature Level Scan Volume dashboard provides visibility into the scan volume at a feature level in order to monitor and control cost at a feature level.",
+      "panelTitle": "Top 50 Expensive Queries",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel9e3aa8c98984ca4e",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"Interactive Dashboard\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Interactive Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Scheduled Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Search API\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Unknown\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}}],\"series\":{}}",
+      "panelKey": "panel0C956AB2AFE0C845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
       "rowContext": [
-        "Monitoring Your Usage by Tier"
+        "Credits Conversion"
       ],
       "variables": [
         {
-          "name": "tier",
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
           "defaultValue": "*",
-          "values": null,
+          "values": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
           "allowMultiSelect": false
         }
       ]

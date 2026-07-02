@@ -1,9 +1,9 @@
 {
   "id": "q0761",
-  "hash": "6d47c127026c",
+  "hash": "004e24a38e19",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_network\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(description)\n| count by description\n| order by _count",
+  "query": "_index=sec_signal \n[subquery:(((_index=sumologic_audit_events _sourcecategory=cseinsight) or (_index=sumologic_system_events _sourcecategory=cseinsight)))\n| json field=_raw \"insight.readableId\" as insight_readableid\n| json field=_raw \"insight.signals[*]\" as signals_array\n| parse regex field=signals_array \"entityId\\\"\\:\\\"(?<EntityId>.*?)\\\".*?\\\"\" multi\n| where insight_readableid =\"{{insightid}}\"\n| count by EntityId\n| compose entityId keywords\n]\n| timeslice 1d | count _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,103 +12,33 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "user_username",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "device_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "srcDevice_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "dstDevice_ip",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "device_hostname",
+      "name": "insightid",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Network Records",
-      "dashboardDescription": "This dashboard provides analysis of Network Records.",
-      "panelTitle": "Descriptions",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Insight Explorer",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Entity Activities",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD559EFB996638B45",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panelPANE-6BDCACF78901EA48",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12,\"title\":\"Date\"},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"Signal count\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Diverging 1\"},\"thresholdsSettings\":{\"fillRemainingGreen\":true,\"showThresholds\":true,\"thresholds\":{\"warning\":{\"display\":false,\"comparator\":\"greater_or_equal\",\"value\":6},\"critical\":{\"display\":false,\"comparator\":\"greater_or_equal\",\"value\":12}}},\"overrides\":[]}",
+      "rowContext": [
+        "Insight Details"
+      ],
       "variables": [
         {
-          "name": "user_username",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "device_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "srcDevice_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "dstDevice_ip",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "device_hostname",
+          "name": "insightid",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

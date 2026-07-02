@@ -1,11 +1,11 @@
 {
   "id": "q0815",
-  "hash": "76cb00327464",
+  "hash": "856c3689d1ab",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_*_events _sourceCategory=cseInsight _sourceName=Insight*\n| json field=_raw \"insight.entityId\" as entity\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.status\" as resolution\n| where !(isBlank(resolution))\n| count by resolution",
+  "query": "_index=sec_signal  Vulnerability*\n| count",
   "queryParameters": [],
-  "viewerType": "bar",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,14 +13,16 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC KPIs",
-      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
-      "panelTitle": "Insight Resolution Statuses",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "Vulnerable Assets",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelDF37382E88D0694C",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"color\":{\"family\":\"scheme1\"},\"series\":{},\"overrides\":[]}",
-      "rowContext": [],
+      "panelKey": "panelE752CCD4A86E1A4D",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":3,\"color\":\"#16943E\"},{\"from\":4,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
+      "rowContext": [
+        "Daily Alert Breakdown Detailed"
+      ],
       "variables": []
     }
   ]

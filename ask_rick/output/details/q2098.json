@@ -1,0 +1,127 @@
+{
+  "id": "q2098",
+  "hash": "6ee3df884708",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=metadata_*\nsourcecategory = {{sourcecategory}}\ncollector = {{collector}}\nindex = {{index}}\nsourcehost = {{sourcehost}}\n| where (\"{{global_regex_search}}\" = \".*\") or (concat(collector,index,source,sourcecategory,sourcehost) matches /(?i){{global_regex_search}}/)\n| count as events by sourcehost | sort sourcehost asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "index",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcehost",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "global_regex_search",
+      "description": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+      "dataType": "ANY",
+      "value": ".*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_portal/demo.portal.dash.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Log Portal Demo",
+      "dashboardDescription": "A demo of a log discovery portal using a scheduled view to summarize ingested logs.",
+      "panelTitle": "Sourcehost",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3603339CAD23084A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "These panels show values found for each matching metadata for your search scope"
+      ],
+      "variables": [
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "index",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcehost",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "global_regex_search",
+          "defaultValue": ".*",
+          "values": "keyword,foo.*bar,[a-z]+\\.[0-9]+",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "rick.au",
+          "values": "rick.au,service,service.au,service.us2,service.fra,service.dub,service.tky,service.mum,service.fed",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

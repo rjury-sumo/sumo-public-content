@@ -383,11 +383,14 @@ def main():
     by_hash, by_id = {}, {}
 
     def index(e):
+        # Match strictly by hash when present (stable across re-extraction). Only
+        # index by id for hash-less entries, so a renumbered id can't mis-attach a
+        # description to the wrong query after a full re-extract.
         if not isinstance(e, dict):
             return
         if e.get("hash"):
             by_hash[e["hash"]] = e
-        if e.get("id"):
+        elif e.get("id"):
             by_id[e["id"]] = e
 
     enrich_dir = os.path.join(out_dir, "enrichment")

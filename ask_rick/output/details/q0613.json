@@ -1,9 +1,9 @@
 {
   "id": "q0613",
-  "hash": "513ac303e246",
+  "hash": "b999d9cfb813",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal {{{Keyword}}}\n  \n\n| formatDate(toLong(createdTimestamp), \"yyyy-MM-dd HH:mm:ss\") as timestamp\n\n| urlencode(id) as signalId\n| concat(\"https://\",\"{{service_endpoint}}\",\".sumologic.com/sec/signal/\",signalId,\"\") as url\n\n| toUrl(url,\"↪\") as link\n\n| count as Total link, timestamp, name, severity\n| order by timestamp\n| fields -Total",
+  "query": "// id=@date_range:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=date_range minimize=\"{{minimize}}\" \n| formatDate(toLong(start_date), \"MMM dd, yyyy\") as start_date\n| formatDate(toLong(end_date), \"MMM dd, yyyy\") as end_date\n| concat(start_date,  \" - \") as date\n| concat(date, end_date) as date\n| fields date",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,53 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
-      "description": "",
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "service_endpoint",
-      "description": "",
-      "dataType": "ANY",
-      "value": "service.us2"
+      "value": "False positive"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Signals for {{{Keyword}}}",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "Date Range",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel336504BD9BB83B4B",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":5,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "panelKey": "panelPANE-398EEA41A553CB48",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"No Insights\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":true,\"rounding\":0,\"valueFontSize\":30,\"labelFontSize\":12,\"thresholds\":[{\"id\":0,\"value\":null,\"color\":\"#0072a3\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false},\"title\":{\"fontSize\":18}}",
       "rowContext": [
-        "INSIGHTS (Copy)"
+        "## Eligible Algorithmic Insights\n\nThe funnel depicts Algorithmic insights that remain after filtering insights based on\n* date range\n* insights containing dynamic severity rules\n* non-algorithmic dete"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
           "allowMultiSelect": false
         },
         {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": null,
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
           "allowMultiSelect": false
         }
       ]

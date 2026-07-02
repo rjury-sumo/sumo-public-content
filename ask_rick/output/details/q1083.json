@@ -1,47 +1,29 @@
 {
   "id": "q1083",
-  "hash": "761650f260d6",
+  "hash": "c2d7e6c7d795",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=users RolesAssignedToUserUpdated\n| json \"eventName\", \"eventTime\", \"rolesDeleted[*]\", \"operator.sourceIp\" as EventName, EventTime, RolesRemoved, AdminIp nodrop\n| where EventName=\"RolesAssignedToUserUpdated\"\n| parse regex field=RolesRemoved \"\\\"roleName\\\":\\\"(?<RoleName>.*?)\\\"\" multi\n| where AdminIp matches \"{{AdminIp}}\"\n|count as Count by RoleName\n| sort by Count\n| limit 10",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "AdminIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "bar",
+  "query": "_view=sumologic_search_usage_per_query query_type=\"Scheduled Search\"\n| sum(data_scanned_bytes) as scanned_bytes, sum(data_retrieved_bytes) as retrieved_bytes by user_name, query, session_id, execution_duration_ms \n| round(execution_duration_ms/1000) as duration_seconds \n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| replace(scope_section_raw,\" \",\"\") as scope_section \n| parse regex field=scope_section_raw \"_(?<meta>sourcecategory|sourcehost|collector|source|sourcename)\\s*=\"  nodrop\n| parse regex field=scope_section_raw \"_(?<idx>view|index)\\s*=\"  nodrop  \n| where ( isEmpty(idx) AND isEmpty(meta) )\n| fields -queryLower,session_id,execution_duration_ms, scope_section_raw,_some_matched, scope_section,meta,idx",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
-      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
-      "panelTitle": "Top Roles Removed From Users",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Queries Characteristics and Opportunities to Improve",
+      "dashboardDescription": "The Enterprise Search Audit - Queries Characteristics and Opportunities to Improve dashboard provides information about which of your queries take and don’t take advantage of important optimization techniques and metadata to improve efficiency.",
+      "panelTitle": "Scheduled Searches without Metadata",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0c80e2ecbfa6bb49",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "AdminIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel93da686ba51bb847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Search Optimization Considerations"
+      ],
+      "variables": []
     }
   ]
 }

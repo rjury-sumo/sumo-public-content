@@ -1,67 +1,27 @@
 {
   "id": "q0400",
-  "hash": "30c712f1e122",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} statefulset={{statefulset}} metric=container_cpu_usage_seconds_total | rate | sum by statefulset |sum",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "statefulset",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "svp",
+  "hash": "c17a0f3fc5ad",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit \n| where _sourceCategory=\"account_management\"\n| count as count by _messagetime, sourceuser, action, class, target, status | sort by _messagetime\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss.SSS\", \"UTC\") as time\n| fields -_messagetime, count\n| fields time, sourceuser, action, class, target, status",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
-      "panelTitle": "CPU Usage",
+      "folder": "Audit",
+      "dashboardName": "Account Management Overview",
+      "dashboardDescription": "See see trends in operation for users, roles, and access as well as Admin activities.",
+      "panelTitle": "Recent Admin Activities",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-71E7254A8DDF794F",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"svp\":{\"option\":\"Average\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":30,\"color\":\"#16943E\"},{\"from\":31,\"to\":70,\"color\":\"#DFBE2E\"},{\"from\":70,\"to\":100,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false},\"gauge\":{\"show\":true,\"min\":0,\"max\":100}},\"series\":{}}",
-      "rowContext": [
-        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statefulset",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelcc5f68f48ccebb42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

@@ -1,53 +1,29 @@
 {
   "id": "q0876",
-  "hash": "2fd4a0e2f8ae",
+  "hash": "8bd3aca1fb65",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\"\n| count_distinct(device_hostname)",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_username",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "svp",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| where vendor = \"Microsoft\"\n| count by  contentType, name, matchExpression, severity,vendor,product, entity_type\n| sort by _count,name,severity",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - User Telemetry",
-      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
-      "panelTitle": "Distinct Hosts",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signals by Product",
+      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
+      "panelTitle": "Microsoft Signals Summary",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel92F9DB3B86EC8940",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"hideLabel\":false,\"label\":\"Host(s)\"}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "user_username",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelABD163D3B0F1284E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Microsoft"
+      ],
+      "variables": []
     }
   ]
 }

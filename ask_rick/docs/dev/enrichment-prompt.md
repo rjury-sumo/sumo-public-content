@@ -6,8 +6,12 @@ Then feed the result back into the webview. Setup is copy-paste.
 ## Set up the project (once)
 1. **Claude Desktop → new Project.** Name it e.g. `Sumo Query Library — Enrichment`. Pick your model.
 2. **Add project knowledge:** upload `ask_rick/output/enrichment_input.json`
-   (the slim, upload-ready file — ~1.1 MB, only the fields enrichment needs).
-   Regenerate it any time with `python3 ask_rick/scripts/make_enrichment_input.py`.
+   (slim, grouped-by-dashboard, only the fields enrichment needs).
+   Regenerate any time with `python3 ask_rick/scripts/make_enrichment_input.py`.
+   **Top-up run** (after adding dashboards / a fresh extract): run
+   `python3 ask_rick/scripts/make_enrichment_input.py --missing-only` and upload
+   `enrichment_input_missing.json` instead — it contains only queries with no description yet
+   (matched by hash). Append its results to the existing `enrichment.json`.
 3. **Paste the block below into the project's Custom Instructions** (or just send it as the
    first message).
 

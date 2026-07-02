@@ -1,9 +1,9 @@
 {
   "id": "q0206",
-  "hash": "a884a7105a90",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} metric=kube_hpa_status_desired_replicas | quantize 1m | delta",
+  "hash": "ea059092978b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n  {{{keywords}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n| parse regex field=tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n//| count by attack_stage,tags | sort _count\n\n//| where tagname matches \"_mitreAttackTech*\"\n//|  sum(is_generated) as created by tagvalue,rule,product,vendor,entityid,severity,description| created * severity as total_sev | sort total_sev\n| values(entityid) as entity_list,max(severity) as max_sev,count_distinct(entityid) as entities by rule,tagname,tagvalue,product,vendor,severity | sort max_sev,rule asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,41 +12,58 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - HPA v4.6",
-      "dashboardDescription": "The Kubernetes - HPA dashboard provides a high-level view of the health of the Horizontal Pod Autoscalar.",
-      "panelTitle": "Changes in Desired Replicas",
+      "folder": "Signals",
+      "dashboardName": "Signals Console (sec_signal)",
+      "dashboardDescription": "",
+      "panelTitle": "Rules With Tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel5E87872591479A47",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \",\"maximum\":100,\"minimum\":-15}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Light\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"Max\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Min\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Desired\"}},{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Current\"}}]}",
+      "panelKey": "panel1F95FA099698C845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Note: Selecting cluster name and hpa is mandatory for dashboard to work"
+        "Tagging"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "hpa",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
+          "values": "keyword,wildcarded*,// any sumo syntax",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Signals Console sec_signal (Tuning Pack)",
+      "dashboardDescription": "Detailed review of sec_signal events matching a keyword expresison.",
+      "panelTitle": "Rules With Tags",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1F95FA099698C845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Tagging"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         }
       ]

@@ -1,49 +1,29 @@
 {
   "id": "q0923",
-  "hash": "9c36ce3c15d9",
+  "hash": "52667a05de18",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal \n {{{keywords}}}\n \n| where !(isempty(suppressedreasons))\n| if (isempty(suppressedReasons),\"NO\",\"YES\") as suppressed\n| where suppressed = \"YES\"\n| if (suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n| sum(is_suppressed) as suppressed by ruleName | sort by suppressed",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "bar",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingForIndexEnabled OR DataForwardingForIndexUpdated OR DataForwardingForIndexDisabled)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"DataForwardingForIndexEnabled\" ,\"DataForwardingForIndexUpdated\" ,\"DataForwardingForIndexDisabled\")\n| count as Count by EventName",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Signal Analysis",
-      "dashboardName": "Signal Analysis - Suppression",
-      "dashboardDescription": "This dashboard shows an overview and some detailed tabular views for reflected CSE Signal events, specifically mapping, parsers and suppression.",
-      "panelTitle": "Rule Signal Counts  Showing Suppression Count",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Management Overview",
+      "dashboardDescription": "Data Forwarding Management - Overview DashBoard provides an at-a-glance view of trends for destination types and the distribution of destination types, such as  Amazon S3, hitachi, Syslog, and Generic REST. Visual representations for the distribution of data forwarding destinations and data forwarding indexes are also shown.",
+      "panelTitle": "Distribution Of Data Forwarding Index",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel0A9E954A96FCAB46",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":0,\"labelFontSize\":10,\"title\":\"rule_name\",\"labelMaxWidth\":250,\"labelWrap\":false},\"axisY\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"gridThickness\":1,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"},\"axisY2\":{\"title\":\"\",\"titleFontSize\":10,\"titleFontFamily\":\"Lab Grotesque Medium, \\\"Arial Bold\\\", sans-serif\",\"titleFontColor\":\"#EBEFF2\",\"titleFontWeight\":\"normal\",\"labelFontColor\":\"#EBEFF2\",\"lineColor\":\"#DDE4E9\",\"stripLines\":null,\"lineThickness\":0,\"labelFontSize\":10,\"tickColor\":\"#344666\",\"logarithmic\":false,\"linear\":false,\"unit\":{\"value\":\"\",\"isCustom\":false},\"gridThickness\":0,\"valueFormatString\":\"\",\"gridColor\":\"#344666\",\"labelFontFamily\":\"Lab Grotesque Regular, \\\"Arial\\\", sans-serif\",\"labelFontWeight\":\"normal\"}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"legend\":{\"enabled\":false}}",
+      "panelKey": "paneleb2bc0f39073284f",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
       "rowContext": [
-        "About"
+        "Data Source Type / Format Type"
       ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "keyword,wildcarded*,// any sumo syntax",
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

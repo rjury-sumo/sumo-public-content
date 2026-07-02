@@ -1,67 +1,27 @@
 {
   "id": "q0405",
-  "hash": "de92ed7c859f",
+  "hash": "1e6ba8408d0e",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "cluster={{cluster}} statefulset={{statefulset}} (error or critical)\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by statefulset,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "statefulset",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sumologic_audit class=role (action=create or action=delete or action=modify) status=SUCCESS\n| where _sourceCategory=\"account_management\"\n| timeslice 12h\n| count by _timeslice, action\n| transpose row _timeslice column action",
+  "queryParameters": [],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
-      "panelTitle": "Errors  (Latest 100 Errors)",
+      "folder": "Audit",
+      "dashboardName": "Account Management Overview",
+      "dashboardDescription": "See see trends in operation for users, roles, and access as well as Admin activities.",
+      "panelTitle": "Role Operation Trend",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-69CFDEA495B71844",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
-      "rowContext": [
-        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
-      ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statefulset",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel7b41f29abc518842",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

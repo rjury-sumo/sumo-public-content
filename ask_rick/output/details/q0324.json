@@ -1,9 +1,9 @@
 {
   "id": "q0324",
-  "hash": "73d0bd1ad5b7",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_resource_limits cluster={{cluster}} pod={{pod}} namespace={{namespace}} container=* resource=memory   | quantize 1m |eval _value / 1000000 |  min",
+  "hash": "30600217084f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar* {{keywords}}\n AutomationAction*\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n//\n| json field=details \"automation_engine\" nodrop\n| json field=details \"error\" nodrop\n| json field=details \"rule_id\" as rule_id\n| json field=details \"rule_name\"\n| json field=details \"status\" nodrop\n| json field=details \"name\"\n//\n| count as events by _messagetime,eventname,status,name,rule_id,rule_name,error\n| sort _messagetime | fields -events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_event_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Memory Usage vs Limits vs Requests (MB)",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Events Overview",
+      "dashboardDescription": "sumologic_system_events from automation service or SOAR",
+      "panelTitle": "Automation Action Event Log",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-32ea68308710994b",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2},\"series\":{\"metric=min(kube_pod_container_resource_limits)\":{\"color\":\"yellow\",\"type\":\"area\",\"lineColor\":\"red\",\"fillOpacity\":\".2\"},\"metric=max(container_memory_working_set_bytes)\":{\"color\":\"#e0e0e0\",\"lineThickness\":1.5},\"metric=min(kube_pod_container_resource_requests)\":{\"color\":\"#00BB00\",\"type\":\"area\",\"fillOpacity\":\".2\"}},\"legend\":{\"enabled\":true},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"color\":{\"family\":\"Diverging 2\"}}",
+      "panelKey": "panelDCD940B9AB3EAA40",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
       "rowContext": [
-        "Resource Utilization"
+        "Automation Actions"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_timeslice",
+          "defaultValue": "1h",
+          "values": "5m,15m,1h,3h,1d",
           "allowMultiSelect": false
         }
       ]

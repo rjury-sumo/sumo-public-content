@@ -1,0 +1,103 @@
+{
+  "id": "q2092",
+  "hash": "dcabf6071d5e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| _view as index\n| values(index) as indexes,first(_raw) as example,values(_collector) as collectors, values(_source) as sources, values(_sourcename) as sourcenames, count by _sourcecategory\n| if(length(example)>500,concat(substring(example,0,500),\"...\"),example) as example\n| sort _sourcecategory asc,indexes asc,_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "category",
+      "description": "Labs*,prod*,test*,stage*,dev*",
+      "dataType": "ANY",
+      "value": "Labs*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "search_keywords",
+      "description": "rick",
+      "dataType": "ANY",
+      "value": "rick"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_explorer_2024.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Log Explorer - Find My Log Metadata",
+      "dashboardDescription": "",
+      "panelTitle": "Example Log Events",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel883FF8CF88650840",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "category",
+          "defaultValue": "Labs*",
+          "values": "Labs*,prod*,test*,stage*,dev*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_keywords",
+          "defaultValue": "rick",
+          "values": "rick",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_index",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcecategory",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_collector",
+          "defaultValue": "no",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_source",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcename",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_org",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "live.us2.sumologic.com",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

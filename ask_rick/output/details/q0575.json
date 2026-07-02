@@ -1,9 +1,9 @@
 {
   "id": "q0575",
-  "hash": "99f740ab494d",
+  "hash": "b799c3e80db4",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cse*) \nOR\n(_index=sumologic_system_events _sourcecategory=cse* )\n\n*Mapping*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Mapping*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"logMapping\"\n\n//\n| json field=logMapping \"id\" \n| json field=logMapping \"name\"\n| json field=logMapping \"source\"\n| json field=logMapping \"recordType\"\n| json field=logMapping \"enabled\"\n| json field=logMapping \"vendor\"\n| json field=logMapping \"product\"\n| json field=logMapping \"fields\" nodrop\n\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,source,recordtype,vendor,product,fields | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
+  "query": "_index=sec_signal  {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{keywords",
+      "name": "{Keyword",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Cloud SIEM",
-      "dashboardName": "Cloud SIEM - Rules and Mapping Changes",
-      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
-      "panelTitle": "Log Mapping Change Details",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Overview",
+      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
+      "panelTitle": "Signals for {{{Keyword}}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelDAC9736494B82B4D",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelD5889259890EE94B",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Signals\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#f0731f\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#f0731f\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Log Mappings"
+        "INSIGHTS (Copy)"
       ],
       "variables": [
         {
-          "name": "keywords",
+          "name": "Keyword",
           "defaultValue": "*",
-          "values": "keyword,*starword,",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0999",
-  "hash": "aae05df4f9b4",
+  "hash": "ffa4b680123a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPermissionsUpdated\n| json \"eventName\", \"eventTime\", \"contentIdentity.name\", \"contentIdentity.type\", \"operator.email\", \"permissionsAdded\" as EventName, EventTime, ContentName, ContentType, UserEmail, permissionsAdded nodrop\n| where EventName=\"ContentPermissionsUpdated\"\n| parse regex field=permissionsAdded \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi nodrop\n| json field=json_added_blob \"permissionSourceType\" as TargetPermissionSourceType nodrop //\n| json field=json_added_blob \"permissions\", \"roleIdentity.roleName\", \"userIdentity.userEmail\" as PermissionsAdded, RoleName, TargetUserEmail nodrop\n| if(isNull(RoleName),if(isNull(TargetUserEmail),\"Organization\",TargetUserEmail),RoleName) as Target_User\n|where  ContentName matches \"{{ContentName}}\" and EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\"\n|count by EventTime, ContentName, ContentType, UserEmail, TargetPermissionSourceType, Target_User, PermissionsAdded\n| sort by EventTime\n| fields - _count",
+  "query": "_index=sumologic_audit_events _sourceCategory=\"saml\" (SamlConfigurationCreated OR SamlConfigurationUpdated OR SamlConfigurationDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"samlConfigurationIdentity.id\", \"samlConfigurationIdentity.configurationName\", \"samlConfiguration\", \"to\", \"from\" as EventName, EventTime, Admin, AdminId, AdminIp, ConfigurationId, ConfigurationName, ConfigurationDetails, CurrentValue, PreviuosValue nodrop\n| where  EventName matches \"{{EventName}}\"  \n| where EventName in (\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\") \n|count by EventName, EventTime, ConfigurationName, Admin, AdminId, AdminIp, ConfigurationId, ConfigurationDetails, CurrentValue, PreviuosValue\n| fields - _count, AdminId, ConfigurationId, ConfigurationDetails, CurrentValue, PreviuosValue",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,31 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "ContentName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
       "name": "EventName",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserEmail",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -49,30 +25,16 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Permission Updated, Synchronized",
-      "dashboardDescription": "Content - Permission Updated, Synchronized DashBoard provides detailed information on content permissions that have been added or deleted, as well as content that has been synchronized. The dashboard is organized according to Content Synchronization and Content Permissions.",
-      "panelTitle": "Recent - Permissions Added to Content",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - SAML Activities",
+      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
+      "panelTitle": "Recent - SAML Configuration Activity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel4903a9a8ac073b46",
+      "panelKey": "panel8094f16181ab0a45",
       "visualization": "table",
       "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Content Permission"
-      ],
+      "rowContext": [],
       "variables": [
-        {
-          "name": "ContentName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
         {
           "name": "EventName",
           "defaultValue": "*",

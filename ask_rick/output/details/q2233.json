@@ -1,0 +1,79 @@
+{
+  "id": "q2233",
+  "hash": "a6e43893fde9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_search_usage_per_query\n  AND !(status_message = \"Query canceled\")\n  AND !(user_name = security+sumosupport+*@sumologic.com) \n\n// Excluding current day (incomplete data set)\n| formatdate(now(), \"YYYY-MM-dd\") as currenDay\n| formatdate(_messageTime, \"YYYY-MM-dd\") as eventDay\n| where eventDay != currenDay\n\n// Excluding first day in the query (incomplete data set)\n| formatdate(queryStartTime(), \"YYYY-MM-dd\") as queryStartDay\n| where eventDay != queryStartDay\n\n// selecting FLEX scans only\n| json field=scanned_bytes_breakdown_by_metering_type \"Flex\" as bytes nodrop\n\n// Aggregating per day - sum of bytes as GBytes per data tier\n| timeslice 1d\n| sum(bytes) as bytes by _timeslice\n| bytes/1Ti as tbytes\n\n| {{SCAN}} as credit_cost\n\n// Calculating the sum of credits used per day\n| tbytes * credit_cost as credits\n| sum(credits) as credits by _timeslice\n| avg(credits) as credits\n| round(credits) as credits",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "SCAN",
+      "description": "2.70",
+      "dataType": "ANY",
+      "value": "2.70"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Flex.Credits.v3.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Flex Credits (V3)",
+      "dashboardDescription": "",
+      "panelTitle": "",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5A66A8389A15E84C",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\",\"noDataMessage\":\"0\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Sum\",\"unitify\":false,\"label\":\"Avg Daily Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#496916\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":150}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "SEARCH/SCAN CREDITS"
+      ],
+      "variables": [
+        {
+          "name": "INGEST_CSE",
+          "defaultValue": "5.63",
+          "values": "5.63",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_METRICS",
+          "defaultValue": "0.68",
+          "values": "0.68",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_TRACING",
+          "defaultValue": "3.85",
+          "values": "3.85",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "INGEST_DIMENSION",
+          "defaultValue": "sourcecategory",
+          "values": "collector,source,sourcecategory,sourcehost,sourcename",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN",
+          "defaultValue": "2.70",
+          "values": "2.70",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "SCAN_DIMENSION",
+          "defaultValue": "query_type",
+          "values": "content_name,query_type,query,scanned_partition_count,user_name",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

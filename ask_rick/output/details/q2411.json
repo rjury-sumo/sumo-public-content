@@ -1,0 +1,101 @@
+{
+  "id": "q2411",
+  "hash": "03e26e98e7f0",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat path://\"/Library/Users/YOURPATHHERE/ossec_rules\"\n| where group matches /{{group_matches}}/\n| where sourcefile matches /{{file_matches}}/\n| where description matches /{{description_matches}}/\n| where level >= {{min_level}}\n| lookup Title as text from path://\"/Library/Users/YOURPATHHERE/ossec_level\" on level = level\n\n| count by level ,text | sort level asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "group_matches",
+      "description": "",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "file_matches",
+      "description": "",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "description_matches",
+      "description": ".*",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_level",
+      "description": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+      "dataType": "ANY",
+      "value": "7"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "lookups/ossec/ossec.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "OSSEC Rules",
+      "dashboardDescription": "",
+      "panelTitle": "Rules by severity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel36C7023199C53847",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"maxNumOfSlices\":30},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "min_level",
+          "defaultValue": "7",
+          "values": "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "group_matches",
+          "defaultValue": ".*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "file_matches",
+          "defaultValue": ".*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "description_matches",
+          "defaultValue": ".*",
+          "values": ".*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "q2073",
+  "hash": "482e9906c79b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} _sourceCategory=*events  *node*\n// not \"\\\"type\\\":\\\"Normal\\\"\"\n// exclude any annoying messages here\ninvolvedObject\n//node scal*\nnot \"Nameserver limits were exceeded\"\nnot \"Liveness probe failed\"\nnot FailedAttachVolume\nnot *hassufficient*\nnot *NodeHasNo*\nnot \"Node is not ready\"\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.message\" as message\n| where reason matches /(?i)node|scal/  or message matches /(?i)node[ \\.]/\n| json field=_raw \"object.involvedObject.kind\" as type\n| where !(type IN (\"pod\"))\n| json field=_raw \"object.involvedObject.name\" as name\n| json field=_raw \"object.type\" as level\n\n//| json field=_raw \"object.metadata.namespace\" as namespace\n\n| timeslice {{quantize_interval}}\n| count as events,min(_messagetime) as first, max(_messagetime) as last by cluster,reason,type,level,name,message\n| sort last | formatdate(tolong(last),\"yyyy-MM-dd HH:mm:ss\") as last| formatdate(tolong(first),\"yyyy-MM-dd HH:mm:ss\") as first",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Node Scale Events",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDE08E89C9AFD0A4E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"table\",\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"decimals\":0,\"roundDataPoints\":true,\"fontSize\":12,\"pivotBy\":[],\"sortBy\":\"_value\",\"aggregationType\":\"sum\",\"sortDir\":\"DESC\"},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true}}",
+      "rowContext": [
+        "Node Status"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

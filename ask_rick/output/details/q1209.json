@@ -1,65 +1,29 @@
 {
   "id": "q1209",
-  "hash": "aee9724826a0",
+  "hash": "46928215eb28",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 5m\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n| compare timeshift 1d",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Tracingsources",
-      "description": "",
-      "dataType": "ANY",
-      "value": "sourcecategory_tracing_volume"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
-      "dataType": "ANY",
-      "value": "billedBytes"
-    }
-  ],
-  "viewerType": "line",
+  "query": "_index=sumologic_audit action=login status=SUCCESS\n_sourceCategory=\"user_activity\" | count by sourceuser,interface | sort _count",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/usage_key_stats.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Tracing",
-      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Today vs Yesterday of {{Tracingsources}}  by {{Unit}}",
+      "folder": null,
+      "dashboardName": "Sumo Usage Key Stats",
+      "dashboardDescription": "",
+      "panelTitle": "User Logins",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel230D55689E47E849",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[\"A\"],\"series\":{},\"overrides\":[{\"series\":[\"billedBytes\"],\"queries\":[],\"properties\":{\"name\":\"Today\"}},{\"series\":[\"billedBytes_1d\"],\"queries\":[],\"properties\":{\"name\":\"Yesterday\"}},{\"series\":[\"spansCount\"],\"queries\":[],\"properties\":{\"name\":\"Today\"}},{\"series\":[\"spansCount_1d\"],\"queries\":[],\"properties\":{\"name\":\"Yesterday\"}}]}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelCE97615EBFC1C947",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "User Login Activity"
+      ],
+      "variables": []
     }
   ]
 }

@@ -1,9 +1,9 @@
 {
   "id": "q1040",
-  "hash": "7840b8059c31",
+  "hash": "761650f260d6",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=multiFactorAuthentication UserMultiFactorAuthenticationDisabled\n| json \"eventName\", \"eventTime\", \"userIdentity.userEmail\", \"operator.sourceIp\" as EventName, EventTime, UserEmail, AdminIp nodrop\n| where EventName=\"UserMultiFactorAuthenticationDisabled\"\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventTime, UserEmail\n| sort by EventTime\n| fields - _count, EventTime",
+  "query": "_index=sumologic_audit_events _sourceCategory=users RolesAssignedToUserUpdated\n| json \"eventName\", \"eventTime\", \"rolesDeleted[*]\", \"operator.sourceIp\" as EventName, EventTime, RolesRemoved, AdminIp nodrop\n| where EventName=\"RolesAssignedToUserUpdated\"\n| parse regex field=RolesRemoved \"\\\"roleName\\\":\\\"(?<RoleName>.*?)\\\"\" multi\n| where AdminIp matches \"{{AdminIp}}\"\n|count as Count by RoleName\n| sort by Count\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,21 +18,21 @@
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
-      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
-      "panelTitle": "Recent Users Disabled MFA",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Top Roles Removed From Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8ce3a26aab78fa40",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panel0c80e2ecbfa6bb49",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {

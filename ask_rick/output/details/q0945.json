@@ -1,9 +1,9 @@
 {
   "id": "q0945",
-  "hash": "ac55a48ccb49",
+  "hash": "d08948e25a54",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"sourceIdentity.sourceId\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceId, Source, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\")\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorName matches \"{{CollectorName}}\"\n| if(isNull(Source), if (isNull(CurrentValue), \"-\", CurrentValue), Source) as Source\n| withtime Source\n| most_recent(Source_withtime) as SourceType by SourceId\n| where SourceType != \"-\"\n| count as Count by SourceType",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentCreated OR ContentDeleted OR ContentExported OR ContentImported)\n| json \"eventName\", \"eventTime\", \"adminMode\", \"contentIdentity.name\", \"contentIdentity.type\", \"operator.email\", \"operator.id\", \"operator.sourceIp\" as EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp nodrop\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and AdminMode matches \"{{AdminMode}}\"\n|count by EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - _count, UserId\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,53 +36,31 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "CollectorName",
-      "description": "",
+      "name": "AdminMode",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "pie",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Collector Management",
-      "dashboardName": "Enterprise Audit - Collector Sources Activities",
-      "dashboardDescription": "Collector Sources Activities DashBoard provides detailed information on created, updated and deleted sources, the top collectors where sources were added, active users, and one-day time comparisons. You can use pre-populated filters for a more granular view of selected data.",
-      "panelTitle": "Distribution By Existing Source Type",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Created, Deleted, Exported, Imported Content",
+      "dashboardDescription": "Content - Created, Deleted, Exported, Imported DashBoard provides detailed information on content that is created, deleted, exported, and imported. The dashboard is organized according to activities performed by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Recent - Content Created/Deleted/Exported/Imported",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panele4dd4e89ba18c846",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panel0b9bf0188b4d3a47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
       "variables": [
-        {
-          "name": "EventName",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
         {
           "name": "UserIp",
           "defaultValue": "*",
@@ -90,9 +68,15 @@
           "allowMultiSelect": false
         },
         {
-          "name": "CollectorName",
+          "name": "EventName",
           "defaultValue": "*",
-          "values": null,
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminMode",
+          "defaultValue": "*",
+          "values": "*",
           "allowMultiSelect": false
         }
       ]

@@ -1,0 +1,61 @@
+{
+  "id": "q2055",
+  "hash": "c5df39a892df",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "#A - #B along daemonset, cluster | quantize {{quantize_interval}} | where _value > 0",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "quantize_interval",
+      "description": "30s,1m,5m,15m",
+      "dataType": "ANY",
+      "value": "5m"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "DaemonSet Not Scheduled (desired vs current do not match)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF9282260ACD94843",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[\"latest\",\"min\",\"max\"]},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"type\":\"number\",\"showThresholds\":true,\"fillRemainingGreen\":true,\"numberThresholds\":{\"critical\":{\"display\":false,\"comparator\":\"greater\",\"value\":0},\"warning\":{\"display\":true,\"comparator\":\"greater\",\"value\":0}}},\"hiddenQueryKeys\":[\"A\",\"B\"],\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"visible\":false}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"visible\":false}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"{{cluster}} {{daemonset}}\"}}],\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"series\":{}}",
+      "rowContext": [
+        "DaemonSet Misscheduled"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,81 +1,103 @@
 {
   "id": "q0384",
-  "hash": "4eaadfb142ea",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} service={{service}} metric=kube_pod_container_status_waiting_reason | quantize 1m |  sum",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "service",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
-  "viewerType": "svp",
+  "hash": "b1fcc0ce014f",
+  "queryType": "Traces",
+  "queryMode": "Traces",
+  "query": "",
+  "queryParameters": [],
+  "viewerType": "traceListTable",
   "metricsQueryData": null,
-  "tracesQueryData": null,
+  "tracesQueryData": {
+    "filters": [
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "service",
+        "value": "{{service}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "deployment.environment",
+        "value": "{{environment}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "NumericMetricDescriptor",
+        "operator": ">",
+        "metric": "numErrors",
+        "value": "0"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "operation",
+        "value": "{{operation}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "status",
+        "value": "{{statusmessage}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      }
+    ]
+  },
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing errors - span details.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Pods Waiting",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-BEA083B3A1703948",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Pods\",\"rounding\":\"0\",\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"yellow\"},{\"from\":1,\"to\":null,\"color\":\"#ffb5b5\"}],\"useBackgroundColor\":true},\"hiddenQueryKeys\":[\"A\"],\"series\":{}}",
+      "folder": null,
+      "dashboardName": "Tracing Errors - Span Details",
+      "dashboardDescription": "",
+      "panelTitle": "Error Traces Matching Service and Environment",
+      "panelType": "TracesListPanel",
+      "panelKey": "panelPANE-F665F16BB527A94F",
+      "visualization": "traceListTable",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"traceList\",\"type\":\"traceListTable\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"displaySettings\":{\"chartType\":\"traceList\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Pods"
+        "Trace Metrics (metricfromtrace)"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "service",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "service",
-          "defaultValue": null,
+          "name": "environment",
+          "defaultValue": "default",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instance_url",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "url for your sumo instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "operation",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statusmessage",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

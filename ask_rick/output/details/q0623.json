@@ -1,9 +1,9 @@
 {
   "id": "q0623",
-  "hash": "d7482412c575",
+  "hash": "5a87eed89ff5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal\n{{{rule}}}\n\n_index=sec_signal\n{{{rule}}}\n| json field=entities \"[0].value\" as entityid nodrop\n//\n| json field=fullRecords \"[*].metadata_vendor\" as vendors nodrop\n| json field=fullRecords \"[*].metadata_sourceCategory\" as sourceCategories nodrop\n| json field=fullRecords \"[*].metadata_product\" as products nodrop\n//| json field=fullRecords \"[*].metadata_mapperName\" as mapperNames nodrop\n//| json field=fullRecords \"[*].metadata_deviceEventId\" as deviceEventIds nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n| parse regex field=vendors \"(?<vendor>[\\w\\d_ -]+)\" multi\n| count_distinct(id) as signals by vendor,sourcecategories,products //,deviceEventIds\n\n| parse regex field=products \"(?<product>[\\w\\d_ -]+)\" multi\n| max(signals) as signals by vendor,product,sourcecategories //,deviceEventIds\n\n| parse regex field=sourcecategories \"(?<sourceCategory>[\\w\\d_ \\\\\\/-]+)\" multi\n| max(signals) as signals by vendor,product,sourcecategory //,deviceEventIds\n\n//| parse regex field=deviceEventIds \"(?<deviceEventId>[^\\r\\n\\\"\\[\\]\\{\\},]+)\" multi\n//| max(signals) as signals by vendor,product,sourcecategory,deviceEventId",
+  "query": "// id=@false_positive_rate:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_res_count minimize=\"{{minimize}}\" \n| where insight_state = \"Optimized\"\n| max(count) by insight_state, resolution\n| fields -  insight_state\n| total _max as total_count\n| where resolution = \"False Positive\"\n| (_max * 100)/total_count as FPR\n| format(\"%.1f %%\", FPR) as FPR\n| fields FPR",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,35 +12,53 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{rule",
-      "description": "",
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
       "dataType": "ANY",
-      "value": ""
+      "value": "False positive"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Rule Overview",
-      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
-      "panelTitle": "Signal Record Metadata",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "False Positive Rate",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel8DC648C891BF6A43",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelF8690AA18988384A",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Optimized Insights\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"id\":0,\"value\":null,\"color\":\"#00a0d6\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Signals"
+        "Recommendations Summary"
       ],
       "variables": [
         {
-          "name": "rule",
-          "defaultValue": "THRESHOLD-S00096",
-          "values": null,
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
           "allowMultiSelect": false
         }
       ]

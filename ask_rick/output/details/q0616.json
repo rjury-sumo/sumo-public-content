@@ -1,33 +1,100 @@
 {
   "id": "q0616",
-  "hash": "1b913b0b6c27",
+  "hash": "2d9094741946",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_failure*\n| timeslice 15m\n//| count by metadata_sourceCategory, %\"fields.reason\", _timeslice\n| count by %\"fields.reason\", _timeslice\n| transpose row _timeslice column %\"fields.reason\"",
-  "queryParameters": [],
-  "viewerType": "column",
+  "query": "// id=@rule_severities_recommendations:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=rule_severities minimize=\"{{minimize}}\" \n| \"{{show_rules}}\" as variable_rules | \"{{deployment}}\" as variable_deployment | \"{{domain}}\" as domain | if(variable_rules = \"Rules with severity recommendations\", 0, -1) as delta_reference | if (variable_deployment = \"prod\", \".\", concat(\".\", variable_deployment, \".\")) as sumo_deployment | int(tunability_factor) as tunability | (current_severity - recommended_severity) as delta | abs(delta) as delta | int(delta) as delta\n| where delta > delta_reference\n| parse field=rule \"[*] *\" as rule_id, rule_name\n| concat(\"_index=sumologic_audit_events  _sourceCategory=cseInsight insightupdated \\\"\", rule_id, \"\\\" \\n| \\\"\", rule, \"\\\" as rule \\n| \\\"\", tunability ,\"\\\" as tunability \\n| \\\"\",optimized_count,\"\\\" as eligible_count \\n| %\\\"insight.entityid\\\" as entity_id \\n| %\\\"insight.entitytype\\\" as entity_type \\n| %\\\"insight.resolution\\\" as resolution \\n| where !isNull(resolution) \\n| where resolution in (\\\"False Positive\\\", \\\"No Action\\\") \\n| count by rule, tunability, eligible_count, entity_id, entity_type, resolution \\n| _count as insights_created\") as _query\n| urlencode(_query) as encode_query\n| concat(\"https://\", domain, sumo_deployment, \"sumologic.com/ui/#/search/@%s,%s@%s\") as _url\n| format(_url,start_date,end_date,encode_query) as request_url\n| fields - delta_reference, variable_rules | sort by tunability desc\n| tourl(request_url, toString(tunability)) as tunability\n| fields rule, current_severity, recommended_severity, signal_count, tunability, eligible_count, optimized_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
+      "dataType": "ANY",
+      "value": "False positive"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "show_rules",
+      "description": "All rules,Rules with severity recommendations",
+      "dataType": "ANY",
+      "value": "Rules with severity recommendations"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "deployment",
+      "description": "prod,us2,jp,in,fed,eu,de,ca,au",
+      "dataType": "ANY",
+      "value": "prod"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "domain",
+      "description": "service",
+      "dataType": "ANY",
+      "value": "service"
+    }
+  ],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Parsing and Mapping Troubleshooting",
-      "dashboardDescription": "This dashboard provides analysis on Records failed to parse or map.",
-      "panelTitle": "Failed Reason - Trend",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "Rule Severities - Current v. Recommended, sorted by Tunability",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelBC9E7E0A9FF10A40",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "panelKey": "panelPANE-276AFCCC9BF25A42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":5,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false},\"thresholdsSettings\":{\"type\":\"number\",\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"includes\",\"value\":1,\"toValue\":4},\"critical\":{\"display\":true,\"comparator\":\"includes\",\"value\":4,\"toValue\":10}},\"column\":\"A:delta\",\"highlightViolations\":false,\"textThresholds\":{\"warning\":{\"display\":true,\"values\":[]},\"critical\":{\"display\":true,\"values\":[]}}}}",
       "rowContext": [
-        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
+        "Recommended Rule Severities"
       ],
       "variables": [
         {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": null,
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q1044",
-  "hash": "083484b64981",
+  "hash": "cd4ea3876cdb",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=saml (AllowlistedUsersCreated OR AllowlistedUsersDeleted)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\") AND EventName matches \"{{EventName}}\"\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\") in EventName\n| transpose row _timeslice column EventName",
+  "query": "_index=sumologic_audit_events (_sourceCategory=users OR _sourceCategory=roles) (RolesAssignedToUserUpdated OR UsersAssignedToRoleUpdated)\n| json \"eventName\", \"eventTime\", \"operator.sourceIp\" as EventName, EventTime, AdminIp nodrop\n| where EventName in (\"RolesAssignedToUserUpdated\",\"UsersAssignedToRoleUpdated\")\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n| where AdminIp matches \"{{AdminIp}}\"\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,31 +12,31 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "AdminIp",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "map",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - SAML Activities",
-      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
-      "panelTitle": "Trend - AllowList Users",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Geo Location of Admins",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel291e527383324a4c",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "panelKey": "panel371c2e07b3d18a4b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {
-          "name": "EventName",
+          "name": "AdminIp",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

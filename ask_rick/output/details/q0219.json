@@ -1,9 +1,9 @@
 {
   "id": "q0219",
-  "hash": "e5c286fedae7",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}}  metric=kube_pod_container_resource_limits resource=cpu   | quantize 1m |  sum by namespace",
+  "hash": "13944fba3d1e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=\"asoc/SIGNAL/signals\"  {{{keywords}}}\n| json field=_raw \"rule_name\"\n| json field=_raw \"tags\"\n//| json field=_raw \"summary\"\n| json field=_raw \"entity_id\"\n| json field=_raw \"suppressed_reasons\" nodrop\n| if (isempty(suppressed_reasons),\"YES\",\"NO\") as suppressed\n| where suppressed matches \"{{suppressed}}\" \n//| json field=_raw \"content_type\"\n| json field=_raw \"rule_id\"\n| json field=_raw \"attack_stage\"\n////| json field=_raw \"severity\"\n////| json field=_raw \"description\"\n////| json field=_raw \"id\"\n////| json field=_raw \"objectClassification\"\n//| json field=_raw \"full_records[0].metadata_parser\" as metadata_parser nodrop\n//| json field=_raw \"full_records[0].metadata_product\" as product  nodrop\n//| json field=_raw \"full_records[0].metadata_vendor\" as vendor nodrop\n//| json field=_raw \"full_records[0].user_username\" as user_username nodrop\n//| json field=_raw \"full_records[0].metadata_deviceEventId\" as deviceEventId nodrop\n//| json field=_raw \"full_records[0].metadata_mapperName\" as mapperName nodrop\n//| json field=_raw \"full_records[0].fields\" as fields \n| count by attack_stage,tags | sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
@@ -24,41 +24,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
-      "description": "",
+      "name": "suppressed",
+      "description": "YES,NO,*",
       "dataType": "ANY",
-      "value": "*"
+      "value": "NO"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/CSE_Signals.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "CPUs Usage vs Requests vs Limits (Cores)",
+      "folder": null,
+      "dashboardName": "CSE Signals",
+      "dashboardDescription": "",
+      "panelTitle": "attack_stage and tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-a1abfa4eafd7db40",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\",\"title\":\"Cores\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"D\"],\"properties\":{\"name\":\"Requests - {{namespace}}\"}},{\"series\":[],\"queries\":[\"E\"],\"properties\":{\"name\":\"Limits - {{namespace}}\"}},{\"series\":[],\"queries\":[\"F\"],\"properties\":{\"name\":\"Usage - {{namespace}}\"}}]}",
+      "panelKey": "panel1C1F29C4B8C6DB47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Resource Utilization"
+        "B - Signals - Review Tabular Views"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,wildcarded*,// any sumo syntax",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_by",
+          "defaultValue": "rule_name",
+          "values": "rule_name,severity,user_username,entity_id,metadta_parser,product,vendor,mappername,attack_stage",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "suppressed",
+          "defaultValue": "NO",
+          "values": "YES,NO,*",
           "allowMultiSelect": false
         }
       ]

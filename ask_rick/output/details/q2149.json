@@ -1,0 +1,29 @@
+{
+  "id": "q2149",
+  "hash": "04a2fba4c8cc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH triggered statuscode\n| parse \"*[\" as message\n| keyvalue regex \"=([^\\]]*)\\]\" \"Name\",\"AlertType\",\"Destination\",\"StatusCode\"  nodrop\n//| where action not in (\"UPDATE\",\"START\",\"DELETE\",\"FINISH\",\"CREATE\") and message !=\"Scheduled search alert triggered \"\n| where !(statuscode=200)\n| count by  name, alerttype,destination,statuscode\n| sort by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/Alert Tuning - Monitor or Schedule Search.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alert Tuning - Monitor and Scheduled Searches",
+      "dashboardDescription": "",
+      "panelTitle": "Search Webhook Triggers With Non 200 Status Code",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2DD1844B882FF843",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Scheduled Searches"
+      ],
+      "variables": []
+    }
+  ]
+}

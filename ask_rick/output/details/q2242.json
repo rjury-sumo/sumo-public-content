@@ -1,0 +1,79 @@
+{
+  "id": "q2242",
+  "hash": "49053475019e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n{{{filter}}}\nquery_type=\"Interactive Dashboard\"\n\n// flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"Flex\" as  scan_fl nodrop // in a flex customer you will see this for billable scan\n| json field =scanned_bytes_breakdown_by_metering_type \"Continuous\" as  scan_con nodrop // value also turns up in flex orgs sometimes in small amounts\n| json field =scanned_bytes_breakdown_by_metering_type \"Frequent\" as  scan_fre nodrop\n| json field =scanned_bytes_breakdown_by_metering_type \"Infrequent\" as  scan_inf nodrop\n\n// not flex billable\n| json field =scanned_bytes_breakdown_by_metering_type \"FlexSecurity\" as  scan_cse nodrop // in a flex customer you will see this for CSE scanned logs (not flex billable)\n| json field =scanned_bytes_breakdown_by_metering_type \"ContinuousSecurity\" as  scan_cse nodrop // CSE scan in a legacy org\n| json field =scanned_bytes_breakdown_by_metering_type \"Security\" as  scan_sec nodrop // reflected sec_* indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"Tracing\" as  scan_trc nodrop // scan of tracing indexes\n| json field =scanned_bytes_breakdown_by_metering_type \"RCE\" as  scan_RCE nodrop\n// {}   note it's also possible to see an empty array\n\n| if(isnull(scan_fl),0,scan_fl) as scan_fl\n| if(isnull(scan_con),0,scan_con) as scan_con\n| if(isnull(scan_fre),0,scan_fre) as scan_fre\n| if(isnull(scan_inf),0,scan_inf) as scan_inf\n| if(isnull(scan_cse),0,scan_cse) as scan_cse\n| if(isnull(scan_sec),0,scan_sec) as scan_sec\n| if(isnull(scan_trc),0,scan_trc) as scan_trc\n| if(isnull(scan_RCE),0,scan_RCE) as scan_rce\n\n| scan_fl + scan_con + scan_fre + scan_inf as scan_bytes_flex_billable\n| where scan_bytes_flex_billable > ({{min_scan_gb_per_search}} * 1G)\n//| cse as scan_bytes_cse\n| scan_sec + scan_trc + scan_rce as scan_bytes_not_flex_billable\n\n| round((query_end_time - query_start_time)/ (1000 * 60 * 60 * 24),2) as range_days\n| execution_duration_ms /1000 as duration_s\n\n//| scan_bytes_flex_billable/1T as t\n//| if(t >= 1 and t <10 ,1,0) as tb1\n//| if(t >= 10 and t <100,1,0) as tb10\n//| if(t >= 100 and t < 1000,1,0) as tb100\n//| if(t >= 1000,1,0) as tb1000\n\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count as searches, sum(scan_bytes_flex_billable) as flex_bytes,max(scan_cse) as cse_bytes,sum(scan_bytes_not_flex_billable) as other_bytes, values(range_days) as range_days,values(user_name) as users by content_name\n\n| round(flex_bytes / 1T,1) as flex_tb\n| round(cse_bytes / 1T,1) as cse_tb\n| round(other_bytes / 1T,1) as other_tb\n| fields -flex_bytes,cse_bytes,other_bytes\n\n| sort flex_tb | limit 100 \n| replace (range_days,\"\\n\",\", \") as range_days",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "min_scan_gb_per_search",
+      "description": "1,10,50,100,1000",
+      "dataType": "ANY",
+      "value": "1"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Scan_flex_metering_estimate.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Scan - Flex Metering Estimate (Custom TAE)",
+      "dashboardDescription": "A dashboard for viewing and optimizing high scan and poor performing searches in a Sumo Logic account using Search Audit logs. Uses flex metering tier data column.",
+      "panelTitle": "Top Scan Per Dashboard: Sorted by Flex Billable Scan",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0573E9C68CD5794E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null}}",
+      "rowContext": [
+        "High Scanners Detailed View"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// search audit search term(s)",
+          "values": "// anything,user_name=abc,query_type=*dashboard*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_max_chrs",
+          "defaultValue": "500",
+          "values": "100,200,300,400,500,1000,10000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "min_scan_gb_per_search",
+          "defaultValue": "1",
+          "values": "1,10,50,100,1000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

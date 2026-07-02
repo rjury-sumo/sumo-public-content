@@ -1,0 +1,67 @@
+{
+  "id": "q1844",
+  "hash": "fb23ca170076",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_memory_working_set_bytes cluster={{cluster}} pod={{pod}} | quantize 1m| eval _value / 1000000 | max by node, pod| topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Cluster Explorer v4.6",
+      "dashboardDescription": "The Kubernetes - Cluster Explorer dashboard provides a high-level view of the health of the cluster services, along with details on the utilized.",
+      "panelTitle": "Relative Memory Usage (MB) by Pod",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-87dbd92e8231ca47",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"honeyComb\"},\"honeyComb\":{\"groupBy\":[{\"label\":\"node\",\"value\":\"node\"}],\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#69DB4A\"},{\"from\":null,\"to\":null,\"color\":\"#E1C60E\"},{\"from\":null,\"to\":null,\"color\":\"#C73A25\"}]},\"hiddenQueryKeys\":[\"B\"],\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster and pod name is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

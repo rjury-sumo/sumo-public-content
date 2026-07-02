@@ -1,9 +1,9 @@
 {
   "id": "q1094",
-  "hash": "7bb92c458f8a",
+  "hash": "d4b3b24d9253",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=userSessions (UserLoggedOut OR UserLoggedIn OR UserLoginTimedOut)\n| json \"eventName\", \"userSession.id\", \"sessionIdentity.userId\", \"userSession.sourceIp\"  as EventName, LoginUserId, LogoutUserID, UserIp nodrop\n| where EventName in (\"UserLoggedOut\",\"UserLoggedIn\",\"UserLoginTimedOut\")\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n| if(isNull(LoginUserId), LogoutUserID, LoginUserId) as UserId\n| withtime EventName\n| most_recent(EventName_withtime) as LastEvent by UserId\n| where UserId!=\"-\"\n| where LastEvent matches \"UserLoggedIn\"\n| count as Count by LastEvent\n| fillmissing values(\"UserLoggedIn\") in LastEvent",
+  "query": "_view=sumologic_search_usage_per_query \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type not in (\"Interactive Dashboard\",\"Interactive Search\",\"Scheduled Search\",\"Search API\")\n|where query_type matches \"{{query_type}}\" AND user_name matches \"{{user_name}}\"\n|count  as queries by query_type | order by queries",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "query_type",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,38 +24,40 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Session Activities",
-      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
-      "panelTitle": "Current Logged In Users",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Other Search Types",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel027c3662bd6ccb48",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panel6532c2f4bc04884b",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"METRIC_DEFAULT\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Search Concepts"
+      ],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
+          "name": "query_type",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
-          "defaultValue": "*",
+          "name": "user_name",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         }

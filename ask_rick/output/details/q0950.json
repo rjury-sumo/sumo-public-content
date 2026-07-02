@@ -1,9 +1,9 @@
 {
   "id": "q0950",
-  "hash": "3ffb3184f261",
+  "hash": "d80661df5617",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorSourcesSynchronized)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"collectorIdentity.collectorName\", \"sourcesAdded\", \"sourcesUpdated\",\"sourcesDeleted\",  \"sourceIdentity.sourceName\"  as EventName, EventTime, UserEmail, UserId, UserIp, CollectorName, SourcesAdded, SourcesUpdated, SourcesDeleted ,SourceName nodrop\n| where EventName=\"CollectorSourcesSynchronized\"\n| parse field=SourcesAdded \"[*]\" as SourcesAdded nodrop\n| replace(SourcesAdded, \"\\\"\", \"\") as SourcesAdded\n| replace(SourcesAdded, \"[]\", \"-\") as SourcesAdded\n| parse field=SourcesUpdated \"[*]\" as SourcesUpdated nodrop\n| replace(SourcesUpdated, \"\\\"\", \"\") as SourcesUpdated\n| replace(SourcesUpdated, \"[]\", \"-\") as SourcesUpdated\n| parse field=SourcesDeleted \"[*]\" as SourcesDeleted nodrop\n| replace(SourcesDeleted, \"\\\"\", \"\") as SourcesDeleted\n| replace(SourcesDeleted, \"[]\", \"-\") as SourcesDeleted\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\"  and CollectorName matches \"{{CollectorName}}\"\n|count by EventTime, CollectorName, SourcesAdded, SourcesUpdated, SourcesDeleted, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - _count, UserId\n| limit 10",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"operator.email\" as EventName, User nodrop\n| where EventName in (\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") \n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n| count as Count by EventName\n| fillmissing values(\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") in EventName \n| compare timeshift 1d as Shift_1d",
   "queryParameters": [
     {
       "autoComplete": {
@@ -13,7 +13,7 @@
         "lookupMetaData": {}
       },
       "name": "EventName",
-      "description": "",
+      "description": "*",
       "dataType": "ANY",
       "value": "*"
     },
@@ -24,73 +24,37 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "UserEmail",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "CollectorName",
+      "name": "User",
       "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "bar",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Collector Management",
-      "dashboardName": "Enterprise Audit - Collector Sources Activities",
-      "dashboardDescription": "Collector Sources Activities DashBoard provides detailed information on created, updated and deleted sources, the top collectors where sources were added, active users, and one-day time comparisons. You can use pre-populated filters for a more granular view of selected data.",
-      "panelTitle": "Recent - Sources Added To Collector Using Local Configuration Management",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "One Day Time Shift Comparison",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel752442bcbb6a3b40",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "paneld826a590bdcdc944",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
       "rowContext": [],
       "variables": [
         {
           "name": "EventName",
           "defaultValue": "*",
-          "values": null,
+          "values": "*",
           "allowMultiSelect": false
         },
         {
-          "name": "UserEmail",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "UserIp",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "CollectorName",
+          "name": "User",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

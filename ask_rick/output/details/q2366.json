@@ -1,0 +1,150 @@
+{
+  "id": "q2366",
+  "hash": "2e65ade8679d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as view\n//| if(view matches \"*volume*\",\"internal\",view) as view\n| min(_messagetime) as s, max(_messagetime) as e , sum(bytes) as size_in_bytes by view\n| size_in_bytes / 1024 / 1024 / 1024 as gbytes\n| sum(gbytes) as gbytes by view,s,e\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n| where !(tier = \"cse_data\")\n\n| if (tier = \"continuous\",gbytes * ((100 - {{cse_pct}})  /100),0) as continuous\n| if (tier = \"continuous\",gbytes * ({{cse_pct}}  /100),0) as cse\n| if (tier = \"frequent\", gbytes,0) as frequent\n| if (tier = \"infrequent\",gbytes,0) as infrequent\n\n\n| 20 as cr_cont\n| 25 as cr_cse\n| 9 as cr_freq\n| 0.4 as cr_infreq\n\n| if (tier = \"continuous\",cr_cont * gbytes * ((100 - {{cse_pct}})  /100),0) as cr_continuous\n| if (tier = \"continuous\",cr_cse * gbytes * ({{cse_pct}}  /100),0) as cr_cse\n| if (tier = \"frequent\",cr_freq * gbytes,0) as cr_frequent\n| if (tier = \"infrequent\",cr_infreq * gbytes,0) as cr_infrequent\n\n| min(s) as s, max(e) as e,sum(cr_continuous) as cr_cont, sum(cr_cse) as cr_cse, sum(cr_frequent) as cr_frequent,sum(cr_infrequent) as cr_infrequent,\nsum(continuous) as continuous, sum(cse) as cse,sum(frequent) as frequent, sum(infrequent) as infrequent\n\n| (e - s) / (1000 * 60 * 60 * 24) as days\n| continuous / days as continuous\n| cse / days as cse\n| frequent/ days as frequent\n| infrequent / days as infrequent\n\n| cr_cont / days as  cr_cont\n| cr_cse / days as cr_cse\n| cr_frequent/ days as cr_frequent\n| cr_infrequent / days as cr_infrequent\n| cr_cont + cr_cse + cr_frequent + cr_infrequent as cr_per_day\n| continuous + cse + frequent + infrequent as gb_per_day\n| cr_per_day / gb_per_day as CGPI\n| fields -s,e",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "^freq_",
+      "dataType": "ANY",
+      "value": "^freq_"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "^inf",
+      "dataType": "ANY",
+      "value": "^inf"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cse_pct",
+      "description": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_by_tier.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits By Tier",
+      "dashboardDescription": "A simple view of credits ingested by tier using pattern matching on the data volume _view (index) dimension.",
+      "panelTitle": "Credits and GB Per Day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB0AACB67902B884D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Estimate For Log Ingestion Credits"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "^freq_",
+          "values": "^freq_",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "^inf",
+          "values": "^inf",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "15m",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Credits and GB Per Day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB0AACB67902B884D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Estimate For Log Ingestion Credits"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0120",
-  "hash": "a8f141bc1d40",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_resource_limits cluster={{cluster}} namespace={{namespace}} resource=cpu container={{container}} pod={{pod}}  | quantize 1m | sum by pod,cluster,container |topk(100,max)",
+  "hash": "9a49d44c7086",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n*RuleCreated\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" nodrop\n| json field=_raw \"to\" nodrop\n\n| json field=_raw \"templatedMatchRule\" as rulea nodrop\n| json field=_raw \"matchRule\" as ruleb nodrop\n| json field=_raw \"yaraRule\" as rulec nodrop\n| json field=_raw \"thresholdRule\" as ruled nodrop\n| json field=_raw \"chainRule\" as rulee nodrop\n| json field=_raw \"aggregationRule\" as rulef nodrop\n\n| rulea as rule\n| if(isempty(rule),ruleb,rule) as rule\n| if(isempty(rule),rulec,rule) as rule\n| if(isempty(rule),ruled,rule) as rule\n| if(isempty(rule),rulee,rule) as rule\n| if(isempty(rule),rulef,rule) as rule\n\n//| where isempty(rule)\n\n| json field=rule \"readableId\" as id\n| json field=rule \"name\"\n| json field=rule \"enabled\"\n| json field=rule \"expression\"\n| json field=rule \"severityMapping\"\n| json field=rule \"tuningExpressions\"\n| json field=rule \"isPrototype\"\n| json field=rule \"tags\"\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,id,name,enabled,isPrototype | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,89 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "container",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "CPU Usage vs Requests vs Limits (Cores)",
+      "folder": "Content",
+      "dashboardName": "CSE Rules And Mapping Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Rules Created",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-ff92e2eea7056a4f",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2,\"markerSize\":1,\"markerType\":\"circle\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"labelFontSize\":13,\"title\":\"Cores\"},\"axisX\":{}},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{}}",
+      "panelKey": "panel1098C4998C27F944",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Resource Utilization"
+        "Rules Changes"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

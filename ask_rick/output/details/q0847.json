@@ -1,29 +1,27 @@
 {
   "id": "q0847",
-  "hash": "b64aa983ee1a",
+  "hash": "b0bf0dc8fcb5",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_index=sec_signal  Proofpoint*\n| count by name",
+  "queryMode": "SavedSearch",
+  "query": "//Use this query to create a new scheduled view for hyper-efficient queries over large time windows.  See https://help.sumologic.com/docs/manage/scheduled-views?ss360SearchTerm=view\n((_index=sec_record*))\n| where !dstDevice_ip_isInternal OR !srcDevice_ip_isInternal OR !isNull(http_url_fqdn) OR !isNull(dns_queryDomain) OR !isNull(http_url) or !isNull(file_hash_md5) or !isNull(file_hash_sha1) or !isNull(file_hash_sha256)\n| fields dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn\n|timeslice 1m\n| count by _timeslice,dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn",
   "queryParameters": [],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
+      "objectType": "SavedSearch",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC Standup Overview",
-      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
-      "panelTitle": "Proofpoint Successful Phish Alert",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel5DF63905B32DEA4F",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":50,\"color\":\"#16943E\"},{\"from\":50,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
-      "rowContext": [
-        "Daily Alert Breakdown Detailed"
-      ],
-      "variables": []
+      "dashboardName": "Scheduled View Query for Threat Hunting",
+      "dashboardDescription": "Use this query to create a new scheduled view for hyper-efficient queries over large time windows.",
+      "panelTitle": "Scheduled View Query for Threat Hunting",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-15m"
     }
   ]
 }

@@ -1,70 +1,45 @@
 {
   "id": "q0097",
-  "hash": "d64127b259ad",
+  "hash": "b30be1a18f11",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(cluster={{cluster}} _source=events )\n| where %\"object.message\" matches /.*Readiness probe failed.*/\n| where %\"object.involvedobject.name\" matches /.*{{sumologic_override}}-otelcol-logs.*/\n| where !(%\"object.involvedobject.name\" matches /.*{{sumologic_override}}-otelcol-logs-collector.*/)\n| timeslice 1m | count by _timeslice | fillmissing timeslice",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sumologic_override",
-      "description": "sumo,sumologic",
-      "dataType": "ANY",
-      "value": "sumologic"
-    }
-  ],
-  "viewerType": "line",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName, EventTime, UserEmail, UserId, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\")\n| json field=CurrentValue \"ephemeral\", \"sourceSyncMode\", \"collectorType\" as UpdatedIsEphermal, UpdatedSourceSyncMode, UpdatedCollectorType nodrop\n| if(isNull(IsEphemeral), if(isNull(UpdatedIsEphermal), \"-\", UpdatedIsEphermal) , IsEphemeral) as IsEphemeral\n| if(isNull(SourceSyncMode), if(isNull(UpdatedSourceSyncMode), \"-\", UpdatedSourceSyncMode) , SourceSyncMode) as SourceSyncMode\n| if(isNull(CollectorType), if(isNull(UpdatedCollectorType), \"-\", UpdatedCollectorType) , CollectorType) as CollectorType\n| where EventName matches \"*\" and if(\"*\"=\"*\", true, UserIp matches \"*\") and UserEmail matches \"*\" and if(\"*\"=\"*\", true, CollectorType matches \"*\") and if(\"*\"=\"*\", true,Interface matches \"*\")\n|count by EventName, EventTime, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, Interface, UserEmail, UserId, UserIp\n| sort by EventTime\n| fields - UserId, _count\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/collection_flex_cse.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Readiness Probe Violations",
+      "folder": null,
+      "dashboardName": "Collection Overview - SIEM Flex",
+      "dashboardDescription": "Key collection stats",
+      "panelTitle": "Collection Changes (Audit Log)",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelB2DB537FADCA884E",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"Readiness Probe Violations for otel logs\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "panelKey": "panelC169BA0AB53BC845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
       "rowContext": [
-        "Opentelemetry Logs Collection Monitoring"
+        "Collection Health Events"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "data_volume_view",
+          "defaultValue": "sourcecategory",
+          "values": "sourcecategory,collector,view",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "value_max_chr",
+          "defaultValue": "50",
+          "values": "35,50,70,250",
           "allowMultiSelect": false
         },
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "timeslice",
+          "defaultValue": "6h",
+          "values": "15m,1h,6h,1d,100 buckets",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q1023",
-  "hash": "81b7bc4dd379",
+  "hash": "369862f85131",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentUpdated OR ContentMoved OR ContentCopied)\n| json \"eventName\", \"eventTime\", \"adminMode\", \"contentIdentity.name\", \"contentIdentity.type\", \"operator.email\", \"operator.id\", \"operator.sourceIp\" as EventName, EventTime, AdminMode, ContentName, ContentType, UserEmail, UserId, UserIp nodrop\n| where EventName in (\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\")\n| json \"copiedTo.contentIdentity.name\" as TargetContentName nodrop\n| json \"origin.name\", \"destination.name\" as SourceFolder, TargetFolder nodrop\n| if(isNull(TargetContentName), \"-\", TargetContentName) as CopiedContentName\n| if(isNull(SourceFolder), \"-\", SourceFolder) as OriginFolderName\n| if(isNull(TargetFolder), \"-\", TargetFolder) as DestinationFolderName\n| where  UserIp matches \"{{UserIp}}\" and  EventName matches \"{{EventName}}\"\n|count by EventName, EventTime, AdminMode, ContentName, ContentType,UserEmail, UserId, UserIp, CopiedContentName, OriginFolderName, DestinationFolderName\n| sort by EventTime\n| fields - _count, UserId\n| limit 10",
+  "query": "_index=sumologic_audit_events _sourceCategory=roles RoleCreated\n| json \"eventName\", \"role.systemDefined\",\"operator.email\", \"operator.sourceIp\"  as EventName, SystemDefined, Admin, AdminIp nodrop\n| where EventNAme=\"RoleCreated\" \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| count as Count by SystemDefined\n| if(SystemDefined=\"true\", \"System Defined\", \"User Defined\") as SystemDefined",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "EventName",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -24,39 +24,55 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
-      "description": "*",
+      "name": "Admin",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
       "dataType": "ANY",
       "value": "*"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Content Management",
-      "dashboardName": "Enterprise Audit - Updated, Moved, Copied Content",
-      "dashboardDescription": "Content - Updated, Moved, Copied DashBoard provides detailed information about content that is updated, moved and copied. The dashboard is organized according to activities performed  by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
-      "panelTitle": "Recent - Content Updated/Moved/Copied",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - Role Activities",
+      "dashboardDescription": "Role Activities DashBoard provides detailed information on activities by user role, such as top capabilities, admin role activities, and recent events.",
+      "panelTitle": "System Defined Vs User Defined",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel2ba774c489ba694e",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Admin Mode"
-      ],
+      "panelKey": "panelcc0c575a80157942",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
       "variables": [
         {
           "name": "EventName",
           "defaultValue": "*",
-          "values": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
+          "name": "Admin",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminIp",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false

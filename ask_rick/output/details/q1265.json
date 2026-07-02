@@ -1,0 +1,29 @@
+{
+  "id": "q1265",
+  "hash": "d6b66fc98474",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted OR CollectorSourcesSynchronized)\n| json \"eventName\" as EventName nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\", \"CollectorSourcesSynchronized\") \n| timeslice by 1h\n| count by EventName,_timeslice\n| fillmissing timeslice(1h)\n| transpose row _timeslice column eventname",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Sources Created or Deleted",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel839A8DA6ACC98A4B",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.5,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

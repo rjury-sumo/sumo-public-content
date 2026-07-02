@@ -1,0 +1,131 @@
+{
+  "id": "q1314",
+  "hash": "b6c86b650504",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=\"sumologic_volume\"\nAND _sourcecategory = \"granular_volume\"\n\n{{keywords}}\n//// built in\n| json field=_raw \"messageTier\" as datatier | where datatier matches \"{{datatier}}\"\n| json field=_raw \"sizeInBytes\" as bytes  \n| json field=_raw \"messageCount\" as events \n| json field=_raw \"viewName\"  as index | where index matches \"{{partition}}\"\n//\n//// defined in feature flag\n| json field=_raw \"collectorName\" as collector nodrop | where collector matches \"{{collector}}\"\n| json field=_raw \"sourceCategory\"  nodrop | where sourcecategory matches \"{{sourcecategory}}\"\n| json field=_raw \"bladeName\" as source nodrop\n//\n| timeslice 5m\n| sum(bytes) as bytes, sum(events) as events by datatier, collector,sourcecategory,source,index\n\n// add credits from contract for tiers\n| 20 as cr_rate \n| if (datatier = \"Infrequent\",.4,cr_rate) as cr_rate\n| if (datatier = \"Frequent\",9,cr_rate) as cr_rate\n| if (datatier = \"CSE\",25,cr_rate) as cr_rate\n| bytes / 1Gi as gb | fields - bytes\n| cr_rate * gb as credits \n| round(gb,2) as gb | round(credits,2) as credits\n| sort credits | limit 1000",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "keywords",
+      "description": "// one or more keyword expressions",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "datatier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "partition",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "collector",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourcecategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/guv/Metadata discovery using granular usage guv.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Metadata Discovery Using Granular Usage Visibility (GUV)",
+      "dashboardDescription": "",
+      "panelTitle": "Credit Used - Top 1000",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-49A36552BC949A47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// one or more keyword expressions",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "collector",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "partition",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "datatier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "graph_grouping",
+          "defaultValue": "index",
+          "values": "index,sourcecategory,collector,source,datatier",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_instance_name",
+          "defaultValue": "service.au.sumologic.com",
+          "values": "service.au.sumologic.com",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

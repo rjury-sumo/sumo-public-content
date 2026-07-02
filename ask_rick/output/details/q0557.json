@@ -1,9 +1,9 @@
 {
   "id": "q0557",
-  "hash": "476728fcdccf",
+  "hash": "99f740ab494d",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory=\"collector_tracing_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as %\"{{Unit}}\" by collector\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| %\"{{Unit}}\" / duration_in_min as % \"Billion {{Unit}} per minute\"\n| top 5 collector by % \"Billion {{Unit}} per minute\"",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse*) \nOR\n(_index=sumologic_system_events _sourcecategory=cse* )\n\n*Mapping*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Mapping*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"logMapping\"\n\n//\n| json field=logMapping \"id\" \n| json field=logMapping \"name\"\n| json field=logMapping \"source\"\n| json field=logMapping \"recordType\"\n| json field=logMapping \"enabled\"\n| json field=logMapping \"vendor\"\n| json field=logMapping \"product\"\n| json field=logMapping \"fields\" nodrop\n\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,source,recordtype,vendor,product,fields | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,39 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
+      "name": "{keywords",
+      "description": "",
       "dataType": "ANY",
-      "value": "billedBytes"
+      "value": ""
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Data Volume",
-      "dashboardName": "Data Volume - Tracing",
-      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
-      "panelTitle": "Top 5 Collectors by {{Unit}}",
+      "folder": "Enterprise Audit - Cloud SIEM",
+      "dashboardName": "Cloud SIEM - Rules and Mapping Changes",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Log Mapping Change Details",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-3",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
-      "rowContext": [],
+      "panelKey": "panelDAC9736494B82B4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Log Mappings"
+      ],
       "variables": [
         {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "TracingView",
-          "defaultValue": "sourcecategory",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

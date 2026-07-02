@@ -1,0 +1,29 @@
+{
+  "id": "q1260",
+  "hash": "9783ed5bdbdd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes _sourceCategory=\"collector_volume\" \n| parse regex \"\\\"(?<collector>(?:[^\\\"]+)|(?:\\\"\\\"))\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi \n//| sort _messagetime \n| max(_messagetime) as MostRecent, sum(bytes) as TotalVolumeBytes by collector \n| formatDate(tolong(MostRecent),\"yyyy/MM/dd HH:mm:ss\") as MostRecentTime \n| toMillis(now()) as currentTime \n| formatDate(fromMillis(currentTime),\"yyyy/MM/dd HH:mm:ss\") as SearchTime \n| (currentTime-MostRecent) / 1000 / 60 as mins_since_last_logs \n| fields -mostrecent, currenttime,SearchTime\n|floor(mins_since_last_logs) as mins_since_last_logs\n//| format (\"%s Has not collected data in the past %s minutes\", collector,mins_since_last_logs) as message\n| sort mins_since_last_logs\n// we set a threshold on this line\n| where mins_since_last_logs >= 15",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collection.volume.config.changes.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collector Volume And Config Changes",
+      "dashboardDescription": "",
+      "panelTitle": "Collectors With No Recent Data",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelAA32CF2AAE3FF94C",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [
+        "Changes In Collection and Sources"
+      ],
+      "variables": []
+    }
+  ]
+}

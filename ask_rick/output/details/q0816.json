@@ -1,9 +1,9 @@
 {
   "id": "q0816",
-  "hash": "342dadb19877",
+  "hash": "55d49df5c7cf",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where insight_status = \"closed\"\n| avg(insight_time_to_response)\n| round(_avg / 3600) as _avg",
+  "query": "_index=sec_signal  CrowdStrike*\n| count",
   "queryParameters": [],
   "viewerType": "svp",
   "metricsQueryData": null,
@@ -13,14 +13,16 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC KPIs",
-      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
-      "panelTitle": "Average Hours To Response",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "CrowdStrike EDR Alerts",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel6BAFF8A6BA8DFA4F",
+      "panelKey": "panel43D8BFA487EC7A40",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":3,\"color\":\"#16943E\"},{\"from\":3,\"to\":12,\"color\":\"#DFBE2E\"},{\"from\":12,\"to\":24,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":24},\"sparkline\":{\"show\":false},\"hideData\":false,\"option\":\"Sum\"},\"series\":{}}",
-      "rowContext": [],
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":4,\"color\":\"#16943E\"},{\"from\":5,\"to\":40,\"color\":\"#DFBE2E\"},{\"from\":41,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
+      "rowContext": [
+        "Daily Alert Breakdown Detailed"
+      ],
       "variables": []
     }
   ]

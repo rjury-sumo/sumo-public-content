@@ -1,9 +1,9 @@
 {
   "id": "q0598",
-  "hash": "6ae45ac2d3d1",
+  "hash": "8fadeec284dc",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_authentication objectType=Authentication {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
+  "query": "_index=sec_record_failure*\n| count as today by metadata_sourceCategory, %\"fields.reason\"\n//| sort _count\n| compare with timeshift 1d 1 as vs_yesterday\n| concat(\"https://\",\"{{service_endpoint}}\",\".sumologic.com/ui/#/search/create?query=_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%5Bsubquery%3A%20_index%3Dsec_record_failure*%20metadata_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%7C%20count%20by%20metadata_sourceMessageId%0A%20%20%20%20%7C%20metadata_sourceMessageId%20as%20_messageId%0A%20%20%20%20%7C%20compose%20_messageId%20maxResults%3D10000%5D%0A%7C%20_size%20as%20bytes%0A%7C%20timeslice%201s%0A%7C%20count%20by%20_timeslice%2C%20_messageId%2C%20bytes%2C%20_sourceCategory%2C%20_raw%20%0A%7C%20sort%20by%20_timeslice&startTime=-15m&endTime=-10m\") as url\n| replace(url,\"%3Cmy_sc%3E\",metadata_sourceCategory) as url\n| toURL(url,\"show_failed_events\") as show_failed_events\n| fields metadata_sourceCategory, %\"fields.reason\", today, today_vs_yesterday,show_failed_events\n| sort today",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,13 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
+      "name": "service_endpoint",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "service.us2"
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,23 +26,17 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "dashboardName": "Cloud SIEM - Parsing and Mapping Troubleshooting",
+      "dashboardDescription": "This dashboard provides analysis on Records failed to parse or map.",
+      "panelTitle": "Failed Reason by _sourceCategory",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel2D452885A2302946",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"Authentication\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#005982\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#005982\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelA22B857FA4EA3A46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy)"
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
       ],
       "variables": [
-        {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
         {
           "name": "service_endpoint",
           "defaultValue": "service.us2",

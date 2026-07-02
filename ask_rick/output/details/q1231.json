@@ -1,0 +1,65 @@
+{
+  "id": "q1231",
+  "hash": "81db9ac8cfe7",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "Namespace=aws/apigateway metric=Latency Statistic=average  apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| avg by apiname",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "apiname",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "accountid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/aws/api_gateway_errors_and_latency.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Api Gateway Errors and Latency",
+      "dashboardDescription": "",
+      "panelTitle": "Latency Per API",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA0464FB391067B44",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"axes\":{\"axisY\":{\"title\":\"\"},\"axisX\":{}},\"legend\":{},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{apiname}}\"}}]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "apiname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "accountid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

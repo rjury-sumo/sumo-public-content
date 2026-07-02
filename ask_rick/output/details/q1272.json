@@ -1,0 +1,49 @@
+{
+  "id": "q1272",
+  "hash": "4adc15f9e19b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit _sourceName=VOLUME_QUOTA _sourceCategory=account_management budget  {{{keywords}}}\n//| parse \"Capacity: * bytes\\nUsage: * bytes\\nUsage status: *\\nAction: *\\n\" as capacity_bytes,used_bytes,status,action\n\n| parse \"Budget * with scope * consumed\" as name,scope\n| parse \"consumed *% of capacity and is reset at *.\" as percent,reset_time\n| parse \"Capacity: * bytes\" as capacity_bytes\n| parse \"Usage: * bytes\" as used_bytes\n| sort _messagetime \n| first(capacity_bytes) as capacity_bytes, first(percent) as percent by name \n| capacity_bytes/1024/1024 as mb\n|  num(percent) as percent |sort percent\n| if (percent >=100 ,\"exceeded\",\"ok\") as status\n| fields -capacity_bytes",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/collection/collectionIssues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Collection Issues",
+      "dashboardDescription": "",
+      "panelTitle": "Budget Status",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel756CB3D0AF116A45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":1}}",
+      "rowContext": [
+        "Budgets"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "*,// any search keywords,not installed* not filecollection*,budget",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "q1740",
+  "hash": "d7b3911d574f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*falco* cluster={{cluster}} output_fields rule priority output \n| json  \"log.priority\" as priority\n| json  \"log.rule\" as rule\n| json  \"log.time\" as time\n| json  \"$['log']['output_fields']['proc.cmdline']\" as proc_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.name']\" as proc_name nodrop\n| json  \"$['log']['output_fields']['user.name']\" as user_name nodrop\n| json  \"log.output\" as output\n| json \"$['log']['output_fields']['k8s.ns.name']\" as namespace\n//| where !isEmpty(namespace)\n| count as total by time,rule, priority, cluster, container, pod, namespace, proc_cmdline, proc_name, user_name,output\n| fields time,rule, priority, cluster, container, pod, namespace, proc_cmdline, proc_name, user_name,output\n| sort by time",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_20250416.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes",
+      "dashboardName": "Kubernetes - Security Rules Triggered",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides detailed information of anomalous activity, in addition it also provides details of the OOB Falco rules triggered by the activity on your infrastructure.",
+      "panelTitle": "Rules Triggered",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-565e0c9e8ba17a4e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Security Rules Triggered v4.6",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides detailed information of anomalous activity, in addition it also provides details of the OOB Falco rules triggered by the activity on your infrastructure.",
+      "panelTitle": "Rules Triggered",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-565e0c9e8ba17a4e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

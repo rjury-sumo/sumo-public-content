@@ -1,9 +1,9 @@
 {
   "id": "q1060",
-  "hash": "6171153ba320",
+  "hash": "b181470545ad",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=roles (RoleCreated OR RoleUpdated OR RoleDeleted)\n| json \"eventName\", \"to.capabilities\", \"operator.email\", \"operator.sourceIp\"  as EventName, capabilities_updated, Admin, AdminIp nodrop\n| where EventName in (\"RoleCreated\",\"RoleUpdated\",\"RoleDeleted\") \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "query": "_index=sumologic_audit_events _sourceCategory=users UserEmailChanged\n| json \"eventName\", \"eventTime\", \"userIdentity.userId\", \"newEmail\", \"oldEmail\",\"operator.email\", \"operator.sourceIp\" as EventName, EventTime, TargetUserId, TargetUserEmail, TargetUserOldEmail, Admin, AdminIp nodrop\n| where EventName=\"UserEmailChanged\"\n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, TargetUserId, TargetUserEmail, TargetUserOldEmail\n| sort by EventTime\n| fields - _count, EventName, TargetUserId",
   "queryParameters": [
     {
       "autoComplete": {
@@ -42,7 +42,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "map",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -50,13 +50,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - Role Activities",
-      "dashboardDescription": "Role Activities DashBoard provides detailed information on activities by user role, such as top capabilities, admin role activities, and recent events.",
-      "panelTitle": "Geo Location",
+      "dashboardName": "Enterprise Audit - User(Email, Password) Activities",
+      "dashboardDescription": "User (Email, Password) Activities DashBoard provides detailed information on user password and email activities, such as password changes, password resets by admins, and user email change requests and changes.",
+      "panelTitle": "Recent - Email Change Activity",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panela267ca13b4d07a40",
-      "visualization": "map",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "panelKey": "panel50a67777b781c846",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
       "rowContext": [],
       "variables": [
         {

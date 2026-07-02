@@ -1,9 +1,9 @@
 {
   "id": "q0312",
-  "hash": "739c23e36afb",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_status_ready pod={{pod}} cluster={{cluster}} | quantize 1m  | max by pod, cluster| topk(500, max)",
+  "hash": "5954fa204665",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar*  {{keywords}}\nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n\n\n| count as events by subsystem \n| sort events",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,59 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "pod",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_event_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Pod Ready State",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Events Overview",
+      "dashboardDescription": "sumologic_system_events from automation service or SOAR",
+      "panelTitle": "By Subsystem",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-7dfba63a804f7842",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\"},\"series\":{\"metric=sum(kube_pod_container_status_ready)\":{\"color\":\"#009900\",\"type\":\"area\",\"fillOpacity\":\"0.25\"},\"metric=sum(kube_pod_container_status_terminated_reason) reason=OOMKilled\":{\"color\":\"#CC0000\",\"type\":\"column\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"wrap\":true},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"pod={{pod}} cluster={{cluster}}\"}}],\"axes\":{\"axisX\":{},\"axisY\":{\"title\":\" \"}}}",
+      "panelKey": "panel0268BD4F9ADAAB41",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Overview"
+        "Event Breakdown"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_timeslice",
+          "defaultValue": "1h",
+          "values": "5m,15m,1h,3h,1d",
           "allowMultiSelect": false
         }
       ]

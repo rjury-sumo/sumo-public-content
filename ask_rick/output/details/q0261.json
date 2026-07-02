@@ -1,9 +1,9 @@
 {
   "id": "q0261",
-  "hash": "72834f776b74",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} node={{node}} (metric=node_network_receive_bytes_total OR metric=node_network_transmit_bytes_total) !device=veth* | quantize using sum | rate increasing | sum by node | topk(500,max)",
+  "hash": "f61722ab441c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cat {{{lookup}}}\n| where createdtime > (now () - (1000 * 60 * 60 * 24 * 30))\n//| formatdate(tolong(createdtime),\"yyyy-MM\") as month\n| concat(severity,\":\",severityname) as state \n//| if(isnull(confidence),0,confidence) as confidence\"\n//| 1 as n | total n as total_insights by entityvalue\n| where resolution not in (\"False Positive\",\"No Action\",\"Duplicate\",\"\")\n| values(state) as severity,values(insightid) as ids,values(resolution) as resolutions,sum(riskscore) as total_risk,count as insights, pct(riskscore,50) as med_riskscore,pct(timetoresponse,50) as MTTResponse,pct(timetoremediation,50) as MTTResolution,pct(timetodetection,50) as MTTDetection by entityvalue | sort insights\n//| round(avg_riskscore,1) as avg_riskscore | round(avg_confidence,2) as avg_confidence\n|round(MTTResponse/60) as MTTResponse | round(MTTResolution/60) as  MTTResolution | round(MTTDetection/60) as MTTDetection\n| count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{lookup",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "node",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "line",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/exec_dash_2025/3.dashboard_executive_view.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Net Utilization (Transmitted) vs Net Saturation (Dropped)",
+      "folder": null,
+      "dashboardName": "Insights - Executive View (v3 Oct 2025)",
+      "dashboardDescription": "New lookup based KPI dashboard, Uses new Oct 2025 lookup with valid MTTResp",
+      "panelTitle": "Resolved Insights Last 30 Days",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-8572b03da853db4e",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"stacked\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme6\"},\"axes\":{\"axisY\":{\"title\":\"Bytes/Sec\"}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Utilization - {{node}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Saturation - {{node}}\"}}],\"series\":{}}",
+      "panelKey": "panel268A6CE4BE7DEB43",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Threats Resolved\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
       "rowContext": [
-        "Resource Utilization"
+        "Tuning Performance"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
-          "values": null,
+          "name": "lookup",
+          "defaultValue": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
+          "values": "path://\"/Library/Users/some.user@sumologic.com/lookups/siem_metrics\"",
           "allowMultiSelect": false
         },
         {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "name": "days",
+          "defaultValue": "365",
+          "values": "30,60,90,180,365,1000",
           "allowMultiSelect": false
         }
       ]

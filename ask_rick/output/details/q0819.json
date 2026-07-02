@@ -1,11 +1,11 @@
 {
   "id": "q0819",
-  "hash": "4564e3d853ee",
+  "hash": "f98934fcf5ed",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_sourcecategory=\"detectionlab/siem/insights\" OR _sourcecategory=\"cse/insights\" OR (_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated)\n| json field=_raw \"severity\"\n| json field=_raw \"closed\"\n| json field=_raw \"closedBy\"\n| json field=_raw \"assignee\"\n| json field=_raw \"resolution\"\n| where !isNull(closed)\n| count by closedBy",
+  "query": "_index=sec_signal  Yara*\n| count",
   "queryParameters": [],
-  "viewerType": "column",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -13,14 +13,16 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - SOC KPIs",
-      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
-      "panelTitle": "Insights Closed by User",
+      "dashboardName": "Cloud SIEM - SOC Standup Overview",
+      "dashboardDescription": "This dashboard provides metrics related for SOC standups.",
+      "panelTitle": "File Analytics - Yara Rules Triggered",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel22BEEA8788F84B4D",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"column\"},\"series\":{},\"overrides\":[]}",
-      "rowContext": [],
+      "panelKey": "panelECBDA84C80D8094D",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"label\":\"\",\"gauge\":{\"show\":false,\"max\":200},\"sparkline\":{\"show\":false},\"thresholds\":[{\"from\":1,\"to\":50,\"color\":\"#16943E\"},{\"from\":50,\"to\":100,\"color\":\"#DFBE2E\"},{\"from\":100,\"to\":1000,\"color\":\"#BF2121\"}],\"hideLabel\":false,\"noDataString\":\"0\",\"option\":\"Maximum\"}}",
+      "rowContext": [
+        "Daily Alert Breakdown Detailed"
+      ],
       "variables": []
     }
   ]

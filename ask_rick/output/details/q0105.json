@@ -1,9 +1,9 @@
 {
   "id": "q0105",
-  "hash": "47e5a41674d0",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} statefulset=*{{sumologic_override}}-otelcol-metrics* metric=container_cpu_usage_seconds_total | rate increasing | quantize 1m using avg | avg by container, pod | sum by pod",
+  "hash": "d7482412c575",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n{{{rule}}}\n\n_index=sec_signal\n{{{rule}}}\n| json field=entities \"[0].value\" as entityid nodrop\n//\n| json field=fullRecords \"[*].metadata_vendor\" as vendors nodrop\n| json field=fullRecords \"[*].metadata_sourceCategory\" as sourceCategories nodrop\n| json field=fullRecords \"[*].metadata_product\" as products nodrop\n//| json field=fullRecords \"[*].metadata_mapperName\" as mapperNames nodrop\n//| json field=fullRecords \"[*].metadata_deviceEventId\" as deviceEventIds nodrop\n\n| concat (ruleid,\" \",rulename) as rule\n| parse regex field=vendors \"(?<vendor>[\\w\\d_ -]+)\" multi\n| count_distinct(id) as signals by vendor,sourcecategories,products //,deviceEventIds\n\n| parse regex field=products \"(?<product>[\\w\\d_ -]+)\" multi\n| max(signals) as signals by vendor,product,sourcecategories //,deviceEventIds\n\n| parse regex field=sourcecategories \"(?<sourceCategory>[\\w\\d_ \\\\\\/-]+)\" multi\n| max(signals) as signals by vendor,product,sourcecategory //,deviceEventIds\n\n//| parse regex field=deviceEventIds \"(?<deviceEventId>[^\\r\\n\\\"\\[\\]\\{\\},]+)\" multi\n//| max(signals) as signals by vendor,product,sourcecategory,deviceEventId",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,71 +12,81 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{rule",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sumologic_override",
-      "description": "sumo,sumologic",
-      "dataType": "ANY",
-      "value": "sumologic"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "CPU Usage by Pod",
+      "folder": "Content",
+      "dashboardName": "CSE Rule",
+      "dashboardDescription": "",
+      "panelTitle": "Signal Record Metadata",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelC2560B3AB20F3B4D",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+      "panelKey": "panel8DC648C891BF6A43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Opentelemetry Metrics Collection Monitoring"
+        "Signals"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Rule (Tuning Pack)",
+      "dashboardDescription": "Deep dive into signals, and records generated by a rule.",
+      "panelTitle": "Signal Record Metadata",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8DC648C891BF6A43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
+          "name": "rule",
+          "defaultValue": "MATCH-S00513",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Rule Overview",
+      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
+      "panelTitle": "Signal Record Metadata",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8DC648C891BF6A43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
         {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
+          "values": null,
           "allowMultiSelect": false
         }
       ]

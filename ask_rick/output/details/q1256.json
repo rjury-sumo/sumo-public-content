@@ -1,0 +1,49 @@
+{
+  "id": "q1256",
+  "hash": "f8e526bbd8a6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=*cloudtrail* \n{{{keywords}}} \n| count by errorcode | sort _count | if(isempty(errorcode),\"Successful\",errorcode) as errorcode",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/cloudtrail/cloudtrail-ratelimit_capacity_exceeded_errors.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "AWS Cloudtrail - Rate Limit and Capacity Errors",
+      "dashboardDescription": "",
+      "panelTitle": "Volumes By Errorcode",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel21E13F098426A94E",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Errors (Cloudtrail with an errorcode key)"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "errorcode,accessdenied,get*,not eventtype=get*,(errorcode=*exceeded* or errorcode=*limit* or errorcode=*Insufficient* or errorcode=*rate* or errorcode=*Throttling*)",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

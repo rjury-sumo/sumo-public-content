@@ -1,9 +1,9 @@
 {
   "id": "q0407",
-  "hash": "a6a998e94673",
+  "hash": "c50950e9668a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "*events* cluster={{cluster}}\n| json  \"object.involvedObject.name\" as name\n| if (\"{{statefulset}}\" matches \"*\", \"*\", \"*{{statefulset}}*\") as statefulset\n| where name matches statefulset\n| count by name, namespace, _messageTime\n| fields - _count\n| timeslice 1d| count by _timeslice",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity \"AdminMode=true\"\n| parse \"User * deleted * \\\"*\\\"\" as sourceuser,content_type,content_name\n| where action =\"DELETE\"\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type, content_name\n| fields - _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,52 +12,32 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "sourceuser",
       "description": "",
       "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "statefulset",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
+      "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
-      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
-      "panelTitle": "Events Over Time",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Admin Mode",
+      "dashboardDescription": "See when content is deleted, moved, whitelisted, and shared. As well as when permission is added or removed.",
+      "panelTitle": "Content Deleted",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-158373C7ADEDF844",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Sequential 1\"},\"series\":{},\"overrides\":[{\"series\":[\"_count\"],\"queries\":[],\"properties\":{\"visible\":true,\"name\":\" Count\"}}]}",
-      "rowContext": [
-        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
-      ],
+      "panelKey": "panelbbe7a27ab0f99a46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "statefulset",
-          "defaultValue": "",
+          "name": "sourceuser",
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }

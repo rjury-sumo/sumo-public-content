@@ -1,9 +1,9 @@
 {
   "id": "q0599",
-  "hash": "bcb81014e5fa",
+  "hash": "7b9d249de29c",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_authentication objectType=AuthenticationPrivilegeEscalation {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
+  "query": "_index=sec_signal\n{{{rule}}}\n\n| if (isempty(suppressedreasons),\"NO\",\"YES\") as suppressed\n\n| if(suppressed=\"YES\",1,0) as is_suppressed\n| if(suppressed=\"NO\",1,0) as is_generated\n\n| json field=entities \"[0].value\" as entityid nodrop\n\n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_sourceCategory\" as sourceCategory nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_mapperName\" as mapperName nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId nodrop\n| json field=fullRecords \"[0].metadata_parser\" as parser nodrop\n| concat (ruleid,\" \",rulename) as rule\n\n| parse regex field=tags \"\\\"(?<tagname>[^:\\\"]+):(?<tagvalue>[^:\\\"]+)\" multi\n\n| max(severity) as max_sev,count_distinct(entityid) as entities,count_distinct(rule) as rules by tagname,tagvalue",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,13 +12,13 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "{Keyword",
+      "name": "{rule",
       "description": "",
       "dataType": "ANY",
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,26 +26,20 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Health Monitoring",
-      "dashboardName": "Cloud SIEM - Overview",
-      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
-      "panelTitle": "Records for {{{Keyword}}}",
+      "dashboardName": "Cloud SIEM - Rule Overview",
+      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
+      "panelTitle": "Rule Signal Tags",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel1CD4D6B8B587AB47",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\",\"noDataMessage\":\"0 \"},\"svp\":{\"option\":\"Sum\",\"label\":\"AuthenticationPrivilegeEscalation\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#005982\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#005982\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panelDE3F2D67A00F0A4B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy)"
+        "Signals"
       ],
       "variables": [
         {
-          "name": "Keyword",
-          "defaultValue": "*",
-          "values": "*",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
           "values": null,
           "allowMultiSelect": false
         }

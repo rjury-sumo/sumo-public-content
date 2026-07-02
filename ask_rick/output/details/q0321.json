@@ -1,9 +1,9 @@
 {
   "id": "q0321",
-  "hash": "0febcb84950e",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Basic",
-  "query": "metric=container_memory_working_set_bytes cluster={{cluster}} namespace={{namespace}} pod={{pod}} container=* | quantize 1m | avg by container, pod | sum by pod | sum",
+  "hash": "ef27b25922b1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=oar* {{keywords}} errors\n PlaybookExecution  \nAND _view = sumologic_system_events\n\n| json field=_raw \"eventName\"\n| json field=_raw \"subsystem\"\n| json field=_raw \"severityLevel\"\n// actual fields vary by audit event type\n// we need to merge them to a single value\n\n// for many types we can get them with one regex\n// \"ReportIdentity\": {\"name\": \"Inc_details\"},\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *\\{[^\\}]+name\\\": *\\\"(?<item_name>[^\\\"]+)\" nodrop\n\n| json field=_raw \"TaskIdentity.title\" as t_name nodrop\n| json field=_raw \"IncidentInvestigatorIdentity.username\" as iii_name nodrop\n| json field=_raw \"IncidentIdentity.incidentid\" as i_name nodrop\n| json field=_raw \"EntityIdentity.id\" as e_name nodrop\n| json field=_raw \"IncidentNoteIdentity.title\" as ini_name nodrop\n| json field=_raw \"Entity.value\" as e_value nodrop\n| json field=_raw \"Entity.type\" as e_type nodrop\n| json field=_raw \"AppCentralPackage.name\" as a_name nodrop\n\n| if(isempty(iii_name),item_name,iii_name) as item2_name\n| if(isempty(t_name),item_name,t_name) as item_name\n| if(isempty(i_name),item_name,i_name) as item_name\n| if(isempty(e_name),item_name,e_name) as item_name\n| if(isempty(ini_name),item_name,ini_name) as item_name\n| if(isempty(e_value),item_name,concat(e_type,\" \",e_value)) as item_name\n| if(isempty(a_name),item_name,a_name) as item_name\n\n// etc\n| parse regex field = _raw \"\\\"[a-zA-z0-9]+Identity\\\": *(?<identity_json>\\{[^\\}]+\\}), \\\"(?<type>[^\\\"]+)\\\": *(?<details>\\{[^\\}]+\\})\" nodrop\n//\n\n| json field=details \"running_id\" as id\n| json field=details \"type\"\n| json field=details \"status\"\n| json field=details \"playbook_name\"\n| timeslice {{graph_timeslice}}\n| count as events by _timeslice,playbook_name | transpose row _timeslice column playbook_name",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,20 +12,8 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
+      "name": "keywords",
+      "description": "// any keyword expression for audit events",
       "dataType": "ANY",
       "value": "*"
     },
@@ -36,69 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "pod",
-      "description": "",
+      "name": "graph_timeslice",
+      "description": "5m,15m,1h,3h,1d",
       "dataType": "ANY",
-      "value": "*"
+      "value": "1h"
     }
   ],
-  "viewerType": "svp",
-  "metricsQueryData": {
-    "metric": "container_memory_working_set_bytes",
-    "aggregationType": "Sum",
-    "groupBy": "",
-    "filters": [
-      {
-        "key": "cluster",
-        "value": "{{cluster}}",
-        "negation": null
-      },
-      {
-        "key": "namespace",
-        "value": "{{namespace}}",
-        "negation": null
-      },
-      {
-        "key": "pod",
-        "value": "{{pod}}",
-        "negation": null
-      }
-    ],
-    "operators": null
-  },
+  "viewerType": "column",
+  "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/SOAR Automation Services/automation_soar_event_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Pod v4.6",
-      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
-      "panelTitle": "Percent of Memory Limit",
+      "folder": null,
+      "dashboardName": "Automation or SOAR Events Overview",
+      "dashboardDescription": "sumologic_system_events from automation service or SOAR",
+      "panelTitle": "Playbook Errors Over Time By Playbook",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-5aca1a098f90f849",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"gauge\":{\"show\":true},\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#dfbe2e\"},{\"from\":85,\"to\":101,\"color\":\"red\"}],\"option\":\"Average\",\"label\":\"%\",\"valueFontSize\":14},\"hiddenQueryKeys\":[\"B\",\"A\"]}",
+      "panelKey": "panelEC0DB695B4CFAA4E",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"}}",
       "rowContext": [
-        "Overview"
+        "Playbook Execution"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "// any keyword expression for audit events",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
+          "name": "graph_timeslice",
+          "defaultValue": "1h",
+          "values": "5m,15m,1h,3h,1d",
           "allowMultiSelect": false
         }
       ]

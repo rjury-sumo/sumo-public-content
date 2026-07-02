@@ -1,24 +1,11 @@
 {
   "id": "q0447",
-  "hash": "8e9d3e2cf1c2",
+  "hash": "164652eb0b35",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| where action =\"INSTALL\"\n| parse \"installed application (*, *) into folder \\\"*\\\" as \\\"*\\\"\" as app_name,app_id,target_folder_location,app_name2\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time,sourceuser, app_name",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sourceuser",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH triggered\n| parse \"[AlertType=*]\" as type nodrop\n| parse \"[Destination=*]\" as destination nodrop\n| parse \"[Name=*]\" as name nodrop\n| count as count by destination\n| sort count",
+  "queryParameters": [],
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,22 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Imported/Exported/Installed/Shared Publicly",
-      "dashboardDescription": "See when content is shared, exported or imported. As well as count and trends in content that has been shared, exported or imported.",
-      "panelTitle": "Application Installed by Users",
+      "dashboardName": "Scheduled Search - Search Triggered Summary",
+      "dashboardDescription": "See all webhook and scheduled search triggerings.",
+      "panelTitle": "Alerts Fired by Destination",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelf1870fae9ae84b4c",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "panelKey": "panel07f3baa590d49b40",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true}}",
       "rowContext": [],
-      "variables": [
-        {
-          "name": "sourceuser",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

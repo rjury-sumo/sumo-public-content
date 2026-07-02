@@ -1,0 +1,103 @@
+{
+  "id": "q2377",
+  "hash": "1e1b1fb0924f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume sizeInBytes \n_sourceCategory=view_volume\n\n| parse regex \"\\\"(?<view>[^\\\"]+)\\\"\\:\\{\\\"sizeInBytes\\\"\\:(?<bytes>\\d+),\\\"count\\\"\\:(?<count>\\d+)\\}\" multi\n| bytes / 1024 / 1024 / 1024 as gbytes\n\n| min(_messagetime) as f, max(_messagetime) as l,sum(gbytes) as gbytes by view\n| where gbytes > 0\n| \"continuous\" as tier\n| if(view matches /{{freq_regex}}/,\"frequent\",tier) as tier\n| if(view matches /{{infreq_regex}}/,\"infrequent\",tier) as tier\n| if (view matches /(?)CSE_[RS][ei]/,\"cse_data\",tier) as tier\n\n| view as rename_for_report\n| if(view matches \"_sumologic_report*\",\"saved_views\",view) as rename_for_report\n| if (view matches \"*sumologic*\",\"sumologic_internal\",rename_for_report) as rename_for_report\n\n| 0.0067 as cr_storage\n|  0.0015 as cr_infreq_storage\n\n| if (tier = \"infrequent\",cr_infreq_storage * gbytes,cr_storage * gbytes) as storage_credits\n| ( (l - f )/ (1000 * 60 * 60 * 24)) as duration_d\n| (storage_credits / duration_d) * {{average_retention_days}} as estimated_lifetime_storage_credits\n\n| max(duration_d) as period_days,sum(gbytes) as gbytes, sum(estimated_lifetime_storage_credits) as estimated_lifetime_storage_credits by tier\n| round(period_days,2) as period_days\n| round(gbytes,2) as gbytes_total\n| round(gbytes * ( 1/period_days),3) as gbytes_per_day\n| round(estimated_lifetime_storage_credits,2) as storage_credits_per_day_full_retention\n| round(estimated_lifetime_storage_credits /  {{average_retention_days}},3)  as storage_credits\n| fields -gbytes\n| fields tier, period_days,gbytes_total,gbytes_per_day,storage_credits,storage_credits_per_day_full_retention",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "freq_regex",
+      "description": "_freq",
+      "dataType": "ANY",
+      "value": "_freq"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "infreq_regex",
+      "description": "infrequent|",
+      "dataType": "ANY",
+      "value": "infrequent"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "average_retention_days",
+      "description": "30,90,365,390",
+      "dataType": "ANY",
+      "value": "30"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/credits_estimator_using_datavolume_cse.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Credits Estimator Using Data Volume - CSE Version",
+      "dashboardDescription": "",
+      "panelTitle": "Estimated Period and Lifetime Storage Credit Use For {{average_retention_days}} Days Retention",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel323647DE98CB5B4A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"series\":{}}",
+      "rowContext": [
+        "Estimated Lifetime Storage Credits for {{average_retention_days}} days retention"
+      ],
+      "variables": [
+        {
+          "name": "freq_regex",
+          "defaultValue": "_freq",
+          "values": "_freq",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "infreq_regex",
+          "defaultValue": "infrequent",
+          "values": "infrequent|",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,1d,15m",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "average_retention_days",
+          "defaultValue": "30",
+          "values": "30,90,365,390",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_regex",
+          "defaultValue": "cse_|asoc",
+          "values": "cse_|asoc",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "cse_pct",
+          "defaultValue": "0",
+          "values": "15,20,25,30,35,40,45,50,55,65,70,75,80,85,90,95,99",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

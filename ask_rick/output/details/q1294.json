@@ -1,0 +1,42 @@
+{
+  "id": "q1294",
+  "hash": "ece5f6a73aec",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=credits_usage_hourly*\n| sum(units) as units,sum(credits) as credits by uom,rate,unit\n| where uom matches /CSE|Continuous|Infrequent|Frequent/\n| credits / units as CPGB | avg(CPGB) as CPGB",
+  "queryParameters": [],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Credits View (credits_usage_hourly)",
+      "dashboardDescription": "A dashboard of high level credits consumption using the hourly credits view.",
+      "panelTitle": "Credits Per Log GB",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE09BE9CA9E8ED844",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credits/GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":13,\"color\":\"#16943E\"},{\"from\":13,\"to\":20,\"color\":\"#DFBE2E\"},{\"from\":20,\"to\":30,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":30}},\"series\":{}}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,85 +1,29 @@
 {
   "id": "q0184",
-  "hash": "a379733f2429",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} namespace={{namespace}} deployment={{deployment}} metric=kube_pod_container_status_waiting_reason | quantize 1m |  sum",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "deployment",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "svp",
+  "hash": "5b5e2863e9a8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure*\n| count as today by metadata_sourceCategory, %\"fields.reason\"\n//| sort _count\n| compare with timeshift 1d 1 as vs_yesterday\n| \"https://cse-content.long.sumologic.net/ui/#/search/create?query=_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%5Bsubquery%3A%20_index%3Dsec_record_failure*%20metadata_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%7C%20count%20by%20metadata_sourceMessageId%0A%20%20%20%20%7C%20metadata_sourceMessageId%20as%20_messageId%0A%20%20%20%20%7C%20compose%20_messageId%20maxResults%3D10000%5D%0A%7C%20_size%20as%20bytes%0A%7C%20timeslice%201s%0A%7C%20count%20by%20_timeslice%2C%20_messageId%2C%20bytes%2C%20_sourceCategory%2C%20_raw%20%0A%7C%20sort%20by%20_timeslice&startTime=-15m&endTime=-10m\" as url\n//| \"https://service.au.sumologic.com/ui/#/search/create?query=_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%5Bsubquery%3A%20_index%3Dsec_record_failure*%20metadata_sourceCategory%3D%3Cmy_sc%3E%0A%20%20%20%20%7C%20count%20by%20metadata_sourceMessageId%0A%20%20%20%20%7C%20metadata_sourceMessageId%20as%20_messageId%0A%20%20%20%20%7C%20compose%20_messageId%20maxResults%3D10000%5D%0A%7C%20_size%20as%20bytes%0A%7C%20timeslice%201s%0A%7C%20count%20by%20_timeslice%2C%20_messageId%2C%20bytes%2C%20_sourceCategory%2C%20_raw%20%0A%7C%20sort%20by%20_timeslice&startTime=-15m&endTime=-10m\" as url\n| replace(url,\"%3Cmy_sc%3E\",metadata_sourceCategory) as url\n| toURL(url,\"show_failed_events\") as show_failed_events\n| fields metadata_sourceCategory, %\"fields.reason\", today, today_vs_yesterday,show_failed_events\n| sort today",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Deployment v4.6",
-      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
-      "panelTitle": "Pods Waiting",
+      "folder": "Records",
+      "dashboardName": "SE Collection, Mapping, and Parsing Health Check",
+      "dashboardDescription": "",
+      "panelTitle": "Failed Reason by _sourceCategory",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel345C9476B350CA46",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Pods\",\"rounding\":\"0\",\"thresholds\":[{\"from\":0,\"to\":0.99,\"color\":\"#98eca9\"},{\"from\":null,\"to\":null,\"color\":\"yellow\"},{\"from\":1,\"to\":null,\"color\":\"#ffb5b5\"}],\"useBackgroundColor\":true},\"hiddenQueryKeys\":[\"A\"],\"series\":{}}",
+      "panelKey": "panelA22B857FA4EA3A46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
       "rowContext": [
-        "Pods"
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
       ],
-      "variables": [
-        {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "deployment",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "variables": []
     }
   ]
 }

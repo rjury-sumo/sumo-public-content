@@ -1,49 +1,27 @@
 {
   "id": "q0457",
-  "hash": "f9de6bb3e2d5",
+  "hash": "2165ca9527db",
   "queryType": "Logs",
-  "queryMode": "Logs",
-  "query": "_view=sumologic_audit   _sourceCategory=user_activity \n| where action in (\"MANAGE_PERMISSIONS\" , \"CREATE\", \"DELETE\", \"MOVE\", \"COPY\", \"UPDATE\", \"IMPORT\", \"EXPORT\",\"INSTALL\")\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by status",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "sourceuser",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "pie",
+  "queryMode": "SavedSearch",
+  "query": "_index=sumologic_audit _sourceCategory=account_management _sourceName=VOLUME_QUOTA AND MetricIngest",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
+      "objectType": "SavedSearch",
       "folder": "Audit",
-      "dashboardName": "Library Content - Overview",
-      "dashboardDescription": "See an overview of Audit Library content, including location of users, user activity, outliers by user, and breakdowns by action.",
-      "panelTitle": "Success - Failure Status Breakdown",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panel39141b0c8c2bb94f",
-      "visualization": "pie",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true}}",
-      "rowContext": [
-        "Source User"
-      ],
-      "variables": [
-        {
-          "name": "sourceuser",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "dashboardName": "Throttling events - Metrics Ingest",
+      "dashboardDescription": "Throttling events are reported when:  1.At least 15 minutes has elapsed since the last time a throttling event was reported. AND 2.At least 2 percent of collector sources experienced the effect of data throttling in the time interval.",
+      "panelTitle": "Throttling events - Metrics Ingest",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-24h"
     }
   ]
 }

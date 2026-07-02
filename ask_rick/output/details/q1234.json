@@ -1,0 +1,65 @@
+{
+  "id": "q1234",
+  "hash": "fe9f32e48315",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "Namespace=aws/apigateway metric=count Statistic=Sum apiname={{apiname}} accountid={{accountid}} | quantize using sum\n| sum by apiname | topk(10, sum)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "apiname",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "accountid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/aws/api_gateway_errors_and_latency.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Api Gateway Errors and Latency",
+      "dashboardDescription": "",
+      "panelTitle": "Top Requests Per API",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA10B814D804AF843",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "apiname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "accountid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

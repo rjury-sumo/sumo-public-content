@@ -1,65 +1,29 @@
 {
   "id": "q0880",
-  "hash": "2b9d0a21d9b9",
+  "hash": "2ae850dbf944",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_signal\n| formatDate(toLong(createdTimestamp), \"yyyy-MM-dd HH:mm:ss\") as timestamp\n| json field=entities \"[0].type\" as entity_type nodrop\n| where entity_type matches \"*username\"\n| json field=entities \"[0].value\" as user_username nodrop\n| where user_username matches \"{{user_username}}\"\n| urlencode(id) as signalId\n| concat(\"https://\",\"{{service_endpoint}}\",\".sumologic.com/sec/signal/\",signalId,\"\") as url\n| tourl(url,name) as ruleName\n| concat (\"User \",user_username,\" triggered an alert on the Signal: \",ruleName) as activity\n| count by activity,timestamp\n| sort by timestamp asc\n| fields -_count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "user_username",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "service_endpoint",
-      "description": "service.us2,service.au,service.eu,service.jp,service.in,service",
-      "dataType": "ANY",
-      "value": "service.us2"
-    }
-  ],
-  "viewerType": "table",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| where vendor =  \"Sumo Logic\"\n| json field=entities \"[0].type\" as entity_type nodrop\n| count \n| sort by _count",
+  "queryParameters": [],
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - User Telemetry",
-      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
-      "panelTitle": "Signal Timeline",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signals by Product",
+      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
+      "panelTitle": "Sumo Logic",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel3F5B52CA97135B4C",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "user_username",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "service_endpoint",
-          "defaultValue": "service.us2",
-          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelF23574A7A4B9DB45",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"Signals\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Sumo Logic CIP Search Alerts"
+      ],
+      "variables": []
     }
   ]
 }

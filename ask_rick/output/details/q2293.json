@@ -1,0 +1,36 @@
+{
+  "id": "q2293",
+  "hash": "af9728ee5309",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n\n| where data_scanned_bytes > (100 * 1G)\n| (query_end_time - query_start_time)/1000 as range_s\n| execution_duration_ms /1000 as duration_s\n| if(status_message = \"Finished successfully\",0,1) as fail\n// AGGREGATE TO GET STATS\n| count_distinct(query) as unique_queries,max(scanned_partition_count) as max_partitions,count_distinct(user_name) as users,sum(duration_s) as total_sec,count as searches, sum(data_scanned_bytes) as bytes_scanned,   sum(fail) as %\"fail/cancelled\" by user_name,query_type\n//| replace (partitions,\"\\n\",\", \") as partitions\n| sort bytes_scanned\n| bytes_scanned / 1024/1024/1024 as scan_gb \n| total_sec / (60 * 60) as total_hours | fields -bytes_scanned,total_sec,users\n| round(scan_gb / searches,1) as scan_gb_per_search\n| limit 200",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/audit_sumo_search_scan_overview.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Audit: Sumo Search Scan Overview",
+      "dashboardDescription": "A dashboard for viewing search scan overview and trends",
+      "panelTitle": "Top Scanners > 100GB: User and Query Type. Use this panel to locate the user / workload combinations that drive high scans.",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel55606FEC9E703A4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "High Scanners View"
+      ],
+      "variables": [
+        {
+          "name": "timeslice",
+          "defaultValue": "1d",
+          "values": "1h,15m,1d,10m,5m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

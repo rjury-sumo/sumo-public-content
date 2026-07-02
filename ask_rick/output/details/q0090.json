@@ -1,58 +1,56 @@
 {
   "id": "q0090",
-  "hash": "82e746142a9d",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}}  metric=up job=apiserver | quantize 2m |  sum",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    }
-  ],
+  "hash": "294d399d1911",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight \"\\\"status\\\": \\\"closed\\\"\" )  // insightupdated\nOR\n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated new)\n\n| json field=_raw \"eventName\"\n//| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n//| json field=_raw \"insight.name\" as name\n//| json field=_raw \"insight.entityType\" as entitytype\n//| json field=_raw \"insight.entityValue\" as entityvalue\n//| json field=_raw \"insight.tags\" as tags\n//| json field=_raw \"insight.severity\" as severity\n//| json field=_raw \"insight.severityName\" as severityname\n//| json field=_raw \"insight.confidence\" as confidence\n//| json field=_raw \"insight.signals\" as signals\n//\n// in closed events\n//| json field=_raw \"insight.assignee\" as assignee nodrop\n//| json field=_raw \"insight.resolution\" as resolution nodrop\n\n// in update events \n//| json field=_raw \"to\" as last_change nodrop\n\n// may exist after an update\n//| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n//| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n//| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n//\n//| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n//| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n//| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n//| sort _messagetime\n//\n// ensure we only store the most recent result\n//| where status=\"closed\"\n\n| timeslice 1d\n| if(status=\"closed\",1,0) as closed\n| if(status=\"closed\",0,1) as opened\n//| concat(severity,\"-\",severityname ) as severity\n| sum(closed) as closed, sum(opened) as opened | round(100 * (closed/opened)) as close_ratio\n| fields close_ratio",
+  "queryParameters": [],
   "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/CSIEM_Overview/cloud_siem_overview.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Collection Health Check v4.6",
-      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
-      "panelTitle": "Apiserver",
+      "folder": null,
+      "dashboardName": "Cloud SIEM Overview",
+      "dashboardDescription": "",
+      "panelTitle": "Ratio of Insights Open : Closed",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel420FFD9692AC594C",
+      "panelKey": "panelB3DA1B96ABBA1B47",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"Endpoints\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":1,\"to\":null,\"color\":\"#82edd6\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":0,\"to\":1,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":90,\"to\":10000,\"color\":\"#16943E\"},{\"from\":60,\"to\":90,\"color\":\"#DFBE2E\"},{\"from\":-1000,\"to\":60,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":100}},\"series\":{}}",
       "rowContext": [
-        "Untitled"
+        "Insights Overview"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
+      "objectType": "Dashboard",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "Cloud SIEM Overview (Tuning Pack)",
+      "dashboardDescription": "",
+      "panelTitle": "Ratio of Insights Open : Closed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB3DA1B96ABBA1B47",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":90,\"to\":10000,\"color\":\"#16943E\"},{\"from\":60,\"to\":90,\"color\":\"#DFBE2E\"},{\"from\":-1000,\"to\":60,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":true,\"min\":0,\"max\":100}},\"series\":{}}",
+      "rowContext": [
+        "Insights Overview"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "sumologic_override",
-          "defaultValue": "sumologic",
-          "values": "sumo,sumologic",
+          "name": "cse_instance",
+          "defaultValue": "service.us2.sumologic.com",
+          "values": "service.us2.sumologic.com",
           "allowMultiSelect": false
         }
       ]

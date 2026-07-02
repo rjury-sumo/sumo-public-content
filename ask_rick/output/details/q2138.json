@@ -1,0 +1,29 @@
+{
+  "id": "q2138",
+  "hash": "38660c460f46",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_system_events _sourceCategory=alerts AlertCreated\n| json field=_raw \"details.monitorInfo.monitorName\" as monitor_name\n| json \"details.name\" as alert_event_name\n| json \"details.monitorInfo.monitorId\" as monitorId\n| where alert_event_name = \"AlertCreated\"\n| timeslice 15m\n| count as fired by _timeslice",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/Alert Tuning - Monitor or Schedule Search.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alert Tuning - Monitor and Scheduled Searches",
+      "dashboardDescription": "",
+      "panelTitle": "Alerts Fired (Monitors)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-A0E7070996298B4A",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "(Copy)"
+      ],
+      "variables": []
+    }
+  ]
+}

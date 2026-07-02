@@ -1,0 +1,49 @@
+{
+  "id": "q2405",
+  "hash": "848bd9e14f47",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as scope\n| replace(status_message,/,.*/,\"\") as status_message\n| count_distinct(query) as queries,count as searches, sum(data_scanned_bytes) as total_bytes,  sum(retrieved_message_count) as retrieved_events,sum(range_days) as range_days,avg(scanned_partition_count) as avg_partitions, sum(scan_inf) as scan_inf, values(status_message) as statuses by user_name,scope,query_type | limit 100 //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| (total_bytes/1024/1024/1024 ) as total_gb\n\n| fields -scan_inf,total_bytes\n| sort credits\n\n| sort credits\n| credits/queries as cr_per_query",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "john.smith",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "data-tiers/infrequent-scans.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Infrequent Scans (TAM Custom Dashboard)",
+      "dashboardDescription": "",
+      "panelTitle": "Summary",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8238C2A79B7B4B4E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "This Panel Shows Statistics By User"
+      ],
+      "variables": [
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "john.smith",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0597",
-  "hash": "ea8555e115a5",
+  "hash": "179f1bff59e5",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_audit objectType=AuditResourceAccess {{{Keyword}}}\n| timeslice 1h\n| count as Total by _timeslice\n| order by _timeslice",
+  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{{Keyword}}}\n| count as Total by metadata_vendor, metadata_product\n| order by Total",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -30,11 +30,11 @@
       "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
       "panelTitle": "Records for {{{Keyword}}}",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel58D73E2FB7873A4D",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Sum\",\"label\":\"AuditResourceAccess\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":null,\"color\":\"#005982\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":true,\"color\":\"#005982\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "panelKey": "panel3E49D954A4FBCA4A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
       "rowContext": [
-        "INSIGHTS (Copy) (Copy)"
+        "INSIGHTS (Copy) (Copy) (Copy)"
       ],
       "variables": [
         {

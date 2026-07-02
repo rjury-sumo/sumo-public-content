@@ -1,9 +1,9 @@
 {
   "id": "q0222",
-  "hash": "65f2e9ff2d86",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_status_waiting_reason cluster={{cluster}} namespace={{namespace}}  | quantize 1m |  sum by reason, pod | topk(500,max) | filter sum > 0",
+  "hash": "182c8ec05bd6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=asoc/INSIGHT*  /// \"\\\"name\\\": \\\"new\\\",\" \n{{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count by _messagetime,time,name,readableid,description,source,status,severity,confidence,assignee,entityType,entityName,created, tags,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort _messagetime \n| max(_messagetime) as latest,first(time) as time, first(name) as name, first(description) as description,first(source) as source, first(status) as status, first(severity) as severity, values(assignee) as assignee, first(entitytype) as entitytype, first(entityname) as entityname,last(created) as created,first(tags) as tags, first(signalnames) as signalnames,first(signalstages) as signalstages,first(signalruleids) as signalruleids by readableid\n| sort latest| fields -latest //| fields -_count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "honeyComb",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/insight-review.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Terminated and Waiting Pods",
+      "folder": null,
+      "dashboardName": "CSE Insights Review",
+      "dashboardDescription": "",
+      "panelTitle": "Insight Current Status",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-19155C4D9AE05941",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"reason\",\"value\":\"reason\"}],\"aggregationType\":\"avg\"},\"hiddenQueryKeys\":[\"C\",\"D\"],\"series\":{}}",
+      "panelKey": "panelPANE-CFE9D761B3623A4C",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Pods"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "// INSIGHT-123",
+          "values": "//none",
           "allowMultiSelect": false
         }
       ]

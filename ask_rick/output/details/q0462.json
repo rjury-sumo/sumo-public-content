@@ -1,24 +1,11 @@
 {
   "id": "q0462",
-  "hash": "6ddd5ea52cb9",
+  "hash": "45acb3b22c3a",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_view=sumologic_audit _sourceCategory=user_activity\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"User * updated the following permissions on * \\\"*\\\". \\nAdded: *\\nRemoved: *\" as user,content_type,content_name,added_permissions,removed_permissions nodrop\n| parse regex field=added_permissions \"(?<addedperm>\\(.+?: .+?\\))\" multi\n| parse regex field=addedperm \"\\((?<added_permission_to>.+)<(?<permission_target>.+)>: (?<added_permissions>.+)\\)\"\n|where if (\"{{added_permissions}}\" = \"*\", true, added_permissions matches \"{{added_permissions}}\")\n|count by content_name \n| sort by _count",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "added_permissions",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    }
-  ],
-  "viewerType": "bar",
+  "query": "_index=sumologic_audit action=login status=SUCCESS\n| where _sourceCategory=\"user_activity\" \n| timeslice by 1d\n| count as count by _timeslice",
+  "queryParameters": [],
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,24 +13,15 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Audit",
-      "dashboardName": "Library Content - Updated Permission",
-      "dashboardDescription": "See when permission is added or removed. As well as a breakdown, and count of permission being added or deleted by type or content.",
-      "panelTitle": "Added Permission by Content",
+      "dashboardName": "User Activity - Login and Credentials",
+      "dashboardDescription": "See logins, location of logged in users, and count of login attempts, password changes, and password resets",
+      "panelTitle": "Successful User Login Attempts",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel72a61a55aadc2b49",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
-      "rowContext": [
-        "Added Permission"
-      ],
-      "variables": [
-        {
-          "name": "added_permissions",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panel8b1f604b8c45d84d",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

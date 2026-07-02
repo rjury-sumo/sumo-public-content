@@ -1,0 +1,83 @@
+{
+  "id": "q1247",
+  "hash": "14bee0fabe86",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=*cloudwatch* accountid= {{accountid}} account = {{account}} functionname={{functionname}}\n(err* or warn* or crit* or fatal or fail*)\n//| parse field=logstream \"*/[*]*\" as logstreamDate, version, logstreamID\n//\n| parse regex  \"^(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorObj>.*)\" nodrop | json field=errorObj \"errorMessage\" nodrop\n| parse regex  \"^(?<time>\\d+\\/\\d+\\/\\d+\\s+\\d+:\\d+:\\d+):(?<logLevel>ERROR|CRITICAL):(?<errorMsg>.*)\" nodrop \n| parse regex  \"^\\[(?<logLevel>ERROR|CRITICAL)]\\s(?<errorMsg>.*)\" nodrop\n| parse regex \"^\\[(?<logLevel>ERROR|CRITICAL)]\\t(?<time>\\d[^\\t]*)\\t(?<RequestId>[^\\t]*)\\t(?<errorMsg>.*)\" nodrop\n| parse regex \"^(?<logLevel>ERROR|CRITICAL) \\| (?<time>.*) \\| (?<thread>.*) \\| (?<component>.*) \\| (?<errorMsg>.*)\" nodrop\n| parse regex  \"(?<errorMsg>.*HTTPError.*)\" nodrop\n| if (isEmpty(errorMessage), errorMsg, errorMessage) as errorMessage\n| where !isEmpty(errorMessage) | substring(errormessage,0,150) as errormessage\n| parse regex field=functionname \"^(?<function>(?:[^_-]+[_-]*){1,3})\" nodrop | if (isempty(function),functionname,function) as function\n| if(length(functionname) > length(function),concat(function,\"*\"),function) as function\n| count as num_errors by accountid,account,errorMessage, function | sort num_errors | limit 100\n//| top 30 errorMessage, functionname by num_errors desc, errorMessage asc, functionname asc, account asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "accountid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "account",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*prod*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "functionname",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/aws/lambda_key_indicators_errors.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Lambda - Key Signals and Errors",
+      "dashboardDescription": "",
+      "panelTitle": "Lambda Logs Events Likely to Be Errors",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel15D2A612B1D5EA41",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "account",
+          "defaultValue": "*prod*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "accountid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "functionname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

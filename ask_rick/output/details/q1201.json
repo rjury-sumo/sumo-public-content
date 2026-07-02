@@ -1,9 +1,9 @@
 {
   "id": "q1201",
-  "hash": "2f012abb7feb",
+  "hash": "d58672a4b6f4",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 6h\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice\n|outlier %\"{{Unit}}\"",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated )\nnot tokenid\n| json field=_raw \"collectorIdentity.collectorId\" as collectorId nodrop\n| json field=_raw \"collectorIdentity.collectorName\" as collectorName nodrop\n| json \"eventName\",  \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\" as EventName,  user, userid, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue nodrop\n| where EventName in (\"CollectorCreated\", \"CollectorDeleted\")\n\n//| where user matches \"*\"\n| json field=_raw \"operator.sourceIp\" as ip nodrop\n\n| count by _messagetime, ip,interface,subsystem,eventname,user,collectorName, collectorid\n| sum(_count) as changes by ip,interface,subsystem,eventname,user,collectorName, collectorid\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| geoip ip \n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n| if (interface = \"COLLECTOR\",\"Legcay Accessid/key\",interface) as interface\n| first(collectorName) as example_collector, sum(changes)  as changes by interface,subsystem,eventname,user,asn_geo,location\n| sort changes",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Tracingsources",
-      "description": "",
+      "name": "expected_asn_geo_regex",
+      "description": "regular expression for expected asn geo strings",
       "dataType": "ANY",
-      "value": "sourcecategory_tracing_volume"
+      "value": ".*"
     },
     {
       "autoComplete": {
@@ -24,39 +24,47 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Unit",
-      "description": "spansCount , billedBytes",
+      "name": "show_asn_geo",
+      "description": "exception,normal",
       "dataType": "ANY",
-      "value": "billedBytes"
+      "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "file": "apps/audit/sumologic_login_api_activity.json",
       "objectType": "Dashboard",
-      "folder": "Flex",
-      "dashboardName": "Flex - Tracing",
-      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
-      "panelTitle": "Ingest Outlier of {{Tracingsources}} by {{Unit}}",
+      "folder": null,
+      "dashboardName": "Sumo Logic Login and API Activity",
+      "dashboardDescription": "",
+      "panelTitle": "Collector Creation / Registration By Legacy Accessid/key, UI or API",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
-      "rowContext": [],
+      "panelKey": "panel17122486BBDDCA4E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Collector Registration and Creation"
+      ],
       "variables": [
         {
-          "name": "Unit",
-          "defaultValue": "billedBytes",
-          "values": "spansCount , billedBytes",
+          "name": "expected_asn_geo_regex",
+          "defaultValue": ".*",
+          "values": "regular expression for expected asn geo strings",
           "allowMultiSelect": false
         },
         {
-          "name": "Tracingsources",
-          "defaultValue": "sourcecategory_tracing_volume",
-          "values": null,
+          "name": "user",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_asn_geo",
+          "defaultValue": "*",
+          "values": "exception,normal",
           "allowMultiSelect": false
         }
       ]

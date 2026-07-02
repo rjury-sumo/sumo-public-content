@@ -1,0 +1,85 @@
+{
+  "id": "q2263",
+  "hash": "a0b839c9fe08",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n//query_type=*dash*\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,values(user_name) as user_names,count as searches, sum(scan_tb) as scan_tb by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n\n\n| querytimerange() / (1000 * 60) as qrm \n| range_day * 1440 as range_minutes\n| qrm / searches as ran_every\n| range_minutes / ran_every as %\"range:schedule\"\n\n//| where scans_many_partitions > 0 \n| fields -over_30s_runtime,scans_many_partitions,gt_7d_range,gt_30d_range,scan_gt_10tb,scan_gt_100tb,qrm\n| sort scan_tb \n| limit 50",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "custom_params",
+      "description": "// other custom parameters,content_name=*something*,status_message=*fail*",
+      "dataType": "ANY",
+      "value": "// some_field=some_value"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimum_gb_scan",
+      "description": "10,50,100,1000",
+      "dataType": "ANY",
+      "value": "10"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Sumo_Poor_Search_Performers.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Search Poor Performers",
+      "dashboardDescription": "",
+      "panelTitle": "Top Searches With Greatest Total Scan",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDE6FEE85BB872A43",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Highest Total Scan"
+      ],
+      "variables": [
+        {
+          "name": "minimum_gb_scan",
+          "defaultValue": "10",
+          "values": "10,50,100,1000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "custom_params",
+          "defaultValue": "// some_field=some_value",
+          "values": "// other custom parameters,content_name=*something*,status_message=*fail*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q1091",
-  "hash": "2dd236b1e6a6",
+  "hash": "cb4345bd6d93",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events  _sourceCategory=userSessions (UserLoggedOut OR UserLoggedIn OR UserLockedOut OR UserUnlocked OR UserLoginTimedOut)\n| json \"eventName\", \"userSession.sourceIp\" as EventName, UserIp nodrop\n| where EventName in (\"UserLoggedOut\", \"UserLoggedIn\", \"UserLockedOut\", \"UserUnlocked\", \"UserLoginTimedOut\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n| count as Count by EventName\n| fillmissing values(\"UserLoggedOut\", \"UserLoggedIn\", \"UserLockedOut\", \"UserUnlocked\", \"UserLoginTimedOut\") in EventName \n| compare timeshift 1d as Shift_1d",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier=Continuous \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| toLowerCase(query) as queryLower\n| parse regex field=queryLower \"(?<aggregation>sum|avg|count|count_distinct|count_frequent|max|min|avg|first|last|most_recent|least_recent|pct|stddev|fillmissing|compose)\" nodrop\n| if (isempty(aggregation),\"non-aggregate\",\"aggregate\") as query_type\n| count by query_type",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "EventName",
+      "name": "query_type",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     },
     {
       "autoComplete": {
@@ -24,38 +24,40 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "UserIp",
+      "name": "user_name",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "bar",
+  "viewerType": "pie",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - User & Role Management",
-      "dashboardName": "Enterprise Audit - User Session Activities",
-      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
-      "panelTitle": "One Day Time Shift Comparison",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Aggregate vs Non-Aggregate Searches",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel28ebd22590f1e848",
-      "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stackedPercent\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
-      "rowContext": [],
+      "panelKey": "panelfae0fb4ca0f49946",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"},\"series\":{}}",
+      "rowContext": [
+        "Search Concepts"
+      ],
       "variables": [
         {
-          "name": "EventName",
-          "defaultValue": "*",
+          "name": "query_type",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "UserIp",
-          "defaultValue": "*",
+          "name": "user_name",
+          "defaultValue": null,
           "values": null,
           "allowMultiSelect": false
         }

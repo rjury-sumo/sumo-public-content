@@ -1,9 +1,9 @@
 {
   "id": "q0546",
-  "hash": "e60021e0a056",
+  "hash": "a0dd056ee45b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourcecategory={{LogView}}_and_tier_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes",
+  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as {{Unit}}\n|if(\"{{Unit}}\" matches \"spansCount\", 1000000, 1Gi) as denominator \n| {{Unit}}/denominator as  {{Unit}}\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| {{Unit}}/duration_in_min as {{Unit}}\n| fields {{Unit}}",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,7 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "LogView",
+      "name": "TracingView",
       "description": "",
       "dataType": "ANY",
       "value": "sourcecategory"
@@ -24,10 +24,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "Tier",
-      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
       "dataType": "ANY",
-      "value": "*"
+      "value": "billedBytes"
     }
   ],
   "viewerType": "svp",
@@ -38,33 +38,19 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Overview",
-      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
-      "panelTitle": "Ingest {{LogView}}- Log Volume",
+      "dashboardName": "Data Volume - Tracing",
+      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
+      "panelTitle": "Ingest - {{Unit}} per minute",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-B8FEB8C8B1D9A943",
+      "panelKey": "panelPANE-4EBA2D949F075940",
       "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"gbytes\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
-      "rowContext": [
-        "Logs"
-      ],
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Gbytes/Million per minute\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
       "variables": [
         {
-          "name": "Tier",
-          "defaultValue": "*",
-          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "LogView",
-          "defaultValue": "sourcecategory",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "MetricsView",
-          "defaultValue": "sourcecategory",
-          "values": null,
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
           "allowMultiSelect": false
         },
         {

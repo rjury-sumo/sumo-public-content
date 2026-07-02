@@ -1,0 +1,61 @@
+{
+  "id": "q2062",
+  "hash": "66dc1b2d7ccc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=*kubelet*   cluster={{cluster}} \n(\nCrashLoopBackOff\nor\nOOMKilled\nor\n(Error syncing pod) \nor (reason evicted) \nor (\"Failed to pull image\") \nor Failedattachvolume\nor FailedattachMount\nor FailedScheduling\nor \"MountVolume.SetUp failed\"\nor (configmap \"not found\") \nor (secret \"not found\") \nor NodeNotReady \nor HostPortConflict \nor \"Failed to pull image\"\nor ( (error failed) not \"when try to find container\")\n)\n| json field=_raw \"_HOSTNAME\" as hostname\n| json field=_raw \"MESSAGE\" | where message matches \"E*\" \n// key indicators\n| parse regex field=message \"(?i)(?<keyindicator>oomkilled|crashloopbackoff)\" nodrop\n| parse regex field=message \"^(?<level>[A-Z])+[0-9]+\\s+[0-9:\\.]+\\s+(?<threadid>[0-9]+)\\s+(?<file>[^\\s:]+):(?<lineno>[0-9]+)\\]\\s(?<event>.+)\" nodrop\n| parse regex field=event \"(?i)(?<type>Error syncing pod|oomkilled|CrashLoopBackOff|evicted|Failedattachvolume|FailedattachMount|FailedScheduling|Error: [^\\s]+ failed|configmap .+not found$|secret .+not found$|NodeNotReady|HostPortConflict|Failed to pull image)\" nodrop \n\n// strict\n| where !(isempty(type))\n\n// wider\n//| if(isempty(type),concat(\"others:\",substring(event,0,50)),type) as type\n\n| trim(concat(type,\" \",keyindicator)) as type\n//|  min(_messagetime) as starttime,max(_messagetime) as endtime,first(event) as example ,count by cluster,file,type,hostname \n//| first(event) as example,values(hostname) as hosts,count as errors by cluster,file,type\n| sort type asc\n| count as errors by type | sort errors",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_common_issues.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Kubernetes Common Issues - Feb 5 2025",
+      "dashboardDescription": "",
+      "panelTitle": "Kubelet Common Error Conditions",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel65FB5ED99FDB184A",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Kubelet Events"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "top_n",
+          "defaultValue": "50",
+          "values": "10,25,50,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "quantize_interval",
+          "defaultValue": "5m",
+          "values": "30s,1m,5m,15m",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0221",
-  "hash": "ab64eb36ea67",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_status_terminated_reason cluster={{cluster}} namespace={{namespace}} !reason=completed  | quantize 1m | sum by reason, pod | topk(500,max) | filter sum > 0",
+  "hash": "e1698148ae96",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure \n metadata_sourcecategory={{sourcecategory}} {{{search_term}}}\n| metadata_sourcecategory as sourcecategory\n| metadata_vendor as vendor\n| metadata_product as product\n| metadata_deviceeventid as eventid\n| metadata_parser as parser\n| count by sourcecategory,vendor,product,eventid,parser,reason | sort _count",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
-      "description": "",
+      "name": "sourcecategory",
+      "description": "any source category",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -24,41 +24,41 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
+      "name": "{search_term",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "honeyComb",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/failed_to_map.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Terminated and Waiting Pods",
+      "folder": null,
+      "dashboardName": "Failed To Map Review",
+      "dashboardDescription": "",
+      "panelTitle": "Table View",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-19155C4D9AE05941",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"reason\",\"value\":\"reason\"}],\"aggregationType\":\"avg\"},\"hiddenQueryKeys\":[\"C\",\"D\"],\"series\":{}}",
+      "panelKey": "panelF33C2015BA492949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":9,\"labelFontSize\":9},\"axisY\":{\"titleFontSize\":9,\"labelFontSize\":9}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Pods"
+        "Help"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
+          "name": "sourcecategory",
+          "defaultValue": "*",
+          "values": "any source category",
           "allowMultiSelect": false
         },
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "search_term",
+          "defaultValue": "// no search term",
+          "values": "// any.search.term.vs.sec_record_failure,metadata_parser=a,metadata_product=b,metadata_vendor=c,metadata_deviceeventid=d",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0115",
-  "hash": "7034693b3226",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_pod_container_resource_limits cluster={{cluster}} namespace={{namespace}} container={{container}} pod={{pod}} resource=memory   |quantize 1m | eval _value / (1000000)|sum  by pod,cluster,container |topk(100,max)",
+  "hash": "22cd3128d1f9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n*Rule*\n\n{{{rule}}}\n//THRESHOLD-S00096\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"templatedMatchRule\" as rulea nodrop\n| json field=_raw \"matchRule\" as ruleb nodrop\n| json field=_raw \"yaraRule\" as rulec nodrop\n| json field=_raw \"thresholdRule\" as ruled nodrop\n| json field=_raw \"chainRule\" as rulee nodrop\n| json field=_raw \"aggregationRule\" as rulef nodrop\n\n| rulea as rule\n| if(isempty(rule),ruleb,rule) as rule\n| if(isempty(rule),rulec,rule) as rule\n| if(isempty(rule),ruled,rule) as rule\n| if(isempty(rule),rulee,rule) as rule\n| if(isempty(rule),rulef,rule) as rule\n\n//| where isempty(rule)\n\n| json field=rule \"readableId\" as id\n| json field=rule \"name\"\n| json field=rule \"enabled\"\n| json field=rule \"expression\"\n| json field=rule \"severityMapping\"\n| json field=rule \"tuningExpressions\"\n| json field=rule \"isPrototype\"\n| json field=rule \"tags\"\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,isPrototype,operator,expression,severitymapping,tuningexpressions,tags, old,new | fields -_count // tuningexpressions\n| where id matches /(?i){{{rule}}}/\n| sort _messagetime  | fields -_messagetime",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,88 +12,57 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{rule",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "container",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "pod",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "timeSeries",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/cse_reflected_data/app_cse_reflelected_data.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Container v4.6",
-      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
-      "panelTitle": "Memory Requests vs Usage vs Limits (MB)",
+      "folder": "Content",
+      "dashboardName": "CSE Rule",
+      "dashboardDescription": "",
+      "panelTitle": "Auditing Rule Configuration Changes",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelpane-5c3b521cb97a7a43",
-      "visualization": "timeSeries",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2,\"markerSize\":\"2\",\"markerType\":\"circle\"},\"legend\":{\"enabled\":true},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"series\":{}}",
+      "panelKey": "panelD35FBCEA912F4B4B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Resource Utilization"
+        "Audit Events For This Rule"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "*",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
           "values": null,
           "allowMultiSelect": false
-        },
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Rule Overview",
+      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
+      "panelTitle": "Auditing Rule Configuration Changes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD35FBCEA912F4B4B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Audit Events For This Rule"
+      ],
+      "variables": [
         {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "pod",
-          "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "container",
-          "defaultValue": "*",
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
           "values": null,
           "allowMultiSelect": false
         }

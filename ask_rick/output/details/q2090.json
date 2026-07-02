@@ -1,0 +1,175 @@
+{
+  "id": "q2090",
+  "hash": "f7343ffb7855",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory={{category}} {{search_keywords}}\n| \"{{search_keywords}}\" as sk\n| min(_messagetime) as f, max(_messagetime) as l, count by _sourcecategory,_collector,_source,sk,_view,_sourcename\n| sort _sourcecategory asc, _collector asc,_source asc\n\n// prepare the category strings\n| if(_view=\"\",\"SumologicDefault\",_view) as index\n| concat(\"_index=\",index) as  i\n| concat(\"_sourcecategory=\",_sourcecategory) as sc\n| concat(\"_collector=\",_collector) as c\n| concat(\"_source=\",_source) as s \n| concat(\"_sourcename=\",_sourcename) as sn\n\n| if(\"yes\" = \"{{add_index}}\",i,\"\") as i\n| if(\"yes\" = \"{{add_sourcecategory}}\",sc,\"\") as sc\n| if(\"yes\" = \"{{add_collector}}\",c,\"\") as c\n| if(\"yes\" = \"{{add_source}}\",s,\"\") as s\n| if(\"yes\" = \"{{add_sourcename}}\",sn,\"\") as sn\n\n| toint(floor((now()-f ) / (1000 * 60))) as f_min_ago\n| toint(ceil((now()-l ) / (1000 * 60))) as l_min_ago\n| concat(\"-\",f_min_ago,\"m -\",l_min_ago,\"m\") as rel_expression\n| fields -f_min_ago,l_min_ago\n\n// suppress scientific notation must be epoch\n| format( \"%.0f\",f) as f\n| format( \"%.0f\",l) as l\n\n// fix if they put a space in their stuff\n\n| replace(i,\" \",\"?\") as i\n| replace(sc,\" \",\"?\") as sc\n| replace(c,\" \",\"?\") as c\n| replace(s,\" \",\"?\") as s\n| replace(sn,\" \",\"?\") as sn\n\n\n// create one meta to avoid the 10 param limit on concat using multiple concats.\n| i as meta\n| concat (meta,\"\\n \",sc,\" \",c) as meta\n| concat (meta,\"\\n \",s,\" \",sn,\"\\n\") as meta\n| trim(meta) as meta\n| concat(meta,\"\\n \",sk) as search\n\n| tourl(concat(\"https://{{my_org}}/ui/#/search/@\",f,\",\",l,\"@\",urlencode(search)),\"Right Click Open Search Tab\") as  %\"Open This Search\" | fields -sc ,sk,c,s,f,l,i,sn,meta\n\n| sort _sourcecategory asc, _collector asc, _source asc, _view asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "category",
+      "description": "Labs*,prod*,test*,stage*,dev*",
+      "dataType": "ANY",
+      "value": "Labs*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "search_keywords",
+      "description": "rick",
+      "dataType": "ANY",
+      "value": "rick"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "add_index",
+      "description": "yes,no",
+      "dataType": "ANY",
+      "value": "yes"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "add_sourcecategory",
+      "description": "yes,no",
+      "dataType": "ANY",
+      "value": "yes"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "add_collector",
+      "description": "yes,no",
+      "dataType": "ANY",
+      "value": "no"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "add_source",
+      "description": "yes,no",
+      "dataType": "ANY",
+      "value": "yes"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "add_sourcename",
+      "description": "yes,no",
+      "dataType": "ANY",
+      "value": "yes"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_org",
+      "description": "live.us2.sumologic.com",
+      "dataType": "ANY",
+      "value": "live.us2.sumologic.com"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/log_explorers/log_explorer_2024.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Log Explorer - Find My Log Metadata",
+      "dashboardDescription": "",
+      "panelTitle": "New Specific Metadata Search",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel279fcddd9fdc1847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+      "rowContext": [
+        "About"
+      ],
+      "variables": [
+        {
+          "name": "category",
+          "defaultValue": "Labs*",
+          "values": "Labs*,prod*,test*,stage*,dev*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "search_keywords",
+          "defaultValue": "rick",
+          "values": "rick",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_index",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcecategory",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_collector",
+          "defaultValue": "no",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_source",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "add_sourcename",
+          "defaultValue": "yes",
+          "values": "yes,no",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_org",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "live.us2.sumologic.com",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "id": "q2260",
+  "hash": "325888c8f3d1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n// any search term\nuser_name = {{user_name}}\n\n// some_field=some_value\n{{custom_params}}\n\n| where data_scanned_bytes > ({{minimum_gb_scan}} * 1G)\n//| where execution_duration_ms > 15000\n| (query_end_time - query_start_time)/1000 as range_s\n| round(range_s/60/60/24) as range_day\n| range_s/60 as range_min\n| execution_duration_ms /1000 as duration_s\n// AGGREGATE TO GET STATS\n\n| if(duration_s > 30,1,0) as over_30s_runtime\n| if(scanned_partition_count>10,1,0) as scans_many_partitions\n| if(range_day >= 7 and range_day < 30,1,0) as gt_7d_range\n| if(range_day >= 30,1,0) as gt_30d_range\n| data_scanned_bytes / 1T as scan_tb\n| if(scan_tb >= 10 and scan_tb < 100,1,0) as scan_gt_10tb\n| if(scan_tb >= 100,1,0) as scan_gt_100tb\n| values(user_name) as users, sum(over_30s_runtime) as over_30s_runtime, sum(scans_many_partitions) as scans_many_partitions, sum(gt_7d_range) as gt_7d_range,sum(gt_30d_range) as gt_30d_range,sum(scan_gt_10tb) as scan_gt_10tb, sum(scan_gt_100tb) as scan_gt_100tb,avg(duration_s) as avg_run_secs,max(duration_s) as max_run_secs,max(scanned_partition_count) as max_partitions,sum(scan_tb) as scan_tb,count as searches by query_type,query,content_name, range_day\n//| parse regex field=query \"(?i)(?<has_subquery>compare with timeshift|\\[ *subquery:)\" nodrop\n//| substring(query,0,500) as query\n| sort scan_tb | limit 50\n| if(isempty(content_name),users,content_name) as name_or_user\n| sum(scan_tb) as scan_tb by query_type, name_or_user \n| transpose row query_type column name_or_user",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "custom_params",
+      "description": "// other custom parameters,content_name=*something*,status_message=*fail*",
+      "dataType": "ANY",
+      "value": "// some_field=some_value"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimum_gb_scan",
+      "description": "10,50,100,1000",
+      "dataType": "ANY",
+      "value": "10"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/search_audit/Sumo_Poor_Search_Performers.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Search Poor Performers",
+      "dashboardDescription": "",
+      "panelTitle": "Top 50 Total Scan By Saved Item or User Name",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1B741DB6B8EB9B4F",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"horizontalAlign\":\"right\",\"maxWidth\":440.2982177734375,\"maxHeight\":50,\"fontFamily\":\"Roboto\",\"fontSize\":12,\"fontWeight\":\"normal\",\"showAsTable\":true,\"wrap\":true,\"shownStatistics\":[]},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Common Poor Performance Indicators"
+      ],
+      "variables": [
+        {
+          "name": "minimum_gb_scan",
+          "defaultValue": "10",
+          "values": "10,50,100,1000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "custom_params",
+          "defaultValue": "// some_field=some_value",
+          "values": "// other custom parameters,content_name=*something*,status_message=*fail*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

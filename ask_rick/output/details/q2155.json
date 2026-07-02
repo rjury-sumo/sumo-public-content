@@ -1,0 +1,55 @@
+{
+  "id": "q2155",
+  "hash": "78c41dd3f892",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "{{{filter}}}\n_index=sumologic_system_events _sourceCategory=alerts \n| json field=_raw \"details.monitorInfo.monitorId\" as monitorid\n| json field=_raw \"details.name\" as eventname\n| json field=_raw \"details.monitorInfo.triggerGranularity\" as granularity\n| json field=_raw \"details.alertDuration\" as duration nodrop\n\n| if (isnull(duration),\"0\",duration ) as duration\n| replace(duration,\" ms\",\"\") as duration\n| round(duration / 1000) as duration\n| json field=_raw \"subsystem\"\n| json field=_raw \"resourceIdentity.name\" as name\n| json field=_raw \"resourceIdentity.id\" as resourceid\n\n| json field=_raw \"details.alertingGroup.previousState\" as previousstatus\n| json field=_raw \"details.alertingGroup.currentState\" as status\n| json field=_raw \"details.alertingGroup.triggerValue\" as value\n| json field=_raw \"details.alertingGroup.timeSeriesKey\" as timeseries nodrop\n| if (isempty(timeseries),\"group\",timeseries) as timeseries\n| replace(timeseries,/_violations=.+/,\"\") as timeseries\n| sort _messagetime \n| values(status) as statuses,first(_messagetime) as updated,first(status) as status by monitorid,name,timeseries,granularity\n| where status =\"Critical\"\n| count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{filter",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/monitors/alerts-investigation-console.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Alerts Investigation Console",
+      "dashboardDescription": "",
+      "panelTitle": "Open Critical Alerts",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel94C774E796B0884E",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Alerts\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "Monitor High Level Status"
+      ],
+      "variables": [
+        {
+          "name": "filter",
+          "defaultValue": "// to disable or enter search",
+          "values": "//anything,(drop or \"new relic\" or availability)",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sumo_url",
+          "defaultValue": "service.us2",
+          "values": "live.us2,service.us2,service,service.au,service.mum,service.fra",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

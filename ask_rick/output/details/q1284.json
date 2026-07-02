@@ -1,0 +1,179 @@
+{
+  "id": "q1284",
+  "hash": "13ec866613cb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n _sourceCategory = \"sourcecategory_tracing_volume\"\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum(billedBytes) as %\"billedBytes\" by _timeslice, field_type\n| %\"billedBytes\"  as %\"billedBytes Count\"\n\n| %\"billedBytes\" / 1024/1024/1024 as gb\n| gb * 14 as credits\n| sum(credits) as credits by field_type,_timeslice\n| transpose row _timeslice column field_type\n\n| {{my_annual_credits}} / {{credit_term_days}} as plan\n| sort _timeslice asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "my_annual_credits",
+      "description": "10000,1000000,100000",
+      "dataType": "ANY",
+      "value": "1234567"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credit_term_days",
+      "description": "365",
+      "dataType": "ANY",
+      "value": "365"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/credits/Credits Daily Burn Rate.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Ingest Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3D09C2448B77F84C",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "1234567",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/credits_usage_summary_app.json",
+      "objectType": "Dashboard",
+      "folder": "Credits Usage Summary",
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Ingest Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3D09C2448B77F84C",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/credits_usage_summary/examples/dashboard.burn.rate.raw.dv.logs.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Daily Ingest Burn Rate (Data Volume Raw)",
+      "dashboardDescription": "",
+      "panelTitle": "Tracing Ingest Credits",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3D09C2448B77F84C",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"xy\":{\"xDimension\":[],\"yDimension\":[],\"zDimension\":[]},\"overrides\":[{\"series\":[\"plan\"],\"queries\":[],\"properties\":{\"type\":\"line\",\"lineDashType\":\"dash\",\"lineThickness\":2,\"color\":\"#f2da73\"}},{\"series\":[\"trend\"],\"queries\":[],\"properties\":{\"type\":\"line\"}}]}",
+      "rowContext": [
+        "About This Dashboard"
+      ],
+      "variables": [
+        {
+          "name": "retention_days",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "retention_days_infr",
+          "defaultValue": "390",
+          "values": "390,30,90,180",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "storage_estimate_factor",
+          "defaultValue": ".55",
+          "values": ".55,.6,.7,.8,.9",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "my_annual_credits",
+          "defaultValue": "21900",
+          "values": "10000,1000000,100000",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "credit_term_days",
+          "defaultValue": "365",
+          "values": "365",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,9 +1,9 @@
 {
   "id": "q0014",
-  "hash": "f205aa71e831",
+  "hash": "cac437611e92",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}\n| quantize to {{quanitize_to}} using {{quantize_aggregate}}\n{{apply_rate}}\n| topk({{N}},latest) \n//| {{final_aggregate}} by {{group_by_1}},{{group_by_2}}",
+  "query": "account={{account}} metric=StatusCheckFailed_System region={{region}} instanceid={{instanceid}} namespace={{namespace}} statistic=maximum {{field}}={{{value}}} | max",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,19 +12,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "metric_name",
-      "description": "",
-      "dataType": "ANY",
-      "value": "node_cpu_seconds_total"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "_sourcecategory",
+      "name": "account",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -36,7 +24,7 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "_collector",
+      "name": "region",
       "description": "",
       "dataType": "ANY",
       "value": "*"
@@ -48,10 +36,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "tag_filter_name",
-      "description": "<any_tag>,pod,namespace,container,etc",
+      "name": "instanceid",
+      "description": "",
       "dataType": "ANY",
-      "value": "mode"
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -60,10 +48,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "tag_filter_value",
-      "description": "*prod*,foo*,*bar*",
+      "name": "namespace",
+      "description": "",
       "dataType": "ANY",
-      "value": "idle"
+      "value": "aws/ec2"
     },
     {
       "autoComplete": {
@@ -72,10 +60,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "quanitize_to",
-      "description": "5m",
+      "name": "field",
+      "description": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
       "dataType": "ANY",
-      "value": "5m"
+      "value": "_collector"
     },
     {
       "autoComplete": {
@@ -84,125 +72,71 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "quantize_aggregate",
-      "description": "avg,sum,min,max,count",
+      "name": "{value",
+      "description": "",
       "dataType": "ANY",
-      "value": "avg"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "apply_rate",
-      "description": "| rate increasing,// no rate,| delta,| rate",
-      "dataType": "ANY",
-      "value": "| rate increasing"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "N",
-      "description": "10,20,25,30",
-      "dataType": "ANY",
-      "value": "20"
+      "value": ""
     }
   ],
-  "viewerType": "table",
+  "viewerType": "svp",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/metrics/metric_discovery_and_guided_search.json",
+      "file": "apps/AWS-EC2/aws-ec2-cloudwatch.json",
       "objectType": "Dashboard",
       "folder": null,
-      "dashboardName": "Metric Discovery and Guided Search",
-      "dashboardDescription": "",
-      "panelTitle": "'Open in Metrics Search' on this panel for a headstart on metrics Search: metric={{metric_name}}   _sourcecategory={{_sourcecategory}}  _collector={{_collector}}  {{tag_filter_name}} = {{tag_filter_value}}",
+      "dashboardName": "99. AWS EC2 Cloudwatch Metrics - Custom Tags",
+      "dashboardDescription": "The AWS EC2 Metrics - Summary dashboard provides at-a-glance information about a EC2 using Cloudwatch metrics.",
+      "panelTitle": "Status Check Failed: System",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelB4DAEFC1B0E96B4B",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
+      "panelKey": "panel979439CE97D77B46",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"thresholds\":[{\"from\":null,\"to\":0,\"color\":\"#527b01\"},{\"from\":0.01,\"to\":5,\"color\":\"#b18209\"},{\"from\":5,\"to\":25,\"color\":\"#b63010\"}],\"sparkline\":{\"show\":true},\"gauge\":{\"show\":true,\"min\":0,\"max\":25},\"label\":\"Failed Checks\",\"valueFontSize\":20,\"option\":\"Latest\",\"labelFontSize\":8},\"series\":{}}",
       "rowContext": [
-        "Metric Discovery - filtered by metric={{metric_name}}"
+        "About"
       ],
       "variables": [
         {
-          "name": "metric_name",
-          "defaultValue": "node_cpu_seconds_total",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "_sourcecategory",
+          "name": "account",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "_collector",
+          "name": "region",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "tag_filter_name",
-          "defaultValue": "mode",
-          "values": "<any_tag>,pod,namespace,container,etc",
+          "name": "namespace",
+          "defaultValue": "aws/ec2",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "tag_filter_value",
-          "defaultValue": "idle",
-          "values": "*prod*,foo*,*bar*",
+          "name": "instanceid",
+          "defaultValue": "*",
+          "values": null,
           "allowMultiSelect": false
         },
         {
-          "name": "N",
-          "defaultValue": "20",
-          "values": "10,20,25,30",
+          "name": "field",
+          "defaultValue": "_collector",
+          "values": "_sourcecategory,_sourcehost,_collector,_source,environment,team,component,aws:cloudformation:stack-name",
           "allowMultiSelect": false
         },
         {
-          "name": "quanitize_to",
-          "defaultValue": "5m",
-          "values": "5m",
+          "name": "value",
+          "defaultValue": "*",
+          "values": "a,b*,*c*",
           "allowMultiSelect": false
         },
         {
-          "name": "quantize_aggregate",
-          "defaultValue": "avg",
-          "values": "avg,sum,min,max,count",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "final_aggregate",
-          "defaultValue": "avg",
-          "values": "avg,sum,min,max,count",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "group_by_1",
-          "defaultValue": "cluster",
-          "values": "cluster,pod,namespace,container,_sourcehost",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "group_by_2",
-          "defaultValue": "node",
-          "values": "pod,namespace,container,_sourcehost,node,service",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "apply_rate",
-          "defaultValue": "| rate increasing",
-          "values": "| rate increasing,// no rate,| delta,| rate",
+          "name": "Table_GroupBy",
+          "defaultValue": "aws:cloudformation:stack-name",
+          "values": "a list of group by tags separated by commas,environment,team,aws:cloudformation:stack-name,name",
           "allowMultiSelect": false
         }
       ]

@@ -1,9 +1,9 @@
 {
   "id": "q0499",
-  "hash": "362aaa584613",
+  "hash": "4a1b2bc367e7",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where  dataTier matches \"{{Tier}}\"\n| bytes/1Mi as mbytes\n| timeslice 1h\n| sum(mbytes) as mbytes by _timeslice\n| predict mbytes by 1h model=ar, forecast=20\n| fillmissing timeslice(1h)\n| fields - mbytes_error",
+  "query": "_index=sumologic_volume _sourceCategory=\"sourcecategory_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes\n| timeslice 1d\n| sum(gbytes) as gbytes by _timeslice, sourcecategory\n| total gbytes as tot_gbytes by _timeslice\n| (gbytes*100/tot_gbytes) as pct_total \n| where pct_total >= 1 and pct_total <= 30 // candidates for partition\n| count by _timeslice",
   "queryParameters": [
     {
       "autoComplete": {
@@ -18,7 +18,7 @@
       "value": "*"
     }
   ],
-  "viewerType": "line",
+  "viewerType": "column",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
@@ -26,34 +26,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Data Volume",
-      "dashboardName": "Data Volume - Log Spikes",
-      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
-      "panelTitle": "Data Volume Predictions",
-      "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-1",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_gbytes\":{\"visible\":false},\"A_gbytes_predicted\":{\"visible\":true},\"A_gbytes_linear\":{\"visible\":false},\"A_gbytes_error\":{\"visible\":true}}}",
-      "rowContext": [],
-      "variables": [
-        {
-          "name": "Tier",
-          "defaultValue": "*",
-          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
-          "allowMultiSelect": false
-        }
-      ]
-    },
-    {
-      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
-      "objectType": "Dashboard",
-      "folder": "Data Volume",
       "dashboardName": "Data Volume - Logs",
       "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
-      "panelTitle": "Data Ingest Prediction",
+      "panelTitle": "Candidate Partitions",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-8",
-      "visualization": "line",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_mbytes\":{\"visible\":false},\"A_mbytes_predicted\":{\"visible\":true},\"A_mbytes_linear\":{\"visible\":false}}}",
+      "panelKey": "panelPANE-16",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"\"},\"axisY\":{\"title\":\"count\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"count\"}}]}",
       "rowContext": [
         "Note: Daily Ingest Capacity"
       ],

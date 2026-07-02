@@ -1,9 +1,9 @@
 {
   "id": "q0735",
-  "hash": "e228a8f848e7",
+  "hash": "f3a40da90b4e",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sec_record_authentication\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isNull(description)\n| count by description\n| order by _count",
+  "query": "_index=sec_record_notification\n| where (user_username matches \"{{user_username}}\" or isEmpty(user_username)) and (device_ip matches \"{{device_ip}}\" or isEmpty(device_ip)) and (srcDevice_ip matches \"{{srcDevice_ip}}\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"{{dstDevice_ip}}\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"{{device_hostname}}\" or isEmpty(device_hostname))\n| where !isEmpty(device_hostname)\n| count by device_hostname\n| sort by _count\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -74,13 +74,13 @@
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
       "folder": "Record Analysis",
-      "dashboardName": "Cloud SIEM - Record Analysis - Authentication Records",
-      "dashboardDescription": "This dashboard provides analysis of Authentication Records.",
-      "panelTitle": "Descriptions",
+      "dashboardName": "Cloud SIEM - Record Analysis - Notification Records",
+      "dashboardDescription": "This dashboard provides analysis of Notification Records.",
+      "panelTitle": "Top 10 Notification Records by Hostname",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelD559EFB996638B45",
+      "panelKey": "panelF317CE10BBAB7A4F",
       "visualization": "table",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [],
       "variables": [
         {

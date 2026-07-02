@@ -1,9 +1,9 @@
 {
   "id": "q0228",
-  "hash": "a42e2b39a807",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} namespace={{namespace}} pod=* container=* | quantize 1m | rate | avg by container, pod | sum by pod |topk(100,max)",
+  "hash": "fe1940a733af",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=asoc/INSIGHT*   {{{keywords}}}\n| _messageid as mid\n//| json field=_raw \"id\"\n| json field=_raw \"name\"\n| json field=_raw \"readableId\"\n| json field=_raw \"description\"\n| json field=_raw \"source\"\n| json field=_raw \"created\"\n| json field=_raw \"closed\"\n| json field=_raw \"severity\"\n| json field=_raw \"confidence\"\n| json field=_raw \"status.name\" as status nodrop\n//| json field=_raw \"entity\"\n| json field=_raw \"entity.entityType\" as entityType nodrop\n| json field=_raw \"entity.name\" as entityName nodrop\n| json field=_raw \"timeToDetection\" nodrop\n| json field=_raw \"timeToResponse\" nodrop\n| json field=_raw \"timeToRemediation\" nodrop\n| json field=_raw \"assignee.username\" as assignee nodrop\n| json field=_raw \"tags\" nodrop\n| json field=_raw \"signals[*].name\" as signalNames\n| json field=_raw \"signals[*].stage\" as signalstages\n| json field=_raw \"signals[*].ruleId\" as  signalruleIds\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd hh:mm:ss ZZZZ\") as time\n| count_distinct(readableid) as insights,count as events , values(status) as statuses by name,description //,tags //,signalNames,signalstages,signalruleIds //timeToDetection,timeToResponse,timeToRemediation,\n//| where status = \"new\"\n//| count as insights by name, description,source,severity,entitytype\n\n| sort name asc",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
       "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "namespace",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
     }
   ],
-  "viewerType": "honeyComb",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/deprecated/insight-review.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Namespace v4.6",
-      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
-      "panelTitle": "Percentage of CPU Limit",
+      "folder": null,
+      "dashboardName": "CSE Insights Review",
+      "dashboardDescription": "",
+      "panelTitle": "Insights By Name",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-D8741042B06FF94D",
-      "visualization": "honeyComb",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"avg\"},\"hiddenQueryKeys\":[\"B\",\"A\"],\"series\":{}}",
+      "panelKey": "panelD96D56B0AA22E848",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
       "rowContext": [
-        "Pods"
+        "About"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
-          "defaultValue": "*",
-          "values": null,
+          "name": "keywords",
+          "defaultValue": "// INSIGHT-123",
+          "values": "//none",
           "allowMultiSelect": false
         }
       ]

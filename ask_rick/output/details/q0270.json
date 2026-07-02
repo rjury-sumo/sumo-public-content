@@ -1,9 +1,9 @@
 {
   "id": "q0270",
-  "hash": "23d316fcc0a2",
-  "queryType": "Metrics",
-  "queryMode": "Metrics-Advanced",
-  "query": "metric=kube_node_status_condition node={{node}} cluster={{cluster}} status=\"true\" condition=ready | avg",
+  "hash": "69483770b726",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "((_index=sumologic_audit_events _sourcecategory=cse* \nOR\n_index=sumologic_system_events _sourcecategory=cse* )\n(*ruleUpdated or *rulecreated or *ruledeleted))\n\n{{{keywords}}}\n\n\nnot  \"\\\"source\\\": \\\"sumo\\\"\"\n| json field=_raw \"eventName\"\n| where eventname matches \"*Rule*\"\n| parse regex field=eventname \"^(?<rule_type>\\w+)Rule(?<change>\\w+)\"\n\n| parse  \"\\\"source\\\": \\\"*\\\"\" as source nodrop\n| parse \"\\\"description\\\": \\\"This Rule was updated by *.\\\", \\\"name\\\"\" as sumo_deploy nodrop\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"operator.interface\" as op_interface nodrop\n| if(isempty(operator),source,operator) as operator\n| if(isempty(op_interface),\"sumo_deployed\",op_interface) as interface\n\n\n// rule blob varies by name which is super annoying\n// this hack turns all the variants into a single vald json object\n// although the key names still vary somewhat\n| parse regex  \"\\\"\\w+Rule\\\": (?<rule>\\{\\\"id\\\": .+)\" nodrop \n// chop off possible end junk\n// for updates\n| replace(rule,/ \\\"from\\\": \\{.+/,\"\") as rule \n// kill end bit\n| replace (rule,/[\\}, ]+$/,\"}\") as rule\n\n// common fields\n| json field=rule \"id\" as yid nodrop\n| json field=rule \"readableId\" as id nodrop\n| if((isempty(id)),concat(rule_type,\"-\",yid),id) as id\n| json field=rule \"name\" nodrop\n| json field=rule \"enabled\" nodrop\n| json field=rule \"isPrototype\" nodrop\n| json field=rule \"tags\" nodrop\n| json field=rule \"tuningExpressions\" nodrop\n| json field=rule \"descriptionExpression\" nodrop\n\n// variants\n| json field=rule \"filterExpression\" nodrop\n| json field=rule \"expression\" as hasexp nodrop\n| json field=rule \"expressionsAndLimits\" nodrop\n| concat (filterexpression,hasexp,expressionsAndLimits) as expression\n\n| json field=rule \"severity\" as s nodrop\n| json field=rule \"severityMapping\" nodrop\n| concat(s,severitymapping) as severity\n//| first(rule) as rule by rule_type,change\n| count as changes by change,operator,interface,rule_type,id,name\n| sort id",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,53 +12,35 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "node",
+      "name": "{keywords",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "cluster",
-      "description": "",
-      "dataType": "ANY",
-      "value": "*"
+      "value": ""
     }
   ],
-  "viewerType": "svp",
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/CSIEM/tuning_pack/cse_tuning_pack.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Node v4.6",
-      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
-      "panelTitle": "Status",
+      "folder": "CSE Tuning Pack",
+      "dashboardName": "CSE Rules and Mapping Changes (Tuning Pack)",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Rule Created, Updated Or Changed By Customer Users",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-33C10B48B3D2B846",
-      "visualization": "svp",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Label\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":true,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":1.1,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":1.2,\"to\":null,\"color\":\"#FFB5B5\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"title\":{\"fontSize\":16}}",
+      "panelKey": "panelF23B00C9B8A96A4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
       "rowContext": [
-        "Overview"
+        "Rules Changes"
       ],
       "variables": [
         {
-          "name": "cluster",
+          "name": "keywords",
           "defaultValue": "*",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "node",
-          "defaultValue": "*",
-          "values": null,
+          "values": "keyword,*starword,",
           "allowMultiSelect": false
         }
       ]

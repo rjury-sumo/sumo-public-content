@@ -1,9 +1,9 @@
 {
   "id": "q1041",
-  "hash": "6079c0641329",
+  "hash": "5b1fbe74a44f",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_audit_events _sourceCategory=serviceAllowlist (ServiceAllowlistPermissionsSet OR ServiceAllowlistUpdated)\n| json \"eventName\", \"operator.email\",\"operator.sourceIp\" as EventName, Admin, AdminIp nodrop\n| where EventName in (\"ServiceAllowlistPermissionsSet\", \"ServiceAllowlistUpdated\")\n| where AdminIp matches \"{{AdminIp}}\"|count as Count by Admin, EventName\n| transpose row Admin column EventName as %\"ServiceAllowlistPermissionsSet\", %\"ServiceAllowlistUpdated\"\n| sort by ServiceAllowlistPermissionsSet, ServiceAllowlistUpdated",
+  "query": "_index=sumologic_audit_events _sourceCategory=roles UsersAssignedToRoleUpdated\n| json \"eventName\", \"eventTime\", \"usersDeleted[*]\",\"operator.sourceIp\" as EventName, EventTime, UsersRemoved, AdminIp nodrop\n| where EventName=\"UsersAssignedToRoleUpdated\"\n| parse regex field=UsersRemoved \"\\\"userEmail\\\":\\\"(?<TargetUserEmail>.*?)\\\"\" multi\n| where AdminIp matches \"{{AdminIp}}\"|count as Count by TargetUserEmail\n| sort by Count\n| limit 10",
   "queryParameters": [
     {
       "autoComplete": {
@@ -25,14 +25,14 @@
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "Enterprise Audit - Security Management",
-      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
-      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
-      "panelTitle": "Active Admins Updating Service AllowList",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Top Users Removed From Roles",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel82c30840af3d4b48",
+      "panelKey": "panel95ae2be58123694c",
       "visualization": "bar",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{}}",
       "rowContext": [],
       "variables": [
         {

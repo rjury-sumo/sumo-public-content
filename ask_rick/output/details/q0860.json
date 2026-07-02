@@ -1,67 +1,27 @@
 {
   "id": "q0860",
-  "hash": "f97e94785996",
+  "hash": "f8ecaac58e8b",
   "queryType": "Logs",
   "queryMode": "Logs",
-  "query": "_index=sumologic_system_events _sourcecategory=cseinsight insightcreated \n\n{{{keywords}}}\n\nnew\n\n\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n\n| json field=_raw \"insight.severity\" as severity\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n\n| timeslice by {{graph_by_timeslice}}\n\n| where status=\"new\"\n\n\n| count by _timeslice,severity\n\n// ensure we only store the most recent result\n | transpose row _timeslice column severity",
-  "queryParameters": [
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "{keywords",
-      "description": "",
-      "dataType": "ANY",
-      "value": ""
-    },
-    {
-      "autoComplete": {
-        "type": "SKIP_AUTOCOMPLETE",
-        "autoCompleteKey": "",
-        "autoCompleteValues": [],
-        "lookupMetaData": {}
-      },
-      "name": "graph_by_timeslice",
-      "description": "15m,1h,3h,1d,1w",
-      "dataType": "ANY",
-      "value": "1d"
-    }
-  ],
-  "viewerType": "column",
+  "query": "_index=sec_signal \n| count by  ruleName\n| sort by _count desc \n| compare with timeshift 1d",
+  "queryParameters": [],
+  "viewerType": "table",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
       "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
       "objectType": "Dashboard",
-      "folder": "SOC Analysis",
-      "dashboardName": "Cloud SIEM - Security Operations Overview",
-      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
-      "panelTitle": "Insights New Events By Time and Severity",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Analysis - Rules",
+      "dashboardDescription": "This dashboard provides trend analysis of triggered rules,  rules by match expression and top rules triggered",
+      "panelTitle": "Triggered Rules - One Day Time Comparison",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panel2F304186AE98F847",
-      "visualization": "column",
-      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
-      "rowContext": [
-        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
-      ],
-      "variables": [
-        {
-          "name": "keywords",
-          "defaultValue": "*",
-          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
-          "allowMultiSelect": false
-        },
-        {
-          "name": "graph_by_timeslice",
-          "defaultValue": "1d",
-          "values": "15m,1h,3h,1d,1w",
-          "allowMultiSelect": false
-        }
-      ]
+      "panelKey": "panelB4EEA711AFFB494E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
     }
   ]
 }

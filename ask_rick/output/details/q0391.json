@@ -1,9 +1,9 @@
 {
   "id": "q0391",
-  "hash": "bd4d0b6bb03b",
+  "hash": "b45737ba954f",
   "queryType": "Metrics",
   "queryMode": "Metrics-Advanced",
-  "query": "cluster={{cluster}} service={{service}} namespace={{namespace}} metric=container_cpu_usage_seconds_total | count by cluster, service | topk(500,max)",
+  "query": "application={{application}}\nservice={{service}} deployment.environment={{environment}} metric=service_requests _contenttype = metricfromtrace \n| quantize using sum | sum by service | topk ( 100, avg) | timeshift  7d",
   "queryParameters": [
     {
       "autoComplete": {
@@ -12,10 +12,10 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "cluster",
+      "name": "application",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -27,7 +27,7 @@
       "name": "service",
       "description": "",
       "dataType": "ANY",
-      "value": ""
+      "value": "*"
     },
     {
       "autoComplete": {
@@ -36,46 +36,46 @@
         "autoCompleteValues": [],
         "lookupMetaData": {}
       },
-      "name": "namespace",
+      "name": "environment",
       "description": "",
       "dataType": "ANY",
-      "value": "*"
+      "value": "prod"
     }
   ],
-  "viewerType": "table",
+  "viewerType": "line",
   "metricsQueryData": null,
   "tracesQueryData": null,
   "sources": [
     {
-      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "file": "apps/Tracing and Spans/tracing.metrics.contentfromtrace.json",
       "objectType": "Dashboard",
-      "folder": "Kubernetes v4.6",
-      "dashboardName": "Kubernetes - Service v4.6",
-      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
-      "panelTitle": "Service Info",
+      "folder": null,
+      "dashboardName": "Tracing Metrics contentfromtrace",
+      "dashboardDescription": "",
+      "panelTitle": "Requests Vs Last Week",
       "panelType": "SumoSearchPanel",
-      "panelKey": "panelPANE-7ADCE6E4A51EFB43",
-      "visualization": "table",
-      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"aggregationType\":\"latest\",\"fontSize\":\"15\",\"nullValue\":\"empty\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\" \"}}]}",
+      "panelKey": "panel658A87DFBAE9B842",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":true}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true,\"shownStatistics\":[]},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"lineDashType\":\"dash\",\"lineThickness\":2,\"name\":\"{{service}} - Last week\"}},{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"lineThickness\":2,\"name\":\"{{service}}\"}}]}",
       "rowContext": [
-        "Overview"
+        "Top K Performance History Filtered by application: {{application}} env: {{environment}} service: {{service}}"
       ],
       "variables": [
         {
-          "name": "cluster",
-          "defaultValue": "",
-          "values": null,
-          "allowMultiSelect": false
-        },
-        {
-          "name": "namespace",
+          "name": "application",
           "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         },
         {
+          "name": "environment",
+          "defaultValue": "prod",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
           "name": "service",
-          "defaultValue": null,
+          "defaultValue": "*",
           "values": null,
           "allowMultiSelect": false
         }
