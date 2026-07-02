@@ -1,0 +1,29 @@
+{
+  "id": "q1125",
+  "hash": "b693da7723cd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query\n//| \"_sourcecategory=cqsplitter DefaultPerCustomerLagTracker \\\"current lag\\\" \" as query \n| count as qCount, sum(data_scanned_bytes) as scanned by query,user_name\n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| replace(scope_section_raw,\" \",\"\") as scope_section | if (scope_section=\"\" or isNull(scope_section) or scope_section=\"*\",1, 0) as  select_all\n| parse regex field=scope_section_raw \"_(?<meta>sourcecategory|sourcehost|collector|source|sourcename)\\s*=\"  nodrop  | if (meta!=\"\",1,0) as use_meta\n| parse regex field=scope_section_raw \"_(?<idx>view|index)\\s*=\"  nodrop  | if (idx!=\"\",1,0) as use_idx\n| parse regex field=scope_section_raw \"(?:^|\\s+)(?<kfield>\\w+)\\s*=\"  nodrop  | if (kfield!=\"\" and !(kfield in (\"sourcecategory\",\"collector\",\"index\",\"view\",\"source\",\"sourcehost\",\"sourcename\")),1,0) as use_field\n| 0 as use_kw | parse regex field=scope_section_raw \"(?:^|\\s+)(?<first>\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|[\\w\\\"\\']+)(?<bridge>\\s*=\\s*|\\s+|$)(?<second>\\w+|$)\" multi nodrop | if ( !(bridge matches \"*=*\") and select_all!=1,1,use_kw) as use_kw\n| max(use_kw) as use_kw, max(use_field) as use_field, max(use_meta) as use_meta, max(use_idx) as use_idx, max(qCount) as qCount, max(scanned) as scanned by query,user_name \n| scanned/1Gi as scanned\n| (use_kw+use_field+use_meta+use_idx) as optimizations\n| format(\"%d Optimizations\",int(optimizations)) as %\"Optimization Techniques\"\n// To look for queries WITH a given number of optimizations, uncomment and modify the following line and comment the last line\n//| where optimizationsStr matches \"0*\" \n| sum(qCount) as queries, sum(scanned) as scanned_in_GB by %\"Optimization Techniques\" \n| total(queries) as total_queries | total(scanned_in_gb) as total_scanned_in_gb \n| toInt((queries/total_queries)*100) as queries_pct | toInt((scanned_in_gb/total_scanned_in_gb)*100) as scanned_pct \n| format(\"%.2f\",scanned_in_gb) as scanned_in_gb\n| fields -total_queries,total_scanned_in_gb\n| sort by %\"Optimization Techniques\"",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Queries Characteristics and Opportunities to Improve",
+      "dashboardDescription": "The Enterprise Search Audit - Queries Characteristics and Opportunities to Improve dashboard provides information about which of your queries take and don’t take advantage of important optimization techniques and metadata to improve efficiency.",
+      "panelTitle": "Queries by Optimization Techniques",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel037db1d1a726a94d",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Search Optimization Considerations"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "id": "q0952",
+  "hash": "763884812f83",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventTime\", \"eventName\", \"operator.id\", \"operator.email\", \"operator.sourceIp\", \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"destination.destinationType\",\"destination.enabled\",\"destination.encrypted\", \"from\", \"to\" as EventTime, eventName, UserId, User, UserIp, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, PreviousValue, CurrentValue nodrop\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\") AND EventName matches \"{{EventName}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and User matches \"{{User}}\"\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Destination Activities",
+      "dashboardDescription": "Data Forwarding Destination Activities DashBoard provides detailed information on data forwarding destination activities. You can review trends for activities, their geographical locations, one-day times shift comparisons, user activity, and recent destination activities.",
+      "panelTitle": "Geo Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel582ef7c19062e846",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

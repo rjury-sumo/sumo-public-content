@@ -1,0 +1,47 @@
+{
+  "id": "q1035",
+  "hash": "12850662c28b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events  _sourceCategory=passwordPolicy PasswordPolicyUpdated\n| json \"eventName\", \"eventTime\", \"from\", \"to\", \"operator.email\", \"operator.sourceIp\" as EventName, EventTime, PreviousValue, CurrentValue, Admin, AdminIp nodrop\n| where EventName=\"PasswordPolicyUpdated\"\n| json field=PreviousValue \"expireAfterDays\", \"reuseAfterChanges\", \"lockoutPolicy.failedAttempts\", \"lockoutPolicy.lockoutMinutes\", \"mfaPolicy.required\", \"mfaPolicy.rememberBrowser\" as PreviousexpireAfterDays, PreviousreuseAfterChanges, PreviousfailedAttempts, PreviouslockoutMinutes, Previousrequired, PreviousrememberBrowser nodrop\n| json field=CurrentValue \"expireAfterDays\", \"reuseAfterChanges\", \"lockoutPolicy.failedAttempts\", \"lockoutPolicy.lockoutMinutes\", \"mfaPolicy.required\", \"mfaPolicy.rememberBrowser\" as CurrentexpireAfterDays, CurrentreuseAfterChanges, CurrentfailedAttempts, CurrentlockoutMinutes, Currentrequired, CurrentrememberBrowser nodrop\n| if(PreviousexpireAfterDays!=CurrentexpireAfterDays, concat(\"PasswordExpiryAfterDays changed from \", PreviousexpireAfterDays, \" to \", CurrentexpireAfterDays), \"NoChange\") as PasswordExpiryAfterDays\n| if(PreviousreuseAfterChanges!=CurrentreuseAfterChanges, concat(\"PasswordReuseAfterChanges changed from \", PreviousreuseAfterChanges, \" to \", CurrentreuseAfterChanges), \"NoChange\") as PasswordReuseAfterChanges\n| if(PreviousfailedAttempts!=CurrentfailedAttempts, concat(\"LockOutAfterFailedAttempts changed from \", PreviousfailedAttempts, \" to \", CurrentfailedAttempts), \"NoChange\") as LockOutAfterFailedAttempts\n| if(PreviouslockoutMinutes!=CurrentlockoutMinutes, concat(\"LockOutMinutes changed from \", PreviouslockoutMinutes, \" to \", CurrentlockoutMinutes), \"NoChange\") as LockOutMinutes\n| if(Previousrequired!=Currentrequired, concat(\"MFARequired changed from \", Previousrequired, \" to \", Currentrequired), \"NoChange\") as MFARequired\n| if(PreviousrememberBrowser!=CurrentrememberBrowser, concat(\"RememberBrowser changed from \", PreviousrememberBrowser, \" to \", CurrentrememberBrowser), \"NoChange\") as RememberBrowser\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventTime, Admin, AdminIp, PasswordExpiryAfterDays, PasswordReuseAfterChanges, LockOutAfterFailedAttempts, LockOutMinutes, MFARequired, RememberBrowser\n| sort by EventTime\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Recent - Password Policy Changes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelffa74cb88bd2aa49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "id": "q0954",
+  "hash": "25d501c9fef2",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding (DataForwardingDestinationCreated OR DataForwardingDestinationUpdated OR DataForwardingDestinationDeleted)\n| json \"eventTime\", \"eventName\", \"operator.id\", \"operator.email\", \"operator.sourceIp\", \"destinationIdentity.destinationName\", \"destinationIdentity.dataSourceType\", \"destination.destinationType\",\"destination.enabled\",\"destination.encrypted\", \"from\", \"to\" as EventTime, eventName, UserId, User, UserIp, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, PreviousValue, CurrentValue nodrop\n| json field=CurrentValue \"destinationType\", \"enabled\", \"encrypted\" as DestinationTypeUpdated, enabledUpdated, EncryptedUpdated nodrop\n| if(isNull(DestinationType), if(isNull(DestinationTypeUpdated), \"-\",DestinationTypeUpdated), DestinationType) as DestinationType\n| if(isNull(Enabled), if(isNull(enabledUpdated), \"-\",enabledUpdated), Enabled) as Enabled\n| if(isNull(Encrypted), if(isNull(EncryptedUpdated), \"-\",EncryptedUpdated), Encrypted) as Encrypted\n| where EventName in (\"DataForwardingDestinationCreated\", \"DataForwardingDestinationUpdated\", \"DataForwardingDestinationDeleted\") \n| where  EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and User matches \"{{User}}\"\n|count by EventTime, eventName, DestinationName, DataSourceType, DestinationType, Enabled, Encrypted, UserId, User, UserIp, PreviousValue, CurrentValue\n| sort by EventTime\n| fields - _count, UserId, PreviousValue, CurrentValue",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Destination Activities",
+      "dashboardDescription": "Data Forwarding Destination Activities DashBoard provides detailed information on data forwarding destination activities. You can review trends for activities, their geographical locations, one-day times shift comparisons, user activity, and recent destination activities.",
+      "panelTitle": "Recent - Destination Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelc561ab428fdb8b4a",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

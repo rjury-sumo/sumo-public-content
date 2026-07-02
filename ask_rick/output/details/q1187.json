@@ -1,0 +1,61 @@
+{
+  "id": "q1187",
+  "hash": "5006c7fa279e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume dataPoints\n| where _sourceCategory matches \"{{Metricsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints\n| datapoints/1000/1000 as datapoints\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| fields %\"DPM\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Metricsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_metrics_volume"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Ingest {{Metricsources}}- DPM",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1473FFF58D074B4D",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Million Datapoints per minute\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Metrics"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

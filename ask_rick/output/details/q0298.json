@@ -1,0 +1,67 @@
+{
+  "id": "q0298",
+  "hash": "55892f707e3d",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_node_status_condition node={{node}} cluster={{cluster}} status=true (condition=DiskPressure or condition=MemoryPressure or condition=NetworkUnavailable or condition=PIDPressure) | sum by condition, node | filter latest > 0",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "node",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Node - Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Nodes Overview dashboard provides high-level information on the health and performance of the cluster nodes.",
+      "panelTitle": "Critical Nodes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-BA39EE419CB87A4F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and node is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

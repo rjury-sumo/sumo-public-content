@@ -1,0 +1,83 @@
+{
+  "id": "q1108",
+  "hash": "829eef512ebc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserEmailChangeRequested OR UserEmailChanged OR UserPasswordReset OR UserPasswordChanged)\n| json \"eventName\", \"operator.email\", \"operator.sourceIp\"  as EventName, Admin, AdminIp nodrop\n| where EventName in (\"UserEmailChangeRequested\", \"UserEmailChanged\", \"UserPasswordReset\", \"UserPasswordChanged\") \n| where EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Admin",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User(Email, Password) Activities",
+      "dashboardDescription": "User (Email, Password) Activities DashBoard provides detailed information on user password and email activities, such as password changes, password resets by admins, and user email change requests and changes.",
+      "panelTitle": "Geo Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1c2135f1ab428b4b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Admin",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

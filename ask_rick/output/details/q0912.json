@@ -1,0 +1,29 @@
+{
+  "id": "q0912",
+  "hash": "b49b9c5388a6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| where vendor = \"CrowdStrike\"\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| count by name\n| sort by _count",
+  "queryParameters": [],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signals by Product",
+      "dashboardDescription": "This dashboard provides Signals analysis by product, vendor, and summary of  CSE Signals.",
+      "panelTitle": "CrowdStrike Signals by Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-ED4FCF14A746194F",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "CrowdStrike"
+      ],
+      "variables": []
+    }
+  ]
+}

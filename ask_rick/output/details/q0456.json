@@ -1,0 +1,49 @@
+{
+  "id": "q0456",
+  "hash": "9a818a9c6c36",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity | where action in (\"MANAGE_PERMISSIONS\" , \"CREATE\", \"DELETE\", \"MOVE\", \"COPY\", \"UPDATE\", \"IMPORT\", \"EXPORT\",\"INSTALL\")\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = _sourceHost\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Overview",
+      "dashboardDescription": "See an overview of Audit Library content, including location of users, user activity, outliers by user, and breakdowns by action.",
+      "panelTitle": "Geo Location of Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel14e220628c18594b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{}}}",
+      "rowContext": [
+        "Source User"
+      ],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

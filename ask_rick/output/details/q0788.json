@@ -1,0 +1,49 @@
+{
+  "id": "q0788",
+  "hash": "aed5d10cf1e1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"insight.entityValue\" as entity\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by entity\n| fields entity",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "insightid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Insight Explorer",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Entity Tracked",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelA53DF93A8C089B46",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"table\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":25,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":97,\"to\":300,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":168}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Insight Details"
+      ],
+      "variables": [
+        {
+          "name": "insightid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

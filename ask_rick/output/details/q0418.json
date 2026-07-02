@@ -1,0 +1,27 @@
+{
+  "id": "q0418",
+  "hash": "c17a0f3fc5ad",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit \n| where _sourceCategory=\"account_management\"\n| count as count by _messagetime, sourceuser, action, class, target, status | sort by _messagetime\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss.SSS\", \"UTC\") as time\n| fields -_messagetime, count\n| fields time, sourceuser, action, class, target, status",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Account Management Overview",
+      "dashboardDescription": "See see trends in operation for users, roles, and access as well as Admin activities.",
+      "panelTitle": "Recent Admin Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelcc5f68f48ccebb42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

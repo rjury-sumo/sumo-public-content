@@ -1,0 +1,27 @@
+{
+  "id": "q0476",
+  "hash": "4c5d35eda1a6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit action=login status=SUCCESS\n| where _sourceCategory=\"user_activity\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = _sourceHost \n| count by latitude, longitude, country_code, country_name, region, city, postal_code \n| sort _count",
+  "queryParameters": [],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "User Activity - Login and Credentials",
+      "dashboardDescription": "See logins, location of logged in users, and count of login attempts, password changes, and password resets",
+      "panelTitle": "Logged-In User Locations",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel363a9a9ba049eb49",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

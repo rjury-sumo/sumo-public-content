@@ -1,0 +1,58 @@
+{
+  "id": "q0753",
+  "hash": "56ecf080cbb9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_endpoint\n| where (user_username matches \"*\" or isEmpty(user_username)) and (device_ip matches \"*\" or isEmpty(device_ip)) and (srcDevice_ip matches \"*\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"*\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"*\" or isEmpty(device_hostname))\n| %\"fields.filepath\" as file_path\n| %\"fields.fileHash\" as file_hash\n| where !isEmpty(file_hash_md5) or !isEmpty(file_hash) or !isEmpty(file_basename) or !isEmpty(file_path) or !isempty(threat_referenceUrl) or !isempty (threat_name)\n| tourl (threat_referenceUrl, threat_name) as threat_url\n| count by severity, file_hash_md5, file_hash, file_basename, file_path, threat_url\n| order by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Endpoint Records",
+      "dashboardDescription": "This dashboard provides analysis of Endpoint Records.",
+      "panelTitle": "Files Seen",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3AD435A3BE65B941",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "srcDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dstDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_hostname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "id": "q0643",
+  "hash": "16ba82fbd84b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if(IsEmpty(timeToRemediation), 0, timeToRemediation) as timeToRemediation\n\n| floor(timeToRemediation/60/60/24) as timeToRemediation_days\n| timeToRemediation - (timeToRemediation_days*24*60*60) as timeToRemediation\n\n| floor(timeToRemediation/60/60) as timeToRemediation_hours\n| timeToRemediation - (timeToRemediation_hours*60*60) as timeToRemediation\n\n| floor(timeToRemediation/60) as timeToRemediation_minutes\n| timeToRemediation - (timeToRemediation_minutes*60) as timeToRemediation\n\n| floor(timeToRemediation) as timeToRemediation_seconds\n\n| format(\"%s Days, %s Hrs, %s Min, %s Sec\", ToInt(timeToRemediation_days), ToInt(timeToRemediation_hours), ToInt(timeToRemediation_minutes), ToInt(timeToRemediation_seconds)) as timeToRemediation\n\n| count as Total timeToRemediation\n| timeToRemediation as Total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "TIME TO REMEDIATE",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6EB4DCD48D97C949",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"status\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"-\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":20,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

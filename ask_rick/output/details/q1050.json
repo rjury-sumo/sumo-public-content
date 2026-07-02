@@ -1,0 +1,27 @@
+{
+  "id": "q1050",
+  "hash": "bf1ce2861098",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events\n| where _sourceCategory in (\"accessKeys\", \"saml\", \"serviceAllowlist\", \"passwordPolicy\", \"multiFactorAuthentication\")\n| timeslice 1d\n| count as Count by _timeslice, _sourceCategory\n| fillmissing timeslice(1d),\n  values(\"accessKeys\", \"saml\", \"serviceAllowlist\", \"passwordPolicy\", \"multiFactorAuthentication\") in _sourceCategory\n| transpose row _timeslice column _sourceCategory",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Security Management Overview",
+      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
+      "panelTitle": "Activities Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panela80e0908afcfba49",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

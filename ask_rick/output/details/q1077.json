@@ -1,0 +1,83 @@
+{
+  "id": "q1077",
+  "hash": "2753068b3270",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=users (UserCreated OR UserUpdated OR UserDeleted)\n| json \"eventName\", \"userIdentity.userId\", \"user.active\", \"to.active\", \"operator.email\", \"operator.sourceIp\" as EventName, UserId, ActiveCreated, ActiveUpdated,  Admin, AdminIp nodrop\n| where EventName in (\"UserCreated\",\"UserUpdated\", \"UserDeleted\")\n| where  EventName matches \"{{EventName}}\" and Admin matches \"{{Admin}}\" and AdminIp matches \"{{AdminIp}}\"\n| if(isNull(ActiveCreated), if(isNull(ActiveUpdated), \"-\", ActiveUpdated) ,ActiveCreated) as CurrentActive\n| withtime CurrentActive\n| most_recent(CurrentActive_withtime) as Status by UserId\n| where Status!=\"-\"\n| count as Count by Status\n| if(Status matches \"true\", \"Active\", \"InActive\") as Status",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Admin",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Activities",
+      "dashboardDescription": "User Activities DashBoard provides detailed information about user activities, including top admins, one-day time comparison, and recent events.",
+      "panelTitle": "Active Users Vs Inactive Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelcc271c0d8e7e0a4d",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Admin",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "id": "q0536",
+  "hash": "c2090d409158",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{MetricsView}}_metrics_volume datapoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 6h\n| sum(datapoints) as datapoints by _timeslice\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| predict  %\"DPM\"  by 1h model=ar, forecast=20\n| fillmissing timeslice(1h)\n| fields - datapoints, DPM_error, duration_in_min",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "MetricsView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Metrics",
+      "dashboardDescription": "The Data Volume - Metrics dashboard allows you to view your metrics ingested, identifies ingest outliers/spikes as well as helps predict what ingestion is going to be.",
+      "panelTitle": "Ingest Prediction - {{MetricsView}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note"
+      ],
+      "variables": [
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "q0903",
+  "hash": "7723ecf30ac4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=fullRecords \"[0].metadata_deviceEventId\" as deviceEventId\n| count vendor, product, deviceEventId\n| compare with timeshift 7d 4\n| order by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Monitoring",
+      "dashboardDescription": "This dashboard provides times based metrics for CSE Signals.",
+      "panelTitle": "Signal Disappearances by Vendor, Product, and Event ID - 7 Days Time Comparison",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-6A39FACA86B66B40",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

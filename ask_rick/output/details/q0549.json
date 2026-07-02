@@ -1,0 +1,67 @@
+{
+  "id": "q0549",
+  "hash": "3bfab244d877",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume \n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum(billedBytes) as billedBytes by collector\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| billedBytes / duration_in_min as % \"billedBytes per minute\"\n| top 5 collector by % \"billedBytes per minute\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "TracingView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Top 5 {{TracingView}} by Billed Bytes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3342C298A0F54A40",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Tracing"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

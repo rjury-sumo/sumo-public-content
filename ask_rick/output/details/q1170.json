@@ -1,0 +1,36 @@
+{
+  "id": "q1170",
+  "hash": "de2a90b24083",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n|data_scanned_bytes / (1024*1024) as mbytes\n| timeslice 6h\n| sum (mbytes) as mbytes by _timeslice\n| predict mbytes by 6h model=ar, forecast=20",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Logs",
+      "dashboardDescription": "The Logs dashboard helps you see your log ingest volume between default and non-default indexes along with the predicted growth. This dashboard also provides predicted growth for scan volume.",
+      "panelTitle": "Data Scan Volume Prediction",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF93F9D3988853A4E",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Log Data Scan"
+      ],
+      "variables": [
+        {
+          "name": "Subscribed_Average_Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

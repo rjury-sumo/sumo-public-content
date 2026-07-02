@@ -1,0 +1,67 @@
+{
+  "id": "q1158",
+  "hash": "41984b0fd744",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\"\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| sum(sizeInGB) as total_data_scanned, sum (credits_consumed) as total_credits_consumed by query_type \n| fields query_type, total_credits_consumed, total_data_scanned\n| format( \"%.2f\",total_credits_consumed) as total_credits_consumed\n| format( \"%.2f\",total_data_scanned) as total_data_scanned\n| sort by total_credits_consumed",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credits_conversion",
+      "description": "0.016",
+      "dataType": "ANY",
+      "value": "0.016"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Feature Level Scan Volume",
+      "dashboardDescription": "The Feature Level Scan Volume dashboard provides visibility into the scan volume at a feature level in order to monitor and control cost at a feature level.",
+      "panelTitle": "Credits Consumed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panela8ef1f7683402b4e",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\"}}",
+      "rowContext": [
+        "Credits Conversion"
+      ],
+      "variables": [
+        {
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

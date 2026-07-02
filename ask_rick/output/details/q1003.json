@@ -1,0 +1,85 @@
+{
+  "id": "q1003",
+  "hash": "f76ecb1d9f68",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentSynchronizationRequested\n| json \"eventName\", \"syncRequest.contentNameToSynchronize\",\"contentIdentity.name\", \"syncRequest.requestBy.userEmail\" as EventName, ContentToSynchronize, ContentName, UserEmail\n| where EventName=\"ContentSynchronizationRequested\"\n|where  ContentName matches \"{{ContentName}}\" and EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\"\n| count as Count by ContentToSynchronize\n| sort by Count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Permission Updated, Synchronized",
+      "dashboardDescription": "Content - Permission Updated, Synchronized DashBoard provides detailed information on content permissions that have been added or deleted, as well as content that has been synchronized. The dashboard is organized according to Content Synchronization and Content Permissions.",
+      "panelTitle": "Top Content Requested to Synchronize",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelabf1ba2e83428a4a",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [
+        "Content Permission"
+      ],
+      "variables": [
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

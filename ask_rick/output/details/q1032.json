@@ -1,0 +1,27 @@
+{
+  "id": "q1032",
+  "hash": "c3238b9c24a4",
+  "queryType": "Logs",
+  "queryMode": "SavedSearch",
+  "query": "_index=sumologic_audit_events (_sourceCategory=userSessions or _sourceCategory=collection) (UserLoggedIn OR CollectorCreated OR CollectorUpdated OR CollectorDeleted OR EphemeralCollectorDeleted OR ClobberCollectorDeleted OR CollectorUpgradeRequested OR CollectorUpgradeCompleted)\n| json \"eventName\"  as EventName\n| where EventName in (\"UserLoggedIn\", \"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"EphemeralCollectorDeleted\", \"ClobberCollectorDeleted\", \"CollectorUpgradeRequested\", \"CollectorUpgradeCompleted\")\n| json \"userSession.sourceIp\" as srcIP  nodrop \n| json \"operator.sourceIp\" as  srcIp_1 nodrop\n| if (isNull(srcIp), srcIp_1, srcIp) as srcIp\n| lookup country_name from geo://location on ip=srcIp \n| where country_name in (\"Iran\", \"North Korea\", \"Myanmar\",\"Mali\")",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "SavedSearch",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Australia embargoed countries",
+      "dashboardDescription": "User and Collector activities from Countries under targeted sanctions programs by United States",
+      "panelTitle": "Enterprise Audit - Australia embargoed countries",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-7d"
+    }
+  ]
+}

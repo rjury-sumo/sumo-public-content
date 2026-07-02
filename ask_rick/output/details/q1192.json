@@ -1,0 +1,61 @@
+{
+  "id": "q1192",
+  "hash": "224a23da2f0d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches\"{{Metricsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints by collector",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Metricsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_metrics_volume"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Usage Percentage of {{Metricsources}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel64969DDBBDE92B45",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Metrics"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "q1036",
+  "hash": "630cc0f1200e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=multiFactorAuthentication UserMultiFactorAuthenticationEnabled\n| json \"eventName\", \"eventTime\", \"userIdentity.userEmail\",\"operator.sourceIp\" as EventName, EventTime, UserEmail, AdminIp nodrop\n| where EventName=\"UserMultiFactorAuthenticationEnabled\"\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventTime, UserEmail\n| sort by EventTime\n| fields - _count, EventTime",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Recent Users Enabled MFA",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8eab3fa29ec9eb4d",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

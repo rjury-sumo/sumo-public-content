@@ -1,0 +1,47 @@
+{
+  "id": "q0426",
+  "hash": "e30d6458450d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity \"AdminMode=true\"\n| parse \"moved * \\\"*\\\" into folder *\" as content_type,content_name,target_folder_location\n| where action =\"MOVE\"\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type, content_name, target_folder_location\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Admin Mode",
+      "dashboardDescription": "See when content is deleted, moved, whitelisted, and shared. As well as when permission is added or removed.",
+      "panelTitle": "Content Moved",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panela6c8f8f28d701849",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

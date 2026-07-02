@@ -1,0 +1,35 @@
+{
+  "id": "q0351",
+  "hash": "a9f6207a410e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*falco* output_fields rule priority output \n| json  \"log.priority\" as priority\n| json \"log.rule\" as rule\n| json  \"$['log']['output_fields']['proc.cmdline']\" as proc_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.name']\" as proc_name nodrop\n| json  \"$['log']['output_fields']['proc.pcmdline']\" as proc_parent_cmdline nodrop\n| json  \"$['log']['output_fields']['proc.pname']\" as proc_parent_name nodrop\n| if(isBlank(proc_name), \"none\", proc_name) as proc_name\n| count by proc_name",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": {
+    "metric": "",
+    "aggregationType": "None",
+    "groupBy": "",
+    "filters": [],
+    "operators": null
+  },
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Security Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Security Overview Dashboard provides high level details of anomalous container, application, host, and network activity.",
+      "panelTitle": "Rules Triggered  by Process",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-9d0f1ed7824b6947",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"bar\"},\"legend\":{\"enabled\":false},\"color\":{\"family\":\"scheme3\"}}",
+      "rowContext": [
+        "Rule Priorities"
+      ],
+      "variables": []
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "id": "q0209",
+  "hash": "e840dbb50076",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*events*\n| json field=_raw \"object.reason\" as reason\n| json field=_raw \"object.type\"\n| where %\"object.type\" != \"Normal\"\n| json field=_raw \"object.involvedObject.kind\" as kind\n| where kind = \"HorizontalPodAutoscaler\"\n| json field=_raw \"object.message\" as message\n| limit 100\n| count by reason, cluster, kind, message\n| fields - _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - HPA v4.6",
+      "dashboardDescription": "The Kubernetes - HPA dashboard provides a high-level view of the health of the Horizontal Pod Autoscalar.",
+      "panelTitle": "Events (Latest 100)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-6DB2D837BE2D6B41",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and hpa is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "hpa",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

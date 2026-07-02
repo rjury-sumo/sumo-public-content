@@ -1,0 +1,73 @@
+{
+  "id": "q0335",
+  "hash": "09f67bbc03d8",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_network_receive_bytes_total cluster={{cluster}} pod={{pod}} | quantize 1m | rate | sum by pod | eval _value/1000000 | topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Pod v4.6",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Network - Incoming and Outgoing (MB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8E776726BA494842",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme4\"},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Incoming - {{pod}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Outgoing - {{pod}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

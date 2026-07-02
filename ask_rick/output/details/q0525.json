@@ -1,0 +1,47 @@
+{
+  "id": "q0525",
+  "hash": "9a99b7a7abc3",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory = \"sourcecategory_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| timeslice 1h\n| sum(gbytes) as daily_ingest_gbytes by _timeslice, sourceCategory\n| transpose row _timeslice column sourceCategory",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Logs by Metadata Fields",
+      "dashboardDescription": "The Data Volume - Logs by Metadata Fields dashboard allows you to view log ingest volume by tier, source categories, collectors and hosts.",
+      "panelTitle": "Ingest by Source Category",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

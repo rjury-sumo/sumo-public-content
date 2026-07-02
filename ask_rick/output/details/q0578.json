@@ -1,0 +1,103 @@
+{
+  "id": "q0578",
+  "hash": "5baa652d8882",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure objectType=FailedRecord metadata_sourceCategory={{{sourceCategory}}} metadata_vendor={{{vendor}}} metadata_product={{{product}}} metadata_deviceEventId={{{deviceEventId}}}\n| limit 1000\n| json field=_raw \"reason\" nodrop\n| formatDate(_messageTime, \"yyyy-MM-dd HH:mm:ss\") as date\n| count as Total date, metadata_sourceMessageId, metadata_sourceCategory, metadata_vendor, metadata_product, metadata_deviceEventId, reason\n| order by date\n| fields -Total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{sourceCategory",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{vendor",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{product",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{deviceEventId",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Cloud SIEM - Data Parsing & Mapping Monitoring",
+      "dashboardName": "Cloud SIEM - Failed Records Analysis",
+      "dashboardDescription": "This dashboard provides summary on Failed Records.",
+      "panelTitle": "Details ( Last 1000)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-3FA8C399B0DEEA45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"paginationPageSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "CSE FAILED RECORDS"
+      ],
+      "variables": [
+        {
+          "name": "sourceCategory",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "vendor",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "product",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deviceEventId",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "q0478",
+  "hash": "c9330bee6242",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit action=login status=SUCCESS\n| where _sourceCategory=\"user_activity\"\n| withtime _messageTime\n| most_recent(_messageTime_withtime) as last_login by sourceuser,_sourceHost\n| formatDate(fromMillis(last_login), \"MM-dd-yyyy HH:mm:ss.SSS\", \"UTC\") as last_login\n| _sourceHost as Host\n| fields -_sourceHost\n| fields sourceuser, host, last_login\n| sort by last_login",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "User Activity - Login and Credentials",
+      "dashboardDescription": "See logins, location of logged in users, and count of login attempts, password changes, and password resets",
+      "panelTitle": "Last Successful Login (UTC)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelb0d7f9a983854949",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

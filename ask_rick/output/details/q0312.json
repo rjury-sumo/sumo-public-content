@@ -1,0 +1,73 @@
+{
+  "id": "q0312",
+  "hash": "739c23e36afb",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_pod_container_status_ready pod={{pod}} cluster={{cluster}} | quantize 1m  | max by pod, cluster| topk(500, max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "timeSeries",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Pod v4.6",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Pod Ready State",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-7dfba63a804f7842",
+      "visualization": "timeSeries",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\"},\"series\":{\"metric=sum(kube_pod_container_status_ready)\":{\"color\":\"#009900\",\"type\":\"area\",\"fillOpacity\":\"0.25\"},\"metric=sum(kube_pod_container_status_terminated_reason) reason=OOMKilled\":{\"color\":\"#CC0000\",\"type\":\"column\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"wrap\":true},\"hiddenQueryKeys\":[],\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"pod={{pod}} cluster={{cluster}}\"}}],\"axes\":{\"axisX\":{},\"axisY\":{\"title\":\" \"}}}",
+      "rowContext": [
+        "Overview"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

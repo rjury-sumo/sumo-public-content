@@ -1,0 +1,41 @@
+{
+  "id": "q0660",
+  "hash": "8b07af91a530",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where insight_status = \"closed\"\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| timeslice 1d\n| count by _timeslice \n| fillmissing timeslice\n| sort by _timeslice",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Closed",
+      "dashboardDescription": "This dashboard provides metrics around closed insights.",
+      "panelTitle": "Closed Insights Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-28239C82AED4794A",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Overview",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Insights by Created vs Closed",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE3B0531CB9CF5A43",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"color\":\"#bf2121\",\"name\":\"Insights-Created\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"color\":\"#116b25\",\"name\":\"Insights-Closed\"}}]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

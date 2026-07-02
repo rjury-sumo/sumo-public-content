@@ -1,0 +1,67 @@
+{
+  "id": "q0262",
+  "hash": "fbb23ae55945",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} node={{node}} (metric=node_network_receive_drop_total OR metric=node_network_transmit_drop_total) !device=veth* | quantize using sum | rate increasing | sum by node | topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "node",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Node v4.6",
+      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
+      "panelTitle": "Net Utilization (Transmitted) vs Net Saturation (Dropped)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-8572b03da853db4e",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"stacked\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme6\"},\"axes\":{\"axisY\":{\"title\":\"Bytes/Sec\"}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Utilization - {{node}}\"}},{\"series\":[],\"queries\":[\"B\"],\"properties\":{\"name\":\"Saturation - {{node}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

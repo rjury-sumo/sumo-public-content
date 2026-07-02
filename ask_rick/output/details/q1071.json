@@ -1,0 +1,29 @@
+{
+  "id": "q1071",
+  "hash": "dabcafab0792",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events\n| where _sourceCategory in (\"users\", \"roles\", \"userSessions\")\n| _sourceCategory as Category\n| timeslice 12h\n| count by _timeslice, Category\n| fillmissing timeslice(12h), values(\"users\",\"roles\",\"userSessions\") in Category\n| transpose row _timeslice column Category",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User & Role Management Overview",
+      "dashboardDescription": "User and Role Management - Overview DashBoard provides an at-a-glance view of user activities and sessions, email account requests, and trends over time. You can also review user role data, such as user activities by role.",
+      "panelTitle": "Activities Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7e7b0f8e95f01a40",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stackedPercent\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[]}",
+      "rowContext": [
+        "User Session Activities"
+      ],
+      "variables": []
+    }
+  ]
+}

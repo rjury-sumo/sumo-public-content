@@ -1,0 +1,27 @@
+{
+  "id": "q0781",
+  "hash": "0a383a4a4ab8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure*\n| count as today by metadata_sourceCategory, %\"fields.reason\"\n| compare with timeshift 1d 1 as vs_yesterday\n| fields metadata_sourceCategory, %\"fields.reason\", today, today_vs_yesterday\n| sort today",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Failed Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Failed Records",
+      "dashboardDescription": "This dashboard provides Analysis of Failed Records",
+      "panelTitle": "Failed Records by _sourceCategory",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-B48D54628D7C7B42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

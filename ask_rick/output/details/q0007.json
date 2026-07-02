@@ -1,0 +1,85 @@
+{
+  "id": "q0007",
+  "hash": "5d8e79059154",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events accessId api\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"subsystem\"\n| json field=_raw \"eventName\"\n| json field=_raw \"operator.email\" as user\n| where user matches \"{{user}}\"\n| json field=_raw \"operator.accessId\" as id\n| json field=_raw \"operator.sourceIp\" as ip\n| count by _messagetime, ip,interface,subsystem,eventname,user,id\n| sum(_count) as requests by ip,interface,subsystem,eventname,user,id\n\n// GEOLOCATION\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n// COULD USE SUCH AS THIS TO MAKE SIGNATURE  MATCHING ON API ACCESS LOCATION INFO PER USER\n//| replace( concat (user,\"_\",asn,\"_\",organization,\"_\",country_code,\"_\",city),\" \",\"\") as new_user_geo_key\n| concat(substring(id,0,4),\"****\",substring(id,8,13)) as id\n| geoip ip\n| lookup asn,organization from asn://default on ip=ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (asn_geo matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n| where location matches \"{{show_asn_geo}}\"\n\n| sum(requests)  as requests by subsystem,eventname,user, id,asn_geo,location\n| sort requests",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "expected_asn_geo_regex",
+      "description": "regular expression for expected asn geo strings",
+      "dataType": "ANY",
+      "value": ".*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "show_asn_geo",
+      "description": "exception,normal",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/audit/sumologic_login_api_activity.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Logic Login and API Activity",
+      "dashboardDescription": "",
+      "panelTitle": "Sumo Configuration Actions Via API (Create,update,delete)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD7BF46228CCECB40",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "API Access Activity and Configuration Changes"
+      ],
+      "variables": [
+        {
+          "name": "expected_asn_geo_regex",
+          "defaultValue": ".*",
+          "values": "regular expression for expected asn geo strings",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_asn_geo",
+          "defaultValue": "*",
+          "values": "exception,normal",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

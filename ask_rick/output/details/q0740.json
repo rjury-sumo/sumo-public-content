@@ -1,0 +1,58 @@
+{
+  "id": "q0740",
+  "hash": "5ccaee89e061",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_email\n| where (user_username matches \"*\" or isEmpty(user_username)) and (device_ip matches \"*\" or isEmpty(device_ip)) and (srcDevice_ip matches \"*\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"*\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"*\" or isEmpty(device_hostname))\n| metadata_sourceCategory  as _sourceCategory \n| metadata_product  as product \n| metadata_mapperName  as mapperName  \n| if(isBlank(severity), \"Unassigned\", severity) as severity\n| count by severity,user_username ,_sourceCategory, product ,mapperName\n| sort by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Email Records",
+      "dashboardDescription": "This dashboard provides analysis of Email Records.",
+      "panelTitle": "Email Records Summary",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelF317CE10BBAB7A4F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "srcDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dstDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_hostname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "id": "q0638",
+  "hash": "b439c70ab8bd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.description\" as description nodrop\n\n| toUpperCase(description) as description\n\n| count as Total description\n| description as Total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "DESCRIPTION",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel777E031CB58B2B46",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"status\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"-\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":25,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

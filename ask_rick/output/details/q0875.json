@@ -1,0 +1,53 @@
+{
+  "id": "q0875",
+  "hash": "990e397a1d63",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\"\n| count_distinct(device_ip)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "Distinct Addresses",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7CD87983BCD87847",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"series\":{},\"svp\":{\"hideLabel\":false,\"label\":\"Address(es)\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

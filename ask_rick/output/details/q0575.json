@@ -1,0 +1,49 @@
+{
+  "id": "q0575",
+  "hash": "99f740ab494d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cse*) \nOR\n(_index=sumologic_system_events _sourcecategory=cse* )\n\n*Mapping*\n\n{{{keywords}}}\n\n| json field=_raw \"eventName\"\n| where eventname matches \"*Mapping*\"\n| json field=_raw \"operator.email\" as operator nodrop\n| json field=_raw \"from\" as old nodrop\n| json field=_raw \"to\" as new nodrop\n\n| json field=_raw \"logMapping\"\n\n//\n| json field=logMapping \"id\" \n| json field=logMapping \"name\"\n| json field=logMapping \"source\"\n| json field=logMapping \"recordType\"\n| json field=logMapping \"enabled\"\n| json field=logMapping \"vendor\"\n| json field=logMapping \"product\"\n| json field=logMapping \"fields\" nodrop\n\n| formatdate(tolong(_messagetime),\"yyyy-MM-dd HH:mm\") as time\n| count by time,_messagetime,eventname,id,name,enabled,source,recordtype,vendor,product,fields | fields -_count // tuningexpressions\n| sort _messagetime  | fields -_messagetime",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Cloud SIEM",
+      "dashboardName": "Cloud SIEM - Rules and Mapping Changes",
+      "dashboardDescription": "View changes to CSE rules and mappings using audit event data.",
+      "panelTitle": "Log Mapping Change Details",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelDAC9736494B82B4D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"fontSize\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Log Mappings"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "keyword,*starword,",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

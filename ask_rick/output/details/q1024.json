@@ -1,0 +1,67 @@
+{
+  "id": "q1024",
+  "hash": "5d6e662a1851",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentUpdated OR ContentMoved OR ContentCopied)\n| json \"adminMode\", \"eventName\", \"operator.email\", \"contentIdentity.type\",\"operator.sourceIp\"  as AdminMode, EventName, UserEmail, ContentType, UserIp nodrop\n| where EventName in (\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\") AND AdminMode=\"false\" \n|where  UserIp matches \"{{UserIp}}\" and  EventName matches \"{{EventName}}\"\n|count as Count by UserEmail\n| sort by Count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Updated, Moved, Copied Content",
+      "dashboardDescription": "Content - Updated, Moved, Copied DashBoard provides detailed information about content that is updated, moved and copied. The dashboard is organized according to activities performed  by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Top Users - User Mode",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2e95a9cca248584b",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

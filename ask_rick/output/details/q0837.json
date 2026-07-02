@@ -1,0 +1,27 @@
+{
+  "id": "q0837",
+  "hash": "a8e43b8506a4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourceCategory=\"detectionlab/siem/insights\"\n| json field=_raw \"severity\"\n| json field=_raw \"entity.name\" as entity\n| toLowerCase(severity) as severity\n| if(severity=\"low\",13,if(severity=\"medium\",15,if(severity=\"high\", 16,10))) as severity\n| timeslice 1h\n| avg(severity) by _timeslice \n| predict _avg by 1h model=ar,forecast=3d",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - SOC KRIs",
+      "dashboardDescription": "This dashboard provides SOC KRIs related metrics.",
+      "panelTitle": "Predictive Risk - 3 day Forecast",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-F018FEA2B1DB5A4D",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"outlierBandLineDashType\":\"solid\",\"outlierBandDisplayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"title\":{\"fontSize\":16},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"#dde4e9\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"scheme9\"},\"invisibleSeriesIds\":[\"A__avg_error\",\"A__avg_linear\"]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

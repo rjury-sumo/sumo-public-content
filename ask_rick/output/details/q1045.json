@@ -1,0 +1,47 @@
+{
+  "id": "q1045",
+  "hash": "e8b5613ad7d1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=saml (AllowlistedUsersCreated OR AllowlistedUsersDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"allowlistedUsers\"  as EventName, EventTime, Admin, AdminId, AdminIp, allowlistedUsers nodrop\n| parse regex field=allowlistedUsers \"\\\"userEmail\\\":\\\"(?<UserAddedToAllowList>.*?)\\\"\" multi\n| where EventName in (\"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\") AND EventName matches \"{{EventName}}\"\n|count by EventTime, EventName, UserAddedToAllowList, Admin, AdminIp\n| sort by EventTime\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - SAML Activities",
+      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
+      "panelTitle": "Recent - AllowList User Activity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelfc3ec7e99d10c941",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

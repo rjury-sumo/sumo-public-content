@@ -1,0 +1,85 @@
+{
+  "id": "q0101",
+  "hash": "55413675df4c",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} namespace={{namespace}} statefulset=*{{sumologic_override}}-otelcol-logs* metric=otelcol_exporter_queue_size | quantize 1m using avg  | avg by container, pod | sum by pod",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sumologic_override",
+      "description": "sumo,sumologic",
+      "dataType": "ANY",
+      "value": "sumologic"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Collection Health Check v4.6",
+      "dashboardDescription": "The Kubernetes - Collection Health Check dashboard displays collection status from otel components in the Kubernetes cluster.",
+      "panelTitle": "Queue Size by Pod",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel657DEA36A1845940",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\"\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{\"name\":\"{{pod}}\"}}]}",
+      "rowContext": [
+        "Opentelemetry Logs Collection Monitoring"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "sumologic_override",
+          "defaultValue": "sumologic",
+          "values": "sumo,sumologic",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

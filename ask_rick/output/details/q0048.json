@@ -1,0 +1,49 @@
+{
+  "id": "q0048",
+  "hash": "f41187ca9936",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} (error or critical)\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by cluster, node,pod,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Cluster v4.6",
+      "dashboardDescription": "The Kubernetes - Cluster dashboard provides a detailed view of the cluster health, along with details on all the components and resources.",
+      "panelTitle": "Error Logs (Latest 100 Errors)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1CF0B5A5AD281A4F",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [
+        "Logs/Events"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

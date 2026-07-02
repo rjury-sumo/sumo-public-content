@@ -1,0 +1,67 @@
+{
+  "id": "q1159",
+  "hash": "152ef039fb9b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\"\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| timeslice 1d\n| sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)\n| avg(total_credits_consumed) as avg_credits_consumed",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credits_conversion",
+      "description": "0.016",
+      "dataType": "ANY",
+      "value": "0.016"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Feature Level Scan Volume",
+      "dashboardDescription": "The Feature Level Scan Volume dashboard provides visibility into the scan volume at a feature level in order to monitor and control cost at a feature level.",
+      "panelTitle": "Avg Credits Consumed/day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6182c3a6bf03ca4a",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"Credit\",\"useBackgroundColor\":false,\"useNoData\":true,\"noDataString\":\"0\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [
+        "Credits Conversion"
+      ],
+      "variables": [
+        {
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": "SLO,Interactive Dashboard,Interactive Search,Search API,Scheduled Views,Scheduled Search,Monitors",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

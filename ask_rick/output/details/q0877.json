@@ -1,0 +1,53 @@
+{
+  "id": "q0877",
+  "hash": "202d35c72b75",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = device_ip\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "Countries",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1E1E0DDCBE056B48",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

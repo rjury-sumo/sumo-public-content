@@ -1,0 +1,47 @@
+{
+  "id": "q1046",
+  "hash": "3fc401566d7e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=saml\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\"  as EventName, EventTime, Admin, AdminId, AdminIp\n| where EventName in (\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\", \"SamlLockdownEnabled\", \"SamlLockdownDisabled\", \"AllowlistedUsersCreated\", \"AllowlistedUsersDeleted\")\n| where EventName matches \"{{EventName}}\"\n|count by EventName, Admin\n| transpose row Admin column EventName as %\"SamlConfigurationCreated\", %\"SamlConfigurationUpdated\", %\"SamlConfigurationDeleted\", %\"SamlLockdownEnabled\", %\"SamlLockdownDisabled\", %\"AllowlistedUsersCreated\", %\"AllowlistedUsersDeleted\"\n| sort by SamlConfigurationCreated, SamlConfigurationUpdated, SamlConfigurationDeleted, SamlLockdownEnabled, SamlLockdownDisabled, AllowlistedUsersCreated, AllowlistedUsersDeleted\n| limit 5",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - SAML Activities",
+      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
+      "panelTitle": "Active Admins",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1055434b960cc945",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stackedPercent\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

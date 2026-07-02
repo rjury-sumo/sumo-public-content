@@ -1,0 +1,119 @@
+{
+  "id": "q0932",
+  "hash": "e9e8a9b1a903",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted OR EphemeralCollectorDeleted OR ClobberCollectorDeleted OR CollectorUpgradeRequested OR CollectorUpgradeCompleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"operator.interface\", \"collectorIdentity.collectorName\", \"collector.ephemeral\", \"collector.sourceSyncMode\", \"collector.collectorType\",  \"to\", \"from\", \"requestBy.userId\", \"requestBy.userEmail\" as EventName, EventTime, UserEmail, UserId, UserIp, Interface, CollectorName, IsEphemeral, SourceSyncMode, CollectorType, CurrentValue, PreviousValue, requestByUserId, requestByUserEmail nodrop\n| if(isNull(UserEmail), if(isNull(requestByUserEmail), UserId, requestByUserEmail), UserEmail) as User\n| where EventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"EphemeralCollectorDeleted\", \"ClobberCollectorDeleted\", \"CollectorUpgradeRequested\", \"CollectorUpgradeCompleted\")\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorType matches \"{{CollectorType}}\" and Interface matches \"{{Interface}}\"\n| count by UserIp\n| lookup latitude, longitude from geo://location on ip = UserIp\n| sum(_count) as count by latitude, longitude",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "CollectorType",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Interface",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Activities",
+      "dashboardDescription": "Collector Activities DashBoard provides detailed information on collector activities, such as top users by activity and a one-day time comparison. You can also review data on recent collector activities and upgrades, and use pre-populated filters for a granular view of selected data.",
+      "panelTitle": "Geo Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelf02142f6aa6d1946",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "CollectorType",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Interface",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "id": "q0449",
+  "hash": "6d7b631d1708",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit _sourceCategory=user_activity \"updated visibility\"\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"updated visibility of * \\\"*\\\" to *\" as content_type,content_name,visibility_level\n| where visibility_level in (\"World\", \"Whitelist\")\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type,content_name,visibility_level\n| sort by visibility_level\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Imported/Exported/Installed/Shared Publicly",
+      "dashboardDescription": "See when content is shared, exported or imported. As well as count and trends in content that has been shared, exported or imported.",
+      "panelTitle": "Content Shared with Public Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelc039d8d78da0494f",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "q1134",
+  "hash": "cb4345bd6d93",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier=Continuous \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| toLowerCase(query) as queryLower\n| parse regex field=queryLower \"(?<aggregation>sum|avg|count|count_distinct|count_frequent|max|min|avg|first|last|most_recent|least_recent|pct|stddev|fillmissing|compose)\" nodrop\n| if (isempty(aggregation),\"non-aggregate\",\"aggregate\") as query_type\n| count by query_type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Aggregate vs Non-Aggregate Searches",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelfae0fb4ca0f49946",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"},\"series\":{}}",
+      "rowContext": [
+        "Search Concepts"
+      ],
+      "variables": [
+        {
+          "name": "query_type",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

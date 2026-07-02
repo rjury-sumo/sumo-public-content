@@ -1,0 +1,67 @@
+{
+  "id": "q0552",
+  "hash": "59dad5d772e5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{LogView}}_and_tier_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| bytes/1Gi as gbytes | sum(gbytes) as gbytes by dataTier",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "LogView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Usage Percentage of {{LogView}} by Tier",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel5953BCCB98BE3844",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"series\":{},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"}}",
+      "rowContext": [
+        "Logs"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

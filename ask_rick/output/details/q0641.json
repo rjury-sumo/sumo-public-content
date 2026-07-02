@@ -1,0 +1,49 @@
+{
+  "id": "q0641",
+  "hash": "b127a65358bc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.timeToDetection\" as timeToDetection nodrop\n\n| if(IsEmpty(timeToDetection), 0, timeToDetection) as timeToDetection\n\n| floor(timeToDetection/60/60/24) as timeToDetection_days\n| timeToDetection - (timeToDetection_days*24*60*60) as timeToDetection\n\n| floor(timeToDetection/60/60) as timeToDetection_hours\n| timeToDetection - (timeToDetection_hours*60*60) as timeToDetection\n\n| floor(timeToDetection/60) as timeToDetection_minutes\n| timeToDetection - (timeToDetection_minutes*60) as timeToDetection\n\n| floor(timeToDetection) as timeToDetection_seconds\n\n| format(\"%s Days, %s Hrs, %s Min, %s Sec\", ToInt(timeToDetection_days), ToInt(timeToDetection_hours), ToInt(timeToDetection_minutes), ToInt(timeToDetection_seconds)) as timeToDetection\n\n| count as Total timeToDetection\n| timeToDetection as Total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "TIME TO DETECTION",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel314EBC7A92254A44",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"status\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"-\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":20,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

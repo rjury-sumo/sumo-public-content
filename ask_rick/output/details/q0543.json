@@ -1,0 +1,79 @@
+{
+  "id": "q0543",
+  "hash": "43467a9258dc",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{LogView}}_and_tier_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes | sum(gbytes) as gbytes by collector\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| gbytes / duration_in_day as %\"GB/Day\"\n| top 5 collector by %\"GB/Day\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "LogView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Top 5  {{LogView}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-2",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Logs"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

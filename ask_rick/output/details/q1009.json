@@ -1,0 +1,83 @@
+{
+  "id": "q1009",
+  "hash": "90737fa53927",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentPublicVisibilityUpdated OR ContentPubliclyAccessed OR ApplicationInstalled)\n| json \"eventName\", \"operator.email\", \"contentIdentity.type\"  as EventName, UserEmail, ContentName  nodrop\n| where EventName in (\"ContentPublicVisibilityUpdated\",\"ContentPubliclyAccessed\",\"ApplicationInstalled\") \n| where EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\" and ContentName matches \"{{ContentName}}\"\n| count as Count by EventName\n| fillmissing values(\"ContentPublicVisibilityUpdated\",\"ContentPubliclyAccessed\",\"ApplicationInstalled\") in EventName\n| compare with timeshift 1d as Shift_1d",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Publicly Accessed, Application Installed",
+      "dashboardDescription": "Content - Publicly Accessed, Application DashBoard provides detailed information on installed applications, shared and publicly accessed content. The dashboard is organized according to installed applications and publicly accessed content. For a more granular view of the data, you can filter on Event Type, Content Type, Admin Mode, Visibility using the pre-populated filters.",
+      "panelTitle": "One Day Time Shift Comparison",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel63901927b03dc94e",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

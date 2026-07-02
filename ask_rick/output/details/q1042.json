@@ -1,0 +1,47 @@
+{
+  "id": "q1042",
+  "hash": "ffa4b680123a",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=\"saml\" (SamlConfigurationCreated OR SamlConfigurationUpdated OR SamlConfigurationDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"samlConfigurationIdentity.id\", \"samlConfigurationIdentity.configurationName\", \"samlConfiguration\", \"to\", \"from\" as EventName, EventTime, Admin, AdminId, AdminIp, ConfigurationId, ConfigurationName, ConfigurationDetails, CurrentValue, PreviuosValue nodrop\n| where  EventName matches \"{{EventName}}\"  \n| where EventName in (\"SamlConfigurationCreated\", \"SamlConfigurationUpdated\", \"SamlConfigurationDeleted\") \n|count by EventName, EventTime, ConfigurationName, Admin, AdminId, AdminIp, ConfigurationId, ConfigurationDetails, CurrentValue, PreviuosValue\n| fields - _count, AdminId, ConfigurationId, ConfigurationDetails, CurrentValue, PreviuosValue",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - SAML Activities",
+      "dashboardDescription": "SAML Activities DashBoard provides detailed information about SAML activities, such as SAML lockdown and SAML configuration. You can also review AllowList user activities such as creating, deleting, and updating allowlists.",
+      "panelTitle": "Recent - SAML Configuration Activity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8094f16181ab0a45",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

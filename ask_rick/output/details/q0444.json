@@ -1,0 +1,47 @@
+{
+  "id": "q0444",
+  "hash": "139c1e7e3e5c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit _sourceCategory=user_activity //\"updated visibility\"\n| where action =\"MANAGE_PERMISSIONS\"\n| parse \"updated visibility of * \\\"*\\\" to *\" as content_type,content_name,visibility_level\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by content_name",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Imported/Exported/Installed/Shared Publicly",
+      "dashboardDescription": "See when content is shared, exported or imported. As well as count and trends in content that has been shared, exported or imported.",
+      "panelTitle": "Frequently Shared Content",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelb0d0abce97528a41",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

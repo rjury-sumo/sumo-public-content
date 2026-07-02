@@ -1,0 +1,27 @@
+{
+  "id": "q0698",
+  "hash": "9bc266f12004",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight) or (_index=sumologic_system_events _sourcecategory=cseinsight)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\" \") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\" \") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| parse regex field=insight_tags \"(?<tag>[\\w-_ :.]+)\" multi\n| count_distinct(insight_Id) by tag, insight_name\n| sort by _count_distinct desc",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Overview",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Insights by Tag",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel01CF915B9A416B4B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

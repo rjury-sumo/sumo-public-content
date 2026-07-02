@@ -1,0 +1,65 @@
+{
+  "id": "q1092",
+  "hash": "cb1ecbcaae36",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions UserLoggedIn\n| json \"eventName\", \"authenticationSource\", \"userSession.sourceIp\" as EventName, AuthenticationSource, UserIp nodrop\n| where EventName=\"UserLoggedIn\"\n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count as Count by AuthenticationSource",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Authentication Source Comparison",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel36f21d65b2350a4e",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

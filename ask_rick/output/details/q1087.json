@@ -1,0 +1,47 @@
+{
+  "id": "q1087",
+  "hash": "cd4ea3876cdb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events (_sourceCategory=users OR _sourceCategory=roles) (RolesAssignedToUserUpdated OR UsersAssignedToRoleUpdated)\n| json \"eventName\", \"eventTime\", \"operator.sourceIp\" as EventName, EventTime, AdminIp nodrop\n| where EventName in (\"RolesAssignedToUserUpdated\",\"UsersAssignedToRoleUpdated\")\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n| where AdminIp matches \"{{AdminIp}}\"\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Geo Location of Admins",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel371c2e07b3d18a4b",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "id": "q0393",
+  "hash": "05f21d9d1f6c",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_network_receive_bytes_total cluster={{cluster}} service={{service}} | quantize 1m | rate | sum by service | eval _value/1000000 | topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "service",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Service v4.6",
+      "dashboardDescription": "The Kubernetes - Service Overview dashboard provides a high-level view of the health of the cluster services, along with details on the utilized resources by service.",
+      "panelTitle": "Network - Incoming and Outgoing (MB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-3F072E1182062A40",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme4\"},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Incoming - {{service}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Outgoing - {{service}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

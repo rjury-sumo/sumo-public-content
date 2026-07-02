@@ -1,0 +1,49 @@
+{
+  "id": "q1156",
+  "hash": "0960e3a114e4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| sum (credits_consumed) as total_credits_consumed by query_type \n| sort by total_credits_consumed",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credits_conversion",
+      "description": "0.016",
+      "dataType": "ANY",
+      "value": "0.016"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Credits Consumed",
+      "dashboardDescription": "The Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed. This allows you to monitor and control search costs.",
+      "panelTitle": "Credits Consumed by Feature",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panela8ef1f7683402b4e",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"SET3\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\"},\"series\":{}}",
+      "rowContext": [
+        "Credits Conversion"
+      ],
+      "variables": [
+        {
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

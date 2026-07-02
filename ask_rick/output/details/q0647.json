@@ -1,0 +1,67 @@
+{
+  "id": "q0647",
+  "hash": "17a94715ad40",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "// id=@funnel_insights:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_count minimize=\"{{minimize}}\" \n| where (insight_state = \"Current\" or insight_state = \"Eligible\")\n| if (insight_state matches \"Current\", \"All_insights\", insight_state) as insight_state\n| max(count) by insight_state\n| sort by _max desc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
+      "dataType": "ANY",
+      "value": "False positive"
+    }
+  ],
+  "viewerType": "funnel",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1540B2599772FA42",
+      "visualization": "funnel",
+      "visualSettingsRaw": "{\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"funnel\",\"displayType\":\"default\",\"maxNumOfSlices\":10,\"indexLabelFontSize\":14,\"orientation\":\"default\",\"valueRepresents\":\"height\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"legend\":{\"enabled\":false,\"showAsTable\":false},\"title\":{\"fontSize\":18}}",
+      "rowContext": [
+        "## Eligible Algorithmic Insights\n\nThe funnel depicts Algorithmic insights that remain after filtering insights based on\n* date range\n* insights containing dynamic severity rules\n* non-algorithmic dete"
+      ],
+      "variables": [
+        {
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

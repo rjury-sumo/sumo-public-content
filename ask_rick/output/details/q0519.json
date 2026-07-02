@@ -1,0 +1,55 @@
+{
+  "id": "q0519",
+  "hash": "2d9ed06357ad",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes\n| ((queryEndTime() - queryStartTime())/(1000*60*60*24)) as duration_in_day\n| gbytes / duration_in_day as %\"GB/Day\"\n| fields %\"GB/Day\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Average Daily Ingest",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-F3E8267DBF73BA43",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"GB/Day\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":15,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Note: Daily Ingest Capacity"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

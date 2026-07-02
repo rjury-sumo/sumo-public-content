@@ -1,0 +1,27 @@
+{
+  "id": "q1054",
+  "hash": "37395fa46874",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events\n| where _sourceCategory in (\"accessKeys\", \"saml\", \"serviceAllowlist\", \"passwordPolicy\", \"multiFactorAuthentication\")\n| json \"eventName\", \"operator.sourceIp\" as EventName, UserIp nodrop\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Security Management Overview",
+      "dashboardDescription": "Security Management - Overview Dashboard provides an at-a-glance view of security activities over time, user activity, the number of users who have been enabled and disabled MFA, and the geographic locations of security activities.",
+      "panelTitle": "Geo Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0a6cf82db5c05a41",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

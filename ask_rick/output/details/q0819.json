@@ -1,0 +1,27 @@
+{
+  "id": "q0819",
+  "hash": "4564e3d853ee",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_sourcecategory=\"detectionlab/siem/insights\" OR _sourcecategory=\"cse/insights\" OR (_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated)\n| json field=_raw \"severity\"\n| json field=_raw \"closed\"\n| json field=_raw \"closedBy\"\n| json field=_raw \"assignee\"\n| json field=_raw \"resolution\"\n| where !isNull(closed)\n| count by closedBy",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - SOC KPIs",
+      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
+      "panelTitle": "Insights Closed by User",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel22BEEA8788F84B4D",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"column\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

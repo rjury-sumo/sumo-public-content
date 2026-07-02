@@ -1,0 +1,61 @@
+{
+  "id": "q1184",
+  "hash": "8596cfe9dceb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches\"{{Metricsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints by collector\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| top 5 collector by %\"DPM\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Metricsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_metrics_volume"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Top 5 {{Metricsources}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-7",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"collector\",\"hideLabels\":true},\"axisY\":{\"title\":\"DPM\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Metrics"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

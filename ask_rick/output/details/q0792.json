@@ -1,0 +1,49 @@
+{
+  "id": "q0792",
+  "hash": "64ea0ee62a10",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight  OR\n_index=sumologic_system_events _sourcecategory=cseinsight )\n| json field=_raw \"insight.severityName\" as SeverityName\n| json field=_raw \"insightIdentity.readableId\" as insight_id\n| where insight_id=\"{{insightid}}\"\n| count_distinct(insight_id) by SeverityName\n| fields SeverityName",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "insightid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Insight Explorer",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Severity Level",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-36C9DB9D875B9B49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Insight Details"
+      ],
+      "variables": [
+        {
+          "name": "insightid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

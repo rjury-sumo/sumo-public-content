@@ -1,0 +1,27 @@
+{
+  "id": "q0487",
+  "hash": "abcc608733f8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit class=scheduled_search (action=TIMEOUT or action=SUSPEND or action=SKIP or status=FAILURE)\n| where _sourceCategory=\"scheduled_search\"\n| KV \"Name\", \"SchSearchId\", \"SchTime\"\n| count as count by SchTime, Name, SchSearchId, sourceuser, action, status | sort by SchTime | limit 10\n| fields -count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "User Activity - Scheduled Search",
+      "dashboardDescription": "See a count of scheduled searches that were started, completed, finished with errors, timed-out, skipped, or suspended.",
+      "panelTitle": "Recent Scheduled Search Errors",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel27df3df79f78aa44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

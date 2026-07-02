@@ -1,0 +1,48 @@
+{
+  "id": "q1195",
+  "hash": "6a8705332c1b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n|data_scanned_bytes / 1Gi as sizeInGB\n| timeslice 1d\n| sum (sizeInGB) as total_data_scanned_GB by _timeslice",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Data Scanned  Trend",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3C0B30E89621FA41",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1},\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Logs"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

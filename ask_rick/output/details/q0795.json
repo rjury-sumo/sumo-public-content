@@ -1,0 +1,49 @@
+{
+  "id": "q0795",
+  "hash": "4862b918a1ec",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record* \n[subquery:(((_index=sumologic_audit_events _sourcecategory=cseinsight) or (_index=sumologic_system_events _sourcecategory=cseinsight)))\n| json field=_raw \"insight.readableId\" as insight_readableid\n| json field=_raw \"insight.entityValue\" as entityvalue\n| where insight_readableid =\"{{insightid}}\"\n| count by entityvalue\n| compose entityvalue keywords\n]\n| timeslice 1d \n| count _sourcecategory,objecttype,_timeslice",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "insightid",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Insight Explorer",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Entity SourceCategory",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-500599B38BAA5843",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":0,\"to\":5,\"color\":\"#ffbc8e\"},{\"from\":6,\"to\":20,\"color\":\"#c55003\"},{\"from\":21,\"to\":10000000,\"color\":\"#ff5d5d\"}],\"shape\":\"hexagon\",\"groupBy\":[],\"aggregationType\":\"count\"},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
+      "rowContext": [
+        "Insight Details"
+      ],
+      "variables": [
+        {
+          "name": "insightid",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

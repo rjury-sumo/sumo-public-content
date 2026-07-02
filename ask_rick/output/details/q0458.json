@@ -1,0 +1,49 @@
+{
+  "id": "q0458",
+  "hash": "5d831c6d965f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity \n| where action in (\"MANAGE_PERMISSIONS\" , \"CREATE\", \"DELETE\", \"MOVE\", \"COPY\", \"UPDATE\", \"IMPORT\", \"EXPORT\",\"INSTALL\")\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by  sourceuser\n| sort by _count\n| limit 10",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Overview",
+      "dashboardDescription": "See an overview of Audit Library content, including location of users, user activity, outliers by user, and breakdowns by action.",
+      "panelTitle": "Top 10 Active Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel08ac8569bf3baa4d",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Source User"
+      ],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

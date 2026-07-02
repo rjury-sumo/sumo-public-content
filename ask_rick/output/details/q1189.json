@@ -1,0 +1,61 @@
+{
+  "id": "q1189",
+  "hash": "dfdef0e4338e",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| where _sourceCategory matches \"{{Tracingsources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum(billedBytes) as billedBytes by collector\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| billedBytes / duration_in_min as % \"billedBytes per minute\"\n| top 5 collector by % \"billedBytes per minute\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tracingsources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_tracing_volume"
+    }
+  ],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Overview",
+      "dashboardDescription": "The Overview dashboard helps you understand how much data you are ingesting and scanning in logs. It also helps you understand how much data you are ingesting in Metrics and Tracing.",
+      "panelTitle": "Top 5 {{Tracingsources}} by BilledBytes",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3342C298A0F54A40",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{\"axisX\":{\"title\":\"collector\",\"hideLabels\":true},\"axisY\":{\"title\":\"billedBytes per minute\"}},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Tracing"
+      ],
+      "variables": [
+        {
+          "name": "Logsources",
+          "defaultValue": "sourcecategory_and_tier_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metricsources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "q0901",
+  "hash": "d5cd367e0eb0",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n| timeslice 1d\n| toLong(createdTimestamp) as created_timestamp\n| min(created_timestamp) as first_seen, max(created_timestamp) as last_seen, count_distinct(_timeslice) as distinct_days_seen by ruleName\n| now() - last_seen as days_since_last_signal\n| days_since_last_signal/1000/60/60/24 as days_since_last_signal\n| formatDate(toLong(first_seen), \"yyyy-MM-dd\") as first_seen\n| formatDate(toLong(last_seen), \"yyyy-MM-dd\") as last_seen\n| order by days_since_last_signal",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Monitoring",
+      "dashboardDescription": "This dashboard provides times based metrics for CSE Signals.",
+      "panelTitle": "Time Based Metrics",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel2EB8AC339A0D6840",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"decimals\":2},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "id": "q0676",
+  "hash": "0de795daad04",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| json field=_raw \"insight.signals.length()\" as signal_count\n| if(isBlank(insight_assignee), \"Unassigned\", insight_assignee) as insight_assignee\n| insight_confidence * 100 as insight_confidence \n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n\n| if(IsEmpty(insight_time_to_detection), 0, insight_time_to_detection) as insight_time_to_detection\n| floor(insight_time_to_detection/60/60/24) as insight_time_to_detection_days\n| insight_time_to_detection - (insight_time_to_detection_days*24*60*60) as insight_time_to_detection\n| floor(insight_time_to_detection/60/60) as insight_time_to_detection_hours\n| insight_time_to_detection - (insight_time_to_detection_hours*60*60) as insight_time_to_detection\n| floor(insight_time_to_detection/60) as insight_time_to_detection_minutes\n| insight_time_to_detection - (insight_time_to_detection_minutes*60) as insight_time_to_detection\n| floor(insight_time_to_detection) as insight_time_to_detection_seconds\n| format(\"%s Days, %s Hrs, %s Min, %s Sec\", ToInt(insight_time_to_detection_days), ToInt(insight_time_to_detection_hours), ToInt(insight_time_to_detection_minutes), ToInt(insight_time_to_detection_seconds)) as insight_time_to_detection\n| count by insight_createdAt, insight_readableId,signal_count ,insight_severity,insight_description, insight_name, insight_assignee ,insight_ruleId, insight_tags , insight_time_to_detection , entity_value, entity_type, entity_id\n| fields - _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Created",
+      "dashboardDescription": "This dashboard provides Insights Created related metrics.",
+      "panelTitle": "Insights Summary",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-EF4FC953B251EB49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":2},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

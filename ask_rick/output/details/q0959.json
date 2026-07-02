@@ -1,0 +1,83 @@
+{
+  "id": "q0959",
+  "hash": "9a05bcba153c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=dataForwarding DataForwardingForIndexDisabled\n| json \"eventName\", \"eventTime\", \"indexName\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"dataForwarding\", \"from\", \"to\" as EventName, EventTime, IndexName, User, UserId, UserIp, dataForwarding, PreviousValue, CurrentValue nodrop\n| where EventName=\"DataForwardingForIndexDisabled\"\n| where  EventName matches \"{{EventName}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\"\n| count as Count by EventName\n| fillmissing values(\"DataForwardingForIndexDisabled\") in EventName",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Forwarding Management",
+      "dashboardName": "Enterprise Audit - Data Forwarding Index Activities",
+      "dashboardDescription": "Data Forwarding Index Activities DashBoard provides detailed information about data forwarding indexes that were created using partitions and scheduled views. You can review trends, geographical locations for data forwarding index activities, one-day time shift comparisons, user activities, as well as data on disabled indexes and recent index activities.",
+      "panelTitle": "Index Disabled",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "paneld6512c918917994b",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

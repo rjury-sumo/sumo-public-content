@@ -1,0 +1,49 @@
+{
+  "id": "q0437",
+  "hash": "06ae7c68f0ed",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_audit   _sourceCategory=user_activity\n| parse \"copied * \\\"*\\\" into folder \\\"*\\\" as \\\"*\\\"\" as content_type,content_name,target_folder_location,copied_content_name\n| where action =\"COPY\"\n| formatDate(fromMillis(_messagetime), \"MM-dd-yyyy HH:mm:ss\") as date_time\n|where if (\"{{sourceuser}}\" = \"*\", true, sourceuser matches \"{{sourceuser}}\")\n|count by date_time, sourceuser, content_type, content_name,target_folder_location, copied_content_name\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "sourceuser",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Library Content - Created/Deleted/Moved/Copied/Updated",
+      "dashboardDescription": "See when content is created or deleted. As as a counts, trends, and outliers in content creation or deletion.",
+      "panelTitle": "Content Copied",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel9c22b1cb828dc94b",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Content Created"
+      ],
+      "variables": [
+        {
+          "name": "sourceuser",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

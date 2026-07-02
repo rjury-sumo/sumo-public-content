@@ -1,0 +1,103 @@
+{
+  "id": "q0129",
+  "hash": "9a02394fd41b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} namespace={{namespace}} pod={{pod}} container={{container}} \n| json  \"log\" as msg\n| where !isNull(msg)\n| count by cluster,pod,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "container",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Container v4.6",
+      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
+      "panelTitle": "Container Logs (Latest 100 Logs)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-bf47101cbab14b49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"fontSize\":14},\"series\":{}}",
+      "rowContext": [
+        "Logs"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "container",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "id": "q1177",
+  "hash": "ff36787824b4",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory matches \"{{MetricsSources}}\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 6h\n| sum(datapoints) as datapoints by _timeslice\n| predict datapoints by 6h model=ar, forecast=20",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "MetricsSources",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory_metrics_volume"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Prediction of {{MetricsSources}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

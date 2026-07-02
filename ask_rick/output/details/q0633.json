@@ -1,0 +1,49 @@
+{
+  "id": "q0633",
+  "hash": "f5e6a1560977",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal\n{{{rule}}}\n\n| json field=entities \"[0].value\" as entityid nodrop\n//\n//| json field=fullRecords \"[*].metadata_vendor\" as vendors nodrop\n| json field=fullRecords \"[*].metadata_sourceCategory\" as sourceCategories nodrop\n//| json field=fullRecords \"[*].metadata_product\" as products nodrop\n//| json field=fullRecords \"[*].metadata_mapperName\" as mapperNames nodrop\n//| json field=fullRecords \"[*].metadata_deviceEventId\" as deviceEventIds nodrop\n\n//| concat (ruleid,\" \",rulename) as rule\n| parse regex field=sourceCategories \"(?<sourcecategory>[\\w\\d_\\/\\.-]+)\" multi\n| count_distinct(id) as signals by sourcecategory\n//\n| sort signals",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{rule",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Rule Overview",
+      "dashboardDescription": "Look in depth at a CSE rule to assist with rule tuning.",
+      "panelTitle": "Source Categories",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel99C10AB59D369B49",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Signals"
+      ],
+      "variables": [
+        {
+          "name": "rule",
+          "defaultValue": "THRESHOLD-S00096",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

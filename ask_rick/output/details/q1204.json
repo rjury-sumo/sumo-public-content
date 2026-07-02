@@ -1,0 +1,55 @@
+{
+  "id": "q1204",
+  "hash": "802bd5825f2f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| where _sourceCategory=\"collector_tracing_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1h\n|sum({{Unit}}) as %\"curr_hrs_{{Unit}}\" by _timeslice\n| sort by _timeslice asc \n| diff %\"curr_hrs_{{Unit}}\"\n| where !isNull(_diff)\n| (_diff+%\"curr_hrs_{{Unit}}\") as %\"prev_hrs_{{Unit}}\"\n| ((_diff / %\"curr_hrs_{{Unit}}\") * 100) as pct_incr\n| 50 as spikePercent\n| where (-1 * pct_incr) > spikePercent\n| abs(pct_incr) as pct_incr\n| fields _timeslice, %\"curr_hrs_{{Unit}}\", %\"prev_hrs_{{Unit}}\", pct_incr",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Tracing",
+      "dashboardDescription": "This Dashboard helps  to review Tracing details of your data ingest and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Spike  of Last {{Unit}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-12",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note for Ingest Spike Panels of {{Unit}}"
+      ],
+      "variables": [
+        {
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Tracingsources",
+          "defaultValue": "sourcecategory_tracing_volume",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

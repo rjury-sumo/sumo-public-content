@@ -1,0 +1,29 @@
+{
+  "id": "q1163",
+  "hash": "03f09a88e934",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by _timeslice, collector\n| compare with timeshift 1d\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, gbytes_1d, collector\n| if (!(isNull(gbytes_1d)), ((gbytes - gbytes_1d) / gbytes_1d) * 100, gbytes * 100) as percent_diff\n| if (isNull(gbytes_1d), 0, gbytes_1d) as gbytes_1d\n| where percent_diff > 0\n| sort percent_diff\n| limit 25\n| fields _timeslice, collector, percent_diff, gbytes, gbytes_1d",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Log Spikes",
+      "dashboardDescription": "The Log Spikes Dashboard helps to review details of your data ingested for logs.",
+      "panelTitle": "Top Ingest Spikes for Top 5 Collectors Per Day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-5",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Top 5 Per Day"
+      ],
+      "variables": []
+    }
+  ]
+}

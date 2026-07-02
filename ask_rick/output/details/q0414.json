@@ -1,0 +1,107 @@
+{
+  "id": "q0414",
+  "hash": "b1fcc0ce014f",
+  "queryType": "Traces",
+  "queryMode": "Traces",
+  "query": "",
+  "queryParameters": [],
+  "viewerType": "traceListTable",
+  "metricsQueryData": null,
+  "tracesQueryData": {
+    "filters": [
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "service",
+        "value": "{{service}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "deployment.environment",
+        "value": "{{environment}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "NumericMetricDescriptor",
+        "operator": ">",
+        "metric": "numErrors",
+        "value": "0"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "operation",
+        "value": "{{operation}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      },
+      {
+        "type": "FieldDescriptor",
+        "operator": "=",
+        "field": "status",
+        "value": "{{statusmessage}}",
+        "valueType": "StringTracingValue",
+        "target": "any span"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "file": "apps/Tracing and Spans/tracing errors - span details.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Tracing Errors - Span Details",
+      "dashboardDescription": "",
+      "panelTitle": "Error Traces Matching Service and Environment",
+      "panelType": "TracesListPanel",
+      "panelKey": "panelPANE-F665F16BB527A94F",
+      "visualization": "traceListTable",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"traceList\",\"type\":\"traceListTable\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"displaySettings\":{\"chartType\":\"traceList\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Trace Metrics (metricfromtrace)"
+      ],
+      "variables": [
+        {
+          "name": "service",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "environment",
+          "defaultValue": "default",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "any keyword string",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "instance_url",
+          "defaultValue": "live.us2.sumologic.com",
+          "values": "url for your sumo instance",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "operation",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statusmessage",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

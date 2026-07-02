@@ -1,0 +1,27 @@
+{
+  "id": "q0818",
+  "hash": "3b02a0f0fe56",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| avg(insight_time_to_detection)\n| round(_avg / 3600) as _avg",
+  "queryParameters": [],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - SOC KPIs",
+      "dashboardDescription": "This dashboard provides SOC KPIs related metrics.",
+      "panelTitle": "Average Hours to Detection",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel237EE73894F29948",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\"},\"svp\":{\"label\":\"\",\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":24,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":96,\"to\":168,\"color\":\"#BF2121\"}],\"gauge\":{\"show\":true,\"max\":168},\"sparkline\":{\"show\":false},\"option\":\"Sum\"},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

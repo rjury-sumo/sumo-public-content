@@ -1,0 +1,27 @@
+{
+  "id": "q1161",
+  "hash": "0548ec5c4cba",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by _timeslice\n| outlier gbytes",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Log Spikes",
+      "dashboardDescription": "The Log Spikes Dashboard helps to review details of your data ingested for logs.",
+      "panelTitle": "Data Volume Outlier",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-0",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

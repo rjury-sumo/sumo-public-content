@@ -1,0 +1,119 @@
+{
+  "id": "q1029",
+  "hash": "81d4b0a03117",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _SourceCategory=accessKeys (AccessKeyCreated OR AccessKeyDeleted OR AccessKeyUpdated)\n| json \"eventName\", \"eventTime\", \"accessId\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"accessKey.accessKeyLabel\", \"accessKey.enabled\", \"to\", \"from\", \"to.enabled\"  as EventName, EventTime, AccessId, User, UserId, UserIp, AccessKeyLabel, IsActive, CurrentValue, PreviousValue, IsActiveUpdated nodrop\n| if(isNull(IsActive), if(isNull(IsActiveUpdated), \"-\", IsActiveUpdated) ,IsActive) as IsActive\n| where EventName in (\"AccessKeyCreated\",\"AccessKeyDeleted\",\"AccessKeyUpdated\") \n| where EventName matches \"{{EventName}}\" and AccessId matches \"{{AccessId}}\" and User matches \"{{User}}\" and UserIp matches \"{{UserIp}}\" and AccessKeyLabel matches \"{{AccessKeyLabel}}\"\n| withtime IsActive\n| most_recent(IsActive_withtime) as Status by AccessId\n| count as Count by Status\n| where Status != \"-\"\n| if (Status matches \"true\", \"Active\", \"InActive\") as Status",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AccessId",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AccessKeyLabel",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Access Key Activities",
+      "dashboardDescription": "Access Key Activities DashBoard provides detailed information about access key activities, such as creation, deletion, and updates. You can also review trends, user activity, the number of active access keys, and one-day time comparisons.",
+      "panelTitle": "Active Vs InActive Access Keys",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4a267be788a19944",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AccessId",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "AccessKeyLabel",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

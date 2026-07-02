@@ -1,0 +1,29 @@
+{
+  "id": "q1124",
+  "hash": "55287e901959",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n| count as queries by query\n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| replace(scope_section_raw,\" \",\"\") as scope_section | if (scope_section=\"\" or isNull(scope_section) or scope_section=\"*\",1, 0) as  select_all\n| parse regex field=scope_section_raw \"_(?<meta>sourcecategory|sourcehost|collector|source|sourcename)\\s*=\"  nodrop  | if (meta!=\"\",1,0) as use_meta\n| parse regex field=scope_section_raw \"_(?<idx>view|index)\\s*=\"  nodrop  | if (idx!=\"\",1,0) as use_idx\n| parse regex field=scope_section_raw \"(?:^|\\s+)(?<kfield>\\w+)\\s*=\"  nodrop  | if (kfield!=\"\" and !(kfield in (\"sourcecategory\",\"collector\",\"index\",\"view\",\"source\",\"sourcehost\",\"sourcename\")),1,0) as use_field\n| 0 as use_kw | parse regex field=scope_section_raw \"(?:^|\\s+)(?<first>\\\"[^\\\"]+\\\"|\\'[^\\']+\\'|[\\w\\\"\\']+)(?<bridge>\\s*=\\s*|\\s+|$)(?<second>\\w+|$)\" multi nodrop | if ( !(bridge matches \"*=*\") and select_all!=1,1,use_kw) as use_kw\n| max(use_kw) as use_kw, max(use_field) as use_field, max(use_meta) as use_meta, max(use_idx) as use_idx, max(queries) as queries by query\n| (use_kw+use_field+use_meta+use_idx) as optimizations\n| format(\"%d Optimizations\",int(optimizations)) as OptimizationsStr\n//| where optimizationsStr matches \"4*\" \n| sum(queries) as queries by optimizationsStr | sort by optimizationsStr",
+  "queryParameters": [],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Queries Characteristics and Opportunities to Improve",
+      "dashboardDescription": "The Enterprise Search Audit - Queries Characteristics and Opportunities to Improve dashboard provides information about which of your queries take and don’t take advantage of important optimization techniques and metadata to improve efficiency.",
+      "panelTitle": "Queries by Optimization Techniques",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel973468bf9c8f1a45",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"}}",
+      "rowContext": [
+        "Search Optimization Considerations"
+      ],
+      "variables": []
+    }
+  ]
+}

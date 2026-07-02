@@ -1,0 +1,67 @@
+{
+  "id": "q0222",
+  "hash": "65f2e9ff2d86",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_pod_container_status_waiting_reason cluster={{cluster}} namespace={{namespace}}  | quantize 1m |  sum by reason, pod | topk(500,max) | filter sum > 0",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Namespace v4.6",
+      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
+      "panelTitle": "Terminated and Waiting Pods",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-19155C4D9AE05941",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"honeyComb\",\"displayType\":\"default\",\"mode\":\"honeyComb\"},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"reason\",\"value\":\"reason\"}],\"aggregationType\":\"avg\"},\"hiddenQueryKeys\":[\"C\",\"D\"],\"series\":{}}",
+      "rowContext": [
+        "Pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

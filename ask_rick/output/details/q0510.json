@@ -1,0 +1,55 @@
+{
+  "id": "q0510",
+  "hash": "d6381dc7e816",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Mi as mbytes\n| timeslice 1h\n| sum(mbytes) as curr_hrs_mbytes by _timeslice\n| sort by _timeslice asc \n| diff curr_hrs_mbytes\n| where !isNull(_diff)\n| (_diff+curr_hrs_mbytes) as prev_hrs_mbytes\n| ((_diff / curr_hrs_mbytes) * 100) as pct_incr\n| 50 as spikePercent\n| where (-1 * pct_incr) > spikePercent\n| abs(pct_incr) as pct_incr\n| fields _timeslice, curr_hrs_mbytes, prev_hrs_mbytes, pct_incr",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Ingest Spike (Last data point)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [
+        "Note: Daily Ingest Capacity"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

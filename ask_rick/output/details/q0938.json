@@ -1,0 +1,27 @@
+{
+  "id": "q0938",
+  "hash": "cd0397b71540",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted OR CollectorUpgradeCompleted)\n| json \"eventName\" as EventName nodrop\n| where eventName in (\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"CollectorUpgradeCompleted\")\n| timeslice 1d\n| count as Count by _timeslice, EventName\n| fillmissing timeslice(1d),\n  values(\"CollectorCreated\", \"CollectorUpdated\", \"CollectorDeleted\", \"CollectorUpgradeCompleted\") in EventName\n| transpose row _timeslice column EventName",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Management Overview",
+      "dashboardDescription": "Collector Management - Overview Dashboard provides a high-level view of trends related to collector and source activities, collector upgrade requests, upgrade successes and failures, the number of ephemeral collectors created and deleted, and the number of clobber collectors that were deleted.",
+      "panelTitle": "Trend - Collector Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel641cc2afb8133841",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"CollectorCreated\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"CollectorDeleted\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"CollectorUpdated\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}},{\"series\":[\"CollectorUpgradeCompleted\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"line\"}}]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

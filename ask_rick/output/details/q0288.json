@@ -1,0 +1,55 @@
+{
+  "id": "q0288",
+  "hash": "744a4f02d6e0",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*events* cluster={{cluster}}\n| json  \"object.metadata.namespace\" as namespace\n| json  \"object.involvedObject.name\" as name\n| json  \"object.lastTimestamp\" as lastTimestamp\n| json  \"object.message\" as message\n| count by name, lastTimestamp, message, namespace\n| sort by lastTimestamp desc\n| fields - _count\n| limit 100",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Node v4.6",
+      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
+      "panelTitle": "Pod Events (Latest 100)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel58AD96139C8BD84A",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#ED3CPE\",\"outlierBandFillOpacity\":0.15,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Logs/Events"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

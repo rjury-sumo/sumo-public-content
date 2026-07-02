@@ -1,0 +1,27 @@
+{
+  "id": "q0421",
+  "hash": "e0bd1c4b5b07",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit \n| where _sourceCategory=\"account_management\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = _sourceHost \n| count by latitude, longitude, country_code, country_name, region, city, postal_code \n| sort _count",
+  "queryParameters": [],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Account Management Overview",
+      "dashboardDescription": "See see trends in operation for users, roles, and access as well as Admin activities.",
+      "panelTitle": "Geolocation of Admin Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1a9affa8aa83bb40",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{}},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

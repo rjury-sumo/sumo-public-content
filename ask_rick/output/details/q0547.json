@@ -1,0 +1,67 @@
+{
+  "id": "q0547",
+  "hash": "4372e2c50a1b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{MetricsView}}_metrics_volume dataPoints\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| sum(datapoints) as datapoints\n| datapoints/1000 as datapoints\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| fields %\"DPM\"",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "MetricsView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Overview",
+      "dashboardDescription": "The Data Volume - Overview dashboard helps you understand your ingest in terms of Logs (by Tiers), Metrics and Tracing capabilities",
+      "panelTitle": "Ingest {{MetricsView}}- DPM",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1473FFF58D074B4D",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Thousand Datapoints per minute\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Metrics"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "LogView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

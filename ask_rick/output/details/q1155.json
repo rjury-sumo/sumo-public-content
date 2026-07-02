@@ -1,0 +1,72 @@
+{
+  "id": "q1155",
+  "hash": "a81c7d17aa9a",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query (analytics_tier=\"Flex\")  !(status_message=\"Query Failed\")\t\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| data_scanned_bytes / 1Gi as sizeInGB\n| sizeInGB * {{credits_conversion}} as credits_consumed\n| timeslice 1d\n| sum (credits_consumed) as total_credits_consumed, count as query_count by _timeslice \n| fillmissing timeslice (1d)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "credits_conversion",
+      "description": "0.016",
+      "dataType": "ANY",
+      "value": "0.016"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Credits Consumed",
+      "dashboardDescription": "The Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed. This allows you to monitor and control search costs.",
+      "panelTitle": "Credits Consumed Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7537801891ec5b4b",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"minimum\":0,\"maximum\":null,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Diverging 1\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Credits Conversion"
+      ],
+      "variables": [
+        {
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Credits Consumed",
+      "dashboardDescription": "The Credits Consumed dashboard provides visibility into the total amount of Cloud Flex Credits your organization has consumed. This allows you to monitor and control search costs.",
+      "panelTitle": "Credits Consumed Over Time (Previous Month)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel03d95af7b49a794c",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null},\"axisY2\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"minimum\":0,\"maximum\":null,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Diverging 1\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Credits Conversion"
+      ],
+      "variables": [
+        {
+          "name": "credits_conversion",
+          "defaultValue": "0.016",
+          "values": "0.016",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

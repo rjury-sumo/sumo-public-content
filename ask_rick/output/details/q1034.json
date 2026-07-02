@@ -1,0 +1,47 @@
+{
+  "id": "q1034",
+  "hash": "7d6b06c00705",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events (_sourceCategory=serviceAllowlist OR _sourceCategory=passwordPolicy OR _sourceCategory=multiFactorAuthentication)\n| json \"operator.sourceIp\" as AdminIp nodrop\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = AdminIp\n|where if (\"{{AdminIp}}\" = \"*\", true, AdminIp matches \"{{AdminIp}}\")\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Geo Location Of All Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel94bbdd5fb879f944",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

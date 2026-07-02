@@ -1,0 +1,67 @@
+{
+  "id": "q0873",
+  "hash": "4d166b927219",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated\nOR\n_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n\n{{{keywords}}}\n\nclosed\n\n| json field=_raw \"eventName\"\n| json field=_raw \"insightIdentity.id\" as id\n| json field=_raw \"insightIdentity.readableId\" as insightid\n| json field=_raw \"insight.status\" as status\n| json field=_raw \"insight.name\" as name\n| json field=_raw \"insight.entityType\" as entitytype\n| json field=_raw \"insight.entityValue\" as entityvalue\n| json field=_raw \"insight.tags\" as tags\n| json field=_raw \"insight.severity\" as severity\n| json field=_raw \"insight.confidence\" as confidence\n| json field=_raw \"insight.signals\" as signals\n\n// in closed events\n| json field=_raw \"insight.assignee\" as assignee nodrop\n| json field=_raw \"insight.resolution\" as resolution nodrop\n\n\n// may exist after an update\n| json field=_raw \"insight.timeToResponse\" as timeToResponse nodrop\n| json field=_raw \"insight.timeToDetection\" as timeToDetection nodrop\n| json field=_raw \"insight.timeToRemediation\" as timeToRemediation nodrop\n\n| if (isnull(timeToResponse),-1,timeToResponse/3600) as timeToResponse\n| if (isnull(timeToDetection),-1,timeToDetection/3600) as timeToDetection\n| if (isnull(timeToRemediation),-1,timeToRemediation/3600) as timeToRemediation\n| sort _messagetime\n| timeslice by {{graph_by_timeslice}}\n\n// severity used to be numeric but for a while it wasn't so covering bases here\n| tostring(severity) as sev_string\n| 0 as s\n| if (sev_string matches /1|HIGH/,1,s) as s\n| if (sev_string matches /2|MEDIUM/,2,s) as s\n| if (sev_string matches /3|LOW/,3,s) as s\n| s as severity\n| if(s = 1,\"1. HIGH\",\"OTHER\") as severity\n| if(s = 2,\"2. MEDIUM\",severity) as severity\n| if(s = 3,\"3. LOW\",severity) as severity\n| if(s = 0,\"0. OTHER\",severity) as severity\n\n// ensure we only store the most recent result\n| count as events,first(status) as status,first(tags) as tags, max(s) as max_sev,first(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(signals) as signals,values(eventname) as eventnames by insightid,name,entitytype,entityvalue ,_timeslice,severity\n\n\n| where status=\"closed\"\n\n\n| first(status) as status, max(max_sev) as max_sev,avg(confidence) as confidence,first(assignee) as assignee,first(resolution) as resolution,first(timeToResponse) as timeToResponse,first(timeToDetection) as timeToDetection,first(timeToRemediation) as timeToRemediation,first(eventnames) as eventnames by insightid,name,entitytype,entityvalue,_timeslice,severity //,first(signals) as signals,\n\n| count by _timeslice,resolution\n\n | transpose row _timeslice column resolution",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{keywords",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "graph_by_timeslice",
+      "description": "15m,1h,3h,1d,1w",
+      "dataType": "ANY",
+      "value": "1d"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - Security Operations Overview",
+      "dashboardDescription": "A dashboard to overview or explore CSE Insights using the sumologic_*_audit events (phase II).",
+      "panelTitle": "Insights Closed By Resolution",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6E6324F185A28947",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "A. Insight Events Overview Params: keywords: {{keywords}} timeslice: {{graph_by_timeslice}}"
+      ],
+      "variables": [
+        {
+          "name": "keywords",
+          "defaultValue": "*",
+          "values": "insight-1234,username,inprogress,closed,entityabc,T1078.001",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "graph_by_timeslice",
+          "defaultValue": "1d",
+          "values": "15m,1h,3h,1d,1w",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

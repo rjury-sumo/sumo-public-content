@@ -1,0 +1,65 @@
+{
+  "id": "q1113",
+  "hash": "146ba42724ac",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| toLowerCase(query) as queryLower \n| parse regex field=queryLower \"^(?<scope_section_raw>[^\\|]+)\" nodrop \n| parse regex field=scope_section_raw \"(?<metadataName>_sourcehost|_sourcename|_source|_collector|\\w+)\\s*=\\s*(?<metadataValue>[^\\s\\|\\)]+)\" multi nodrop \n| where metadataName not in (\"_index\",\"_view\",\"_sourcecategory\")\n|where query_type matches \"{{query_type}}\" AND user_name matches \"{{user_name}}\"\n|count as appearances by metadataname, metadatavalue\n| where metadataname!=\"\" | sort appearances | total(appearances) as total_appearances\n| appearances/total_appearances*100 as percent | format (\"%.2f%s\", percent,\"%\") as percent",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Commonly Referenced Data Sources",
+      "dashboardDescription": "The Enterprise Search Audit - Commonly Referenced Data Sources dashboard provides insights into the key or most popular data sources and metadata referenced in users’ searches. The dashboard helps you understand what your users most commonly search for in your organization.",
+      "panelTitle": "Other Popular Keys Referenced by Queries",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelcde4f9fd9ab3fa47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "query_type",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

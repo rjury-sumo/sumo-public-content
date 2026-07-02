@@ -1,0 +1,65 @@
+{
+  "id": "q0556",
+  "hash": "5b2ba9301073",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume\n| parse regex \"\\\"(?<field_type>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n| timeslice 1d\n|sum({{Unit}}) as %\"{{Unit}}\" by _timeslice, field_type\n| %\"{{Unit}}\"  as %\"{{Unit}} Count\"\n| fields -%\"{{Unit}}\"\n| transpose row _timeslice column field_type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "TracingView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Tracing",
+      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
+      "panelTitle": "Ingest Trend - {{TracingView}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-2",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"axes\":{},\"legend\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_Http Input\":{\"visible\":true},\"A_Unknown\":{\"visible\":true},\"A_nite-tracing-internal\":{\"visible\":true}},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"aggregationType\":\"average\",\"groupBy\":[]},\"color\":{\"family\":\"Categorical Default\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "id": "q0516",
+  "hash": "215767202dfa",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory=\"sourcecategory_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourcecategory, dataTier, bytes, count\n|where dataTier matches \"{{Tier}}\"\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by sourcecategory\n| round(gbytes,2) as gbytes\n| total gbytes as tot_gbytes \n| round(tot_gbytes,2) as tot_gbytes\n| (gbytes*100/tot_gbytes) as pct_total \n| round(pct_total,2) as pct_total \n| where pct_total >= 1 and pct_total <= 30 // candidates for partition\n| sort pct_total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Source Category (1-30%) Vol",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-15",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[],\"decimals\":0},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note: Daily Ingest Capacity"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

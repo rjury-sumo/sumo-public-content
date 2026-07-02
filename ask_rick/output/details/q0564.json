@@ -1,0 +1,65 @@
+{
+  "id": "q0564",
+  "hash": "a0dd056ee45b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourcecategory={{TracingView}}_tracing_volume\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"billedBytes\\\"\\:(?<billedBytes>\\d+)\\,\\\"spansCount\\\"\\:(?<spansCount>\\d+)\\}\" multi\n|sum({{Unit}}) as {{Unit}}\n|if(\"{{Unit}}\" matches \"spansCount\", 1000000, 1Gi) as denominator \n| {{Unit}}/denominator as  {{Unit}}\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| {{Unit}}/duration_in_min as {{Unit}}\n| fields {{Unit}}",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "TracingView",
+      "description": "",
+      "dataType": "ANY",
+      "value": "sourcecategory"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Unit",
+      "description": "spansCount , billedBytes",
+      "dataType": "ANY",
+      "value": "billedBytes"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Tracing",
+      "dashboardDescription": "The Data Volume - Tracing dashboard provides views of your Tracing data ingest by billed bytes and span counts per minute.",
+      "panelTitle": "Ingest - {{Unit}} per minute",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-4EBA2D949F075940",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Average\",\"label\":\"Gbytes/Million per minute\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":10,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "Unit",
+          "defaultValue": "billedBytes",
+          "values": "spansCount , billedBytes",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "TracingView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "q1131",
+  "hash": "1925eaa470f8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| round(execution_duration_ms/1000) as duration_seconds \n| execution_duration_ms / 1000 as query_time_s\n| count as total_searches, count_distinct(user_name) as users, pct(query_time_s,50,95,99), sum(scanned_message_count) as scanned_events, sum(retrieved_message_count) as retrieved_events, sum(data_scanned_bytes) as scanned_bytes by query_type | sort query_type asc\n| format(\"%,.1f\",_query_time_s_pct_50) as median_s\n| format(\"%,.1f\",_query_time_s_pct_95) as pct_90_s\n| format(\"%,.1f\",_query_time_s_pct_99) as pct_99_s\n| round(scanned_bytes / 1Gi ) as scanned_GB\n| fields -_query_time_s_pct_50, _query_time_s_pct_95, _query_time_s_pct_99, scanned_bytes\n| order by scanned_events",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Search Statistics",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelcb624821a3d0ea42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Search Concepts"
+      ],
+      "variables": [
+        {
+          "name": "query_type",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

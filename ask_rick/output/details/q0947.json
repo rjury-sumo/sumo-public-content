@@ -1,0 +1,101 @@
+{
+  "id": "q0947",
+  "hash": "d7d03f472efe",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (SourceCreated OR SourceUpdated OR SourceDeleted OR CollectorSourcesSynchronized)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"sourceIdentity.collectorName\", \"sourceIdentity.sourceName\", \"source\", \"to\", \"from\" as EventName, EventTime, UserEmail, userId, UserIp, CollectorName, SourceName, SourceDetails, CurrentValue, PreviousValue nodrop\n| where EventName in (\"SourceCreated\", \"SourceUpdated\", \"SourceDeleted\", \"CollectorSourcesSynchronized\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" and UserEmail matches \"{{UserEmail}}\" and CollectorName matches \"{{CollectorName}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "CollectorName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Sources Activities",
+      "dashboardDescription": "Collector Sources Activities DashBoard provides detailed information on created, updated and deleted sources, the top collectors where sources were added, active users, and one-day time comparisons. You can use pre-populated filters for a more granular view of selected data.",
+      "panelTitle": "Geo Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelc91fd76bb8754b48",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "CollectorName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

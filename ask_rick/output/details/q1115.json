@@ -1,0 +1,49 @@
+{
+  "id": "q1115",
+  "hash": "e9764de18b12",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}} \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m \n| avg(execution_duration_ms) as query_time by query_type, _timeslice \n| query_time/1000 as query_time\n| transpose row _timeslice column query_type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
+      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
+      "panelTitle": "Avg Query RunTime (sec) by Query Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4392ea78a0907a4c",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":null,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Monitoring Your Usage by Tier"
+      ],
+      "variables": [
+        {
+          "name": "tier",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

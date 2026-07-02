@@ -1,0 +1,65 @@
+{
+  "id": "q1093",
+  "hash": "30528620086c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=userSessions (UserLoggedOut OR UserLoggedIn OR UserLockedOut OR UserUnlocked OR UserLoginTimedOut)\n| json \"eventName\", \"eventTime\", \"accountId\", \"userSession.sourceIp\" as EventName, EventTime, AccountId, UserIp nodrop\n| json \"userSession.email\", \"userSession.id\" as LoginUser, LoginUserId nodrop\n| json \"sessionIdentity.userEmail\", \"sessionIdentity.userId\" as LogoutUser, LogoutUserId nodrop\n| json \"userIdentity.userEmail\", \"userIdentity.userId\" as LockedUser, LockedUserId nodrop\n| json \"authenticationSource\" as AuthenticationSource nodrop\n| if(isEmpty(LoginUser), if(isEmpty(LogoutUser), if(isEmpty(LockedUser), \"\", LockedUser),LogoutUser), LoginUser) as User\n| if(isEmpty(LoginUserId), if(isEmpty(LogoutUserId), if(isEmpty(LockedUserId), \"\", LockedUserId),LogoutUserId), LoginUserId) as UserId\n| _sourceHost as UserIp\n| where EventName in (\"UserLoggedOut\", \"UserLoggedIn\", \"UserLockedOut\", \"UserUnlocked\", \"UserLoginTimedOut\") \n| where EventName matches \"{{EventName}}\" and UserIp matches \"{{UserIp}}\" \n|count by EventName, EventTime, User, UserId, UserIp, AuthenticationSource\n| sort by EventTime\n| fields - _count, UserId\n| limit 100",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Session Activities",
+      "dashboardDescription": "User Session Activities DashBoard provides detailed information on user session activities, such as locked and unlocked account activities, top admins, current logged in and logged out users, and timed out users.",
+      "panelTitle": "Events - Recent Sessions",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0cf635a1b7694842",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

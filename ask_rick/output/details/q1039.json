@@ -1,0 +1,47 @@
+{
+  "id": "q1039",
+  "hash": "e2ad6a536713",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=serviceAllowlist ServiceAllowlistPermissionsSet\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.sourceIp\", \"loginAndApi\", \"shareDashboards\" as EventName, EventTime, Admin, AdminIp, LoginAndApiStatus, ShareDashBoardStatus nodrop\n| where EventName=\"ServiceAllowlistPermissionsSet\"\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventTime, Admin, AdminIp, LoginAndApiStatus, ShareDashBoardStatus\n| sort by EventTime\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Recent - Service AllowList Permission Activities",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1cb67e609c1c0a44",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

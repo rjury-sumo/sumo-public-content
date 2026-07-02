@@ -1,0 +1,27 @@
+{
+  "id": "q0940",
+  "hash": "2ba6cada48d5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=collection (CollectorCreated OR CollectorUpdated OR CollectorDeleted)\n| json \"eventName\", \"operator.interface\" as EventName, ActivityInterface nodrop\n| where EventName in (\"CollectorCreated\",\"CollectorUpdated\",\"CollectorDeleted\")\n| count as Count by ActivityInterface, EventName\n| transpose row ActivityInterface column EventName\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Collector Management",
+      "dashboardName": "Enterprise Audit - Collector Management Overview",
+      "dashboardDescription": "Collector Management - Overview Dashboard provides a high-level view of trends related to collector and source activities, collector upgrade requests, upgrade successes and failures, the number of ephemeral collectors created and deleted, and the number of clobber collectors that were deleted.",
+      "panelTitle": "Distribution - Action Performed From Interface",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0069e7c990e44a43",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"bar\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

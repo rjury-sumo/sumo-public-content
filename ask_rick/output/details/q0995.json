@@ -1,0 +1,65 @@
+{
+  "id": "q0995",
+  "hash": "29b9ebf3348d",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"operator.sourceIp\",\"operator.email\" as EventName, UserIp, User nodrop\n| where EventName in (\"FieldExtractionRuleCreated\", \"FieldExtractionRuleUpdated\", \"FieldExtractionRuleDeleted\") AND EventName matches \"{{EventName}}\"\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "Geo Location of Events",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7601a574ae943a48",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

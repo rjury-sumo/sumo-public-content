@@ -1,0 +1,85 @@
+{
+  "id": "q0325",
+  "hash": "50e9e73c605f",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_pod_container_resource_requests cluster={{cluster}} pod={{pod}} namespace={{namespace}} container=* resource=memory   | quantize 1m |eval _value / 1000000 |  min",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "timeSeries",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Pod v4.6",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Memory Usage vs Limits vs Requests (MB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-32ea68308710994b",
+      "visualization": "timeSeries",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2},\"series\":{\"metric=min(kube_pod_container_resource_limits)\":{\"color\":\"yellow\",\"type\":\"area\",\"lineColor\":\"red\",\"fillOpacity\":\".2\"},\"metric=max(container_memory_working_set_bytes)\":{\"color\":\"#e0e0e0\",\"lineThickness\":1.5},\"metric=min(kube_pod_container_resource_requests)\":{\"color\":\"#00BB00\",\"type\":\"area\",\"fillOpacity\":\".2\"}},\"legend\":{\"enabled\":true},\"hiddenQueryKeys\":[\"A\",\"B\",\"C\"],\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"color\":{\"family\":\"Diverging 2\"}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

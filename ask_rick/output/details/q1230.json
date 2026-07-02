@@ -1,0 +1,173 @@
+{
+  "id": "q1230",
+  "hash": "71e6d2a6b653",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  !(user_name=*sumologic.com) !(status_message=\"Query Failed\")\t\n| json field=scanned_bytes_breakdown \"Infrequent\" as data_scanned_bytes\n| fields data_scanned_bytes, query, is_aggregate, query_type, remote_ip, retrieved_message_count, scanned_message_count, scanned_partition_count, session_id, status_message, user_name,query_start_time, query_end_time\n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| query_end_time - query_start_time as query_time_range_hrs\n| query_time_range_hrs / 3600000 as query_time_range_hrs\n|data_scanned_bytes / 1Gi as sizeInGB\n|where if (\"{{query_time_range_hrs}}\" = \"0\", true, query_time_range_hrs > {{query_time_range_hrs}}) AND if (\"{{user_name}}\" = \"*\", true, user_name matches \"{{user_name}}\") AND if (\"{{session_id}}\" = \"*\", true, session_id matches \"{{session_id}}\") AND if (\"{{is_aggregate}}\" = \"*\", true, toString(is_aggregate) matches \"{{is_aggregate}}\") AND if (\"{{status_message}}\" = \"*\", true, status_message matches \"{{status_message}}\") AND if (\"{{query}}\" = \"*\", true, query matches \"{{query}}\") AND if (\"{{query_type}}\" = \"*\", true, query_type matches \"{{query_type}}\")\n|sum(sizeInGB) as total_data_scanned_GB by query, is_aggregate, query_type, status_message, user_name, session_id, query_time_range_hrs\n| where if (\"{{total_data_scanned_GB}}\" = \"0\", true, total_data_scanned_GB > {{total_data_scanned_GB}})\n| sort by total_data_scanned_GB",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_time_range_hrs",
+      "description": "0,1,6,24,48,168,720",
+      "dataType": "ANY",
+      "value": "0"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "session_id",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "is_aggregate",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "status_message",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "total_data_scanned_GB",
+      "description": "0,1,5,10,100",
+      "dataType": "ANY",
+      "value": "0"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Infrequent Data Tier",
+      "dashboardName": "Infrequent Data Tier - Query Analysis",
+      "dashboardDescription": "The Infrequent Data Tier - Query Analysis dashboard provides visibility into the Infrequent Data Tier queries that are most expensive, as well as detailed information on the queries.",
+      "panelTitle": "Query Analysis",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelc58b3f6d99ce6a41",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}},\"highlightViolations\":true}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "session_id",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "is_aggregate",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "status_message",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_type",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "total_data_scanned_GB",
+          "defaultValue": "0",
+          "values": "0,1,5,10,100",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "query_time_range_hrs",
+          "defaultValue": "0",
+          "values": "0,1,6,24,48,168,720",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

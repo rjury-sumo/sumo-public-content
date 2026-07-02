@@ -1,0 +1,27 @@
+{
+  "id": "q0469",
+  "hash": "3071e2f2e882",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit and _sourceName=SCHEDULED_SEARCH (\"Scheduled search alert triggered\")\n| parse \"[Name=*]\" as SavedSearchName\n\n| parse \"[AlertType=*]\" as AlertType nodrop\n| timeslice 1d\n| count by AlertType, _timeslice\n| transpose row _timeslice column AlertType",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Audit",
+      "dashboardName": "Scheduled Search - Search Triggered Summary",
+      "dashboardDescription": "See all webhook and scheduled search triggerings.",
+      "panelTitle": "Searches Triggered per Day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelef575e2e9da92a47",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"email\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"saveToIndex\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"webhook\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}}]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

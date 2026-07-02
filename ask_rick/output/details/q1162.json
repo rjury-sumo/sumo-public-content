@@ -1,0 +1,29 @@
+{
+  "id": "q1162",
+  "hash": "3cc5c88271c8",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| timeslice 1d\n| bytes/1024/1024/1024 as gbytes \n| sum(gbytes) as gbytes by _timeslice, collector\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, collector\n| transpose row _timeslice column collector",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Log Spikes",
+      "dashboardDescription": "The Log Spikes Dashboard helps to review details of your data ingested for logs.",
+      "panelTitle": "Top 5 Collectors Per Day",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-4",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "Top 5 Per Day"
+      ],
+      "variables": []
+    }
+  ]
+}

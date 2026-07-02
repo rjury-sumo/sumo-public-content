@@ -1,0 +1,67 @@
+{
+  "id": "q0159",
+  "hash": "f4c4071b67fb",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} daemonset={{daemonset}}\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by daemonset,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "daemonset",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Daemonsets - Overview v4.6",
+      "dashboardDescription": "The Kubernetes - Daemonsets Overview dashboard provides a high-level view of the health of the Daemonsets.",
+      "panelTitle": "Logs  (Latest 100 Logs)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1DB8EBE5A80FB94E",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and daemonset  is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "daemonset",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

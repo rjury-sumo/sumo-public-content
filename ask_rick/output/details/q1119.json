@@ -1,0 +1,49 @@
+{
+  "id": "q1119",
+  "hash": "db4019bd74a6",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier={{tier}} \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| timeslice 15m \n| sum(data_retrieved_bytes) as data_retrieved_bytes by query_type, _timeslice \n| int(data_retrieved_bytes/1Gi) as data_retrieved_bytes\n| transpose row _timeslice column query_type",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "tier",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Data Tier Usage Over Time",
+      "dashboardDescription": "The Enterprise Search Audit - Data Tier Usage Over Time dashboard provides detailed insights into search usage by analytics tier. It displays the total number of searches and the types of queries run by users.",
+      "panelTitle": "Retrieved Bytes Used (GB) by Query Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel0cb3da50bfdcfa43",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"thresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[{\"series\":[\"Interactive Dashboard\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Interactive Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Scheduled Search\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Search API\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}},{\"series\":[\"Unknown\"],\"queries\":[],\"properties\":{\"axisYType\":\"primary\",\"type\":\"column\"}}],\"series\":{}}",
+      "rowContext": [
+        "Monitoring Your Usage by Tier"
+      ],
+      "variables": [
+        {
+          "name": "tier",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

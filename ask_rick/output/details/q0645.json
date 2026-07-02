@@ -1,0 +1,49 @@
+{
+  "id": "q0645",
+  "hash": "6bc17075330c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.signals\" as signals nodrop\n| parse regex field=signals \"(?<signal>\\{\\\"id\\\"\\:[^\\}]+\\})\" multi nodrop\n| json field=signal \"description\" as description nodrop\n| json field=signal \"summary\" as summary nodrop\n| json field=signal \"name\" as name nodrop\n| json field=signal \"ruleName\" as ruleName nodrop\n| json field=signal \"ruleId\" as ruleId nodrop\n| json field=signal \"created\" as created nodrop\n| json field=signal \"severity\" as severity nodrop\n\n| format(\"┌ ID: %s\\n└ NAME: %s\", ruleId, ruleName) as rule\n| format(\"┌ NAME: %s\\n├ SUMMARY: %s\\n└ DESCRIPTION: %s\\n\\n► SEVERITY: %s\", name, summary, description, severity) as signal\n\n| parse regex field=created \"(?<timestamp>^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3})\"\n| parseDate(timestamp, \"yyyy-MM-dd'T'HH:mm:ss.SSS\", \"UTC\") as _messageTime\n\n| formatDate(_messageTime, \"yyyy-MM-dd HH:mm:ss\") as date\n| count as Total by date, rule, signal\n| fields -Total\n| order by date asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "SIGNALS",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD009D12AB736794B",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

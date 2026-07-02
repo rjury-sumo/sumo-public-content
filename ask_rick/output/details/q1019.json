@@ -1,0 +1,67 @@
+{
+  "id": "q1019",
+  "hash": "50eb052f46b5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content and (ContentUpdated OR ContentMoved OR ContentCopied)\n| json \"eventName\", \"adminMode\", \"operator.sourceIp\" as EventName, AdminMode, UserIp nodrop\n| where EventName in (\"ContentUpdated\", \"ContentMoved\", \"ContentCopied\") AND AdminMode=\"true\" \n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = UserIp\n|where  UserIp matches \"{{UserIp}}\" and  EventName matches \"{{EventName}}\"\n|count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Updated, Moved, Copied Content",
+      "dashboardDescription": "Content - Updated, Moved, Copied DashBoard provides detailed information about content that is updated, moved and copied. The dashboard is organized according to activities performed  by users in User Mode and Content Administrator Mode. You can view more granular data using pre-populated filters for Event Type, Content Type and Admin Mode.",
+      "panelTitle": "Geo Location - Admin Mode",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel772be422b7c0da43",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [
+        "Admin Mode"
+      ],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

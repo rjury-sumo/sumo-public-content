@@ -1,0 +1,27 @@
+{
+  "id": "q0970",
+  "hash": "ba1f3c317872",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPermissionsUpdated\n| json \"eventName\", \"contentIdentity.name\",\"permissionsAdded\" as EventName, ContentName, permissionsAdded nodrop\n| where EventName=\"ContentPermissionsUpdated\"\n| parse regex field=permissionsAdded \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi nodrop\n| json field=json_added_blob \"permissionSourceType\" as TargetPermissionSourceType\n| count as Count by ContentName\n| sort by Count\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Content Management Overview",
+      "dashboardDescription": "Content - Overview Dashboard provides a high-level view of system activities with data on content activities over time, top applications, top content, publicly accessed content, and exported content. You can also view data on user activity and top content on which permission are added and deleted.",
+      "panelTitle": "Content by Permission Added",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel77934c5ebe779948",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"right\",\"showAsTable\":true},\"series\":{}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

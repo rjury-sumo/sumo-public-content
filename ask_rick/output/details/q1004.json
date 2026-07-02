@@ -1,0 +1,85 @@
+{
+  "id": "q1004",
+  "hash": "3e32f8f4b276",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentSynchronizationCompleted\n| json \"eventName\", \"eventTime\", \"status\", \"syncRequest.requestBy.userEmail\", \"syncRequest.contentNameToSynchronize\", \"syncRequest.parentFolder.name\", \"contentIdentity.name\" as EventName, EventTime, Status, RequestedBy, ContentToSynchronize, FolderName, ContentName  nodrop\n| RequestedBy as UserEmail\n| where EventName=\"ContentSynchronizationCompleted\"\n| where  ContentName matches \"{{ContentName}}\" and EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\"\n|count by  EventTime, Status, RequestedBy, ContentToSynchronize, FolderName\n| sort by EventTime\n| fields - _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Permission Updated, Synchronized",
+      "dashboardDescription": "Content - Permission Updated, Synchronized DashBoard provides detailed information on content permissions that have been added or deleted, as well as content that has been synchronized. The dashboard is organized according to Content Synchronization and Content Permissions.",
+      "panelTitle": "Recent - Content Synchronization",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel69f2f8a5aa6df845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [
+        "Content Permission"
+      ],
+      "variables": [
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

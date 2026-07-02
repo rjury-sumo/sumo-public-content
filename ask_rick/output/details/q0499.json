@@ -1,0 +1,76 @@
+{
+  "id": "q0499",
+  "hash": "362aaa584613",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory = \"collector_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n|where  dataTier matches \"{{Tier}}\"\n| bytes/1Mi as mbytes\n| timeslice 1h\n| sum(mbytes) as mbytes by _timeslice\n| predict mbytes by 1h model=ar, forecast=20\n| fillmissing timeslice(1h)\n| fields - mbytes_error",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Log Spikes",
+      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
+      "panelTitle": "Data Volume Predictions",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-1",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_gbytes\":{\"visible\":false},\"A_gbytes_predicted\":{\"visible\":true},\"A_gbytes_linear\":{\"visible\":false},\"A_gbytes_error\":{\"visible\":true}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        }
+      ]
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Logs",
+      "dashboardDescription": "Data Volume - Logs dashboard allows you to view your log ingest volume by tier , by  ingest spikes, outliers, and quota.",
+      "panelTitle": "Data Ingest Prediction",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{\"A_mbytes\":{\"visible\":false},\"A_mbytes_predicted\":{\"visible\":true},\"A_mbytes_linear\":{\"visible\":false}}}",
+      "rowContext": [
+        "Note: Daily Ingest Capacity"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

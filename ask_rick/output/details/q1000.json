@@ -1,0 +1,85 @@
+{
+  "id": "q1000",
+  "hash": "addf28616bd9",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=content ContentPermissionsUpdated\n| json \"eventName\", \"permissionsAdded\", \"contentIdentity.name\", \"operator.email\" as EventName, permissionsAdded,  ContentName, UserEmail nodrop\n| where EventName=\"ContentPermissionsUpdated\"\n| parse regex field=permissionsAdded \"(?<json_added_blob>\\{[^\\}]+(?:\\}\\}|\\}))\" multi nodrop\n| json field=json_added_blob \"permissionSourceType\" as TargetPermissionSourceType \n| timeslice 1d\n| where  ContentName matches \"{{ContentName}}\" and EventName matches \"{{EventName}}\" and UserEmail matches \"{{UserEmail}}\"\n|count as Count by _timeslice, TargetPermissionSourceType\n| transpose row _timeslice column TargetPermissionSourceType",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ContentName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "UserEmail",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Permission Updated, Synchronized",
+      "dashboardDescription": "Content - Permission Updated, Synchronized DashBoard provides detailed information on content permissions that have been added or deleted, as well as content that has been synchronized. The dashboard is organized according to Content Synchronization and Content Permissions.",
+      "panelTitle": "Permission Added Over Time by Source Type",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel492b420da7dfd941",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"hideLabels\":false,\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false,\"gridColor\":\"\",\"minimum\":null,\"maximum\":null}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}},\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Content Permission"
+      ],
+      "variables": [
+        {
+          "name": "ContentName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "UserEmail",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

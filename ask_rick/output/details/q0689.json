@@ -1,0 +1,41 @@
+{
+  "id": "q0689",
+  "hash": "a8d5e44d300a",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightcreated) OR \n(_index=sumologic_system_events _sourcecategory=cseinsight insightcreated)\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n| json field=_raw \"insight.signals.length()\" as signal_count\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| count",
+  "queryParameters": [],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Created",
+      "dashboardDescription": "This dashboard provides Insights Created related metrics.",
+      "panelTitle": "Insights Created",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC31A32C98B1C3A49",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":25,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":97,\"to\":300,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":168}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    },
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Overview",
+      "dashboardDescription": "This dashboard provides summary of Insights with created vs closed trend.",
+      "panelTitle": "Insights Created",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelC31A32C98B1C3A49",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"label\":\"\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":0,\"to\":24,\"color\":\"#16943E\"},{\"from\":25,\"to\":96,\"color\":\"#DFBE2E\"},{\"from\":97,\"to\":300,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":168}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

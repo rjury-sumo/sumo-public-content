@@ -1,0 +1,85 @@
+{
+  "id": "q0167",
+  "hash": "b393da5e413c",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=kube_pod_container_status_restarts_total cluster={{cluster}} namespace={{namespace}} deployment={{deployment}} | quantize 1m | sum by cluster| delta | eval max(_value, 0)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "deployment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "timeSeries",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Deployment v4.6",
+      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
+      "panelTitle": "Pods Running vs Restarts",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-3432a6259a7db840",
+      "visualization": "timeSeries",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"lineThickness\":2},\"hiddenQueryKeys\":[\"B\",\"A\"],\"color\":{\"family\":\"scheme7\"},\"series\":{},\"axes\":{\"axisY\":{\"labelFontSize\":12,\"gridColor\":\"#e2e7eb\"}}}",
+      "rowContext": [
+        "Pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "id": "q0640",
+  "hash": "735fc72cdb0f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND (_sourceCategory=cseInsight OR _sourceCategory=cseInsightComment) AND \"{{ID}}\"\n\n| json \"insight.readableId\" nodrop\n| json \"insightComment.insightReadableId\" nodrop\n| where (%\"insight.readableId\" = \"{{ID}}\" OR %\"insightComment.insightReadableId\" = \"{{ID}}\")\n\n| json \"eventName\" as eventName nodrop\n| toUpperCase(eventName) as eventName\n| if(eventName = \"INSIGHTCREATED\", \"CREATION\", eventName) as eventName\n| if(eventName = \"INSIGHTUPDATED\", \"UPDATE\", eventName) as eventName\n| if(eventName = \"INSIGHTCOMMENTCREATED\", \"COMMENT ADDED\", eventName) as eventName\n\n| json \"operator.email\" as operator nodrop\n| if(IsEmpty(operator), \"-\", toUpperCase(operator)) as operator\n\n| json \"insight.status\" as status nodrop\n| if(IsEmpty(status), \"-\", status) as status\n| toUpperCase(status) as status\n\n| json \"insightComment.body\" as comment nodrop\n| replace(comment, \"•\", \"\\n•\") as comment\n| replace(comment, \".  \", \".\\n\\n\") as comment\n\n| json \"to\" nodrop\n| parse regex field=to \"\\\"assignee\\\"\\:\\\"(?<update_assignee>[^\\,]+)\\\"\" nodrop\n| parse regex field=to \"\\\"resolution\\\"\\:\\\"(?<update_resolution>[^\\,]+)\\\"\" nodrop\n| parse regex field=to \"\\\"status\\\"\\:\\\"(?<update_status>[^\\,]+)\\\"\" nodrop\n\n| format(\"► Assignee: %s\\n► Status: %s\\n► Resolution: %s\", update_assignee, update_status, update_resolution) as updates\n\n| replace(updates, /(► Assignee|► Status|► Resolution)\\:\\s(\\n|$)/, \"\") as updates\n\n| \"-\" as details\n| if(!IsEmpty(updates), ToUpperCase(updates), details) as details\n| if(!IsEmpty(comment), comment, details) as details\n\n| formatDate(_messageTime, \"yyyy-MM-dd HH:mm:ss\") as date\n\n| format(\"%s\\n     ├► Event: %s\\n     ├► Status: %s\\n     └► Operator: %s\", date, eventName, status, operator) as date\n| count as Total by date, details\n//| count as Total by date, eventName, status, operator, details\n\n| fields -Total\n| order by date asc",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "TIMELINE",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel350856F8A6E6684D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

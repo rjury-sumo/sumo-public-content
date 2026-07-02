@@ -1,0 +1,85 @@
+{
+  "id": "q0186",
+  "hash": "f2daab89b1ec",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "namespace={{namespace}} cluster={{cluster}} deployment={{deployment}}  pod=* metric=container_memory_working_set_bytes |quantize 1m | eval _value / (1000000) | sum by cluster,pod | topk(10, max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "deployment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Deployment v4.6",
+      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
+      "panelTitle": "Top 10 CPU(%)/Memory(MB) consuming Pods",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-EB21782B9E7A5A42",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"metric\",\"value\":\"metric\"}],\"aggregationType\":\"avg\"},\"series\":{}}",
+      "rowContext": [
+        "Pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

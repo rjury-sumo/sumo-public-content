@@ -1,0 +1,112 @@
+{
+  "id": "q0322",
+  "hash": "729a19fa00f0",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Basic",
+  "query": "metric=kube_pod_container_resource_limits cluster={{cluster}} namespace={{namespace}} pod={{pod}} container=* resource=memory | quantize 1m | sum",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": {
+    "metric": "kube_pod_container_resource_limits",
+    "aggregationType": "Sum",
+    "groupBy": "",
+    "filters": [
+      {
+        "key": "cluster",
+        "value": "{{cluster}}",
+        "negation": null
+      },
+      {
+        "key": "namespace",
+        "value": "{{namespace}}",
+        "negation": null
+      },
+      {
+        "key": "pod",
+        "value": "{{pod}}",
+        "negation": null
+      },
+      {
+        "key": "resource",
+        "value": "memory",
+        "negation": null
+      }
+    ],
+    "operators": null
+  },
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Pod v4.6",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Percent of Memory Limit",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-5aca1a098f90f849",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"svp\"},\"svp\":{\"gauge\":{\"show\":true},\"thresholds\":[{\"from\":0,\"to\":75,\"color\":\"green\"},{\"from\":75,\"to\":85,\"color\":\"#dfbe2e\"},{\"from\":85,\"to\":101,\"color\":\"red\"}],\"option\":\"Average\",\"label\":\"%\",\"valueFontSize\":14},\"hiddenQueryKeys\":[\"B\",\"A\"]}",
+      "rowContext": [
+        "Overview"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "q0403",
+  "hash": "be4a3916ec07",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}}  statefulset={{statefulset}} metric=container_cpu_usage_seconds_total | quantize 1m | rate  | sum by statefulset | topk(5,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "statefulset",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - StatefulSets - Overview v4.6",
+      "dashboardDescription": "The Kubernetes - StatefulSets dashboard provides a high-level view of the health of the StatefulSets.",
+      "panelTitle": "Top 5 CPU(%)/Memory(MB) consuming Statefulsets",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-E0A5E4FDBCA16B47",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"honeyComb\",\"type\":\"honeyComb\",\"displayType\":\"default\"},\"title\":{\"fontSize\":16},\"honeyComb\":{\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#98ECA9\"},{\"from\":null,\"to\":null,\"color\":\"#F2DA73\"},{\"from\":null,\"to\":null,\"color\":\"#FFB5B5\"}],\"shape\":\"hexagon\",\"groupBy\":[{\"label\":\"metric\",\"value\":\"metric\"}],\"aggregationType\":\"avg\"},\"series\":{}}",
+      "rowContext": [
+        "Note: Selecting cluster name and statefulset is mandatory for dashboard to work"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "statefulset",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

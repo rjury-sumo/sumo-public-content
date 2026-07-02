@@ -1,0 +1,27 @@
+{
+  "id": "q0665",
+  "hash": "b3ebe24fef5f",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| where insight_status = \"closed\"\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| count by insight_name\n| sort by _count\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Closed",
+      "dashboardDescription": "This dashboard provides metrics around closed insights.",
+      "panelTitle": "Top 10 Insights by Name",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel3D1FC8E6841B5A4E",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"bar\",\"displayType\":\"default\",\"fillOpacity\":1,\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"properties\":{}}]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

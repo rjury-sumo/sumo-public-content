@@ -1,0 +1,58 @@
+{
+  "id": "q0744",
+  "hash": "5c377ef65081",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_email\n| where (user_username matches \"*\" or isEmpty(user_username)) and (device_ip matches \"*\" or isEmpty(device_ip)) and (srcDevice_ip matches \"*\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"*\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"*\" or isEmpty(device_hostname))\n| metadata_vendor as vendor\n| srcDevice_ip_city as src_city\n| tourl (threat_referenceUrl, threat_name) as threat\n| count by action, user_email, threat, vendor, src_city\n| order by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Email Records",
+      "dashboardDescription": "This dashboard provides analysis of Email Records.",
+      "panelTitle": "Actions",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7F02C0568CE90A42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "srcDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dstDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_hostname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

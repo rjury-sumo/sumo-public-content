@@ -1,0 +1,27 @@
+{
+  "id": "q0894",
+  "hash": "1a5759d2faea",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_vendor\" as vendor nodrop\n| json field=fullRecords \"[0].metadata_product\" as product nodrop\n| json field=entities \"[0].type\" as entity_type nodrop\n| json field=entities \"[0].value\" as entity_value nodrop\n| json field=fullRecords \"[0].dstDevice_hostname\" as dst_device_hostname nodrop\n| json field=fullRecords \"[0].user_username\" as user_username nodrop\n| where entity_type matches \"*ip\" \n| count by entity_value \n| sort by _count\n| limit 10",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Signal Analysis",
+      "dashboardName": "Cloud SIEM - Signal Analysis",
+      "dashboardDescription": "This dashboard provides CSE Signals analysis by Rules, destination, user, and IP.",
+      "panelTitle": "Top 10 Signals by IP",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel16914E81A0883947",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"overrides\":[],\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

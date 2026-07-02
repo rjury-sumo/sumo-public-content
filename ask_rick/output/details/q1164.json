@@ -1,0 +1,36 @@
+{
+  "id": "q1164",
+  "hash": "1e102c46a699",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume \n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as collector, dataTier, bytes, count\n| where _sourceCategory matches \"collector_and_tier_volume\" and dataTier=\"Flex\"\n| bytes/1024/1024 as mbytes\n| timeslice 6h\n| sum(mbytes) as mbytes by _timeslice\n| predict mbytes by 6h model=ar, forecast=20",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Logs",
+      "dashboardDescription": "The Logs dashboard helps you see your log ingest volume between default and non-default indexes along with the predicted growth. This dashboard also provides predicted growth for scan volume.",
+      "panelTitle": "Data Ingest Prediction",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-8",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Log Ingest"
+      ],
+      "variables": [
+        {
+          "name": "Subscribed_Average_Daily_Log_Ingest_Capacity",
+          "defaultValue": "100",
+          "values": "100",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

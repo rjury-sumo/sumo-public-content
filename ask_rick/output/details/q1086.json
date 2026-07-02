@@ -1,0 +1,47 @@
+{
+  "id": "q1086",
+  "hash": "d9726c3bdfda",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=users RolesAssignedToUserUpdated\n| json \"eventName\", \"eventTime\", \"operator.email\",\"operator.id\",\"operator.sourceIp\", \"userIdentity.userId\",\"userIdentity.userEmail\", \"rolesAdded[*].roleName\", \"rolesDeleted[*].roleName\" as EventName, EventTime, Admin, AdminId, AdminIp, TargetUserId, TargetUserEmail, RolesAdded, RolesRemoved nodrop\n| where EventName=\"RolesAssignedToUserUpdated\"\n| parse field=RolesAdded \"[*]\" as RolesAdded nodrop\n| replace(RolesAdded, \"\\\"\", \"\") as RolesAdded\n| replace(RolesAdded, \"[]\", \"-\") as RolesAdded\n| parse field=RolesRemoved \"[*]\" as RolesRemoved nodrop\n| replace(RolesRemoved, \"\\\"\", \"\") as RolesRemoved\n| replace(RolesRemoved, \"[]\", \"-\") as RolesRemoved\n| where AdminIp matches \"{{AdminIp}}\"\n|count by EventName, EventTime, Admin, AdminId, AdminIp, TargetUserId, TargetUserEmail, RolesAdded, RolesRemoved\n| sort by EventTime\n| fields - _count, EventTime, EventName, AdminId, TargetUserId",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Recent - Roles Assigned/Removed from User",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel4cf63483b8ed194b",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "id": "q0994",
+  "hash": "d8d5f8305cfe",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=fieldExtractionRules (FieldExtractionRuleCreated OR FieldExtractionRuleUpdated OR FieldExtractionRuleDeleted)\n| json \"eventName\", \"eventTime\", \"operator.email\", \"operator.id\", \"operator.sourceIp\", \"fieldExtractionRuleIdentity.fieldExtractionRuleId\", \"fieldExtractionRuleIdentity.fieldExtractionRuleName\", \"fieldExtractionRule.enabled\", \"fieldExtractionRule.fieldNames\", \"to\", \"from\" as EventName, EventTime, User, UserId, UserIp, FieldExtractionRuleId, FieldExtractionRuleName, IsActive, createdfieldnames, CurrentValue, PreviousValue nodrop\n| json field=CurrentValue \"enabled\", \"fieldNames\" as ActiveUpdated, fieldNamesUpdated nodrop\n| if(isNull(IsActive), if(isNull(ActiveUpdated), \"-\", ActiveUpdated), IsActive) as IsActive\n| if(isNull(createdfieldnames), if(isNull(fieldNamesUpdated), \"-\", fieldNamesUpdated), createdfieldnames) as FieldNames\n| where EventName matches \"{{EventName}}\" and User matches \"{{User}}\"\n|count by EventName, EventTime, FieldExtractionRuleId, FieldExtractionRuleName, IsActive, FieldNames, User, UserId, UserIp\n| sort by EventTime\n| fields - _count, UserId, FieldExtractionRuleId",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "EventName",
+      "description": "*",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "User",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Content Management",
+      "dashboardName": "Enterprise Audit - Field Extraction Rule Activities",
+      "dashboardDescription": "Field Extraction Rule Activities DashBoard provides detailed information on the geographic location, active users, recent activities, trends, and one day time shift comparison for Field Extraction Rules. You can analyze more granular data using the pre-populated filters.",
+      "panelTitle": "Recent Events - Field Extraction Rule Events",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8f9496b0be0c9847",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":12},\"series\":{},\"general\":{\"type\":\"table\",\"fontSize\":12,\"mode\":\"timeSeries\"},\"thresholdsSettings\":{\"fillRemainingGreen\":false,\"showThresholds\":false,\"numberThresholds\":{\"warning\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":80},\"critical\":{\"display\":true,\"comparator\":\"greater_or_equal\",\"value\":100}}}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "EventName",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "User",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

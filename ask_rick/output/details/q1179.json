@@ -1,0 +1,42 @@
+{
+  "id": "q1179",
+  "hash": "515d11a3157c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume datapoints\n| where _sourceCategory=\"collector_metrics_volume\"\n| parse regex \"\\\"(?<collector>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| timeslice 1h\n| sum(datapoints) as datapoints by _timeslice\n| sort by _timeslice asc \n| smooth datapoints as moving_avg | datapoints as curr_hrs_datapoints\n| 70 as spikePercent\n| where curr_hrs_datapoints >= (1 + spikePercent / 100) * moving_avg\n| fields -spikePercent",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Flex",
+      "dashboardName": "Flex - Metrics",
+      "dashboardDescription": "This Dashboard helps  to review Metrics details of your data ingestion and to identify areas of high-volume ingest.",
+      "panelTitle": "Ingest Spike (Moving Avg)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-11",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note for Ingest Spike Panels"
+      ],
+      "variables": [
+        {
+          "name": "MetricsSources",
+          "defaultValue": "sourcecategory_metrics_volume",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Subscribed_Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

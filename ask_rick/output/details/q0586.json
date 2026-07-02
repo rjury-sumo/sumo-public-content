@@ -1,0 +1,27 @@
+{
+  "id": "q0586",
+  "hash": "f6fc24a74339",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_signal \n| json field=fullRecords \"[0].metadata_product\" as fromState nodrop\n| concat (ruleid,\" \",rulename) as toState\n| count by fromState, toState\n| top 8 fromState, toState by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Cloud SIEM - Data Parsing & Mapping Monitoring",
+      "dashboardName": "Cloud SIEM - Record Parsing and Analysis",
+      "dashboardDescription": "This dashboard provides analysis on Records parsing.",
+      "panelTitle": "Top Sources to Rules Mapping",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel1D24F992A5A06940",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"series\":{},\"legend\":{\"enabled\":false,\"verticalAlign\":\"right\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[],\"axes\":{\"axisX\":{\"title\":\" \"},\"axisY\":{\"title\":\" \"}},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

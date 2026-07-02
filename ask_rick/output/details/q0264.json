@@ -1,0 +1,67 @@
+{
+  "id": "q0264",
+  "hash": "e02bc987deb8",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_cpu_usage_seconds_total cluster={{cluster}} node={{node}} pod=* | quantize 1m | rate | sum by pod, node | topk(10,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "node",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "honeyComb",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Node v4.6",
+      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
+      "panelTitle": "CPU Usage (%) by Pod - Top 10",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-8babb7779b2d8a40",
+      "visualization": "honeyComb",
+      "visualSettingsRaw": "{\"general\":{\"type\":\"honeyComb\"},\"honeyComb\":{\"groupBy\":[{\"label\":\"node\",\"value\":\"node\"}],\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#69DB4A\"},{\"from\":null,\"to\":null,\"color\":\"#E1C60E\"},{\"from\":null,\"to\":null,\"color\":\"#C73A25\"}],\"aggregationType\":\"avg\"},\"hiddenQueryKeys\":[\"B\",\"C\"],\"series\":{}}",
+      "rowContext": [
+        "Pods"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

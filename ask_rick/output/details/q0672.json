@@ -1,0 +1,27 @@
+{
+  "id": "q0672",
+  "hash": "56ba2a8668fe",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) \n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n| if(isBlank(insight_assignee), \"Unassigned\", insight_assignee) as insight_assignee\n| where insight_status = \"closed\"\n| where insight_resolution = \"False Positive\"\n| json field=_raw \"insight.signals.length()\" as signal_count\n| replace(insight_tags, \"[\",\"\") as insight_tags\n| replace(insight_tags, \"]\",\"\") as insight_tags\n| replace(insight_tags, \"\\\"\",\"\") as insight_tags\n| replace(insight_tags, \",\",\" | \") as insight_tags\n| replace(insight_ruleId, \"[\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"]\",\"\") as insight_ruleId\n| replace(insight_ruleId, \"\\\"\",\"\") as insight_ruleId\n| replace(insight_ruleId, \",\",\" | \") as insight_ruleId\n| count by insight_createdAt, insight_closedAt, insight_id, signal_count , insight_severity,insight_description, insight_name, insight_assignee ,insight_ruleId, insight_tags, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , operator_email, insight_resolution, entity_value, entity_type, entity_id\n| fields - _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insights Closed",
+      "dashboardDescription": "This dashboard provides metrics around closed insights.",
+      "panelTitle": "False Positive Insights Summary",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE8F776938864E84D",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false}}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

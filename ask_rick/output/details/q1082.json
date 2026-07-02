@@ -1,0 +1,47 @@
+{
+  "id": "q1082",
+  "hash": "ed951ea01938",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events (_sourceCategory=users OR _sourceCategory=roles) (RolesAssignedToUserUpdated OR UsersAssignedToRoleUpdated)\n| json \"eventName\", \"eventTime\", \"operator.email\",\"operator.id\",\"operator.sourceIp\" as EventName, EventTime, Admin, AdminId, AdminIp nodrop\n| where EventName in (\"RolesAssignedToUserUpdated\",\"UsersAssignedToRoleUpdated\")\n| where AdminIp matches \"{{AdminIp}}\"\n|count as Count by Admin \n| sort by Count\n| limit 5",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - User & Role Management",
+      "dashboardName": "Enterprise Audit - User Role Relationship Activities",
+      "dashboardDescription": "User Role Relationship Activities DashBoard provides detailed information on activities for user and role modification. You can review the top users that were added to and removed from roles, the top roles from which users were added and removed, and the top admins.",
+      "panelTitle": "Active Admins",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8a2929b8b6e63949",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":\"10\",\"mode\":\"distribution\"},\"color\":{\"family\":\"Categorical Default\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"legend\":{\"enabled\":false,\"wrap\":true,\"verticalAlign\":\"bottom\",\"showAsTable\":false},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

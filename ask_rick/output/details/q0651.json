@@ -1,0 +1,67 @@
+{
+  "id": "q0651",
+  "hash": "8dd6cac4d540",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "// id=@forecasted_unlabeled_insights:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=insights_count minimize=\"{{minimize}}\" \n| where insight_state=\"Unlabeled(New)\"\n| fields count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
+      "dataType": "ANY",
+      "value": "False positive"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "Forecasted Unlabeled Insights",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel281E0EA1A50A3848",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"FUI\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"No data\",\"hideData\":false,\"hideLabel\":false,\"rounding\":2,\"valueFontSize\":36,\"labelFontSize\":18,\"thresholds\":[{\"id\":0,\"value\":null,\"color\":\"#00a0d6\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Recommendations Summary"
+      ],
+      "variables": [
+        {
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

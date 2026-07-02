@@ -1,0 +1,58 @@
+{
+  "id": "q0737",
+  "hash": "9e7b15c0c1bd",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_authentication\n| where (user_username matches \"*\" or isEmpty(user_username)) and (device_ip matches \"*\" or isEmpty(device_ip)) and (srcDevice_ip matches \"*\" or isEmpty(srcDevice_ip)) and (dstDevice_ip matches \"*\" or isEmpty(dstDevice_ip)) and (device_hostname matches \"*\" or isEmpty(device_hostname))\n|  %\"fields.severity\" as severity\n| where !isNull(severity)\n| toLowerCase(severity)\n| count by severity\n| order by _count",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Record Analysis",
+      "dashboardName": "Cloud SIEM - Record Analysis - Authentication Records",
+      "dashboardDescription": "This dashboard provides analysis of Authentication Records.",
+      "panelTitle": "Severity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7F02C0568CE90A42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "srcDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "dstDevice_ip",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "device_hostname",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

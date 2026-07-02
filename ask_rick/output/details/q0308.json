@@ -1,0 +1,85 @@
+{
+  "id": "q0308",
+  "hash": "3f079048295e",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "cluster={{cluster}} namespace={{namespace}} pod={{pod}}  metric=kube_pod_container_status_waiting_reason !reason=ContainerCreating   | quantize 1m |  sum by reason",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Pod v4.6",
+      "dashboardDescription": "The Kubernetes - Pods dashboard provides a high-level view on the health of the cluster pods, along with details on the utilized resources.",
+      "panelTitle": "Waiting Containers by Reason",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelpane-ef49e9cabda5d94c",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"lineThickness\":2},\"color\":{\"family\":\"scheme5\"},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"A\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"{{reason}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Containers"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

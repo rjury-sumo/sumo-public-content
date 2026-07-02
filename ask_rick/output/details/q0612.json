@@ -1,0 +1,67 @@
+{
+  "id": "q0612",
+  "hash": "d983bec055fe",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sumologic_audit_events _sourcecategory=cseinsight insightupdated) {{{Keyword}}}\n| order by _receiptTime\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToDetection\" ,\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.severity\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.entitySensorZone\" ,\"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\",  \"insight.confidence\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time , insight_time_to_detection , insight_assignee , operator_email, insight_status, insight_severity, insight_source, entity_value, entity_type, entity_id, entity_sensor_zone ,insight_description, insight_name, insight_readableId, insight_Id, insight_confidence nodrop\n\n| json field=_raw \"insight.signals[*].ruleId\", \"insight.tags\",  \"insight.created\", \"eventTime\", \"insight.timeToResponse\", \"insight.timeToDetection\" ,\"insight.timeToRemediation\",\"insight.assignee\", \"operator.email\",  \"insight.status\", \"insight.resolution\", \"insight.severity\", \"insight.closed\", \"insight.source\" , \"insight.entityValue\",\"insight.entityType\", \"insight.entityId\", \"insight.description\",  \"insight.name\", \"insight.readableId\", \"insight.id\"  as insight_ruleId, insight_tags, insight_createdAt, insight_event_time, insight_time_to_response , insight_time_to_detection, insight_time_to_remediation , insight_assignee , operator_email, insight_status, insight_resolution, insight_severity, insight_closedAt, insight_source, entity_value, entity_type, entity_id, insight_description, insight_name, insight_readableId, insight_Id nodrop\n\n\n| urlencode(insight_readableId) as insight_readableId\n| concat(\"https://\",\"{{service_endpoint}}\",\".sumologic.com/sec/insight/\", insight_readableId,\"\") as url\n\n\n| toUrl(url, \"↪\") as link\n\n| first(insight_status) as insight_status, first(insight_resolution) as insight_resolution by link, insight_createdAt, insight_readableId, insight_severity, insight_source, insight_name, entity_value\n| order by insight_createdAt, insight_readableId",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{Keyword",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "service_endpoint",
+      "description": "",
+      "dataType": "ANY",
+      "value": "service.us2"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Overview",
+      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
+      "panelTitle": "Insights for {{{Keyword}}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelB650416298FCCB42",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":5,\"fontSize\":12,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+      "rowContext": [
+        "INSIGHTS"
+      ],
+      "variables": [
+        {
+          "name": "Keyword",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

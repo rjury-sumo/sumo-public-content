@@ -1,0 +1,42 @@
+{
+  "id": "q0533",
+  "hash": "70bfe520ab13",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory=\"sourcehost_metrics_volume\" datapoints\n| parse regex \"\\\"(?<sourcehost>[^\\\"]+)\\\"\\:\\{\\\"dataPoints\\\"\\:(?<datapoints>\\d+)\\}\" multi\n| where sourcehost !=\"Unknown\"\n| sum(datapoints) as datapoints by sourcehost\n| ((queryEndTime() - queryStartTime())/(1000*60)) as duration_in_min\n| datapoints / duration_in_min as %\"DPM\" \n| top 5 sourcehost by %\"DPM\"",
+  "queryParameters": [],
+  "viewerType": "bar",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Metrics",
+      "dashboardDescription": "The Data Volume - Metrics dashboard allows you to view your metrics ingested, identifies ingest outliers/spikes as well as helps predict what ingestion is going to be.",
+      "panelTitle": "Top 5 Source Hosts",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-5",
+      "visualization": "bar",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"distribution\",\"type\":\"bar\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[]},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Note"
+      ],
+      "variables": [
+        {
+          "name": "MetricsView",
+          "defaultValue": "sourcecategory",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "Metric_DPM_Ingest_Capacity",
+          "defaultValue": "20000",
+          "values": "20000",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

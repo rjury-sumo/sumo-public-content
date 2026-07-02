@@ -1,0 +1,73 @@
+{
+  "id": "q0191",
+  "hash": "87e91dccb017",
+  "queryType": "Metrics",
+  "queryMode": "Metrics-Advanced",
+  "query": "metric=container_network_transmit_bytes_total cluster={{cluster}} deployment={{deployment}}| quantize 1m | rate | sum by deployment | eval _value/1000000 | topk(500,max)",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "deployment",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Deployment v4.6",
+      "dashboardDescription": "The Kubernetes - Deployment dashboard provides detailed insights into the health and performance of your Kubernetes deployments.",
+      "panelTitle": "Network - Incoming and Outgoing (MB)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-E140279CBCF55B48",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"markerSize\":\"5\",\"markerType\":\"none\"},\"color\":{\"family\":\"scheme4\"},\"axes\":{\"axisY\":{\"title\":\"MB\"},\"axisX\":{}},\"legend\":{\"enabled\":true},\"overrides\":[{\"series\":[],\"queries\":[\"B\"],\"userProvidedChartType\":false,\"properties\":{\"type\":\"line\",\"name\":\"Incoming - {{deployment}}\"}},{\"series\":[],\"queries\":[\"C\"],\"properties\":{\"name\":\"Outgoing - {{deployment}}\"}}],\"series\":{}}",
+      "rowContext": [
+        "Resource Utilization"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

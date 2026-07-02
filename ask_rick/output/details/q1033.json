@@ -1,0 +1,47 @@
+{
+  "id": "q1033",
+  "hash": "2c11cdcefb7c",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_audit_events _sourceCategory=serviceAllowlist ServiceAllowlistUpdated\n| json \"eventName\", \"addedCIDRs[*].cidr\",\"operator.sourceIp\" as EventName, AllowListUsers,AdminIp nodrop\n| where EventName=\"ServiceAllowlistUpdated\"\n| where AdminIp matches \"{{AdminIp}}\"\n| extract field=AllowListUsers \"\\\"(?<IP>.*?)\\\"\" multi\n| count_distinct(IP) as Count by IP\n| lookup latitude, longitude, country_code, country_name, region, city, postal_code from geo://location on ip = IP\n| count by latitude, longitude, country_code, country_name, region, city, postal_code\n| sort _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "AdminIp",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Audit - Security Management",
+      "dashboardName": "Enterprise Audit - Password Policy, MFA, Service AllowList Activities",
+      "dashboardDescription": "Password Policy, MFA, Service AllowList Activities Dashboard provides detailed information about password policy creation, deletion, and updates. It also provides a high-level view of users that enable and disable multi factor authorization (MFA), service allowlist updates, as well as user and admin activities.",
+      "panelTitle": "Geo Location Of AllowList Users",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel6e11e070b1ea4945",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "AdminIp",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

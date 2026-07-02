@@ -1,0 +1,55 @@
+{
+  "id": "q0287",
+  "hash": "7abf01f2bcf2",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*kubelet*  {{node}}\n| json \"MESSAGE\", \"_HOSTNAME\" as log, node\n| count by node,log,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "node",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Node v4.6",
+      "dashboardDescription": "The Kubernetes - Nodes dashboard provides detailed information on the health and performance of the cluster nodes.",
+      "panelTitle": "Kubelet Logs (Latest 100 Logs)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelE7AB94928A6FA945",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"table\"},\"series\":{}}",
+      "rowContext": [
+        "Logs/Events"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "node",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

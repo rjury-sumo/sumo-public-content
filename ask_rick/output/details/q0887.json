@@ -1,0 +1,27 @@
+{
+  "id": "q0887",
+  "hash": "b0bf0dc8fcb5",
+  "queryType": "Logs",
+  "queryMode": "SavedSearch",
+  "query": "//Use this query to create a new scheduled view for hyper-efficient queries over large time windows.  See https://help.sumologic.com/docs/manage/scheduled-views?ss360SearchTerm=view\n((_index=sec_record*))\n| where !dstDevice_ip_isInternal OR !srcDevice_ip_isInternal OR !isNull(http_url_fqdn) OR !isNull(dns_queryDomain) OR !isNull(http_url) or !isNull(file_hash_md5) or !isNull(file_hash_sha1) or !isNull(file_hash_sha256)\n| fields dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn\n|timeslice 1m\n| count by _timeslice,dstDevice_ip, srcDevice_ip, dns_queryDomain, http_url, file_hash_md5,file_hash_sha1,file_hash_sha256,http_url_fqdn",
+  "queryParameters": [],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "SavedSearch",
+      "folder": "SOC Analysis",
+      "dashboardName": "Scheduled View Query for Threat Hunting",
+      "dashboardDescription": "Use this query to create a new scheduled view for hyper-efficient queries over large time windows.",
+      "panelTitle": "Scheduled View Query for Threat Hunting",
+      "panelType": "SavedSearch",
+      "panelKey": null,
+      "visualization": null,
+      "rowContext": [],
+      "variables": [],
+      "defaultTimeRange": "-15m"
+    }
+  ]
+}

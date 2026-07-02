@@ -1,0 +1,67 @@
+{
+  "id": "q0238",
+  "hash": "c1ba83966416",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "cluster={{cluster}} namespace={{namespace}} pod=* error\n| json  \"log\" as msg\n| where !isNull(msg)\n| count by namespace,msg,_messageTime\n| sort _messageTime desc\n| limit 100\n| fields - _messageTime, _count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Namespace v4.6",
+      "dashboardDescription": "The Kubernetes - Namespace dashboard provides a high-level view of the health of the cluster namespaces, along with details on the utilized resources.",
+      "panelTitle": "Errors  (Latest 100 Errors)",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-19D43E6D976A4841",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"},\"series\":{}}",
+      "rowContext": [
+        "Logs/Events"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

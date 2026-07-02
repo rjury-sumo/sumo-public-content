@@ -1,0 +1,49 @@
+{
+  "id": "q0644",
+  "hash": "648c5e200d71",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_*_events AND _sourceCategory=cseInsight AND \"{{ID}}\"\n| json \"insight.readableId\" nodrop\n| where %\"insight.readableId\" = \"{{ID}}\"\n| limit 1\n\n| json \"insight.severity\" as severity nodrop\n\n| if(severity = \"1\", \"LOW\", severity) as severity\n| if(severity = \"2\", \"MEDIUM\", severity) as severity\n| if(severity = \"3\", \"HIGH\", severity) as severity\n| if(severity = \"4\", \"CRITICAL\", severity) as severity\n\n\n| count as Total severity\n| severity as Total",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "ID",
+      "description": "",
+      "dataType": "ANY",
+      "value": "INSIGHT-50"
+    }
+  ],
+  "viewerType": "svp",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Report",
+      "dashboardDescription": "This dashboard provides all comments (and other status changes) for an Insight provided in the filter.",
+      "panelTitle": "SEVERITY",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelD771C0AEB0E7AA40",
+      "visualization": "svp",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"svp\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"label\":\"status\",\"useBackgroundColor\":true,\"useNoData\":false,\"noDataString\":\"-\",\"hideData\":false,\"hideLabel\":true,\"rounding\":2,\"valueFontSize\":30,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false}},\"series\":{},\"legend\":{\"enabled\":false}}",
+      "rowContext": [
+        "Untitled"
+      ],
+      "variables": [
+        {
+          "name": "ID",
+          "defaultValue": "INSIGHT-50",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

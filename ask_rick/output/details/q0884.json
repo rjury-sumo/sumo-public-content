@@ -1,0 +1,53 @@
+{
+  "id": "q0884",
+  "hash": "c3d8da0fa7f1",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "(_index=sec_record_*) \n| formatDate(_messagetime, \"yyyy-MM-dd hh a\") as today \n| concat (description,\" from user \",user_username,\" on IP \",device_ip,\" and host \",device_hostname) as activity\n| where user_username matches \"{{user_username}}\" AND !(isBlank(device_hostname))\n| count by device_hostname | fields -_count",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_username",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "SOC Analysis",
+      "dashboardName": "Cloud SIEM - User Telemetry",
+      "dashboardDescription": "This dashboard provides User Telemetry related metrics.",
+      "panelTitle": "Distinct Hosts",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelBBDFD7F68D72A845",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"singleValueMetrics\",\"type\":\"table\"},\"series\":{},\"svp\":{\"hideLabel\":false,\"label\":\"Host(s)\"}}",
+      "rowContext": [],
+      "variables": [
+        {
+          "name": "user_username",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": "service.us2,service.au,service.eu,service.jp,service.in,service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

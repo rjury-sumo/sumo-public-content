@@ -1,0 +1,49 @@
+{
+  "id": "q0509",
+  "hash": "500ac0a5c392",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sumologic_volume _sourceCategory = \"sourcename_and_tier_volume\"\n| parse regex \"(?<data>\\{[^\\{]+\\})\" multi\n| json field=data \"field\",\"dataTier\",\"sizeInBytes\",\"count\" as sourceName, dataTier, bytes, count\n| where  dataTier matches \"{{Tier}}\"\n| timeslice 1d\n| bytes/1Gi as gbytes \n| sum(gbytes) as gbytes by _timeslice, sourceName\n| compare with timeshift 1d\n| sort _timeslice desc, gbytes desc\n| 1 as rownum\n| accum rownum by _timeslice\n| where _accum <= 5 // limit by this\n| fields _timeslice, gbytes, gbytes_1d, sourceName\n| if (!(isNull(gbytes_1d)), ((gbytes - gbytes_1d) / gbytes_1d) * 100, gbytes * 100) as percent_diff\n| if (isNull(gbytes_1d), 0, gbytes_1d) as gbytes_1d\n| where percent_diff > 0\n| sort percent_diff\n| limit 5\n| fields _timeslice, sourceName, gbytes, gbytes_1d,percent_diff",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "Tier",
+      "description": "Continuous,Frequent,Infrequent,CSE,Flex",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Data Volume",
+      "dashboardName": "Data Volume - Log Spikes",
+      "dashboardDescription": "The Data Volume - Log Spikes Dashboard helps you quickly identify large increases in data ingested for logs.",
+      "panelTitle": "Ingest Spikes for Top 5 Source Names",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-13",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":16},\"general\":{\"mode\":\"timeSeries\",\"type\":\"table\",\"displayType\":\"default\",\"outlierBandColor\":\"#FDECF5\",\"outlierBandMarkerColor\":\"#F032A9\",\"outlierBandFillOpacity\":0.3,\"outlierBandLineThickness\":2,\"outlierBandMarkerSize\":10,\"outlierBandMarkerType\":\"triangle\",\"fillOpacity\":1,\"aggregationType\":\"average\",\"groupBy\":[],\"decimals\":0},\"axes\":{},\"legend\":{},\"color\":{},\"hiddenQueryKeys\":[],\"overrides\":[],\"series\":{}}",
+      "rowContext": [
+        "Top 5 Per Day"
+      ],
+      "variables": [
+        {
+          "name": "Tier",
+          "defaultValue": "*",
+          "values": "Continuous,Frequent,Infrequent,CSE,Flex",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

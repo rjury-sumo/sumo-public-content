@@ -1,0 +1,36 @@
+{
+  "id": "q0617",
+  "hash": "c49acb7a5540",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure*\n| timeslice 15m\n//| count by metadata_sourceCategory, %\"fields.reason\", _timeslice\n| count by metadata_sourceCategory, _timeslice\n| transpose row _timeslice column metadata_sourceCategory",
+  "queryParameters": [],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Parsing and Mapping Troubleshooting",
+      "dashboardDescription": "This dashboard provides analysis on Records failed to parse or map.",
+      "panelTitle": "Failed by _sourceCategory - Trend",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel21BDD401A3904B4F",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"color\":{\"family\":\"Categorical Default\"},\"overrides\":[]}",
+      "rowContext": [
+        "1. Use the link in the below table to [Paste raw events into the Parser](https://help.sumologic.com/Cloud_SIEM_Enterprise/CSE_Schema/Parser_Editor#using-paste-logs)\n2. Share the resultin errors with y"
+      ],
+      "variables": [
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

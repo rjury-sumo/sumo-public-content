@@ -1,0 +1,27 @@
+{
+  "id": "q0585",
+  "hash": "00ff1bb04dd5",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_failure\n| json field=_raw \"reason\" as reason\n| if (reason matches \"*Parsers*\", \"failed_to_parse\", reason) as reason\n| timeslice 1h\n| count by _timeslice, reason\n| transpose row _timeslice column reason",
+  "queryParameters": [],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Cloud SIEM - Data Parsing & Mapping Monitoring",
+      "dashboardName": "Cloud SIEM - Record Parsing and Analysis",
+      "dashboardDescription": "This dashboard provides analysis on Records parsing.",
+      "panelTitle": "Non Parsed Messages",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel7633A85B9FFF7945",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\"},\"series\":{},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\"},\"axes\":{\"axisY\":{\"logarithmic\":true}},\"overrides\":[]}",
+      "rowContext": [],
+      "variables": []
+    }
+  ]
+}

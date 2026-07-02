@@ -1,0 +1,67 @@
+{
+  "id": "q1129",
+  "hash": "63ff5207094b",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query analytics_tier=Continuous \n| if (query_type == \"View Maintenance\", \"Scheduled Views\", query_type) as query_type\n| where query_type matches \"{{query_type}}\" and user_name matches \"{{user_name}}\"\n| lookup latitude, longitude, country_name,city from geo://location on remote_ip=ip\n| where !isnull(longitude) \n| count by latitude,longitude",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "query_type",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "user_name",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "map",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Enterprise Search Audit",
+      "dashboardName": "Enterprise Search Audit - Search Overview",
+      "dashboardDescription": "The Enterprise Search Audit - Search Overview dashboard provides a high-level overview of search usage within your account. The panels also display current search usage in terms of the total number of queries, types of query, and other query characteristics run by users.",
+      "panelTitle": "Searches by Location",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel670d886f8ccecb4a",
+      "visualization": "map",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"map\",\"type\":\"map\"},\"map\":{\"mainMetric\":{\"layerType\":\"Cluster\"}},\"series\":{}}",
+      "rowContext": [
+        "Search Concepts"
+      ],
+      "variables": [
+        {
+          "name": "query_type",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user_name",
+          "defaultValue": null,
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

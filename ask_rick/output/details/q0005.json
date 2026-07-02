@@ -1,0 +1,61 @@
+{
+  "id": "q0005",
+  "hash": "ab75605c8099",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_view=sumologic_search_usage_per_query  user_name=*sumosupport*\n| geoip remote_ip\n| lookup asn,organization from asn://default on ip=remote_ip\n| trim(concat(asn,\"_\",organization,\" \",country_name,\" \",city)) as asn_geo\n| if (country_name matches /{{expected_asn_geo_regex}}/,\"normal\",\"exception\") as location\n\n| count_distinct(query) as distinct,count as searches, sum(data_scanned_bytes) as bytes_scanned, sum(retrieved_message_count) as events by query_type,asn_geo\n| bytes_scanned / 1024/1024/1024 as scan_gb | fields -bytes_scanned\n| sort searches",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "expected_asn_geo_regex",
+      "description": "regular expression for expected asn geo strings",
+      "dataType": "ANY",
+      "value": ".*"
+    }
+  ],
+  "viewerType": "table",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/audit/sumologic_login_api_activity.json",
+      "objectType": "Dashboard",
+      "folder": null,
+      "dashboardName": "Sumo Logic Login and API Activity",
+      "dashboardDescription": "",
+      "panelTitle": "Sumosupport User Search Activity",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel8F6CCF5AA77A6B47",
+      "visualization": "table",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0}}",
+      "rowContext": [
+        "Sumologic support account activity (No filters apply to these panels)"
+      ],
+      "variables": [
+        {
+          "name": "expected_asn_geo_regex",
+          "defaultValue": ".*",
+          "values": "regular expression for expected asn geo strings",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "user",
+          "defaultValue": "*",
+          "values": "",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_asn_geo",
+          "defaultValue": "*",
+          "values": "exception,normal",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

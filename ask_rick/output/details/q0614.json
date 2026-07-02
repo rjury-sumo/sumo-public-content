@@ -1,0 +1,55 @@
+{
+  "id": "q0614",
+  "hash": "34f5b7873a94",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "_index=sec_record_* AND !(objectType=FailedRecord) {{{Keyword}}}\n\n| timeslice 1h\n\n| count as Total by _timeslice, metadata_vendor, metadata_product\n| transpose row _timeslice column metadata_vendor, metadata_product\n| order by _timeslice",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "{Keyword",
+      "description": "",
+      "dataType": "ANY",
+      "value": ""
+    }
+  ],
+  "viewerType": "column",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Health Monitoring",
+      "dashboardName": "Cloud SIEM - Overview",
+      "dashboardDescription": "This dashboard provides metrics related to Insight, Signals and Records. Use dashboard filters to look for specific Insight, Signals and Records.",
+      "panelTitle": "Records for {{{Keyword}}}",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panel65FDB16DB39EF843",
+      "visualization": "column",
+      "visualSettingsRaw": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"axes\":{\"axisX\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"title\":\"\",\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"right\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":true,\"wrap\":true,\"maxWidth\":350},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"overrides\":[]}",
+      "rowContext": [
+        "INSIGHTS (Copy) (Copy) (Copy)"
+      ],
+      "variables": [
+        {
+          "name": "Keyword",
+          "defaultValue": "*",
+          "values": "*",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "service_endpoint",
+          "defaultValue": "service.us2",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

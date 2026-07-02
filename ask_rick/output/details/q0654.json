@@ -1,0 +1,67 @@
+{
+  "id": "q0654",
+  "hash": "aa9b939fae56",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "// id=@insight_source_count:cse_rules:\n_index=sec_record*\n| count \n| infer _model=severityrecommender _category=cse type=source_count minimize=\"{{minimize}}\" \n| max(count) by insight_state",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "minimize",
+      "description": "False positive,False positive & No action",
+      "dataType": "ANY",
+      "value": "False positive"
+    }
+  ],
+  "viewerType": "pie",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/_sumoAdmin_all_the_admin_apps/_SumoAdmin.json",
+      "objectType": "Dashboard",
+      "folder": "Insight Analysis",
+      "dashboardName": "Cloud SIEM - Insight Trainer",
+      "dashboardDescription": "CSE Rule Severity Recommendations",
+      "panelTitle": "Insight Source",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-05E66D0A92D19944",
+      "visualization": "pie",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"distribution\",\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false},\"title\":{\"fontSize\":18}}",
+      "rowContext": [
+        "## Eligible Algorithmic Insights\n\nThe funnel depicts Algorithmic insights that remain after filtering insights based on\n* date range\n* insights containing dynamic severity rules\n* non-algorithmic dete"
+      ],
+      "variables": [
+        {
+          "name": "minimize",
+          "defaultValue": "False positive",
+          "values": "False positive,False positive & No action",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "show_rules",
+          "defaultValue": "Rules with severity recommendations",
+          "values": "All rules,Rules with severity recommendations",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "deployment",
+          "defaultValue": "prod",
+          "values": "prod,us2,jp,in,fed,eu,de,ca,au",
+          "allowMultiSelect": false
+        },
+        {
+          "name": "domain",
+          "defaultValue": "service",
+          "values": "service",
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}

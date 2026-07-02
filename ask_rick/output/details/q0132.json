@@ -1,0 +1,91 @@
+{
+  "id": "q0132",
+  "hash": "c70a55507a45",
+  "queryType": "Logs",
+  "queryMode": "Logs",
+  "query": "*events* cluster={{cluster}}\n| json  \"object.metadata.namespace\" as namespace\n| where namespace matches \"{{namespace}}\"\n| json  \"object.involvedObject.name\" as name\n| json field=_raw \"object.involvedObject.kind\" as kind\n| where name matches \"{{pod}}\" and kind matches \"Pod\"\n| count by name, cluster, namespace, _messagetime\n| fields - _count\n| limit 100\n| timeslice 1d| count by _timeslice",
+  "queryParameters": [
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "cluster",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "namespace",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    },
+    {
+      "autoComplete": {
+        "type": "SKIP_AUTOCOMPLETE",
+        "autoCompleteKey": "",
+        "autoCompleteValues": [],
+        "lookupMetaData": {}
+      },
+      "name": "pod",
+      "description": "",
+      "dataType": "ANY",
+      "value": "*"
+    }
+  ],
+  "viewerType": "line",
+  "metricsQueryData": null,
+  "tracesQueryData": null,
+  "sources": [
+    {
+      "file": "apps/kubernetes/kubernetes_collection_app_versions/kubernetes_app_4.6.json",
+      "objectType": "Dashboard",
+      "folder": "Kubernetes v4.6",
+      "dashboardName": "Kubernetes - Container v4.6",
+      "dashboardDescription": "The Kubernetes - Container dashboard provides a high-level view of the health of cluster containers, along with details of the utilized resources.",
+      "panelTitle": "Container Pod Events Over Time",
+      "panelType": "SumoSearchPanel",
+      "panelKey": "panelPANE-158DD7CBBB808A41",
+      "visualization": "line",
+      "visualSettingsRaw": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"line\",\"displayType\":\"default\",\"markerSize\":0,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":2},\"axes\":{\"axisX\":{\"showLabels\":true,\"title\":\"\",\"titleFontSize\":11,\"labelFontSize\":10},\"axisY\":{\"showLabels\":true,\"titleFontSize\":11,\"labelFontSize\":12,\"logarithmic\":false,\"title\":\" \"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Sequential 1\"},\"series\":{},\"overrides\":[{\"series\":[\"_count\"],\"queries\":[],\"properties\":{\"visible\":true,\"name\":\" Count\"}}],\"title\":{\"fontSize\":14}}",
+      "rowContext": [
+        "Overview"
+      ],
+      "variables": [
+        {
+          "name": "cluster",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "namespace",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "pod",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        },
+        {
+          "name": "container",
+          "defaultValue": "*",
+          "values": null,
+          "allowMultiSelect": false
+        }
+      ]
+    }
+  ]
+}
