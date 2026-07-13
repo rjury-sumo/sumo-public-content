@@ -23,7 +23,7 @@ By the end of this lab you will be able to:
 4. Parse JSON and semi-structured fields using multiple parse operators
 5. Build categorical and time-series aggregate queries and visualise results
 
-**Estimated time:** 45–60 minutes
+**Estimated time:** 15-25 minutes
 
 ---
 
