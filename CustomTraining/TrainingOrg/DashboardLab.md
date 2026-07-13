@@ -272,94 +272,9 @@ A Map panel plots event data geographically. It is a common pattern for web acce
 
 ## Exercise 11: Optional - Scheduled Views - Query Performance
 
-So far every panel has queried **raw log data** directly. As dashboards cover longer time ranges (days or weeks), raw queries scan large volumes of data and can become slow or time out.
-
-**Scheduled views** solve this by pre-computing and storing aggregated results on a rolling basis. Dashboard queries then read from a small, pre-aggregated dataset instead of re-scanning all raw logs.
-
-### Part A: Run the Raw Query and Record Performance
-
-Run the following query in a **new Log Search tab** over the **last 30 days**. When the query completes, note the execution time and data scanned (shown in the search status bar).
-
-```text
- _sourcecategory = "Labs/AWS/WAF"
-| json field=_raw "httpRequest.clientIp" as src_ip
-| where (ispublicip(src_ip))
-| json field=_raw "action"
-| threatip src_ip | where !(isempty(malicious_confidence))
-//| timeslice 1m
-| "AWS" as vendor
-| "WAF" as product
-| malicious_confidence as threat
-| json field=raw_threat "threat_types"
-| count by vendor,product,_sourcecategory,_source,src_ip,action,threat,actor,threat_types
-| lookup asn,organization from asn://default on ip=src_ip
-| geoip src_ip
-| fields -latitude,longitude,country_name,state
-```
-
-**What this query does - step by step:**
-
-| Step | Operator | What it does |
-| --- | --- | --- |
-| 1 | `_sourcecategory = "Labs/AWS/WAF"` | **Scope** - restricts the scan to AWS WAF log data only |
-| 2 | `json field=_raw "httpRequest.clientIp"` | **Parse** - extracts the client IP from the JSON log structure |
-| 3 | `where ispublicip(src_ip)` | **Filter** - discards private/RFC-1918 IPs that cannot be geo-resolved or threat-checked |
-| 4 | `json field=_raw "action"` | **Parse** - extracts whether WAF allowed or blocked the request |
-| 5 | `threatip src_ip` | **Enrich** - looks up each IP against Sumo Logic's threat intelligence feed; adds `malicious_confidence`, `actor`, and threat metadata |
-| 6 | `where !(isempty(malicious_confidence))` | **Filter** - keeps only IPs with a positive threat match |
-| 7 | `count by ...` | **Aggregate** - counts matched threat events grouped by source, IP, action, and threat attributes |
-| 8 | `lookup ... from asn://default` | **Enrich** - resolves each IP to its ASN and organisation name |
-| 9 | `geoip src_ip` | **Enrich** - resolves each IP to country, region, city, latitude, and longitude |
-| 10 | `fields -latitude,...` | **Format** - drops geo-coordinate fields not needed in the output |
-
-> **Why this query is expensive over large time ranges:**
+> This exercise has moved to the dedicated advanced lab: **[Lab scheduled views.md](Lab scheduled views.md)**
 >
-> This query performs three costly operations on **every matching raw log event** at search time:
->
-> - **`threatip`** - each IP is checked against a threat intelligence feed. On high-traffic WAF data this can mean millions of lookups per query run.
-> - **`geoip`** - similarly resolves every IP to a location, adding compute overhead proportional to event volume.
-> - **JSON parsing** - extracting nested fields from raw JSON is more expensive than querying pre-indexed fields.
->
-> Over 30 days of busy WAF traffic, all three operations compound to make this query slow and data-intensive. A scheduled view could cache this work running **once per minute at ingest time** and storing only IOC matches with enrichment already applied - so dashboard queries skip all of this work entirely.
-
-Record your results:
-
-| Metric | Raw Query result |
-| --- | --- |
-| Query execution time - in search result bar in UI| ___ seconds |
-| Data scanned - click the meter icon just to left of run query button | ___ GB |
-
-<img src="images/scan-estimate.png" width="300">
-
-### Part B: Run the Equivalent View Query
-
-Now run the equivalent query using a scheduled view. The view has already aggregated the AWS WAF data in 1-minute buckets - your query re-aggregates those pre-computed rows to the hourly level.
-
-<!-- INSTRUCTOR: Insert the view-based equivalent query for your training environment below -->
-
-```text
-// use the pre-aggregated view instead
-_view=threat_geo_asn_aws_waf_v1
-// view is timesliced by 1m but we don't need that here
-| sum(_count) as matched_events by vendor,product,_sourcecategory,_source,src_ip,action,threat,actor,threat_types, asn, organization 
-```
-
-> **sum(_count)** - Note the view query is slightly different - if we used count here we would just count the rows in the view not sum the _count columnn that is the total per minute in the view schema!
-
-Record your results:
-
-| Metric | View Query result |
-| --- | --- |
-| Query execution time | ___ seconds |
-| Data scanned | ___ GB |
-
-### Part C: Compare and Reflect
-
-> How did the runtimes and scan volume compare for the raw vs the view version of the query?
-> 
-> **Views in dashboards** - We can easily add a query like this to the dashboard we are building using **Add to Dashboard** button in the Aggregates tab.
-> 
-> **Key takeaway:** Views are most valuable for dashboard panels covering days or weeks of data, queries that run repeatedly (dashboards auto-refresh, scheduled reports), and queries involving expensive operations like `geoip` or complex regex parsing - the view computes these once at ingest time and caches the result. Views are **not** suitable when you need raw message-level detail, or for one-off ad-hoc queries.
+> That lab covers the full context of scheduled views — use cases, design principles, creation steps, and querying rules — before leading into this performance comparison exercise. Complete it after finishing the core dashboard exercises.
 
 ## Exercise 12: Optional - Build a custom drilldown link
 
