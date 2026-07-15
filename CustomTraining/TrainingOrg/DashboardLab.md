@@ -25,8 +25,6 @@ In this lab you will build a working dashboard using Amazon CloudFront log data.
 - Build Categorical, Time Series, Honeycomb, and Map panels
 - Use `timeslice`, `transpose`, and `compare with timeshift` techniques for richer visualisations
 - Understand why all dashboard panels require aggregation
-- See how scheduled views dramatically accelerate dashboard query performance
-
 ---
 
 ## UI Version Note
@@ -278,9 +276,8 @@ Dashboards can be part of a workflow where a clickable link in a query result ta
 2. Add a new categorical panel with the query below and select table output type:
 
 ```text
-// use the pre-aggregated view instead
+// hint this is a pre-aggregated scheduled view, that caches threatip and geoip matches in advance on a schedule.
 _view=threat_geo_asn_aws_waf_v1
-
 | min(_timeslice) as f,max(_timeslice) as l, sum(_count) as matches by src_ip,_sourcecategory,_source,threat,country_code,organization
 | "service.sumologic.com" as dp
 | num(l - ( 1000 * 60 * 60 * 3)) as f
