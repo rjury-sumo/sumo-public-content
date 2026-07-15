@@ -4,7 +4,7 @@
 
 ## Overview
 
-In this lab you will build a working dashboard using Amazon CloudFront log data. You will practise creating several panel types, use a template variable filter, and learn how to apply time compare for trend analysis. The lab also introduces scheduled views as a performance optimisation technique.
+In this lab you will build a working dashboard using Amazon CloudFront log data. You will practise creating several panel types, use a template variable filter, and learn how to apply time compare for trend analysis. 
 
 **Lab environment:** Training Org (used in Sumo Certjams). Log in as `training+analyst###@sumologic.com` where `###` is a number from 001-999. Find this month's password via **Home > Certification** tab in the training portal.
 
@@ -270,13 +270,7 @@ A Map panel plots event data geographically. It is a common pattern for web acce
 
 ---
 
-## Exercise 11: Optional - Scheduled Views - Query Performance
-
-> This exercise has moved to the dedicated advanced lab: **[Lab scheduled views.md](Lab scheduled views.md)**
->
-> That lab covers the full context of scheduled views — use cases, design principles, creation steps, and querying rules — before leading into this performance comparison exercise. Complete it after finishing the core dashboard exercises.
-
-## Exercise 12: Optional - Build a custom drilldown link
+## Exercise 11: Optional - Build a custom drilldown link
 
 Dashboards can be part of a workflow where a clickable link in a query result table opens another web url, sumo dashboard with filters provided as query params, or [start a pre-built search in a new query tab](https://www.sumologic.com/help/docs/search/get-started-with-search/build-search/use-url-to-run-search/).
 
