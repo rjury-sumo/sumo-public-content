@@ -16,6 +16,11 @@ By the end you will understand when views add value, how to design and create on
 
 A scheduled view is a **continuously running background query** that reads raw log events, aggregates them (e.g. `timeslice 1m | count by dimensions`), and writes the result into a small, indexed dataset. Dashboard and search queries can then read from this pre-aggregated dataset instead of re-scanning all raw logs.
 
+Scheduled views provide several key benefits:
+- accellerate runtime and performance for key use cases
+- enable large scale use cases by caching query work effort
+- merge data such as lookups into a new unified summary view.
+
 The diagram below shows the data flow:
 
 ```
@@ -37,26 +42,6 @@ Raw logs arrive → Scheduled View runs its definition query every ~1 minute
 
 ---
 
-## Scheduled Views Lab 1: Review views in your account
-
-The UI location of views in your account can very between UI versions.
-
-For new UI either:
-
-- Navigate to **Data Management →  Logs →  Scheduled Views** (the UI page might be called 'Views' if you have this preview enabled)
-- open the "Go To" dialog and search for views then open a new tab
-
-For legacy UI:
-- **Manage Data → Logs → Scheduled Views**.
-
-> Review what views exist in this org. Click on one to see it's defition and consider what use case it would be created for.
-
-Highlight your cursor on the view name in the tablular view so the small 'Open in Search' button appears. Click this to open the view in a search window and review search results.
-
-> How do view results vary from raw messages results in a typical log query?
-
----
-
 ## Key Use Cases For a View
 
 ### 1. Dashboard acceleration over long time ranges
@@ -75,26 +60,50 @@ Weekly or monthly scheduled searches that summarise KPIs are much cheaper when r
 
 ---
 
-## Querying a Scheduled View
+## Scheduled Views Lab 1: Review views in your account
+
+The UI location of views in your account can very between UI versions.
+
+For new UI either:
+
+- Navigate to **Data Management →  Logs →  Scheduled Views** (the UI page might be called 'Views' if you have this preview enabled)
+- open the "Go To" dialog and search for views then open a new tab
+
+For legacy UI:
+- **Manage Data → Logs → Scheduled Views**.
+
+> Review what views exist in this org. Click on one to see it's defition and consider what use case it would be created for.
+
+Highlight your cursor on the view name in the tablular view so the small 'Open in Search' button appears. Click this to open the view in a search window and review search results.
+
+> How do view results vary from raw messages results in a typical log query? What are the columns defined in the view schema?
+
+---
+
+## Scheduled Views Lab 2: Querying a Scheduled View
 
 ### The golden rule: `sum(_count)` not `| count`
 
 The view already counted events in 1-minute buckets. If you use `| count` in your query, you count the number of pre-aggregated rows - not the number of original log events. Always use `sum(_count)`:
 
-```text
+> Run each query below - how do the results differ?
+> 
+```sql
 // Wrong - counts view rows, not original events
-_view=apache_status_v1 | count by status_code
+_view=apache_status | count by status_code
+```
 
+```sql
 // Correct - sums the pre-aggregated event counts
-_view=apache_status_v1 | sum(_count) as requests by status_code
+_view=apache_status | sum(_count) as requests by status_code
 ```
 
 ### Re-aggregating to longer time intervals
 
-The view stores 1-minute buckets. To show hourly or daily charts, re-aggregate in your query:
+The view stores 1-minute buckets. So we can use for simple aggregation as above, or to time series results. Timeslice can be any value down to the minute granularity of the view. For example to graph view results hourly:
 
 ```text
-_view=apache_status_v1
+_view=apache_status
 | timeslice 1h
 | sum(_count) as requests by status_code, _timeslice
 ```
@@ -105,15 +114,15 @@ Filtering before the first `|` uses the view's indexed fields and is much faster
 
 ```text
 // Fast - indexed field filter in scope
-_view=apache_status_v1 status_code=500 | sum(_count) by host
+_view=apache_status status_code=500 | sum(_count) by host
 
 // Slower - post-aggregation filter
-_view=apache_status_v1 | where status_code = 500 | sum(_count) by host
+_view=apache_status| where status_code = 500 | sum(_count) by host
 ```
 
 ---
 
-##  Scheduled Views Lab 2: Compare Raw vs View Query Performance
+## Scheduled Views Lab 3: Compare Raw vs View Query Performance
 
 As dashboards cover longer time ranges (days or weeks), raw queries scan large volumes of data and can become slow or time out.
 
@@ -259,7 +268,7 @@ The goal is to reduce row count vs raw event volume. Run this over a 1-minute sa
 
 ### Naming conventions
 
-Use lowercase, descriptive names with a version suffix:
+Best practice is to use lowercase, descriptive names with a version suffix. Since scheduled views have a defined column schema which cannot be edited it's a good practice to version view names using a v suffix:
 
 ```
 apache_status_v1
