@@ -32,6 +32,9 @@ Raw logs arrive → Scheduled View runs its definition query every ~1 minute
                      (reads tiny pre-aggregated set, not raw logs)
 ```
 
+### Advanced 'save to index' schedule search views
+Advanced users can also create a special view type where a scheduled search saves results to a view on a custom schedule. This is an advanced technique that can be useful for custom reporting use cases - in many cases involving multiple views, each summarizing another. For example for business reporting a once per hour or once per day 'save to index' schedule, might further summarize data already pre-aggregated in a typical 1 minute granularity scheduled view. This is outside scope of this training but good to know. [save to index views](https://www.sumologic.com/help/docs/alerts/scheduled-searches/save-to-index/).
+
 **Key properties:**
 
 - Data is typically grouped in 1 minute 'timesliced' buckets
