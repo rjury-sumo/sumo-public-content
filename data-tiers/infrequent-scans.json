@@ -1,8 +1,8 @@
 {
     "type": "DashboardV2SyncDefinition",
-    "name": "Infrequent Scans (TAM Custom Dashboard)",
+    "name": "Infrequent Scans",
     "description": "",
-    "title": "Infrequent Scans (TAM Custom Dashboard)",
+    "title": "Infrequent Scans",
     "theme": "Light",
     "topologyLabelMap": {
         "data": {}
@@ -21,31 +21,59 @@
         "layoutStructures": [
             {
                 "key": "panelB9E9198F8C62AB4E",
-                "structure": "{\"height\":10,\"width\":16,\"x\":0,\"y\":0}"
+                "structure": "{\"height\":13,\"width\":12,\"x\":12,\"y\":14}"
             },
             {
                 "key": "panelF9D17532A93D0846",
-                "structure": "{\"height\":16,\"width\":24,\"x\":0,\"y\":32}"
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":43}"
             },
             {
                 "key": "panel8238C2A79B7B4B4E",
-                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":12}"
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panelPANE-A433B676868B0B46",
-                "structure": "{\"height\":4,\"width\":8,\"x\":16,\"y\":0}"
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":0}"
             },
             {
                 "key": "panel9CA7940A8880A848",
-                "structure": "{\"height\":6,\"width\":8,\"x\":16,\"y\":4}"
+                "structure": "{\"height\":12,\"width\":10,\"x\":14,\"y\":2}"
             },
             {
-                "key": "panel945992EEBDA22947",
-                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":10}"
+                "key": "panelAB426AB48070CB42",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":19}"
             },
             {
-                "key": "panelC764B8499961BB4D",
-                "structure": "{\"height\":8,\"width\":24,\"x\":0,\"y\":24}"
+                "key": "panelF97F6E9BB7A52948",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":54}"
+            },
+            {
+                "key": "panelPANE-97CAE704A1202847",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":39}"
+            },
+            {
+                "key": "panel25B47AE8B9D5884C",
+                "structure": "{\"height\":12,\"width\":10,\"x\":4,\"y\":2}"
+            },
+            {
+                "key": "panelE72FC7F988D92949",
+                "structure": "{\"height\":13,\"width\":12,\"x\":0,\"y\":14}"
+            },
+            {
+                "key": "panel7D3F0450B828F847",
+                "structure": "{\"height\":12,\"width\":24,\"x\":0,\"y\":27}"
+            },
+            {
+                "key": "panel12834EE2AD053846",
+                "structure": "{\"height\":4,\"width\":4,\"x\":0,\"y\":2}"
+            },
+            {
+                "key": "panel30B12FB691BEAA42",
+                "structure": "{\"height\":4,\"width\":4,\"x\":0,\"y\":6}"
+            },
+            {
+                "key": "panel280FDBB797BBE846",
+                "structure": "{\"height\":4,\"width\":4,\"x\":0,\"y\":10}"
             }
         ]
     },
@@ -53,14 +81,14 @@
         {
             "id": null,
             "key": "panelB9E9198F8C62AB4E",
-            "title": "Infrequent Scans Credits",
+            "title": "Infrequent Scans Credits By User",
             "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice by 1d\n\n| sum(scan_inf)  as bytes by user_name, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | fields -bytes\n| transpose row _timeslice column user_name\n\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice {{timeslice}}\n\n| sum(scan_inf)  as bytes by user_name, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | fields -bytes\n| transpose row _timeslice column user_name\n\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -69,7 +97,7 @@
                     "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message",
-                    "outputCardinalityLimit": null
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -81,13 +109,13 @@
             "id": null,
             "key": "panelF9D17532A93D0846",
             "title": "Queries Detail Top 100 by credits",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":4},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| replace(status_message,/,.*/,\"\") as status_message\n| round(range_days,1) as range_days\n| min(query_start_time) as f,max(query_start_time) as l,count_distinct(query_start_time) as start_times,count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,values(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf,values(status_message) as statuses, values(query_type) as types by user_name,query,datatier  //,session_id\n\n//| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| ( l -f) / (1000 * 60) as start_time_spread_min\n| fields -scan_inf,l,f\n| sort credits | limit 100\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time  - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier=(?<datatier>[a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| (scan_inf/1024/1024/1024 ) as scan_gb \n| count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_gb) as scan_gb,values(status_message) as statuses, values(analytics_tier) as tiers , avg(execution_duration_ms) as avg_exec_ms by user_name,query_type,query,datatier  //,session_id\n\n| sort credits | limit 100\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -107,14 +135,14 @@
         {
             "id": null,
             "key": "panel8238C2A79B7B4B4E",
-            "title": "Summary",
+            "title": "Scoping Behaviours",
             "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier *= *(?<datatier>[IFA][a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"by index\",datatier) as scope\n| replace(status_message,/,.*/,\"\") as status_message\n| count_distinct(query) as queries,count as searches, sum(data_scanned_bytes) as total_bytes,  sum(retrieved_message_count) as retrieved_events,sum(range_days) as range_days,avg(scanned_partition_count) as avg_partitions, sum(scan_inf) as scan_inf, values(status_message) as statuses by user_name,scope,query_type | limit 100 //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n| (total_bytes/1024/1024/1024 ) as total_gb\n\n| fields -scan_inf,total_bytes\n| sort credits\n\n| sort credits\n| credits/queries as cr_per_query\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)(?<datatier>_datatier *= *[a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"index\",datatier) as scoped_by\n\n| count as queries,count as searches, avg(range_days) as avg_day_range,avg(scanned_partition_count) as avg_partitions, max(scanned_partition_count) as max_partitions,sum(scan_inf) as scan_inf by user_name,query_type,scoped_by //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n\n| fields -scan_inf\n| sort credits | limit 100\n| credits/queries as cr_per_query\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -138,19 +166,19 @@
             "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "TextPanel",
-            "text": "This dashboard uses search audit data to show infrequent scans and if filterable by customer.\n\nThe credits consumed should very closely match customer billing page provided your TZ is set to PDT."
+            "text": "This dashboard uses search audit data to show infrequent scans and is filterable by customer. or query_type The estimated credits consumed should very closely match customer billing page provided your TZ is set to PDT."
         },
         {
             "id": null,
             "key": "panel9CA7940A8880A848",
-            "title": "Infrequent Scans Credits",
-            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "title": "Infrequent Scans Credits Top User",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":15,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"legend\":{\"enabled\":false}}",
             "keepVisualSettingsConsistentWithParent": true,
             "panelType": "SumoSearchPanel",
             "queries": [
                 {
                     "transient": false,
-                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice\n| sum(scan_inf)  as bytes by user_name, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by user_name  | sort credits\n\n",
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| sum(scan_inf)  as bytes by user_name \n| (bytes/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by user_name  | sort credits\n\n",
                     "queryType": "Logs",
                     "queryKey": "A",
                     "metricsQueryMode": null,
@@ -159,7 +187,7 @@
                     "spansQueryData": null,
                     "parseMode": "Auto",
                     "timeSource": "Message",
-                    "outputCardinalityLimit": null
+                    "outputCardinalityLimit": 1000
                 }
             ],
             "description": "",
@@ -169,21 +197,234 @@
         },
         {
             "id": null,
-            "key": "panel945992EEBDA22947",
-            "title": "This Panel Shows Statistics By User",
-            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "key": "panelAB426AB48070CB42",
+            "title": "Infrequent Scheduled Search Where Excessive Time Range Relative to Frequency Causes High Scan Ratio",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "TextPanel",
-            "text": "This will show overall contributions. The datatier column shows what scope was used: datatier or index."
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\nquery_type=sched*\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as range_minutes\n\n| count as queries,  sum(retrieved_message_count) as retrieved_events,avg(range_minutes) as range_minutes,avg(scanned_partition_count) as partitions, sum(scan_inf) as scan_inf by user_name,query //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n\n| fields -scan_inf\n| credits/queries as cr_per_query\n\n| (queryTimeRange() / ( 1000 * 60 ) ) / queries as frequency_minutes \n| range_minutes / frequency_minutes as scan_ratio | sort credits\n| where scan_ratio > 2 and credits > 10",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         },
         {
             "id": null,
-            "key": "panelC764B8499961BB4D",
-            "title": "Detailed Top 100 Searches By Total Scan",
-            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\"},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":12},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "key": "panelF97F6E9BB7A52948",
+            "title": "Scope Top 100",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":1},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
             "keepVisualSettingsConsistentWithParent": true,
-            "panelType": "TextPanel",
-            "text": "Shows user_name and query\n- datatier: what type of scope operator used. Best practice is to use ```_index=``` or ```_view``` not ```_datatier``` to minimize scan\n- start_times: how many query start times are observed. Useful to understand if a user is repeating the same search\n- searches: number of searches run\n- credits: credits for scan at standard contract UOM\n- retrieved_events: events retrieved by search\n- range_days: day range of the query. Larger days will resut in higher scan\n- partitions: partitions scanned. Ideally an infrequent scan hits only 1 or 2 speicifc partitions. Numbers over 3 suggest poor scoping and user should add _index\n- statuses: statuses observed for query. If cancelled and failed user is being charged for failed searches where there session might have timed out.\n- types: caller module used (usually UI or API)\n- scan_gb: total scan gb\n- start_time_spread_min: spread of start times. For repeated searches indicate if users is repeating over short or longer time intervals."
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n| ((query_end_time  - query_start_time ) /1000 / 60 /60/24) as range_days\n| parse regex field=query \"(?i)_datatier=(?<datatier>[a-zA-Z]+)\" nodrop\n| if (isempty(datatier),\"index\",datatier) as datatier\n| (scan_inf/1024/1024/1024 )* 0.016 as credits \n| (scan_inf/1024/1024/1024 ) as scan_gb \n| parse regex field=query \"^(?<scope>[^\\|]+)\" nodrop\n| values(user_name) as users,count as searches, sum(credits) as credits, sum(retrieved_message_count) as retrieved_events,avg(range_days) as range_days,avg(scanned_partition_count) as partitions, sum(scan_gb) as scan_gb by query_type,scope  //,session_id\n\n| sort credits | limit 100\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-97CAE704A1202847",
+            "title": "Detailed Tabular Views",
+            "visualSettings": "{\"general\":{\"mode\":\"collapsiblePanel\",\"type\":\"collapsiblePanel\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "CollapsiblePanel",
+            "collapsed": true,
+            "collapsiblePanelChildKeys": [
+                "panel8238C2A79B7B4B4E",
+                "panelAB426AB48070CB42",
+                "panelF9D17532A93D0846",
+                "panelF97F6E9BB7A52948"
+            ]
+        },
+        {
+            "id": null,
+            "key": "panel25B47AE8B9D5884C",
+            "title": "Infrequent Scans Credits By Query Type",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| sum(scan_inf)  as bytes by query_type \n| (bytes/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by query_type  | sort credits\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelE72FC7F988D92949",
+            "title": "Infrequent Credits By Query Type",
+            "visualSettings": "{\"general\":{\"mode\":\"timeSeries\",\"type\":\"column\",\"displayType\":\"stacked\"},\"series\":{},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| timeslice {{timeslice}}\n\n| sum(scan_inf)  as bytes by query_type, _timeslice \n| (bytes/1024/1024/1024 )* 0.016 as credits | fields -bytes\n| transpose row _timeslice column query_type\n\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7D3F0450B828F847",
+            "title": "Per User Summary with Total Credits and Scan GB Per Query Caller Module",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"timeSeries\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n\n// ((query_end_time - query_start_time ) /1000 / 60 /60/24) as range_days\n//| parse regex field=query \"(?i)(?<datatier>_datatier *= *[a-zA-Z]+)\" nodrop\n//| if (isempty(datatier),\"index\",datatier) as scoped_by\n\n| count as searches,avg(scanned_partition_count) as avg_partitions, max(scanned_partition_count) as max_partitions,sum(scan_inf) as scan_inf by user_name,query_type //,session_id\n\n| (scan_inf/1024/1024/1024 )* 0.016 as credits //| fields -bytes\n| (scan_inf/1024/1024/1024 ) as scan_gb\n\n| fields -scan_inf\n| if(query_type=\"Search API\",scan_gb,0) as api\n| if(query_type=\"Interactive Search\",scan_gb,0) as search\n| if(query_type=\"Interactive Dashboard\",scan_gb,0) as dashboard\n| if(query_type=\"Scheduled Search\",scan_gb,0) as schedule\n| if(query_type matches \"*MCP*\",scan_gb,0) as mcp\n| if(query_type matches \"*Agent\",scan_gb,0) as mobot\n| if(api + search + dashboard + schedule + mcp + mobot = 0,scan_gb,0) as other\n| sum(searches) as searches,sum(credits) as credits,sum(scan_gb) as total_scan_gb,sum(api) as api,sum(search) as search,sum(dashboard) as dashboard,sum(schedule) as schedule, sum(mcp) as mcp,sum(mobot) as mobot, sum(other) as other by user_name\n| sort credits\n| 100 * (api/total_scan_gb) as %\"Api Scan %\"\n| 100 * (mcp/total_scan_gb) as %\"MCP Scan %\"\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel12834EE2AD053846",
+            "title": "Total Scan GB",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"GB\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| sum(scan_inf)  as bytes by query_type | bytes / 1Gi as gb | sum(gb)\n//| (bytes/1024/1024/1024 )* 0.016 as credits | sum(credits) as credits by query_type  | sort credits\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel30B12FB691BEAA42",
+            "title": "Total Estimated Credits",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"Credits\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":0,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| sum(scan_inf)  as bytes by query_type | bytes / 1Gi as gb | sum(gb) as gb\n|  gb * 0.016 as credits | sum(credits) as credits \n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel280FDBB797BBE846",
+            "title": "API Credits %",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"svp\",\"displayType\":\"default\",\"roundDataPoints\":true,\"mode\":\"singleValueMetrics\"},\"svp\":{\"option\":\"Latest\",\"unitify\":false,\"textColor\":\"\",\"backgroundColor\":\"\",\"label\":\"%\",\"useBackgroundColor\":false,\"useNoData\":false,\"noDataString\":\"\",\"hideData\":false,\"hideLabel\":false,\"rounding\":1,\"valueFontSize\":24,\"labelFontSize\":14,\"thresholds\":[{\"from\":null,\"to\":null,\"color\":\"#16943E\"},{\"from\":null,\"to\":null,\"color\":\"#DFBE2E\"},{\"from\":null,\"to\":null,\"color\":\"#BF2121\"}],\"sparkline\":{\"show\":false,\"color\":\"#222D3B\"},\"gauge\":{\"show\":false,\"min\":0,\"max\":100,\"showThreshold\":false,\"showThresholdMarker\":false}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_view=sumologic_search_usage_per_query  \nanalytics_tier=*infrequent*\nuser_name={{user_name}}\nquery_type={{query_type}}\n| json field =scanned_bytes_breakdown \"Infrequent\" as scan_inf  \n| sum(scan_inf)  as bytes by query_type | bytes / 1Gi as gb | if (query_type=\"Search API\",gb,0) as api | sum(gb) as gb, sum(api) as api | round(100 * ( api/gb),1) as api_pct | fields api_pct\n\n",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
         }
     ],
     "variables": [
@@ -200,7 +441,36 @@
             "includeAllOption": true,
             "hideFromUI": false,
             "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "timeslice",
+            "displayName": "timeslice",
+            "defaultValue": "1d",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "1h,1d,15m,50 buckets"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "query_type",
+            "displayName": "query_type",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "Interactive?Search,Interactive?Dashboard,Search?API,*MCP*,Scheduled?Search,*Agent*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
         }
     ],
-    "coloringRules": []
+    "coloringRules": [],
+    "schedules": null
 }
