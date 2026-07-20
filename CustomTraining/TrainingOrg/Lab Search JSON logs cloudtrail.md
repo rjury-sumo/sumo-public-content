@@ -140,9 +140,11 @@ The **Field Browser** (left panel on the Messages tab) lists all fields availabl
 
 With your search results displayed:
 
-1. **Add columns:** Check the box next to any field to add it as a column in the Messages tab and move it to **Selected Fields**
-2. **Filter fields:** Type `error` in the Field Browser search box to find `errorCode` and `errorMessage` — select both to add them as columns
-3. **Quick distribution:** Click the `errorCode` field *name* (not the checkbox) to see a pop-up showing the distribution of the top values across the first 100k results — a fast way to understand what is happening without writing a query
+1. **Add columns:** Check the box next to any field to add it as a column in the Messages tab and move it to **Displayed Fields**. Displayed fields are added to the messages result table in right pane.
+2. **Filter fields:** Type `error` in the Field Browser search box to find `errorCode` and `errorMessage` — select checkbox next to each to add them as columns
+3. **Quick distribution:** Click anon text of any field name in field browser list such as  `errorCode` field to see a pop-up showing the distribution of the top values across the first 100k results. This is a simple and fast technique to gain insights into log trends.
+
+![alt text](images/field.browser.features.png)
 
 ### Step 2.2 — Iterate Using the Field Browser
 
@@ -153,9 +155,11 @@ From the field distribution pop-up, you have two pivot options:
 
 ### Step 2.3 — Narrow Scope via the Messages Tab
 
-Below each message in the Messages tab you will see metadata badges: **host**, **category** (`_sourcecategory`), and **index** (`_view`).
+Below the message text in the 'Message' column in the Messages tab you will see metadata badges: **host**, **category** (`_sourcecategory`), and **index** (`_view`). (Note you may have to scroll to right to see this if messages column is not visible).
 
-- **Click a badge** to append it as a scope constraint to the current query:
+![alt text](images/messages.badges.png)
+
+- **Click a badge** to append it as a scope constraint to the current query, in the current search tab. The resulting query might now look like this for example:
 
   ```sql
   (_sourcecategory = Labs/AWS/CloudTrail* recipientaccountid errorcode)
@@ -165,7 +169,7 @@ Below each message in the Messages tab you will see metadata badges: **host**, *
 
   > `_view` is the internal query name for the `index` field shown in the UI.
 
-- **Click the down-arrow** next to a badge to open a new search for [surrounding messages](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/search-surrounding-messages/) — useful for context around a specific event.
+- **Click the down-arrow** next to a badge to open a new search tab for [surrounding messages](https://help.sumologic.com/docs/search/get-started-with-search/search-basics/search-surrounding-messages/) — useful for context around a specific event.
 
 ### Step 2.4 — Drill Into Fields with Log Message Inspector
 
