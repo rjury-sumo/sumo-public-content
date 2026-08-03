@@ -74,9 +74,9 @@ def fetch_all_pages(url: str) -> list[str]:
 
         # Ensure at least some cards are in the DOM before we read the pager
         try:
-            page.wait_for_selector(".blog-item", state="attached", timeout=15_000)
+            page.wait_for_selector(".training-card__item", state="attached", timeout=15_000)
         except Exception:
-            print("  WARNING: No .blog-item cards found after waiting.")
+            print("  WARNING: No .training-card__item cards found after waiting.")
 
         # Scroll to trigger any lazy-load / infinite-scroll then let it settle
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -108,9 +108,9 @@ def fetch_all_pages(url: str) -> list[str]:
             return max(nums) if nums else 1
 
         max_page = _max_page_from_pager()
-        item_count_p1 = page.evaluate("document.querySelectorAll('.blog-item').length")
+        item_count_p1 = page.evaluate("document.querySelectorAll('.training-card__item').length")
         print(f"  Detected {max_page} page(s) via facetwp-pager. "
-              f"Page 1 initial load: {item_count_p1} .blog-item cards.")
+              f"Page 1 initial load: {item_count_p1} .training-card__item cards.")
 
         # Workaround: sumologic.com has a site-side pagination bug where the first load
         # of page 1 renders an incomplete set of cards. Navigating to page 2 then back
@@ -127,8 +127,8 @@ def fetch_all_pages(url: str) -> list[str]:
                 page.wait_for_load_state("networkidle", timeout=15_000)
             except Exception:
                 page.wait_for_timeout(2000)
-            item_count_p1 = page.evaluate("document.querySelectorAll('.blog-item').length")
-            print(f"  After workaround: page 1 has {item_count_p1} .blog-item cards.")
+            item_count_p1 = page.evaluate("document.querySelectorAll('.training-card__item').length")
+            print(f"  After workaround: page 1 has {item_count_p1} .training-card__item cards.")
 
         # Collect page 1
         pages_html.append(page.content())
@@ -139,12 +139,12 @@ def fetch_all_pages(url: str) -> list[str]:
             print(f"  Loading page {pg}/{max_page} ...")
             selector = f".facetwp-pager a.facetwp-page[data-page='{pg}']"
             # Snapshot item count before click so we can detect content replacement
-            prev_count = page.evaluate("document.querySelectorAll('.blog-item').length")
+            prev_count = page.evaluate("document.querySelectorAll('.training-card__item').length")
             page.click(selector)
             # Wait for FacetWP to swap in new content (count must change, then stabilise)
             try:
                 page.wait_for_function(
-                    f"() => document.querySelectorAll('.blog-item').length !== {prev_count}",
+                    f"() => document.querySelectorAll('.training-card__item').length !== {prev_count}",
                     timeout=20_000,
                 )
             except Exception:
@@ -174,7 +174,8 @@ def fetch_all_pages(url: str) -> list[str]:
 def parse_schedule(soup: BeautifulSoup) -> list[dict]:
     """
     Parse instructor-led virtual class cards.
-    Each card is a <div class="blog-item"> inside an <a> that links to registration.
+    Each card is an <a class="training-card__item" href="..."> that links to
+    registration and contains the title and time directly.
     Times are ISO datetimes in <time data-start="..." data-end="...">.
     """
     sessions = []
@@ -190,15 +191,14 @@ def parse_schedule(soup: BeautifulSoup) -> list[dict]:
         print("  WARNING: Could not find 'Instructor-Led' section container.")
         return sessions
 
-    # Each card is: <a class="blog-item-link" href="..."><div class="blog-item">...</div></a>
-    # Search the whole document for blog-item-link anchors (they may sit outside the section tag)
-    search_root = schedule_section or soup
-    for a_tag in soup.find_all("a", class_="blog-item-link", href=True):
-        card = a_tag.find("div", class_="blog-item")
-        if not card:
-            continue
-        title_el = card.find("h3")
-        time_el  = card.find("time", attrs={"data-start": True})
+    # Each card is: <a class="training-card__item" href="...">
+    #   <h3 class="training-card__item-heading">...</h3>
+    #   <time data-start="..." data-end="...">...</time>
+    # </a>
+    # Search the whole document (cards may sit outside the section tag).
+    for a_tag in soup.find_all("a", class_="training-card__item", href=True):
+        title_el = a_tag.find("h3", class_="training-card__item-heading")
+        time_el  = a_tag.find("time", attrs={"data-start": True})
         if not title_el or not time_el:
             continue
 
