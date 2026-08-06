@@ -1,0 +1,720 @@
+{
+    "type": "DashboardV2SyncDefinition",
+    "name": "Mobot: Log Analysis or Security Reponse Usage",
+    "description": "Dashboard uses search audit data to show queries run by copilot or mobot.",
+    "title": "Mobot: Log Analysis or Security Reponse Usage",
+    "theme": "Light",
+    "topologyLabelMap": {
+        "data": {}
+    },
+    "refreshInterval": 0,
+    "timeRange": {
+        "type": "BeginBoundedTimeRange",
+        "from": {
+            "type": "RelativeTimeRangeBoundary",
+            "relativeTime": "-1d"
+        },
+        "to": null
+    },
+    "layout": {
+        "layoutType": "Grid",
+        "layoutStructures": [
+            {
+                "key": "panelD1F667969010194E",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":11}"
+            },
+            {
+                "key": "panel5AA9489D957F784F",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":19}"
+            },
+            {
+                "key": "panel27EF02E38D55B941",
+                "structure": "{\"height\":10,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel54518C05AB3D8A40",
+                "structure": "{\"height\":14,\"width\":12,\"x\":0,\"y\":5}"
+            },
+            {
+                "key": "panelDD36D389BFDB4A4A",
+                "structure": "{\"height\":14,\"width\":8,\"x\":12,\"y\":5}"
+            },
+            {
+                "key": "panel5974A93EA7D61B49",
+                "structure": "{\"height\":7,\"width\":4,\"x\":20,\"y\":5}"
+            },
+            {
+                "key": "panel65E462718AB06A41",
+                "structure": "{\"height\":7,\"width\":4,\"x\":20,\"y\":12}"
+            },
+            {
+                "key": "panel7FFCE80ABC163946",
+                "structure": "{\"height\":14,\"width\":24,\"x\":0,\"y\":10}"
+            },
+            {
+                "key": "panel71B9BEDF9E658946",
+                "structure": "{\"height\":11,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-5A710F0987F72B46",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panel02A13CB498272841",
+                "structure": "{\"height\":9,\"width\":24,\"x\":0,\"y\":9}"
+            },
+            {
+                "key": "panel3166F67DABE46B4B",
+                "structure": "{\"height\":9,\"width\":12,\"x\":0,\"y\":60}"
+            },
+            {
+                "key": "panel7B5C6DA1AC6C1845",
+                "structure": "{\"height\":9,\"width\":12,\"x\":12,\"y\":60}"
+            },
+            {
+                "key": "panelPANE-BF2A2EFBA0CFC847",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":69}"
+            },
+            {
+                "key": "panelPANE-1D787D65929CDB4B",
+                "structure": "{\"height\":7,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelA5023E3BA7D2E843",
+                "structure": "{\"height\":8,\"width\":12,\"x\":0,\"y\":72}"
+            },
+            {
+                "key": "panelPANE-D91B0BC792427B42",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":80}"
+            },
+            {
+                "key": "panel1F2F73B6AA50E844",
+                "structure": "{\"height\":8,\"width\":12,\"x\":12,\"y\":72}"
+            },
+            {
+                "key": "panel487253C09D788B42",
+                "structure": "{\"height\":13,\"width\":24,\"x\":0,\"y\":7}"
+            },
+            {
+                "key": "panelPANE-1D5F50CF9FD4884D",
+                "structure": "{\"height\":1,\"width\":24,\"x\":0,\"y\":57}"
+            },
+            {
+                "key": "panelPANE-965620B7B71D7B4A",
+                "structure": "{\"height\":5,\"width\":24,\"x\":0,\"y\":0}"
+            },
+            {
+                "key": "panelPANE-FDDC2A759B4A2B43",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":70}"
+            },
+            {
+                "key": "panel071B7B2485626B42",
+                "structure": "{\"height\":2,\"width\":24,\"x\":0,\"y\":58}"
+            },
+            {
+                "key": "panelPANE-F1E3903CA6EF0A47",
+                "structure": "{\"height\":27,\"width\":24,\"x\":0,\"y\":30}"
+            }
+        ]
+    },
+    "panels": [
+        {
+            "id": null,
+            "key": "panelD1F667969010194E",
+            "title": "Query Details - Mobot - sorted by billed_scan_gb",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n( query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Flex\" as flex_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(flex_scan_bytes),0,flex_scan_bytes) as flex_scan_bytes\n\n| round(data_scanned_bytes /1Gi,1) as scan_gbytes\n| inf_scan_bytes/1Gi as inf_scan_gbytes\n| flex_scan_bytes/1Gi as flex_scan_gbytes\n| round(inf_scan_gbytes + flex_scan_gbytes,1) as billable_scan_gb\n| round(time_range_m/60 ,1) as time_range_h\n| round(time_range_h/24,1 ) as time_range_d\n| count as searches, sum(scan_gbytes) as scan_gb, sum(billable_scan_gb) as billed_scan_gb, max(scanned_partition_count) as max_partitions, avg(time_range_d) as avg_range_d, sum(execution_duration_ms) as ms_dur by user_name, query, query_type \n| sort billed_scan_gb | limit 1000\n| round(ms_dur / ( 60000),2) as %\"runtime(m)\" | fields - ms_dur\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5AA9489D957F784F",
+            "title": "Total Stats",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* or query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Flex\" as flex_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(flex_scan_bytes),0,flex_scan_bytes) as flex_scan_bytes\n\n| round(data_scanned_bytes /1Gi,1) as scan_gbytes\n| inf_scan_bytes/1Gi as inf_scan_gbytes\n| flex_scan_bytes/1Gi as flex_scan_gbytes\n| round(inf_scan_gbytes + flex_scan_gbytes,1) as billable_scan_gb\n\n| concat(user_name,\" (\",query_type,\")\") as user_name\n| count as searches, sum(data_scanned_bytes) as scan_bytes, sum(billable_scan_gb) as billable_scan_gb,avg(scanned_partition_count) as avg_partitions_scanned, sum(retrieved_message_count) as retrieved_events by user_name \n| round((scan_bytes /1024/1024/1024) * 10 )/10 as scan_gb\n| fields -scan_bytes | sort searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel27EF02E38D55B941",
+            "title": "Scan By Metering Tier - Response Agent",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent*) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| parse regex field=scanned_bytes_breakdown_by_metering_type \"(?<tier>[^\\\",:]+)\\\" *: *(?<bytes>\\d+)\" multi\n| if(tier = \"Flex\" or tier = \"Infrequent\", concat(tier,\"($)\"),tier) as tier\n| bytes /1G as gb\n| sum(gb) as gb by user_name , tier | transpose row user_name column tier",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel54518C05AB3D8A40",
+            "title": "Usage Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* or query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n| timeslice 24 buckets\n| count as searches, count_distinct(user_name) as users by _timeslice",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelDD36D389BFDB4A4A",
+            "title": "Top Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":20,\"mode\":\"distribution\"},\"legend\":{\"enabled\":false,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* or query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches by user_name | sort searches",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel5974A93EA7D61B49",
+            "title": "Searches",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* or query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches by query_type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel65E462718AB06A41",
+            "title": "Users",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"pie\",\"displayType\":\"default\",\"roundDataPoints\":true,\"fillOpacity\":1,\"startAngle\":270,\"innerRadius\":\"30%\",\"maxNumOfSlices\":10,\"mode\":\"distribution\"},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* or query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| count as searches  by user_name,query_type | count as users by query_type",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7FFCE80ABC163946",
+            "title": "Query Details - Agents - sorted scan_gb",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":null},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=*agent* ) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| ((query_end_time - query_start_time ) /1000 / 60 ) as time_range_m\n//| sort execution_duration_ms\n| json field=scanned_bytes_breakdown \"Infrequent\" as inf_scan_bytes nodrop\n| json field=scanned_bytes_breakdown \"Flex\" as flex_scan_bytes nodrop\n\n| if (isnull(inf_scan_bytes),0,inf_scan_bytes) as inf_scan_bytes\n| if (isnull(flex_scan_bytes),0,flex_scan_bytes) as flex_scan_bytes\n\n| round(data_scanned_bytes /1Gi,1) as scan_gbytes\n| inf_scan_bytes/1Gi as inf_scan_gbytes\n| flex_scan_bytes/1Gi as flex_scan_gbytes\n| round(inf_scan_gbytes + flex_scan_gbytes,1) as billable_scan_gb\n| round(time_range_m/60 ,1) as time_range_h\n| round(time_range_h/24,1 ) as time_range_d\n| count as searches, sum(scan_gbytes) as scan_gb, sum(billable_scan_gb) as billed_scan_gb, max(scanned_partition_count) as max_partitions, avg(time_range_d) as avg_range_d, sum(execution_duration_ms) as ms_dur by user_name, query, query_type \n| sort scan_gb | limit 1000\n| round(ms_dur / ( 60000),2) as %\"runtime(m)\" | fields - ms_dur\n//| sort avg_exec_ms",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel71B9BEDF9E658946",
+            "title": "Scan By Metering Tier - Mobot",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\",\"decimals\":0},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "(_view=sumologic_search_usage_per_query) \n(query_type=Mobot) not user_name=*sumosupport*\nuser_name={{user_name}} \nquery={{query_pattern}} \n| where query matches /{{query_regex}}/\n\n| parse regex field=scanned_bytes_breakdown_by_metering_type \"(?<tier>[^\\\",:]+)\\\" *: *(?<bytes>\\d+)\" multi\n| if(tier = \"Flex\" or tier = \"Infrequent\", concat(tier,\"($)\"),tier) as tier\n| bytes /1G as gb\n| sum(gb) as gb by user_name , tier | transpose row user_name column tier",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-5A710F0987F72B46",
+            "title": "Security Reponse Agent Investigations",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\" SystemContext AgentRun verdict\nand _sourcecategory=\"dojo\" not \"\\\"status\\\":\\\"FAILED\\\"\"\n{{AI_investigation_filter}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n//| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n//| json field=_raw \"operator.interface\" as interface nodrop\n//| json field=_raw \"operator.email\" as user nodrop\n//| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n| json field=_raw \"invocationDetails.type\" as type\n| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id\n| count as interactions by _messagetime,eventname,insight_id,session_id,status,verdict | sort _messagetime | fields -interactions",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel02A13CB498272841",
+            "title": "Security Reponse Agent Investigations Failed",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\" SystemContext AgentRun verdict\nand _sourcecategory=\"dojo\" \"\\\"status\\\":\\\"FAILED\\\"\"\n{{AI_investigation_filter}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n//| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n//| json field=_raw \"operator.interface\" as interface nodrop\n//| json field=_raw \"operator.email\" as user nodrop\n//| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n| json field=_raw \"invocationDetails.type\" as type\n| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id\n| count as interactions by _messagetime,eventname,insight_id,session_id,status,verdict | sort _messagetime | fields -interactions",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel3166F67DABE46B4B",
+            "title": "Security Reponse Agent Investigations",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\" SystemContext AgentRun verdict\nand _sourcecategory=\"dojo\" //not \"\\\"status\\\":\\\"FAILED\\\"\"\n{{AI_investigation_filter}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n//| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n//| json field=_raw \"operator.interface\" as interface nodrop\n//| json field=_raw \"operator.email\" as user nodrop\n//| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n//| json field=_raw \"operator.type\" as op_type nodrop\n//| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n//| parse field=session \"*/*\" as session_id,question_id\n| count as interactions by status,verdict | transpose row verdict column status",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel7B5C6DA1AC6C1845",
+            "title": "Security Reponse Agent Investigations Over Time",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"column\",\"displayType\":\"stacked\",\"roundDataPoints\":true,\"fillOpacity\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[\"FAILED-NOT_INVESTIGATED\"],\"queries\":[],\"properties\":{\"color\":\"#bf2121\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\" SystemContext AgentRun verdict \nand _sourcecategory=\"dojo\" //not \"\\\"status\\\":\\\"FAILED\\\"\"\n{{AI_investigation_filter}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n//| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n//| json field=_raw \"operator.interface\" as interface nodrop\n//| json field=_raw \"operator.email\" as user nodrop\n//| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n//| json field=_raw \"operator.type\" as op_type nodrop\n//| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n| if (status = \"FAILED\", concat(status,\"-\",verdict),verdict) as verdict\n| timeslice 24 buckets\n//| parse field=session \"*/*\" as session_id,question_id\n| count as interactions by verdict,_timeslice | transpose row _timeslice column verdict",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-BF2A2EFBA0CFC847",
+            "title": "Security Response Agent Investigations Details",
+            "visualSettings": "{\"general\":{\"mode\":\"collapsiblePanel\",\"type\":\"collapsiblePanel\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "CollapsiblePanel",
+            "collapsed": true,
+            "collapsiblePanelChildKeys": [
+                "panelPANE-5A710F0987F72B46",
+                "panel02A13CB498272841"
+            ]
+        },
+        {
+            "id": null,
+            "key": "panelPANE-1D787D65929CDB4B",
+            "title": "Response Agent Mobot Conversation Summary",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\"  UserContext email\nand _sourcecategory=\"dojo\" \n{{user_name}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as user \n| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n//| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id\n| count_distinct(insight_id) as insights, count_distinct(session_id) as sessions,count as prompts by user | sort prompts ",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelA5023E3BA7D2E843",
+            "title": "Response Agent Mobot Conversation Summary",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\"  UserContext email\nand _sourcecategory=\"dojo\" \n{{user_name}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as user \n| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n//| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id\n| count_distinct(user) as users, count_distinct(insight_id) as insights, count_distinct(session_id) as sessions,count as prompts",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-D91B0BC792427B42",
+            "title": "Reponse Agent Mobot User Sessions Details",
+            "visualSettings": "{\"general\":{\"mode\":\"collapsiblePanel\",\"type\":\"collapsiblePanel\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "CollapsiblePanel",
+            "collapsed": true,
+            "collapsiblePanelChildKeys": [
+                "panelPANE-1D787D65929CDB4B",
+                "panel487253C09D788B42"
+            ]
+        },
+        {
+            "id": null,
+            "key": "panel1F2F73B6AA50E844",
+            "title": "Response Agent Mobot Conversation Activity",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12,\"logarithmic\":false},\"axisY2\":{\"title\":\"Prompt Count\"}},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"color\":{\"family\":\"Categorical Default\"},\"series\":{},\"general\":{\"type\":\"line\",\"displayType\":\"default\",\"roundDataPoints\":true,\"markerSize\":5,\"lineDashType\":\"solid\",\"markerType\":\"none\",\"lineThickness\":1,\"mode\":\"timeSeries\"},\"overrides\":[{\"series\":[\"prompts\"],\"queries\":[],\"properties\":{\"axisYType\":\"secondary\",\"type\":\"column\"}}]}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\"  UserContext email\nand _sourcecategory=\"dojo\" \n{{user_name}}\n| json field=_raw \"eventName\"\n\n// UI investigation only\n| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as user \n| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session nodrop\n| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n//| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id \n|timeslice 24 buckets\n | count as prompts, count_distinct(insight_id) as insights, count_distinct(user) as users by _timeslice",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panel487253C09D788B42",
+            "title": "Response Agent Mobot Conversation Timeline",
+            "visualSettings": "{\"title\":{\"fontSize\":14},\"legend\":{\"enabled\":true,\"verticalAlign\":\"bottom\",\"fontSize\":12,\"maxHeight\":50,\"showAsTable\":false,\"wrap\":true},\"axes\":{\"axisX\":{\"titleFontSize\":12,\"labelFontSize\":12},\"axisY\":{\"titleFontSize\":12,\"labelFontSize\":12}},\"series\":{},\"general\":{\"type\":\"table\",\"displayType\":\"default\",\"roundDataPoints\":true,\"paginationPageSize\":100,\"fontSize\":12,\"mode\":\"distribution\"}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "SumoSearchPanel",
+            "queries": [
+                {
+                    "transient": false,
+                    "queryString": "_index=\"sumologic_audit_events\"  UserContext email\nand _sourcecategory=\"dojo\" \n{{user_name}}\n//| json field=_raw \"eventName\"\n\n// UI investigation only\n//| json field=_raw \"invocationDetails.agentName\" as agent nodrop\n//| json field=_raw \"operator.interface\" as interface nodrop\n| json field=_raw \"operator.email\" as user \n| json field=_raw \"invocationDetails.userPrompt\" as userPrompt nodrop\n\n//| json field=_raw \"operator.type\" as op_type nodrop\n| json field=_raw \"operator.sessionId\" as session \n//| json field=_raw \"invocationDetails.status\" as status\n| json field=_raw \"invocationDetails.context\" as insight_id\n//| json field=_raw \"invocationDetails.type\" as type\n//| json field=_raw \"outputDetails.verdict\" as verdict nodrop\n\n| parse field=session \"*/*\" as session_id,question_id\n| count by _messagetime, insight_id,session_id,question_id,userPrompt | sort _messagetime",
+                    "queryType": "Logs",
+                    "queryKey": "A",
+                    "metricsQueryMode": null,
+                    "metricsQueryData": null,
+                    "tracesQueryData": null,
+                    "spansQueryData": null,
+                    "parseMode": "Auto",
+                    "timeSource": "Message",
+                    "outputCardinalityLimit": 1000
+                }
+            ],
+            "description": "",
+            "timeRange": null,
+            "coloringRules": null,
+            "linkedDashboards": []
+        },
+        {
+            "id": null,
+            "key": "panelPANE-1D5F50CF9FD4884D",
+            "title": "Security Response Agent Search Audit Details",
+            "visualSettings": "{\"general\":{\"mode\":\"collapsiblePanel\",\"type\":\"collapsiblePanel\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "CollapsiblePanel",
+            "collapsed": true,
+            "collapsiblePanelChildKeys": [
+                "panel27EF02E38D55B941",
+                "panel7FFCE80ABC163946"
+            ]
+        },
+        {
+            "id": null,
+            "key": "panelPANE-965620B7B71D7B4A",
+            "title": "Mobot Search Audit Session Data",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels use search audit data for Mobot or `*agent*` query_type. They can be filtered by user_name, query_pattern or query_regex.\nSearch Audit index to show searches run using the query assistant feature which can be called copilot or mobot.\n\nYou can filter by various filters. note:\n- using a query match pattern will speed up the search. This is a case sensitive match filter vs the query column\n- the regex query filter is very powerful but also slower\n- other filters are vs a column before the first | so must match the whole colum for example ```*value*``` but are case insensitive\n"
+        },
+        {
+            "id": null,
+            "key": "panelPANE-FDDC2A759B4A2B43",
+            "title": "Response Agent - Mobot Conversations",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels show security investigation Mobot prompt session audit data. It can be filtered by **user_name ONLY.**"
+        },
+        {
+            "id": null,
+            "key": "panel071B7B2485626B42",
+            "title": "Security Response Agent Investigations",
+            "visualSettings": "{\"general\":{\"mode\":\"TextPanel\",\"type\":\"text\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"text\":{\"format\":\"markdownV2\",\"fontSize\":16},\"series\":{},\"legend\":{\"enabled\":false}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "TextPanel",
+            "text": "These panels show AI investigations triggered by SOC Analyst Agent. Since these are not user triggered you cannot use filters on these panels. You can use AI_investigation_filter as a keyword expression filter vs the sumologic_audit_events."
+        },
+        {
+            "id": null,
+            "key": "panelPANE-F1E3903CA6EF0A47",
+            "title": "Mobot Search Audit Details",
+            "visualSettings": "{\"general\":{\"mode\":\"collapsiblePanel\",\"type\":\"collapsiblePanel\",\"displayType\":\"default\",\"roundDataPoints\":true},\"title\":{\"fontSize\":14},\"series\":{}}",
+            "keepVisualSettingsConsistentWithParent": true,
+            "panelType": "CollapsiblePanel",
+            "collapsed": true,
+            "collapsiblePanelChildKeys": [
+                "panel71B9BEDF9E658946",
+                "panelD1F667969010194E"
+            ]
+        }
+    ],
+    "variables": [
+        {
+            "id": null,
+            "name": "user_name",
+            "displayName": "user_name",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "jane.doe*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "query_pattern",
+            "displayName": "query_pattern",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "*mycategory*,*_datatier*,*_index*,*ategory*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "query_regex",
+            "displayName": "query_regex",
+            "defaultValue": "^.",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": ".*,^.,a|b|c"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": false,
+            "hideFromUI": false,
+            "valueType": "Any"
+        },
+        {
+            "id": null,
+            "name": "AI_investigation_filter",
+            "displayName": "AI_investigation_filter",
+            "defaultValue": "*",
+            "sourceDefinition": {
+                "variableSourceType": "CsvVariableSourceDefinition",
+                "values": "insight-12345,*foo*"
+            },
+            "allowMultiSelect": false,
+            "includeAllOption": true,
+            "hideFromUI": false,
+            "valueType": "Any"
+        }
+    ],
+    "coloringRules": [],
+    "schedules": null
+}
