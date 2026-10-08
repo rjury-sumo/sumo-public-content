@@ -46,6 +46,13 @@ FIRST_NAMES = [
     "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy", "Daniel", "Lisa",
     "Matthew", "Margaret", "Anthony", "Sandra", "Mark", "Ashley", "Steven", "Emily",
     "Paul", "Donna", "Andrew", "Michelle", "Joshua", "Dorothy", "Kevin", "Priya",
+    "Wei", "Mei", "Yuki", "Hiroshi", "Soo-jin", "Min-jun", "Aditya", "Ananya",
+    "Fatima", "Ahmed", "Mohammed", "Amara", "Chidi", "Ngozi", "Kwame", "Amina",
+    "Olumide", "Ravi", "Lakshmi", "Arjun", "Divya", "Jose", "Maria", "Carlos",
+    "Sofia", "Luis", "Camila", "Diego", "Valentina", "Mateo", "Isabella", "Giulia",
+    "Marco", "Luca", "Elena", "Dmitri", "Natasha", "Olga", "Sven", "Ingrid",
+    "Nadia", "Youssef", "Layla", "Hassan", "Zainab", "Tran", "Linh", "Duc",
+    "Hana", "Jin", "Seo-yeon",
 ]
 LAST_NAMES = [
     "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
@@ -53,6 +60,12 @@ LAST_NAMES = [
     "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White",
     "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young",
     "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Patel",
+    "Kim", "Park", "Choi", "Wang", "Zhang", "Liu", "Chen", "Yang",
+    "Huang", "Tanaka", "Suzuki", "Yamamoto", "Sato", "Singh", "Kumar", "Sharma",
+    "Gupta", "Khan", "Ibrahim", "Okafor", "Okonkwo", "Adeyemi", "Mensah", "Diallo",
+    "Traore", "Rossi", "Russo", "Ferrari", "Bianchi", "Muller", "Schmidt", "Fischer",
+    "Weber", "Kowalski", "Nowak", "Petrov", "Ivanov", "Smirnov", "Dubois", "Bernard",
+    "Moreau", "Tran", "Pham", "Vo", "Dang", "Bui",
 ]
 MIDDLE_INITIALS = list("ABCDEFGHJKLMNPQRSTVW")
 DEPARTMENTS = [
@@ -220,7 +233,12 @@ def save_pool(source: str, entity_type: str, pool: list) -> None:
 def person_name(index: int) -> tuple:
     grid = len(FIRST_NAMES) * len(LAST_NAMES)
     first = FIRST_NAMES[index % len(FIRST_NAMES)]
-    last = LAST_NAMES[(index // len(FIRST_NAMES)) % len(LAST_NAMES)]
+    # Stride by a prime larger than any plausible LAST_NAMES length so
+    # index*97 mod len(LAST_NAMES) is a full permutation: consecutive
+    # indices get distinct last names instead of repeating the same one
+    # for a whole first-names cycle (previously everyone was "Smith"
+    # until 40+ records were generated).
+    last = LAST_NAMES[(index * 97 + 11) % len(LAST_NAMES)]
     if index >= grid:
         last = f"{last}{index // grid + 1}"
     return first, last
