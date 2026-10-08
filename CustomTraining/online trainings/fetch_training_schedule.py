@@ -64,103 +64,37 @@ def fetch_all_pages(url: str) -> list[str]:
         )
         page.goto(url, wait_until="load", timeout=90_000)
 
-        # Wait for FacetWP to complete its initial AJAX population.
-        # networkidle gives us 500 ms of no network activity, which covers the
-        # FacetWP AJAX call that fires after DOMContentLoaded.
+        # Wait for FacetWP to finish its initial AJAX population.
         try:
-            page.wait_for_load_state("networkidle", timeout=20_000)
+            page.wait_for_function(
+                "() => window.FWP && FWP.loaded && document.querySelector('.training-card__item')",
+                timeout=45_000,
+            )
         except Exception:
-            pass  # non-fatal; we'll rely on the item-count check below
+            print("  WARNING: FacetWP did not report loaded / no .training-card__item cards found.")
 
-        # Ensure at least some cards are in the DOM before we read the pager
-        try:
-            page.wait_for_selector(".training-card__item", state="attached", timeout=15_000)
-        except Exception:
-            print("  WARNING: No .training-card__item cards found after waiting.")
+        pager = page.evaluate(
+            "() => (window.FWP && FWP.settings && FWP.settings.pager) || {}"
+        )
+        max_page   = int(pager.get("total_pages") or 1)
+        total_rows = int(pager.get("total_rows") or 0)
+        print(f"  FacetWP reports {total_rows} sessions across {max_page} page(s).")
 
-        # Scroll to trigger any lazy-load / infinite-scroll then let it settle
-        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        try:
-            page.wait_for_load_state("networkidle", timeout=10_000)
-        except Exception:
-            page.wait_for_timeout(2000)
+        def _goto_page(n: int) -> None:
+            # networkidle returns before FacetWP swaps the grid, and every page has the
+            # same card count, so wait on FacetWP's own page state instead.
+            page.click(f".facetwp-pager a.facetwp-page[data-page='{n}']")
+            page.wait_for_function(
+                f"() => FWP.settings.pager.page == {n} && !document.querySelector('.facetwp-loading')",
+                timeout=30_000,
+            )
+            page.wait_for_timeout(500)
 
-        def _max_page_from_pager() -> int:
-            """
-            Parse the facetwp-pager and return the highest page number visible.
-            FacetWP pagers often only render a window of links (e.g. 1 2 3 … 8),
-            so we also check for a 'last' page link that carries a higher data-page.
-            """
-            if not page.query_selector(".facetwp-pager"):
-                return 1
-            pager_html = page.inner_html(".facetwp-pager")
-            soup_p = BeautifulSoup(pager_html, "html.parser")
-            nums = set()
-            for a in soup_p.find_all("a", class_="facetwp-page"):
-                dp = a.get("data-page", "")
-                if dp.isdigit():
-                    nums.add(int(dp))
-            # Also check span/div elements that FacetWP uses for the current/last page
-            for el in soup_p.find_all(True):
-                dp = el.get("data-page", "")
-                if dp.isdigit():
-                    nums.add(int(dp))
-            return max(nums) if nums else 1
-
-        max_page = _max_page_from_pager()
-        item_count_p1 = page.evaluate("document.querySelectorAll('.training-card__item').length")
-        print(f"  Detected {max_page} page(s) via facetwp-pager. "
-              f"Page 1 initial load: {item_count_p1} .training-card__item cards.")
-
-        # Workaround: sumologic.com has a site-side pagination bug where the first load
-        # of page 1 renders an incomplete set of cards. Navigating to page 2 then back
-        # forces FacetWP to re-render page 1 with the correct full list.
-        if max_page > 1:
-            print("  Applying page-1 refresh workaround (site pagination bug)...")
-            page.click(".facetwp-pager a.facetwp-page[data-page='2']")
-            try:
-                page.wait_for_load_state("networkidle", timeout=15_000)
-            except Exception:
-                page.wait_for_timeout(2000)
-            page.click(".facetwp-pager a.facetwp-page[data-page='1']")
-            try:
-                page.wait_for_load_state("networkidle", timeout=15_000)
-            except Exception:
-                page.wait_for_timeout(2000)
-            item_count_p1 = page.evaluate("document.querySelectorAll('.training-card__item').length")
-            print(f"  After workaround: page 1 has {item_count_p1} .training-card__item cards.")
-
-        # Collect page 1
-        pages_html.append(page.content())
-
-        # Click through pages 2..N
-        pg = 2
-        while pg <= max_page:
+        pages_html.append(page.content())  # page 1 as loaded
+        for pg in range(2, max_page + 1):
             print(f"  Loading page {pg}/{max_page} ...")
-            selector = f".facetwp-pager a.facetwp-page[data-page='{pg}']"
-            # Snapshot item count before click so we can detect content replacement
-            prev_count = page.evaluate("document.querySelectorAll('.training-card__item').length")
-            page.click(selector)
-            # Wait for FacetWP to swap in new content (count must change, then stabilise)
-            try:
-                page.wait_for_function(
-                    f"() => document.querySelectorAll('.training-card__item').length !== {prev_count}",
-                    timeout=20_000,
-                )
-            except Exception:
-                # Fall back: wait for the loading spinner to clear if present
-                try:
-                    page.wait_for_selector(".facetwp-loading", state="detached", timeout=10_000)
-                except Exception:
-                    pass
-            page.wait_for_timeout(1000)
+            _goto_page(pg)
             pages_html.append(page.content())
-            # Re-read the pager — later pages may reveal a higher total (e.g. "…" resolved)
-            new_max = _max_page_from_pager()
-            if new_max > max_page:
-                print(f"  Pager updated: max page is now {new_max}.")
-                max_page = new_max
-            pg += 1
 
         browser.close()
 
