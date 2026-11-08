@@ -1,32 +1,25 @@
 #Resolves a Sumo Logic log search share shortcode (the code from the UI's Share dialog) to its search JSON:
-#queryString, timeRange, parsingMode, properties and so on. Uses the undocumented
-#GET /api/v1/logSearches/shortCode/{code}, which accepts access ID/key on the API host as well as the
-#browser session on the UI host. Auth, regions and instances follow mobot_client.py
+#queryString, timeRange, parsingMode, properties and so on, via GET /api/v1/logSearches/shortCode/{code}.
+#Authenticates with an access ID/key on the deployment's API host
 
 import argparse
 import base64
 import json
 import os
 import re
-import sys
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import requests
 
-#Shared with mobot_client.py: skippie_instances.json and local_config.py live in the project root
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-INSTANCES_FILE = PROJECT_ROOT / "skippie_instances.json"
-DEFAULT_ACCESS_ID_ENV = "SUMO_ACCESS_ID_CU"
-DEFAULT_ACCESS_KEY_ENV = "SUMO_ACCESS_KEY_CU"
+#instances.json is optional and lives next to this script
+SCRIPT_DIR = Path(__file__).resolve().parent
+INSTANCES_FILE = SCRIPT_DIR / "instances.json"
+DEFAULT_ACCESS_ID_ENV = "SUMO_ACCESS_ID"
+DEFAULT_ACCESS_KEY_ENV = "SUMO_ACCESS_KEY"
+DEFAULT_REGION = "prod"
 
-sys.path.insert(0, str(PROJECT_ROOT))
-try:
-    import local_config
-except ImportError:
-    local_config = None
-
-#Glass region names mapped to the public API host of each deployment, as in mobot_client.py
+#Glass region names mapped to the public API host of each deployment
 REGION_API_HOSTS = {
     "prod": "api.sumologic.com",
     "us2": "api.us2.sumologic.com",
@@ -41,18 +34,6 @@ REGION_API_HOSTS = {
     "esc": "api.esc.sumologic.com",
 }
 REGION_ALIASES = {"us1": "prod", "au": "syd", "eu": "dub", "jp": "tky", "de": "fra", "ca": "mon", "kr": "kor", "ch": "zrh"}
-
-
-def api_url_from_ui_url(ui_url: str) -> str:
-    #Access keys authenticate against the API host, not the UI host
-    #e.g. service.us2.sumologic.com -> api.us2.sumologic.com, service.sumologic.com -> api.sumologic.com
-    host = urlparse(ui_url if "://" in ui_url else f"https://{ui_url}").hostname or ""
-    parts = host.split(".")
-    if parts[0] == "api":
-        return f"https://{host}"
-    if len(parts) >= 4:
-        return "https://api." + ".".join(parts[1:])
-    return "https://api." + ".".join(parts[-2:])
 
 
 def region_api_url(region: str) -> str:
@@ -72,11 +53,11 @@ def load_instances():
     except ValueError as e:
         raise SystemExit(f"{INSTANCES_FILE} is not valid JSON: {e}")
     if not isinstance(data, dict) or not isinstance(data.get("instances"), dict):
-        raise SystemExit(f'{INSTANCES_FILE} needs an "instances" object; see skippie_instances.example.json')
+        raise SystemExit(f'{INSTANCES_FILE} needs an "instances" object; see README.md')
     return data
 
 
-#The --instance named, else the file's "default", else None (auth inferred from flags and local_config.py)
+#The --instance named, else the file's "default", else None (region and key env vars from flags and defaults)
 def resolve_instance(name):
     data = load_instances()
     if name is None:
@@ -85,45 +66,26 @@ def resolve_instance(name):
         name, source = data["default"], f'"default" in {INSTANCES_FILE.name}'
     else:
         if data is None:
-            raise SystemExit(f"--instance {name}: {INSTANCES_FILE} not found. "
-                             "Copy skippie_instances.example.json to skippie_instances.json and edit it.")
+            raise SystemExit(f"--instance {name}: {INSTANCES_FILE} not found; see README.md for its format.")
         source = "--instance"
     instances = data["instances"]
     match = next((k for k in instances if k.lower() == name.lower()), None)
     if match is None:
         raise SystemExit(f"Unknown instance '{name}' ({source}). Defined: {', '.join(instances) or 'none'}.")
-    instance = dict(instances[match], name=match)
-    if instance.get("auth", "session") not in ("session", "accesskey"):
-        raise SystemExit(f"Instance '{match}': auth must be session or accesskey, not {instance.get('auth')!r}.")
-    return instance
+    return dict(instances[match], name=match)
 
 
-#Base URL and headers for the chosen auth
-def configure_auth(auth_type: str, region: str = None,
+#API base URL and Basic auth headers from an access ID/key
+def configure_auth(region: str = None,
                    access_id_env: str = DEFAULT_ACCESS_ID_ENV, access_key_env: str = DEFAULT_ACCESS_KEY_ENV):
-    if region and auth_type != "accesskey":
-        raise SystemExit("--region only applies to --auth accesskey; session auth uses BASE_URL from local_config.py.")
-    if auth_type == "accesskey":
-        access_id = os.environ.get(access_id_env)
-        access_key = os.environ.get(access_key_env)
-        if not access_id or not access_key:
-            raise SystemExit(f"Access key auth needs {access_id_env} and {access_key_env} set in the environment.")
-        #--region wins, then an explicit SUMO_API_URL_CU, then the region of BASE_URL in local_config.py
-        api_url = region_api_url(region) if region else os.environ.get("SUMO_API_URL_CU")
-        if not api_url:
-            if local_config is None or not getattr(local_config, "BASE_URL", None):
-                raise SystemExit("--auth accesskey needs --region, SUMO_API_URL_CU, or BASE_URL in local_config.py.")
-            api_url = api_url_from_ui_url(local_config.BASE_URL)
-        token = base64.b64encode(f"{access_id}:{access_key}".encode()).decode()
-        return api_url.rstrip("/"), {"Accept": "application/json", "Authorization": f"Basic {token}"}
-    if local_config is None:
-        raise SystemExit("Missing local_config.py in the project root — copy local_config.example.py to "
-                         "local_config.py and fill in your ApiSession token and Cookie header.")
-    base_url = local_config.BASE_URL
-    if "://" not in base_url:
-        base_url = f"https://{base_url}"
-    return base_url.rstrip("/"), {"Accept": "application/json", "ApiSession": local_config.API_SESSION,
-                                  "Cookie": local_config.COOKIE}
+    access_id = os.environ.get(access_id_env)
+    access_key = os.environ.get(access_key_env)
+    if not access_id or not access_key:
+        raise SystemExit(f"Access key auth needs {access_id_env} and {access_key_env} set in the environment.")
+    #--region (or the instance's region) wins, then an explicit SUMO_API_URL, then prod
+    api_url = region_api_url(region) if region else os.environ.get("SUMO_API_URL") or region_api_url(DEFAULT_REGION)
+    token = base64.b64encode(f"{access_id}:{access_key}".encode()).decode()
+    return api_url.rstrip("/"), {"Accept": "application/json", "Authorization": f"Basic {token}"}
 
 
 #The UI hands out a shortcode in two forms: "_code=XXXX" to paste into a search, or a
@@ -161,18 +123,16 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Resolve a Sumo Logic log search shortcode (from the UI's Share dialog) and print its search JSON.",
         epilog="""examples:
-  python3 shortcode/shortcode.py CODE
-      use the default instance in skippie_instances.json
-  python3 shortcode/shortcode.py "_code=CODE"
-  python3 shortcode/shortcode.py "https://service.us2.sumologic.com/log-search/create?id=CODE"
+  python3 shortcode.py CODE
+      access ID/key from SUMO_ACCESS_ID / SUMO_ACCESS_KEY against prod (api.sumologic.com)
+  python3 shortcode.py "_code=CODE"
+  python3 shortcode.py "https://service.us2.sumologic.com/log-search/create?id=CODE"
       the paste-into-search form and the share link work too
-  python3 shortcode/shortcode.py --instance demo CODE
-      use the demo instance (its region and key env vars)
-  python3 shortcode/shortcode.py --auth accesskey --region us2 CODE
-      access ID/key from SUMO_ACCESS_ID_CU / SUMO_ACCESS_KEY_CU against api.us2.sumologic.com
-  python3 shortcode/shortcode.py --auth session CODE
-      browser session from local_config.py
-  python3 shortcode/shortcode.py CODE | jq -r .queryString
+  python3 shortcode.py --region us2 CODE
+      against api.us2.sumologic.com
+  python3 shortcode.py --instance NAME CODE
+      a named instance from instances.json (its region and key env vars)
+  python3 shortcode.py CODE | jq -r .queryString
       just the query
 
 A shortcode only resolves in the org (and deployment) it was created in.""",
@@ -180,14 +140,11 @@ A shortcode only resolves in the org (and deployment) it was created in.""",
     parser.add_argument("code", help="The shortcode: the bare code, _code=CODE, or a log-search URL with ?id=CODE "
                                      "(quote URLs so the shell leaves & and ? alone)")
     parser.add_argument("--instance", metavar="NAME",
-                        help=f"Use a named instance from {INSTANCES_FILE.name} (region, auth method, key env vars). "
+                        help=f"Use a named instance from {INSTANCES_FILE.name} (region, key env vars). "
                              "Default: the file's \"default\" instance if set")
-    parser.add_argument("--auth", choices=["session", "accesskey"],
-                        help="session: ApiSession/Cookie from local_config.py; accesskey: access ID/key env vars. "
-                             "Overrides the instance's auth")
     parser.add_argument("--region", metavar="REGION",
-                        help="With --auth accesskey, the deployment to call: prod (us1), us2, dub (eu), fed, fra (de), "
-                             "kor (kr), mon (ca), syd (au), tky (jp), zrh (ch), esc; any case. Overrides the instance's region")
+                        help="The deployment to call: prod (us1), us2, dub (eu), fed, fra (de), "
+                             "kor (kr), mon (ca), syd (au), tky (jp), zrh (ch), esc; any case. Overrides the instance's region. Default: SUMO_API_URL if set, else prod")
     parser.add_argument("--decode-properties", action="store_true",
                         help="Parse the JSON-in-a-string properties field (and its aggregateResultsSettings) into objects")
     parser.add_argument("--compact", action="store_true", help="Print the JSON on one line instead of indented")
@@ -214,14 +171,9 @@ def decode_properties(payload: dict) -> dict:
 def main():
     args = parse_args()
     instance = resolve_instance(args.instance) or {}
-    auth = args.auth or instance.get("auth", "session")
-    region = args.region or (instance.get("region") if auth == "accesskey" else None)
-    if auth == "accesskey":
-        base_url, headers = configure_auth(auth, region,
-                                           instance.get("access_id_env", DEFAULT_ACCESS_ID_ENV),
-                                           instance.get("access_key_env", DEFAULT_ACCESS_KEY_ENV))
-    else:
-        base_url, headers = configure_auth(auth, region)
+    base_url, headers = configure_auth(args.region or instance.get("region"),
+                                       instance.get("access_id_env", DEFAULT_ACCESS_ID_ENV),
+                                       instance.get("access_key_env", DEFAULT_ACCESS_KEY_ENV))
     payload = resolve_shortcode(base_url, headers, extract_code(args.code))
     if args.decode_properties:
         payload = decode_properties(payload)
